@@ -8,6 +8,7 @@ dependencies:
   - dask-kubernetes=0.10.1
   - dask-ml=1.2.0
   - dask-labextension=1.1.0
+  - dask-jobqueue
   - jupyterlab=1.*
   - nodejs=10.15
   - notebook<5.7.5
