@@ -11,9 +11,9 @@ RUN apt-get install gnupg2 -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-RUN  wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
-    && echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list
-    && echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list
+RUN wget -qO - https://research.cs.wisc.edu/htcondor/ubuntu/HTCondor-Release.gpg.key | sudo apt-key add - \
+    && echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list \
+    && echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y condor
 
