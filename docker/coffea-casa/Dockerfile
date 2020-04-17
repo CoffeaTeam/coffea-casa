@@ -7,15 +7,14 @@ RUN apt-get install gnupg2 -y \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y ca-policy-egi-core \
-    && apt-get purge -y gnupg2 \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN wget -qO - https://research.cs.wisc.edu/htcondor/ubuntu/HTCondor-Release.gpg.key | apt-key add - \
+    && wget -qO - https://research.cs.wisc.edu/htcondor/ubuntu/HTCondor-Release.gpg.key | apt-key add - \
     && echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list \
     && echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y condor
+    && apt-get purge -y gnupg2 \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
