@@ -1,0 +1,67 @@
+kubernetes:
+  name: "dask-unl"
+  namespace: default
+  count:
+    start: 0
+    max: null
+  host: "0.0.0.0"
+  port: 0
+  env: {}
+  idle-timeout: null
+  deploy-mode: "local"
+  interface: null
+  protocol: "tcp://"
+  dashboard_address: ":8787"
+  scheduler-service-type: "ClusterIP"
+  # Timeout to wait for the scheduler service to be up (in seconds)
+  # Set it to 0 to wait indefinitely (not recommended)
+  scheduler-service-wait-timeout: 30
+  scheduler-service-template:
+    apiVersion: v1
+    kind: Service
+    spec:
+      selector:
+        dask.org/cluster-name: "" # Cluster name will be added automatically
+        dask.org/component: scheduler
+      ports:
+        - name: comm
+          protocol: TCP
+          port: 8786
+          targetPort: 8786
+        - name: dashboard
+          protocol: TCP
+          port: 8787
+          targetPort: 8787
+  scheduler-template: {}
+  worker-template:
+    kind: Pod
+    metadata:
+      labels:
+        app: "dask"
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      containers:
+      - name: dask
+        image: daskdev/dask:2.9.1
+        env:
+        - name: EXTRA_PIP_PACKAGES
+          value: "joblib scikit-learn stumpy"
+        args:
+          - dask-worker
+          - --nthreads
+          - '2'
+          - --no-bokeh
+          - --memory-limit
+          - 5GB
+          - --death-timeout
+          - '60'
+        resources:
+          limits:
+            cpu: "1"
+            memory: 6G
+          requests:
+            cpu: "1"
+            memory: 5G
+
