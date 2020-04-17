@@ -11,7 +11,7 @@ RUN apt-get install gnupg2 -y \
     && echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list \
     && echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get install -y condor
+    && apt-get install -y condor \
     && apt-get purge -y gnupg2 \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
