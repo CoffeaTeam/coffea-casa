@@ -35,9 +35,6 @@ RUN conda install --yes --freeze-installed \
     htcondor \
     && conda clean -afy
 
-RUN systemctl start condor && \
-    systemctl enable condor
-
 # Coffea
 RUN /opt/conda/bin/pip install --no-cache-dir \
     xxhash==1.3.0 \
@@ -47,9 +44,10 @@ RUN mkdir /opt/app
 
 RUN mkdir /var/lib/condor
 
-RUN groupadd -r condor && \
-    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
+RUN groupadd -r condor && \ 
+    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 WORKDIR /opt/app
 
-ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
+#ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
+ENTRYPOINT ["tini", "-g", "--"]
