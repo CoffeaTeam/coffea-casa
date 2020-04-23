@@ -6,17 +6,18 @@ FROM continuumio/miniconda3:latest
 #Script that helps to work out missing packages without editing Docker image
 COPY prepare.sh /usr/bin/prepare.sh
 
-# EGI CA certificates (can we get them from conda?)
+# EGI CA certificates
 RUN apt-get install gnupg2 -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
-    && wget -q -O - https://research.cs.wisc.edu/htcondor/ubuntu/HTCondor-Release.gpg.key | apt-key add - \
-    && echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.8/bionic bionic contrib" >> /etc/apt/sources.list \
-    && echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.8/bionic bionic contrib" >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get install -y ca-policy-egi-core
+    && apt-get install -y ca-policy-egi-core \
+    && apt-get purge -y gnupg2 \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
-# Dask dependencies
+# Dask dependencies and HTCondor
+# https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     bokeh==2.0.0 \
@@ -31,19 +32,13 @@ RUN conda install --yes --freeze-installed \
     scipy==1.4.1 \
     tini==0.18.0 \
     xrootd==4.11.2 \
+    htcondor \
     && conda clean -afy
 
-# HTCondor
+RUN systemctl start condor && \
+    systemctl enable condor
 
-#RUN apt-get install -y htcondor \
-#    && apt-get purge -y gnupg2 \
-#    && apt-get autoremove -y \
-#    && rm -rf /var/lib/apt/lists/*
-
-#RUN systemctl start condor && \
-#    systemctl enable condor
-
-# Coffea (xxhash should be not needed)
+# Coffea
 RUN /opt/conda/bin/pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.37
