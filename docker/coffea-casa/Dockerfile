@@ -8,10 +8,10 @@ RUN apt-get install gnupg2 -y \
     && apt-get update \
     && apt-get install -y ca-policy-egi-core \
     && wget -qO - https://research.cs.wisc.edu/htcondor/ubuntu/HTCondor-Release.gpg.key | apt-key add - \
-    && echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list \
-    && echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.9/bionic bionic contrib" >> /etc/apt/sources.list \
+    && echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.8/bionic bionic contrib" >> /etc/apt/sources.list \
+    && echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.8/bionic bionic contrib" >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get install -y condor \
+    && apt-get install -y htcondor \
     && apt-get purge -y gnupg2 \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
@@ -31,6 +31,9 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     xrootd==4.11.2 \
     && conda clean -afy
+
+RUN systemctl start condor && \
+    systemctl enable condor
 
 RUN /opt/conda/bin/pip install --no-cache-dir \
     xxhash==1.3.0 \
