@@ -1,21 +1,22 @@
 # based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
-# but more permissive about image size due to read-only requirement in openshift
-FROM continuumio/miniconda3:4.8.2
+FROM continuumio/miniconda3:latest
 
+#RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+
+#Script that helps to work out missing packages without editing Docker image
+COPY prepare.sh /usr/bin/prepare.sh
+
+# EGI CA certificates (can we get them from conda?)
 RUN apt-get install gnupg2 -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get install -y ca-policy-egi-core \
-    && wget -qO - https://research.cs.wisc.edu/htcondor/ubuntu/HTCondor-Release.gpg.key | apt-key add - \
+    && wget -q -O - https://research.cs.wisc.edu/htcondor/ubuntu/HTCondor-Release.gpg.key | apt-key add - \
     && echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.8/bionic bionic contrib" >> /etc/apt/sources.list \
     && echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.8/bionic bionic contrib" >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get install -y htcondor \
-    && apt-get purge -y gnupg2 \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y ca-policy-egi-core
 
+# Dask dependencies
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     bokeh==2.0.0 \
@@ -32,9 +33,17 @@ RUN conda install --yes --freeze-installed \
     xrootd==4.11.2 \
     && conda clean -afy
 
-RUN systemctl start condor && \
-    systemctl enable condor
+# HTCondor
 
+#RUN apt-get install -y htcondor \
+#    && apt-get purge -y gnupg2 \
+#    && apt-get autoremove -y \
+#    && rm -rf /var/lib/apt/lists/*
+
+#RUN systemctl start condor && \
+#    systemctl enable condor
+
+# Coffea (xxhash should be not needed)
 RUN /opt/conda/bin/pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.37
@@ -48,4 +57,4 @@ RUN groupadd -r condor && \
 
 WORKDIR /opt/app
 
-ENTRYPOINT ["tini", "-g", "--"]
+ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
