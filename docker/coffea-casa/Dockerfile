@@ -40,11 +40,15 @@ RUN /opt/conda/bin/pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.37
 
-# Why we need this?
-#RUN mkdir /opt/app
-#RUN mkdir /var/lib/condor
+# Dask environment
+RUN mkdir /opt/app
 
+# Add job spool directory for HTCondor
+RUN mkdir /var/lib/condor
+# Add HTCondor configuration files
 COPY condor_config /etc/condor/
+# Copy configuration files (currently all, to be optimised)
+COPY config.d  /etc/condor/
 
 RUN groupadd -r condor && \ 
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
