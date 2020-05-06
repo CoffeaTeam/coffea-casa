@@ -44,7 +44,7 @@ kubernetes:
         beta.kubernetes.io/os: linux
       containers:
       - name: dask
-        image: daskdev/dask:2.9.1
+        image: oshadura/coffea-casa:latest
         env:
         - name: EXTRA_PIP_PACKAGES
           value: "joblib scikit-learn stumpy"
