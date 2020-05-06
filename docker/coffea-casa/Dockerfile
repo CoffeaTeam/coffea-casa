@@ -40,9 +40,11 @@ RUN /opt/conda/bin/pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.37
 
-RUN mkdir /opt/app
+# Why we need this?
+#RUN mkdir /opt/app
+#RUN mkdir /var/lib/condor
 
-RUN mkdir /var/lib/condor
+COPY condor_config /etc/condor/
 
 RUN groupadd -r condor && \ 
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
