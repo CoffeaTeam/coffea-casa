@@ -46,11 +46,11 @@ RUN mkdir /opt/app
 # Add job spool directory for HTCondor
 RUN mkdir /var/lib/condor 
 # Add configuration directory for HTCondor
-RUN mkdir /etc/condor
+RUN mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
-COPY config.d  /etc/condor/
+COPY config.d  /etc/condor/config.d/
 
 RUN groupadd -r condor && \ 
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
