@@ -44,7 +44,9 @@ RUN /opt/conda/bin/pip install --no-cache-dir \
 RUN mkdir /opt/app
 
 # Add job spool directory for HTCondor
-RUN mkdir /var/lib/condor
+RUN mkdir /var/lib/condor 
+# Add configuration directory for HTCondor
+RUN mkdir /etc/condor
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
