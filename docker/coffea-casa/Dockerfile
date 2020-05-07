@@ -22,6 +22,7 @@ RUN conda install --yes --freeze-installed \
     -c conda-forge \
     bokeh==2.0.0 \
     dask==2.12.0 \
+    dask-jobqueue \
     distributed==2.12.0 \
     matplotlib==3.2.1 \
     lz4==3.0.2 \
