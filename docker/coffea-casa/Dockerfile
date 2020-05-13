@@ -16,6 +16,8 @@ RUN apt-get install gnupg2 -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
+RUN conda config --set ssl_verify no
+
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
@@ -34,6 +36,12 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     xrootd==4.11.2 \
     htcondor \
+    # TO BE REVIEWED!
+    dask-kubernetes \
+    dask-labextension \
+    jupyterlab \
+    nodejs=10.* \
+    tornado \
     && conda clean -afy
 
 # Coffea
@@ -41,6 +49,9 @@ RUN /opt/conda/bin/pip install --no-cache-dir \
     dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.37
+
+# Jupyterhub
+RUN jupyter labextension install @jupyterlab/hub-extension
 
 # Dask environment
 RUN mkdir /opt/app
