@@ -1,0 +1,62 @@
+##############################################################################
+##############################################################################
+#
+#	DO NOT EDIT - file is being maintained by puppet
+#
+##############################################################################
+##############################################################################
+
+
+# Authorization settings
+# These should be unnecessary, unless if we have an error below.
+DENY_WRITE         = anonymous@*, unmapped@*
+DENY_NEGOTIATOR    = anonymous@*, unmapped@*
+DENY_ADMINISTRATOR = anonymous@*, unmapped@*
+DENY_DAEMON        = anonymous@*, unmapped@*
+
+# Defaults for HCC
+FRIENDLY_DAEMONS = *@daemon.unl.edu
+WORKER_NODES     = *@worker.unl.edu/* , t3@daemon.unl.edu/t3.unl.edu
+USERS            = *@unl.edu
+
+# Authz settings for each daemon.  Preferably, change the templates above
+DEFAULT_WRITE = $(FRIENDLY_DAEMONS), $(HOSTNAME)@worker.unl.edu/$(FULL_HOSTNAME)
+ALLOW_WRITE = $(DEFAULT_WRITE)
+
+# Schedd is the only one accepting non-strong auth
+SCHEDD.ALLOW_WRITE               = $(USERS), $(HOSTNAME)@daemon.unl.edu/$(FULL_HOSTNAME)
+NEGOTIATOR.ALLOW_WRITE           = $(FRIENDLY_DAEMONS)
+COLLECTOR.ALLOW_ADVERTISE_MASTER = $(FRIENDLY_DAEMONS), $(WORKER_NODES), condor@unl.edu
+COLLECTOR.ALLOW_ADVERTISE_SCHEDD = $(FRIENDLY_DAEMONS)
+COLLECTOR.ALLOW_ADVERTISE_STARTD = $(WORKER_NODES), $(HOSTNAME)@daemon.unl.edu/$(FULL_HOSTNAME)
+STARTD.ALLOW_NEGOTIATOR          = red-condor@daemon.unl.edu/red-condor.unl.edu, $(HOSTNAME)@daemon.unl.edu/$(FULL_HOSTNAME)
+SHADOW.ALLOW_WRITE               = $(DEFAULT_WRITE), $(WORKER_NODES), $(HOSTNAME)@daemon.unl.edu/$(FULL_HOSTNAME)
+ALLOW_DAEMON                     = $(FRIENDLY_DAEMONS), condor@unl.edu, submit-side@matchsession, $(HOSTNAME)@worker.unl.edu/$(FULL_HOSTNAME)
+ALLOW_ADMINISTRATOR              = red-condor@daemon.unl.edu/red-condor.unl.edu, red-man@unl.edu/red-man.unl.edu, red-man@daemon.unl.edu/red-man.unl.edu, red-man@daemon.unl.edu/172.16.200.1, $(HOSTNAME)@daemon.unl.edu/$(FULL_HOSTNAME), $(HOSTNAME)@worker.unl.edu/$(FULL_HOSTNAME)
+
+# Authentication settings
+SEC_DEFAULT_AUTHENTICATION               = REQUIRED
+SEC_READ_AUTHENTICATION                  = OPTIONAL
+SEC_CLIENT_AUTHENTICATION                = OPTIONAL
+SEC_DEFAULT_AUTHENTICATION_METHODS       = GSI,TOKEN
+SCHEDD.SEC_WRITE_AUTHENTICATION_METHODS  = FS,GSI,TOKEN
+SCHEDD.SEC_DAEMON_AUTHENTICATION_METHODS = FS,GSI,TOKEN
+SEC_CLIENT_AUTHENTICATION_METHODS        = FS,GSI,TOKEN
+
+# This allows the negotiator to generate a temporary authentication between the starter and schedd along with the match
+# Prevents schedd from getting matches it can't use
+SEC_ENABLE_MATCH_PASSWORD_AUTHENTICATION = TRUE
+
+# Privacy settings
+SEC_DEFAULT_ENCRYPTION = OPTIONAL
+SEC_DEFAULT_INTEGRITY  = REQUIRED
+SEC_READ_INTEGRITY     = OPTIONAL
+SEC_CLIENT_INTEGRITY   = OPTIONAL
+SEC_READ_ENCRYPTION    = OPTIONAL
+SEC_CLIENT_ENCRYPTION  = OPTIONAL
+
+# GSI settings
+GSI_DAEMON_TRUSTED_CA_DIR = /etc/grid-security/certificates
+GSI_DAEMON_CERT           = /etc/grid-security/hostcert.pem
+GSI_DAEMON_KEY            = /etc/grid-security/hostkey.pem
+CERTIFICATE_MAPFILE       = /etc/condor/condor_mapfile

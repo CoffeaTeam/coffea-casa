@@ -1,5 +1,5 @@
 # based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
-FROM jupyter/minimal-notebook:latest
+FROM continuumio/miniconda3:latest
 
 #RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 
@@ -25,6 +25,7 @@ RUN conda install --yes --freeze-installed \
     bokeh==2.0.0 \
     dask==2.12.0 \
     distributed==2.12.0 \
+    #dask-jobqueue==0.7.1 \ (doesn't work! why?)
     matplotlib==3.2.1 \
     lz4==3.0.2 \
     numba==0.48.0 \
@@ -38,6 +39,9 @@ RUN conda install --yes --freeze-installed \
     # TO BE REVIEWED!
     dask-kubernetes \
     dask-labextension \
+    jupyterlab \
+    nodejs=10.* \
+    tornado \
     && conda clean -afy
 
 # Coffea
