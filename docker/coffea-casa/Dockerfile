@@ -45,6 +45,7 @@ RUN conda install --yes --freeze-installed \
 RUN /opt/conda/bin/pip install --no-cache-dir \
     dask-jobqueue==0.7.1 \
     jupyterlab \
+    dask-labextension \
     xxhash==1.3.0 \
     coffea==0.6.37
 
