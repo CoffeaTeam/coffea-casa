@@ -39,12 +39,12 @@ RUN conda install --yes --freeze-installed \
     xrootd==4.11.2 \
     htcondor \
     dask-kubernetes \
-    dask-labextension \
     && conda clean -afy
 
 # Coffea
 RUN /opt/conda/bin/pip install --no-cache-dir \
     dask-jobqueue==0.7.1 \
+    dask_labextension \
     xxhash==1.3.0 \
     coffea==0.6.37
 
