@@ -50,8 +50,8 @@ RUN /opt/conda/bin/pip install --no-cache-dir \
 
 # Jupyterhub setup
 RUN jupyter labextension install --clean \
-                            @jupyterlab/hub-extension \
-                            @jupyter-widgets/jupyterlab-manager \
+                            #@jupyterlab/hub-extension \
+                            #@jupyter-widgets/jupyterlab-manager \
                             dask-labextension
 
 # sed -i -e "s|DASK_DASHBOARD_URL|${JUPYTERHUB_SERVICE_PREFIX}proxy/8787|g" jupyterlab-workspace.json
