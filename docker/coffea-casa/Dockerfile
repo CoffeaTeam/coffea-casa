@@ -1,10 +1,12 @@
 # based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
 FROM jupyter/minimal-notebook:latest
-
-#RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+USER root
 
 #Script that helps to work out missing packages without editing Docker image
 COPY prepare.sh /usr/bin/prepare.sh
+
+# Update repositories
+RUN apt-get update
 
 # EGI CA certificates
 RUN apt-get install gnupg2 -y \
@@ -53,7 +55,7 @@ RUN jupyter labextension install @jupyterlab/hub-extension
 RUN mkdir /opt/app
 
 # Add job spool directory for HTCondor
-RUN mkdir /var/lib/condor 
+RUN mkdir /var/lib/condor
 # Add configuration directory for HTCondor
 RUN mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files
@@ -61,7 +63,7 @@ COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
 
-RUN groupadd -r condor && \ 
+RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 WORKDIR /opt/app
