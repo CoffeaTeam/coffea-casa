@@ -20,6 +20,7 @@ RUN apt-get install gnupg2 -y \
 
 RUN conda config --set ssl_verify no
 
+USER $NB_UID
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
@@ -64,6 +65,7 @@ RUN mkdir -p $HOME/.config/dask
 COPY labextension.yml  $HOME/.config/dask/labextension.yml
 COPY kubernetes.yml $HOME/.config/dask/kubernetes.yml
 
+USER root
 # Dask environment
 RUN mkdir /opt/app
 # Add job spool directory for HTCondor
@@ -79,6 +81,7 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 WORKDIR /opt/app
+USER $NB_UID
 
 #ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
 ENTRYPOINT ["tini", "-g", "--"]
