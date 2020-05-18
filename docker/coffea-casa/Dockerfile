@@ -18,9 +18,8 @@ RUN apt-get install gnupg2 -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-RUN conda config --set ssl_verify no
-
 USER $NB_UID
+
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
@@ -47,7 +46,6 @@ RUN /opt/conda/bin/pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.37
 
-USER root
 # Jupyterhub setup
 RUN jupyter labextension install \
                             #@jupyterlab/hub-extension \
@@ -66,6 +64,7 @@ RUN mkdir -p $HOME/.config/dask
 COPY labextension.yml  $HOME/.config/dask/labextension.yml
 COPY kubernetes.yml $HOME/.config/dask/kubernetes.yml
 
+USER root
 # Dask environment
 RUN mkdir /opt/app
 # Add job spool directory for HTCondor
