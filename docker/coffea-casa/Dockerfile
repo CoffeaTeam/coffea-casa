@@ -1,4 +1,4 @@
-# based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
+# Partually based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
 FROM jupyter/minimal-notebook:latest
 USER root
 
@@ -20,6 +20,7 @@ RUN apt-get install gnupg2 -y \
 
 RUN conda config --set ssl_verify no
 
+USER $NB_UID
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
@@ -37,7 +38,6 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     xrootd==4.11.2 \
     htcondor \
-    # TO BE REVIEWED!
     dask-kubernetes \
     dask-labextension \
     && conda clean -afy
@@ -48,12 +48,26 @@ RUN /opt/conda/bin/pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.37
 
-# Jupyterhub
-RUN jupyter labextension install @jupyterlab/hub-extension
+# Jupyterhub setup
+RUN jupyter labextension install --clean \
+                            @jupyterlab/hub-extension \
+                            @jupyter-widgets/jupyterlab-manager \
+                            dask-labextension
 
+# sed -i -e "s|DASK_DASHBOARD_URL|${JUPYTERHUB_SERVICE_PREFIX}proxy/8787|g" jupyterlab-workspace.json
+# export DASK_DISTRIBUTED__DASHBOARD__LINK="${JUPYTERHUB_SERVICE_PREFIX}proxy/8787/status"
+COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
+RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
+
+# extra dask config
+RUN mkdir -p $HOME/.config/dask
+#COPY dask.yaml $HOME/.config/dask/dask.yaml
+COPY labextension.yml  $HOME/.config/dask/labextension.yml
+COPY kubernetes.yml $HOME/.config/dask/kubernetes.yml
+
+USER root
 # Dask environment
 RUN mkdir /opt/app
-
 # Add job spool directory for HTCondor
 RUN mkdir /var/lib/condor
 # Add configuration directory for HTCondor
@@ -67,6 +81,7 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 WORKDIR /opt/app
+USER $NB_UID
 
 #ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
 ENTRYPOINT ["tini", "-g", "--"]
