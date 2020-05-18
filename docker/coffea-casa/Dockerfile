@@ -25,7 +25,7 @@ USER $NB_UID
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
-    bokeh==2.0.0 \
+    #bokeh==2.0.0 \
     dask==2.12.0 \
     distributed==2.12.0 \
     matplotlib==3.2.1 \
