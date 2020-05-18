@@ -44,14 +44,12 @@ RUN conda install --yes --freeze-installed \
 # Coffea
 RUN /opt/conda/bin/pip install --no-cache-dir \
     dask-jobqueue==0.7.1 \
-    jupyterlab \
-    dask-labextension \
     xxhash==1.3.0 \
     coffea==0.6.37
 
 USER root
 # Jupyterhub setup
-RUN jupyter labextension install --clean \
+RUN jupyter labextension install \
                             #@jupyterlab/hub-extension \
                             #@jupyter-widgets/jupyterlab-manager \
                             dask-labextension
