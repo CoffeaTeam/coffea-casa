@@ -1,7 +1,35 @@
 # Partually based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
 FROM jupyter/minimal-notebook:latest
-USER root
 
+###
+### Jupyterlab
+###
+
+# Add extra pluggins
+RUN jupyter labextension install --no-build dask-labextension && \
+    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+    jupyter lab build && \
+    jupyter lab clean && \
+    npm cache clean --force && \
+    rm -rf /home/$NB_USER/.cache/yarn && \
+    rm -rf /home/$NB_USER/.node-gyp && \
+    fix-permissions $CONDA_DIR && \
+    fix-permissions /home/$NB_USER
+
+# sed -i -e "s|DASK_DASHBOARD_URL|${JUPYTERHUB_SERVICE_PREFIX}proxy/8787|g" jupyterlab-workspace.json
+# export DASK_DISTRIBUTED__DASHBOARD__LINK="${JUPYTERHUB_SERVICE_PREFIX}proxy/8787/status"
+COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
+RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
+# extra dask config
+RUN mkdir -p $HOME/.config/dask
+#COPY dask.yaml $HOME/.config/dask/dask.yaml
+COPY labextension.yml  $HOME/.config/dask/labextension.yml
+COPY kubernetes.yml $HOME/.config/dask/kubernetes.yml
+
+###
+### Dask
+###
+USER root
 #Script that helps to work out missing packages without editing Docker image
 COPY prepare.sh /usr/bin/prepare.sh
 
@@ -45,24 +73,6 @@ RUN /opt/conda/bin/pip install --no-cache-dir \
     dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.37
-
-# Jupyterhub setup
-RUN jupyter labextension install \
-                            #@jupyterlab/hub-extension \
-                            #@jupyter-widgets/jupyterlab-manager \
-                            dask-labextension
-
-# sed -i -e "s|DASK_DASHBOARD_URL|${JUPYTERHUB_SERVICE_PREFIX}proxy/8787|g" jupyterlab-workspace.json
-# export DASK_DISTRIBUTED__DASHBOARD__LINK="${JUPYTERHUB_SERVICE_PREFIX}proxy/8787/status"
-COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
-
-RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
-
-# extra dask config
-RUN mkdir -p $HOME/.config/dask
-#COPY dask.yaml $HOME/.config/dask/dask.yaml
-COPY labextension.yml  $HOME/.config/dask/labextension.yml
-COPY kubernetes.yml $HOME/.config/dask/kubernetes.yml
 
 USER root
 # Dask environment
