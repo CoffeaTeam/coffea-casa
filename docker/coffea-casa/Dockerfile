@@ -64,6 +64,7 @@ RUN conda install --yes --freeze-installed \
     dask==2.12.0 \
     distributed==2.12.0 \
     dask-kubernetes \
+    dask-jobqueue \
     matplotlib==3.2.1 \
     lz4==3.0.2 \
     numba==0.48.0 \
@@ -78,7 +79,7 @@ RUN conda install --yes --freeze-installed \
 
 # Coffea
 RUN pip install --no-cache-dir \
-    dask-jobqueue==0.7.1 \
+    #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.37
 
