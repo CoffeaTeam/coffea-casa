@@ -4,12 +4,23 @@ FROM jupyter/minimal-notebook:latest
 ###
 ### Jupyterlab
 ###
+# Add extra plugins
+RUN jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager
+RUN jupyter labextension install --no-build @jupyterlab/git
+RUN jupyter labextension install --no-build @jupyterlab/github
+RUN jupyter labextension install --no-build dask-labextension
 
-# Add extra pluggins
-RUN jupyter labextension install --no-build dask-labextension && \
-    jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-    jupyter lab build && \
-    jupyter lab clean && \
+# Dask extention (looks like it is not available in the image)
+RUN pip install \
+  dask_labextension \
+  jupyterlab_git \
+  jupyterlab_github
+
+# Enable the serverextensions that do not use the conf.d approach
+RUN jupyter serverextension enable --sys-prefix jupyterlab_git
+
+# Build JupyterLab.
+RUN jupyter lab build --dev-build=False && jupyter lab clean && \
     npm cache clean --force && \
     rm -rf /home/$NB_USER/.cache/yarn && \
     rm -rf /home/$NB_USER/.node-gyp && \
@@ -20,11 +31,10 @@ RUN jupyter labextension install --no-build dask-labextension && \
 # export DASK_DISTRIBUTED__DASHBOARD__LINK="${JUPYTERHUB_SERVICE_PREFIX}proxy/8787/status"
 COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
 RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
-# extra dask config
-RUN mkdir -p $HOME/.config/dask
-#COPY dask.yaml $HOME/.config/dask/dask.yaml
-COPY labextension.yml  $HOME/.config/dask/labextension.yml
-COPY kubernetes.yml $HOME/.config/dask/kubernetes.yml
+
+# labextension.yml + kubernetes.yml
+COPY dask_config.yml ${CONDA_DIR}/etc/dask.yml
+
 
 ###
 ### Dask
@@ -47,14 +57,13 @@ RUN apt-get install gnupg2 -y \
     && rm -rf /var/lib/apt/lists/*
 
 USER $NB_UID
-
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
-    #bokeh==2.0.0 \
     dask==2.12.0 \
     distributed==2.12.0 \
+    dask-kubernetes \
     matplotlib==3.2.1 \
     lz4==3.0.2 \
     numba==0.48.0 \
@@ -65,11 +74,10 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     xrootd==4.11.2 \
     htcondor \
-    dask-kubernetes \
     && conda clean -afy
 
 # Coffea
-RUN /opt/conda/bin/pip install --no-cache-dir \
+RUN pip install --no-cache-dir \
     dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.37
@@ -90,6 +98,12 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 WORKDIR /opt/app
+
 USER $NB_UID
+
 #ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
-ENTRYPOINT ["tini", "-g", "--"]
+#ENTRYPOINT ["tini", "-g", "--"]
+
+# Use bash login shell for entrypoint in order
+# to automatically source user's .bashrc
+CMD ["bash", "-l", "-c", "'start-notebook.sh'"]

@@ -1,0 +1,111 @@
+distributed:
+    version: 2
+  
+    dashboard:
+      link: /user/{JUPYTERHUB_USER}/proxy/{port}/status
+  
+    scheduler:
+      idle-timeout: 3600s
+  
+  # uncomment to force new worker pods after 2 hrs
+  #  worker:
+  #    lifetime:
+  #      duration: "2 hours"
+  #      stagger: "10 s"
+  #      restart: true
+  
+    admin:
+      tick:
+        limit: 5s
+  
+  logging:
+    distributed: warning
+    bokeh: critical
+    tornado: critical
+    tornado.application: error
+  
+kubernetes:
+    name: "dask-unl"
+    namespace: default
+    count:
+        start: 0
+        max: null
+    host: "0.0.0.0"
+    port: 0
+    env: {}
+    idle-timeout: null
+    deploy-mode: "local"
+    interface: null
+    protocol: "tcp://"
+    dashboard_address: ":8787"
+    scheduler-service-type: "ClusterIP"
+    # Timeout to wait for the scheduler service to be up (in seconds)
+    # Set it to 0 to wait indefinitely (not recommended)
+    scheduler-service-wait-timeout: 30
+    scheduler-service-template:
+        apiVersion: v1
+        kind: Service
+        spec:
+        selector:
+            dask.org/cluster-name: "" # Cluster name will be added automatically
+            dask.org/component: scheduler
+        ports:
+            - name: comm
+            protocol: TCP
+            port: 8786
+            targetPort: 8786
+            - name: dashboard
+            protocol: TCP
+            port: 8787
+            targetPort: 8787
+    scheduler-template: {}
+    worker-template:
+        kind: Pod
+        metadata:
+        labels:
+            app: "dask"
+        spec:
+        restartPolicy: Never
+        nodeSelector:
+            beta.kubernetes.io/os: linux
+        containers:
+        - name: dask
+            image: oshadura/coffea-casa:latest
+            env:
+            - name: EXTRA_PIP_PACKAGES
+            value: "joblib scikit-learn stumpy"
+            args:
+            - dask-worker
+            - --nthreads
+            - '2'
+            - --no-bokeh
+            - --memory-limit
+            - 5GB
+            - --death-timeout
+            - '60'
+            resources:
+            limits:
+                cpu: "1"
+                memory: 6G
+            requests:
+                cpu: "1"
+                memory: 5G
+  
+  # Specific to each hub
+  #gateway:
+  #  address: xxxx/services/dask-gateway/
+  #  proxy-address: tls://xx.xxx.xx:8786
+  
+  labextension:
+    factory:
+      module: dask_kubernetes
+      class: KubeCluster
+      args: []
+      kwargs: {}
+    initial:
+      - name: "default"
+        workers: 1
+        adapt:
+          minimum: 1
+          maximum: 5
+  
