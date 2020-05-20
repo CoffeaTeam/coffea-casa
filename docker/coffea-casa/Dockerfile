@@ -99,7 +99,7 @@ RUN chown -R jovyan:root /opt/app
 
 # Add job spool directory for HTCondor
 RUN mkdir /var/lib/condor && \
-    mkdir -p $NB_UID/.condor/tokens.d && \
+    mkdir -p $HOME/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
