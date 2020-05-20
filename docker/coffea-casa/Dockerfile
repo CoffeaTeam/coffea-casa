@@ -33,10 +33,10 @@ COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
 RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
 # labextension.yml + kubernetes.yml
-COPY dask_config.yml ${CONDA_DIR}/etc/dask.yml
-COPY dask_config.yml ${HOME}/.config/dask/dask.yml
-COPY kubernetes.yml  ${HOME}/.config/dask/kubernetes.yml
-COPY labextension.yml  ${HOME}/.config/dask/labextension.yml
+COPY dask_config.yml $CONDA_DIR/etc/dask.yml
+COPY dask_config.yml $HOME/.config/dask/dask.yml
+COPY kubernetes.yml  $HOME/.config/dask/kubernetes.yml
+COPY labextension.yml  $HOME/.config/dask/labextension.yml
 
 ###
 ### Dask
@@ -84,7 +84,10 @@ RUN pip install --no-cache-dir \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.39 \
-    cryptography
+    cryptography \
+    pymacaroons \
+    kubernetes \
+    jwt
 
 USER root
 
@@ -106,8 +109,11 @@ COPY config.d  /etc/condor/config.d/
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
-WORKDIR /opt/app
+#change greoup for user $NB_USER
+#ERROR: Submitting jobs as user/group 0 (root) is not allowed for security reasons.
+RUN usermod -g condor $NB_USER
 
+WORKDIR /opt/app
 USER $NB_UID
 
 #ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
