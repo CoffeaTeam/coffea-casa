@@ -34,7 +34,9 @@ RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
 # labextension.yml + kubernetes.yml
 COPY dask_config.yml ${CONDA_DIR}/etc/dask.yml
-
+COPY dask_config.yml ${HOME}/.config/dask/dask.yml
+COPY kubernetes.yml  ${HOME}/.config/dask/kubernetes.yml
+COPY labextension.yml  ${HOME}/.config/dask/labextension.yml
 
 ###
 ### Dask
@@ -85,8 +87,13 @@ RUN pip install --no-cache-dir \
     cryptography
 
 USER root
+
 # Dask environment
+# TBD: should be changed to UNL home dir
 RUN mkdir /opt/app
+RUN chown -R jovyan:root /opt/app
+#TBD: mount /hadoop?
+
 # Add job spool directory for HTCondor
 RUN mkdir /var/lib/condor
 # Add configuration directory for HTCondor
