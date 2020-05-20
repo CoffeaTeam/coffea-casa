@@ -47,7 +47,7 @@ COPY prepare.sh /usr/bin/prepare.sh
 RUN apt-get update
 
 # EGI CA certificates
-RUN apt-get install gnupg2 -y \
+RUN apt-get install gnupg2 libssl-dev -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
@@ -81,7 +81,8 @@ RUN conda install --yes --freeze-installed \
 RUN pip install --no-cache-dir \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
-    coffea==0.6.37
+    coffea==0.6.39 \
+    cryptography
 
 USER root
 # Dask environment
