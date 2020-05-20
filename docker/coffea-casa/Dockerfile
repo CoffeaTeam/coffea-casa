@@ -98,13 +98,14 @@ RUN chown -R jovyan:root /opt/app
 #TBD: mount /hadoop?
 
 # Add job spool directory for HTCondor
-RUN mkdir /var/lib/condor
-# Add configuration directory for HTCondor
-RUN mkdir -p /etc/condor/config.d
+RUN mkdir /var/lib/condor && \
+    mkdir -p $NB_UID/.condor/tokens.d && \
+    mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
+
 
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
