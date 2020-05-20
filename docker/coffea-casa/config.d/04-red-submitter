@@ -21,6 +21,9 @@ USE_PSS = TRUE
 ########
 #ENABLE_IPV6 = TRUE
 
+# K8s sched setup
+SCHEDD_NAME = t3.unl.edu
+
 # define max interval for evaluating periodic release/removal
 MAX_PERIODIC_EXPR_INTERVAL = 1200
 
