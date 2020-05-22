@@ -49,7 +49,8 @@ COPY prepare.sh /usr/bin/prepare.sh
 RUN apt-get update
 
 # EGI CA certificates
-RUN apt-get install gnupg2 libssl-dev -y \
+# (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
+RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
@@ -75,7 +76,8 @@ RUN conda install --yes --freeze-installed \
     python-blosc==1.8.3 \
     scipy==1.4.1 \
     tini==0.18.0 \
-    xrootd==4.11.2 \
+    # We need to build it from scratch because we use need  it for xrdcl-authz-plugin build as well
+    #xrootd==4.11.2 \ 
     htcondor \
     && conda clean -afy
 
@@ -84,18 +86,44 @@ RUN pip install --no-cache-dir \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.39 \
+    # Brian and Nicks scripts dependencies
     cryptography \
     pymacaroons \
     kubernetes \
-    jwt
+    jwt \
+    # xrootd plugin
+    cmake
+
+# We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd is not distributed on Ubuntu
+COPY xrootd-pr1199.patch /tmp/xrootd-pr1199.patch
+
+RUN cd /tmp && \
+    git clone https://github.com/xrootd/xrootd.git && \
+    cd xrootd && \
+    git apply /tmp/xrootd-pr1199.patch && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrootd -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
+    make -j4
 
 USER root
+RUN cd /tmp/xrootd/build && make install
+    #cd /tmp && \
+    #rm -rf xrootd
 
-# Dask environment
-# TBD: should be changed to UNL home dir
-RUN mkdir /opt/app
-RUN chown -R jovyan:root /opt/app
-#TBD: mount /hadoop?
+USER $NB_UID
+RUN cd /tmp && \
+    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+    cd xrdcl-authz-plugin && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/usr && \
+    make
+
+USER root
+RUN cd /tmp/xrdcl-authz-plugin/build && make install
+    #cd /tmp && \
+    #rm -rf xrdcl-authz-plugin
 
 # Add job spool directory for HTCondor
 RUN mkdir /var/lib/condor && \
@@ -117,6 +145,12 @@ RUN groupadd -r condor && \
 #change greoup for user $NB_USER
 #ERROR: Submitting jobs as user/group 0 (root) is not allowed for security reasons.
 RUN usermod -g condor $NB_USER
+
+# Dask environment
+# TBD: should be changed to UNL home dir
+RUN mkdir /opt/app
+RUN chown -R jovyan:condor /opt/app
+#TBD: mount /hadoop?
 
 WORKDIR /opt/app
 USER $NB_UID
