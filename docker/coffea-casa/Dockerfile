@@ -106,6 +106,10 @@ COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
 
+# Tokens setup
+# https://github.com/oshadura/coffea-casa/issues/2
+
+RUN if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d; fi
 
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
