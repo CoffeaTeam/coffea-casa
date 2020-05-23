@@ -64,21 +64,34 @@ USER $NB_UID
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
-    dask==2.12.0 \
-    distributed==2.12.0 \
-    dask-kubernetes \
-    dask-jobqueue \
-    matplotlib==3.2.1 \
-    lz4==3.0.2 \
-    numba==0.48.0 \
+    # ->Dask image
+    # Python 3.8 doesn't work with coffea
+    # python==3.8 \
+    python-blosc \
+    cytoolz \
+    dask==2.16.0 \
+    lz4 \
+    nomkl \
     numpy==1.18.1 \
-    pandas==1.0.3 \
-    python-blosc==1.8.3 \
-    scipy==1.4.1 \
+    pandas==1.0.1 \
     tini==0.18.0 \
-    # We need to build it from scratch because we use need  it for xrdcl-authz-plugin build as well
+    # Coffea-casa extras
+    bokeh \
+    distributed \
+    dask-jobqueue \
+    # coffea-casa dependencies (in JH we build xrootd from scratch)
+    # cpmment: we need to build it from scratch because we use need  it for xrdcl-authz-plugin build as well
     #xrootd==4.11.2 \ 
     htcondor \
+    # Extra packages
+    matplotlib==3.2.1 \
+    numba==0.48.0 \
+    && conda clean -tipsy \
+    && find /opt/conda/ -type f,l -name '*.a' -delete \
+    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
+    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
+    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
+    && rm -rf /opt/conda/pkgs \
     && conda clean -afy
 
 # Coffea
@@ -91,7 +104,7 @@ RUN pip install --no-cache-dir \
     pymacaroons \
     kubernetes \
     jwt \
-    # xrootd plugin
+    # xrootd plugin compilation
     cmake
 
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd is not distributed on Ubuntu
@@ -100,7 +113,9 @@ COPY xrootd-pr1199.patch /tmp/xrootd-pr1199.patch
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
-    git apply /tmp/xrootd-pr1199.patch && \
+    git checkout v4.12.1 &&\
+    # Patch is used for 5.0.0-HEAD
+    # git apply /tmp/xrootd-pr1199.patch && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrootd -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
@@ -144,7 +159,8 @@ RUN groupadd -r condor && \
 
 #change greoup for user $NB_USER
 #ERROR: Submitting jobs as user/group 0 (root) is not allowed for security reasons.
-RUN usermod -g condor $NB_USER
+# No need to cahnge, it configured from kubernetes side
+#RUN usermod -g condor $NB_USER
 
 # Dask environment
 # TBD: should be changed to UNL home dir
@@ -155,8 +171,6 @@ RUN chown -R jovyan:condor /opt/app
 WORKDIR /opt/app
 USER $NB_UID
 
-#ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
-#ENTRYPOINT ["tini", "-g", "--"]
 
 # Use bash login shell for entrypoint in order
 # to automatically source user's .bashrc
