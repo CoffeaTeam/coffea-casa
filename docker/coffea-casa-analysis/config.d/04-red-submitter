@@ -16,7 +16,13 @@ DAEMON_LIST = MASTER, SCHEDD
 
 USE_PSS = TRUE
 
-ENABLE_IPV6 = TRUE
+########
+### FIXME For K8s we remove IPV6!
+########
+#ENABLE_IPV6 = TRUE
+
+# K8s sched setup
+SCHEDD_HOST = t3.unl.edu
 
 # define max interval for evaluating periodic release/removal
 MAX_PERIODIC_EXPR_INTERVAL = 1200
