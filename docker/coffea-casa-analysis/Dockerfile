@@ -1,6 +1,23 @@
 # based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
 FROM continuumio/miniconda3:latest
 
+# Configure environment
+ENV SHELL /bin/bash
+ENV NB_USER jovyan
+ENV NB_UID 1000
+ENV HOME /home/$NB_USER
+ENV PATH=$HOME/.local/bin:$PATH
+
+# Create jovyan user with UID=1000 and in the 'users' group
+RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
+
+# Install start-notebook.sh
+ADD prepare-env.sh /usr/local/bin/
+RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+
+# Fix permissions
+RUN chown -R $NB_USER:users $HOME
+
 #Script that helps to work out missing packages without editing Docker image
 COPY prepare.sh /usr/bin/prepare.sh
 
@@ -14,6 +31,7 @@ RUN apt-get install gnupg2 -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
+USER $NB_USER
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
@@ -73,14 +91,11 @@ RUN chown -R jovyan:condor /opt/app
 
 # Tokens setup
 # https://github.com/oshadura/coffea-casa/issues/2
-
-RUN touch /opt/app/prepare-env.sh &&\
-    echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d; fi' > /opt/app/prepare-env.sh && \
-    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /opt/app/prepare-env.sh && \
-    mv /opt/app/prepare-env.sh /usr/bin/prepare-env.sh
-RUN chmod +x /usr/bin/prepare-env.sh
+RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d; fi' >> /usr/local/bin/prepare-env.sh && \
+    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /usr/local/bin/prepare-env.sh
 
 WORKDIR /opt/app
+USER $NB_USER
 
 #ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
-ENTRYPOINT ["tini", "-g", "/usr/bin/prepare-env.sh"]
+ENTRYPOINT ["tini", "-g", "/usr/local/bin/prepare-env.sh"]

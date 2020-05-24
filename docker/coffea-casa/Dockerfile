@@ -173,7 +173,6 @@ RUN chown -R jovyan:condor /opt/app
 WORKDIR /opt/app
 USER $NB_UID
 
-
 # Use bash login shell for entrypoint in order
 # to automatically source user's .bashrc
 CMD ["bash", "-l", "-c", "'start-notebook.sh'"]
