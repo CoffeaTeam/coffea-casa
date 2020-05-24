@@ -65,11 +65,10 @@ COPY config.d  /etc/condor/config.d/
 # Tokens setup
 # https://github.com/oshadura/coffea-casa/issues/2
 
-RUN touch $HOME/prepare-env.sh &&\
-    echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d; fi' >> $HOME/prepare-env.sh && \
-    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> $HOME/prepare-env.sh
-
-COPY $HOME/prepare-env.sh /usr/bin/prepare-env.sh
+RUN touch /opt/app/prepare-env.sh &&\
+    echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d; fi' > /opt/app/prepare-env.sh && \
+    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /opt/app/prepare-env.sh && \
+    mv /opt/app/prepare-env.sh /usr/bin/prepare-env.sh
 RUN chmod +x /usr/bin/prepare-env.sh
 
 RUN groupadd -r condor && \
