@@ -62,6 +62,15 @@ COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
 
+RUN groupadd -r condor && \
+    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
+
+# Dask environment
+# TBD: should be changed to UNL home dir
+RUN mkdir /opt/app
+RUN chown -R jovyan:condor /opt/app
+#TBD: mount /hadoop?
+
 # Tokens setup
 # https://github.com/oshadura/coffea-casa/issues/2
 
@@ -70,9 +79,6 @@ RUN touch /opt/app/prepare-env.sh &&\
     echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /opt/app/prepare-env.sh && \
     mv /opt/app/prepare-env.sh /usr/bin/prepare-env.sh
 RUN chmod +x /usr/bin/prepare-env.sh
-
-RUN groupadd -r condor && \
-    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 WORKDIR /opt/app
 
