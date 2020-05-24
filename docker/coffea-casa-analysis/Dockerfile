@@ -31,7 +31,6 @@ RUN apt-get install gnupg2 -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-USER $NB_USER
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
@@ -71,6 +70,7 @@ RUN pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.39
 
+USER root
 # Add job spool directory for HTCondor
 RUN mkdir /var/lib/condor && \
     mkdir -p $HOME/.condor/tokens.d && \
