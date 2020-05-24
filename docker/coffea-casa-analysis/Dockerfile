@@ -98,4 +98,4 @@ WORKDIR /opt/app
 USER $NB_USER
 
 #ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
-ENTRYPOINT ["tini", "-g", "/usr/local/bin/prepare-env.sh"]
+ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
