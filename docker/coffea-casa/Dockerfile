@@ -154,8 +154,7 @@ COPY config.d  /etc/condor/config.d/
 # In original notebook it is /usr/local/bin/start-notebook.sh
 
 RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d; fi' >> /usr/local/bin/start-notebook.sh && \
-    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /usr/local/bin/start-notebook.sh && \
-    chmod +x /usr/bin/prepare-env.sh
+    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /usr/local/bin/start-notebook.sh
 
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
