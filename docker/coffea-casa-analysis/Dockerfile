@@ -22,7 +22,7 @@ RUN chown -R $NB_USER:users $HOME
 COPY prepare.sh /usr/bin/prepare.sh
 
 # EGI CA certificates
-RUN apt-get install gnupg2 -y \
+RUN apt-get install gnupg2 ufw -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
