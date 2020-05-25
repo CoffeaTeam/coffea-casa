@@ -155,8 +155,8 @@ COPY config.d  /etc/condor/config.d/
 
 #echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d/condor_token; fi' >> /usr/local/bin/start-notebook.sh && \
 # UGLY HACK!!!
-RUN sed -i '4imkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' /usr/local/bin/start-notebook.sh
-    
+RUN sed -i '4imkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' /usr/local/bin/start-singleuser.sh
+RUN sed -i '4imkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' /usr/local/bin/start-notebook.sh   
 
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
