@@ -95,10 +95,11 @@ RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secret
     echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then export BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"; fi' >> /usr/local/bin/prepare-env.sh  && \
     echo 'export XCACHE_HOST="red-xcache1.unl.edu"' >> /usr/local/bin/prepare-env.sh
 
-USER root
+# Enable iptables
+#USER root
 # Open 8787 port in firewall
-RUN ufw allow 8787/tcp && \
-    ufw enable
+#RUN ufw allow 8787/tcp && \
+#    ufw enable
 
 WORKDIR /opt/app
 USER $NB_USER
