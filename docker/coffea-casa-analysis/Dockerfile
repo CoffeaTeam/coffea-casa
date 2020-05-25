@@ -96,7 +96,7 @@ RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secret
     echo 'export XCACHE_HOST="red-xcache1.unl.edu"' >> /usr/local/bin/prepare-env.sh
 
 # Open 8787 port in firewall
-RUN ufw allow 8787/tcp
+RUN sudo ufw allow 8787/tcp
 
 WORKDIR /opt/app
 USER $NB_USER
