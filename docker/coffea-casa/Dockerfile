@@ -151,15 +151,20 @@ COPY config.d  /etc/condor/config.d/
 
 # Tokens setup
 # https://github.com/oshadura/coffea-casa/issues/2
-RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d/condor_token; fi' >> /usr/local/bin/prepare-env.sh && \
-    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then export BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /usr/local/bin/prepare-env.sh
+# In original notebook it is /usr/local/bin/start-notebook.sh
+
+RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d/condor_token; fi' >> /usr/local/bin/start-notebook.sh && \
+    # No need to have bearer token on JH 
+    #echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then export BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"; fi' >> /usr/local/bin/start-notebook.sh  && \
+    echo 'export XCACHE_HOST="red-xcache1.unl.edu"' >> /usr/local/bin/start-notebook.sh
+    
 
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 #change greoup for user $NB_USER
 #ERROR: Submitting jobs as user/group 0 (root) is not allowed for security reasons.
-# No need to cahnge, it configured from kubernetes side
+# No need to change, it configured from kubernetes side
 #RUN usermod -g condor $NB_USER
 
 # Dask environment

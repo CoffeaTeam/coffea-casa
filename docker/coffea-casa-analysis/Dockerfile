@@ -92,7 +92,11 @@ RUN chown -R jovyan:condor /opt/app
 # Tokens setup
 # https://github.com/oshadura/coffea-casa/issues/2
 RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d/condor_token; fi' >> /usr/local/bin/prepare-env.sh && \
-    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then export BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /usr/local/bin/prepare-env.sh
+    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then export BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"; fi' >> /usr/local/bin/prepare-env.sh  && \
+    echo 'export XCACHE_HOST="red-xcache1.unl.edu"' >> /usr/local/bin/prepare-env.sh
+
+# Open 8787 port in firewall
+RUN ufw allow 8787/tcp
 
 WORKDIR /opt/app
 USER $NB_USER
