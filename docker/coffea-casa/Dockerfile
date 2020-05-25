@@ -154,10 +154,7 @@ COPY config.d  /etc/condor/config.d/
 # In original notebook it is /usr/local/bin/start-notebook.sh
 
 #echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d/condor_token; fi' >> /usr/local/bin/start-notebook.sh && \
-RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then mkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token; fi' >> /usr/local/bin/start-notebook.sh && \
-    # No need to have bearer token on JH 
-    #echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then export BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"; fi' >> /usr/local/bin/start-notebook.sh  && \
-    echo 'XCACHE_HOST="red-xcache1.unl.edu"' >> /usr/local/bin/start-notebook.sh
+RUN echo 'mkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' >> /usr/local/bin/start-notebook.sh
     
 
 RUN groupadd -r condor && \
