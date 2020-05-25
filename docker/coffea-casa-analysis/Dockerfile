@@ -91,8 +91,8 @@ RUN chown -R jovyan:condor /opt/app
 
 # Tokens setup
 # https://github.com/oshadura/coffea-casa/issues/2
-RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d; fi' >> /usr/local/bin/prepare-env.sh && \
-    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /usr/local/bin/prepare-env.sh
+RUN echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d/condor_token; fi' >> /usr/local/bin/prepare-env.sh && \
+    echo 'if [ -f "/etc/cmsaf-secrets/xcache_token" ]; then export BEARER_TOKEN_FILE=$(cat /etc/cmsaf-secrets/xcache_token); fi' >> /usr/local/bin/prepare-env.sh
 
 WORKDIR /opt/app
 USER $NB_USER
