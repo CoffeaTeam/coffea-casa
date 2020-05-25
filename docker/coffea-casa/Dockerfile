@@ -177,4 +177,4 @@ USER $NB_UID
 
 # Use bash login shell for entrypoint in order
 # to automatically source user's .bashrc
-CMD ["bash", "-l", "-c", "'start-notebook.sh'"]
+CMD ["bash", "-l", "-c", "'/usr/local/bin/start-notebook.sh'"]
