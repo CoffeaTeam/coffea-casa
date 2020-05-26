@@ -105,7 +105,7 @@ RUN cd /tmp && \
     #>>> distributed._version.version_json
     #'\n{\n "date": "2020-05-08T15:59:42-0500",\n "dirty": false,\n "error": null,\n "full-revisionid": "f66eda86c36e2f0b0496552c496736baf80c1c1e",\n "version": "2.16.0"\n}\n'
     git checkout 2.16.0 &&\
-    git apply /tmp/distributed-bbockelman.patch && \
+    git apply $HOME/distributed-bbockelman.patch && \
     python setup.py install
 
 RUN cd /tmp && \
@@ -114,7 +114,7 @@ RUN cd /tmp && \
     #>>> dask_jobqueue._version.version_json
     #'\n{\n "date": "2020-03-26T03:47:05+0100",\n "dirty": false,\n "error": null,\n "full-revisionid": "1033e4d56e363cc512f9c37d1ca51a0abbb0e562",\n "version": "0.7.1"\n}\n'
     git checkout 0.7.1 &&\
-    git apply /tmp/dask_jobqueue-bbockelman.patch && \
+    git apply $HOME/dask_jobqueue-bbockelman.patch && \
     python setup.py install
 
 # Coffea
