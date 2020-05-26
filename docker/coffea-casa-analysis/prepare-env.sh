@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -x
 
 export XCACHE_HOST="red-xcache1.unl.edu"
 
