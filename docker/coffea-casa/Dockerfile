@@ -73,7 +73,7 @@ RUN conda install --yes --freeze-installed \
     # python==3.8 \
     python-blosc \
     cytoolz \
-    #dask==2.16.0 \ -> we hope dask withh be installed with dependencies later
+    #dask==2.16.0 \ -> we hope dask will be installed with dependencies later
     lz4 \
     nomkl \
     numpy==1.18.1 \
