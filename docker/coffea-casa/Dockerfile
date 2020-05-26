@@ -113,6 +113,9 @@ RUN pip install --no-cache-dir \
     # xrootd plugin compilation
     cmake
 
+# We will need to install a new version
+RUN pip uninstall -y dask distributed
+
 # Dask dependencies that needs to be patched (hopefully is will pull dask as well)
 RUN cd /tmp && \
     git clone https://github.com/dask/dask-jobqueue.git && \
