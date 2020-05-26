@@ -187,7 +187,7 @@ RUN groupadd 1000 && usermod -g 1000 $NB_USER
 # TBD: should be changed to UNL home dir
 # TBD: mount /hadoop (no need for now)
 RUN mkdir /opt/app
-RUN chown -R jovyan:condor /opt/app
+RUN chown -R jovyan:1000 /opt/app
 
 WORKDIR /opt/app
 USER $NB_UID
