@@ -181,7 +181,7 @@ RUN groupadd -r condor && \
 #change group for user $NB_USER
 #ERROR: Submitting jobs as user/group 0 (root) is not allowed for security reasons.
 # it configured from kubernetes side and updated in docker container to match it
-RUN usermod -g 1000 $NB_USER
+RUN groupadd 1000 && usermod -g 1000 $NB_USER
 
 # Dask environment
 # TBD: should be changed to UNL home dir
