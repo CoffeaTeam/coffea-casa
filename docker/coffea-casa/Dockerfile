@@ -109,7 +109,7 @@ RUN cd /tmp && \
     python setup.py install
 
 RUN cd /tmp && \
-    git clone https://github.com/dask/dask_jobqueue.git && \
+    git clone https://github.com/dask/dask-jobqueue.git && \
     cd dask_jobqueue && \
     #>>> dask_jobqueue._version.version_json
     #'\n{\n "date": "2020-03-26T03:47:05+0100",\n "dirty": false,\n "error": null,\n "full-revisionid": "1033e4d56e363cc512f9c37d1ca51a0abbb0e562",\n "version": "0.7.1"\n}\n'
