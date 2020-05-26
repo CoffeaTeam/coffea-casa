@@ -1,5 +1,5 @@
 diff --git a/distributed/deploy/spec.py b/distributed/deploy/spec.py
-index 5616059..61bdccf 100644
+index cdde4a81..7bd4295c 100644
 --- a/distributed/deploy/spec.py
 +++ b/distributed/deploy/spec.py
 @@ -325,7 +325,7 @@ class SpecCluster(Cluster):
@@ -12,10 +12,10 @@ index 5616059..61bdccf 100644
                  workers.append(worker)
              if workers:
 diff --git a/distributed/scheduler.py b/distributed/scheduler.py
-index dd96550..8565afd 100644
+index 5c50fd4d..e1398dba 100644
 --- a/distributed/scheduler.py
 +++ b/distributed/scheduler.py
-@@ -1056,6 +1056,7 @@ class Scheduler(ServerNode):
+@@ -1055,6 +1055,7 @@ class Scheduler(ServerNode):
          extensions=None,
          validate=None,
          scheduler_file=None,
@@ -28,7 +28,7 @@ index dd96550..8565afd 100644
          self.services = {}
          self.scheduler_file = scheduler_file
 +        if external_address:
-+            self.external_address = external_address
++                self.external_address = external_address
          worker_ttl = worker_ttl or dask.config.get("distributed.scheduler.worker-ttl")
          self.worker_ttl = parse_timedelta(worker_ttl) if worker_ttl else None
          idle_timeout = idle_timeout or dask.config.get(
