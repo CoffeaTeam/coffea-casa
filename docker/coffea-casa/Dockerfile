@@ -131,14 +131,12 @@ RUN pip install --no-cache-dir \
     cmake
 
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
-COPY xrootd-pr1199.patch /tmp/xrootd-pr1199.patch
-
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
     git checkout v4.12.1 &&\
     # Patch is used for 5.0.0-HEAD
-    # git apply /tmp/xrootd-pr1199.patch && \
+    # git apply /home/$NB_USER/xrootd-pr1199.patch && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrootd -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
