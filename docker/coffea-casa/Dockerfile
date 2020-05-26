@@ -64,6 +64,25 @@ RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev -y \
 
 USER $NB_UID
 
+# Dask dependencies that needs to be patched (hopefully is will pull dask as well)
+RUN cd /tmp && \
+    git clone https://github.com/dask/distributed.git && \
+    cd distributed && \
+    #>>> distributed._version.version_json
+    #'\n{\n "date": "2020-05-08T15:59:42-0500",\n "dirty": false,\n "error": null,\n "full-revisionid": "f66eda86c36e2f0b0496552c496736baf80c1c1e",\n "version": "2.16.0"\n}\n'
+    git checkout tags/2.16.0 &&\
+    git apply /home/$NB_USER/distributed-bbockelman.patch && \
+   python setup.py install
+
+RUN cd /tmp && \
+    git clone https://github.com/dask/dask-jobqueue.git && \
+    cd dask-jobqueue && \
+    #>>> dask_jobqueue._version.version_json
+    #'\n{\n "date": "2020-03-26T03:47:05+0100",\n "dirty": false,\n "error": null,\n "full-revisionid": "1033e4d56e363cc512f9c37d1ca51a0abbb0e562",\n "version": "0.7.1"\n}\n'
+    git checkout tags/0.7.1 &&\
+    git apply /home/$NB_USER/dask_jobqueue-bbockelman.patch && \
+    python setup.py install
+
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
@@ -98,25 +117,6 @@ RUN conda install --yes --freeze-installed \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
     && rm -rf /opt/conda/pkgs \
     && conda clean -afy
-
-# Dask dependencies that needs to be patched (hopefully is will pull dask as well)
-RUN cd /tmp && \
-    git clone https://github.com/dask/distributed.git && \
-    cd distributed && \
-    #>>> distributed._version.version_json
-    #'\n{\n "date": "2020-05-08T15:59:42-0500",\n "dirty": false,\n "error": null,\n "full-revisionid": "f66eda86c36e2f0b0496552c496736baf80c1c1e",\n "version": "2.16.0"\n}\n'
-    git checkout tags/2.16.0 &&\
-    git apply /home/$NB_USER/distributed-bbockelman.patch && \
-    pip install setup.py
-
-RUN cd /tmp && \
-    git clone https://github.com/dask/dask-jobqueue.git && \
-    cd dask-jobqueue && \
-    #>>> dask_jobqueue._version.version_json
-    #'\n{\n "date": "2020-03-26T03:47:05+0100",\n "dirty": false,\n "error": null,\n "full-revisionid": "1033e4d56e363cc512f9c37d1ca51a0abbb0e562",\n "version": "0.7.1"\n}\n'
-    git checkout tags/0.7.1 &&\
-    git apply /home/$NB_USER/dask_jobqueue-bbockelman.patch && \
-    pip install setup.py
 
 # Coffea
 RUN pip install --no-cache-dir \
