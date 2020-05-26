@@ -38,6 +38,9 @@ COPY dask_config.yml $HOME/.config/dask/dask.yml
 COPY kubernetes.yml  $HOME/.config/dask/kubernetes.yml
 COPY labextension.yml  $HOME/.config/dask/labextension.yml
 
+#Preparing patches
+COPY patches/ $HOME/
+
 ###
 ### Dask
 ###
@@ -96,7 +99,6 @@ RUN conda install --yes --freeze-installed \
     && rm -rf /opt/conda/pkgs \
     && conda clean -afy
 
-COPY distributed-bbockelman.patch /tmp/distributed-bbockelman.patch
 RUN cd /tmp && \
     git clone https://github.com/dask/distributed.git && \
     cd distributed && \
@@ -106,7 +108,6 @@ RUN cd /tmp && \
     git apply /tmp/distributed-bbockelman.patch && \
     python setup.py install
 
-COPY dask_jobqueue-bbockelman.patch /tmp/dask_jobqueue-bbockelman.patch
 RUN cd /tmp && \
     git clone https://github.com/dask/dask_jobqueue.git && \
     cd dask_jobqueue && \
