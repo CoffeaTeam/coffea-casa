@@ -53,7 +53,7 @@ RUN apt-get update
 
 # EGI CA certificates
 # (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
-RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client -y \
+RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-setuptools -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
@@ -101,6 +101,7 @@ RUN conda install --yes --freeze-installed \
 
 # Coffea
 RUN pip install --no-cache-dir \
+    setuptools \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.39 \
@@ -111,7 +112,7 @@ RUN pip install --no-cache-dir \
     jwt \
     # xrootd plugin compilation
     cmake
-    
+
 # Dask dependencies that needs to be patched (hopefully is will pull dask as well)
 RUN cd /tmp && \
     git clone https://github.com/dask/dask-jobqueue.git && \
