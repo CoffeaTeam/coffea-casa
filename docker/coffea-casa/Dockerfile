@@ -60,12 +60,13 @@ RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev -y \
     && rm -rf /var/lib/apt/lists/*
 
 USER $NB_UID
+
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     # ->Dask image
-    # Python 3.8 doesn't work with coffea
+    # IMPORTANT: Python 3.8 doesn't work with coffea
     # python==3.8 \
     python-blosc \
     cytoolz \
@@ -77,10 +78,11 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     # Coffea-casa extras
     bokeh \
-    distributed \
-    dask-jobqueue \
-    # coffea-casa dependencies (in JH we build xrootd from scratch)
-    # cpmment: we need to build it from scratch because we use need  it for xrdcl-authz-plugin build as well
+    # IMPORTANT: we need apply mini patches -> building from scratch
+    #distributed \
+    #dask-jobqueue \
+    # IMPORTANT: coffea-casa dependencies (in JH we build xrootd from scratch)
+    # comment: we need to build it from scratch because we use need  it for xrdcl-authz-plugin build as well
     #xrootd==4.11.2 \ 
     htcondor \
     # Extra packages
@@ -93,6 +95,26 @@ RUN conda install --yes --freeze-installed \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
     && rm -rf /opt/conda/pkgs \
     && conda clean -afy
+
+COPY distributed-bbockelman.patch /tmp/distributed-bbockelman.patch
+RUN cd /tmp && \
+    git clone https://github.com/dask/distributed.git && \
+    cd distributed && \
+    #>>> distributed._version.version_json
+    #'\n{\n "date": "2020-05-08T15:59:42-0500",\n "dirty": false,\n "error": null,\n "full-revisionid": "f66eda86c36e2f0b0496552c496736baf80c1c1e",\n "version": "2.16.0"\n}\n'
+    git checkout 2.16.0 &&\
+    git apply /tmp/distributed-bbockelman.patch && \
+    python setup.py install
+
+COPY dask_jobqueue-bbockelman.patch /tmp/dask_jobqueue-bbockelman.patch
+RUN cd /tmp && \
+    git clone https://github.com/dask/dask_jobqueue.git && \
+    cd dask_jobqueue && \
+    #>>> dask_jobqueue._version.version_json
+    #'\n{\n "date": "2020-03-26T03:47:05+0100",\n "dirty": false,\n "error": null,\n "full-revisionid": "1033e4d56e363cc512f9c37d1ca51a0abbb0e562",\n "version": "0.7.1"\n}\n'
+    git checkout 0.7.1 &&\
+    git apply /tmp/dask_jobqueue-bbockelman.patch && \
+    python setup.py install
 
 # Coffea
 RUN pip install --no-cache-dir \
@@ -107,7 +129,7 @@ RUN pip install --no-cache-dir \
     # xrootd plugin compilation
     cmake
 
-# We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd is not distributed on Ubuntu
+# We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
 COPY xrootd-pr1199.patch /tmp/xrootd-pr1199.patch
 
 RUN cd /tmp && \
@@ -149,28 +171,24 @@ COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
 
-# Tokens setup
+# Tokens setup (moved to k8s)
 # https://github.com/oshadura/coffea-casa/issues/2
-# In original notebook it is /usr/local/bin/start-notebook.sh
-
-#echo 'if [ -f "/etc/cmsaf-secrets/condor_token" ]; then cp /etc/cmsaf-secrets/condor_token ~/.condor/tokens.d/condor_token; fi' >> /usr/local/bin/start-notebook.sh && \
 # UGLY HACK!!!
-RUN sed -i '4imkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' /usr/local/bin/start-singleuser.sh
-RUN sed -i '4imkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' /usr/local/bin/start-notebook.sh   
+#RUN sed -i '4imkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' /usr/local/bin/start-notebook.sh   
 
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
-#change greoup for user $NB_USER
+#change group for user $NB_USER
 #ERROR: Submitting jobs as user/group 0 (root) is not allowed for security reasons.
-# No need to change, it configured from kubernetes side
-#RUN usermod -g condor $NB_USER
+# it configured from kubernetes side and updated in docker container to match it
+RUN usermod -g 1000 $NB_USER
 
 # Dask environment
 # TBD: should be changed to UNL home dir
+# TBD: mount /hadoop (no need for now)
 RUN mkdir /opt/app
 RUN chown -R jovyan:condor /opt/app
-#TBD: mount /hadoop?
 
 WORKDIR /opt/app
 USER $NB_UID
