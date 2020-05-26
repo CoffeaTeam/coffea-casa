@@ -16,6 +16,6 @@ PORT=`cat $_CONDOR_JOB_AD | grep HostPort | tr -d '"' | awk '{print $NF;}'`
 HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
 
 # for now hardcoded ( --nprocs 1)
-HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker 129.93.183.33:8787 --nthreads 4 --memory-limit 500.00MB --name 0 --nanny --death-timeout 60"
+HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker 129.93.183.33:8787 --nthreads 4 --memory-limit 2000.00MB --name 0 --nanny --death-timeout 60"
 # --contact-address tcp://$HOST:$PORT
 exec $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787 
