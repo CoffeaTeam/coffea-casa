@@ -19,7 +19,7 @@ HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{pri
 NAME=`cat $_CONDOR_JOB_AD | grep DaskWorkerName | tr -d '"' | awk '{print $NF;}'`
 
 # for now hardcoded ( --nprocs 1)
-HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker 129.93.183.31:8787 --name $NAME --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
+HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker 129.93.183.34:8787 --name $NAME --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
 echo "Copy of the job ClassAd:" 1>&2
 cat $_CONDOR_JOB_AD 1>&2
 echo $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787 1>&2
