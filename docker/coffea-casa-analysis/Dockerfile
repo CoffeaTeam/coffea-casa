@@ -11,10 +11,6 @@ ENV PATH=$HOME/.local/bin:$PATH
 # Create jovyan user with UID=1000 and in the 'users' group
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
 
-# Install start-notebook.sh
-ADD prepare-env.sh /usr/local/bin/
-RUN chmod ugo+x /usr/local/bin/prepare-env.sh
-
 # Fix permissions
 RUN chown -R $NB_USER:users $HOME
 
@@ -94,6 +90,9 @@ RUN chown -R jovyan:condor /opt/app
 # Open 8787 port in firewall
 #RUN ufw allow 8787/tcp && \
 #    ufw enable
+
+ADD prepare-env.sh /usr/local/bin/
+RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 WORKDIR /opt/app
 USER $NB_USER
