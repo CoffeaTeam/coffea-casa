@@ -47,7 +47,8 @@ RUN conda install --yes --freeze-installed \
     distributed \
     dask-jobqueue \
     # coffea-casa dependencies (in JH we build xrootd from scratch)
-    xrootd==4.11.2 \
+    cmake \
+    xrootd==4.11.3 \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
@@ -65,6 +66,38 @@ RUN pip install --no-cache-dir \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.39
+
+# We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
+RUN cd /tmp && \
+    git clone https://github.com/xrootd/xrootd.git && \
+    cd xrootd && \
+    git checkout v4.12.1 &&\
+   # Patch is used for 5.0.0-HEAD
+    # git apply /home/$NB_USER/xrootd-pr1199.patch && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrootd -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
+    make -j4
+
+USER root
+RUN cd /tmp/xrootd/build && make install
+    ##cd /tmp && \
+    ##rm -rf xrootd
+
+USER $NB_UID
+
+RUN cd /tmp && \
+    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+    cd xrdcl-authz-plugin && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/usr && \
+    make
+
+USER root
+RUN cd /tmp/xrdcl-authz-plugin/build && make install
+    #cd /tmp && \
+    #rm -rf xrdcl-authz-plugin
 
 USER root
 # Add job spool directory for HTCondor

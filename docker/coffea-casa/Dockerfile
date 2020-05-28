@@ -53,7 +53,7 @@ RUN apt-get update
 
 # EGI CA certificates
 # (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
-RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-setuptools -y \
+RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-setuptools pkg-config -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
@@ -85,8 +85,8 @@ RUN conda install --yes --freeze-installed \
     #distributed \
     #dask-jobqueue \
     # IMPORTANT: coffea-casa dependencies (in JH we build xrootd from scratch)
-    # comment: we need to build it from scratch because we use need  it for xrdcl-authz-plugin build as well
-    #xrootd==4.11.2 \ 
+    # comment: we need to build it from scratch because we use need it for xrdcl-authz-plugin build as well
+    xrootd==4.11.3 \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
@@ -112,6 +112,7 @@ RUN pip install --no-cache-dir \
     jwt \
     # xrootd plugin compilation
     cmake
+    #xrootd
 
 # We will need to install a new version
 RUN pip uninstall -y dask distributed
@@ -141,7 +142,7 @@ RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
     git checkout v4.12.1 &&\
-    # Patch is used for 5.0.0-HEAD
+   # Patch is used for 5.0.0-HEAD
     # git apply /home/$NB_USER/xrootd-pr1199.patch && \
     mkdir build && \
     cd  build && \
@@ -150,10 +151,11 @@ RUN cd /tmp && \
 
 USER root
 RUN cd /tmp/xrootd/build && make install
-    #cd /tmp && \
-    #rm -rf xrootd
+    ##cd /tmp && \
+    ##rm -rf xrootd
 
 USER $NB_UID
+
 RUN cd /tmp && \
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
