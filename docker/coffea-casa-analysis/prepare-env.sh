@@ -17,9 +17,11 @@ sleep 10
 PORT=`cat $_CONDOR_JOB_AD | grep HostPort | tr -d '"' | awk '{print $NF;}'`
 HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
 NAME=`cat $_CONDOR_JOB_AD | grep DaskWorkerName | tr -d '"' | awk '{print $NF;}'`
+# Requirement: to add to Condor job decription "+DaskSchedulerAddress": '"tcp://129.93.183.34:8787"',
+EXTERNALIP_PORT=`cat $_CONDOR_JOB_AD | grep DaskSchedulerAddress | tr -d '"' | awk '{print $NF;}'`
 
 # for now hardcoded ( --nprocs 1)
-HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker 129.93.183.34:8787 --name $NAME --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
+HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT --name $NAME --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
 echo "Copy of the job ClassAd:" 1>&2
 cat $_CONDOR_JOB_AD 1>&2
 echo $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787 1>&2

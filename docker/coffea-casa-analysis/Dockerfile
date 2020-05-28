@@ -17,8 +17,11 @@ RUN chown -R $NB_USER:users $HOME
 #Script that helps to work out missing packages without editing Docker image
 COPY prepare.sh /usr/bin/prepare.sh
 
+# Update repositories
+RUN apt-get update
+
 # EGI CA certificates
-RUN apt-get install gnupg2 ufw openssh-client openssh-client -y \
+RUN apt-get install build-essential gnupg2 openssh-client libssl-dev zlib1g-dev uuid-dev -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
