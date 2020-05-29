@@ -28,7 +28,7 @@ if [[ -f "$PWD/usercert.pem" ]]; then
     FILE_KEY="$PWD/usercert.pem"
 fi
 
-if [ -z "$PATH_CA_FILE" ] & [ -z "$FILE_CERT" ] & [ -z "$FILE_KEY" ]; then
+if [ -n "$PATH_CA_FILE" ] && [ -n "$FILE_CERT" ] && [ -n "$FILE_KEY" ]; then
     echo 'Info: We have full TLS environment setuped'        
     TLS_ENV=true
 else
