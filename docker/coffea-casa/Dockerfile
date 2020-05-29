@@ -46,7 +46,10 @@ COPY patches/ $HOME/
 ###
 USER root
 #Script that helps to work out missing packages without editing Docker image
-COPY prepare.sh /usr/bin/prepare.sh
+COPY prepare-extra-packages.sh /usr/bin/prepare-extra-packages.sh
+
+#
+RUN mkdir -p /etc/cmsaf-secrets/
 
 # Update repositories
 RUN apt-get update
