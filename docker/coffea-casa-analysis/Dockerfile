@@ -15,7 +15,10 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
 RUN chown -R $NB_USER:users $HOME
 
 #Script that helps to work out missing packages without editing Docker image
-COPY prepare.sh /usr/bin/prepare.sh
+COPY prepare-extra-packages.sh /usr/bin/prepare-extra-packages.sh
+
+#
+RUN mkdir -p /etc/cmsaf-secrets/
 
 # Update repositories
 RUN apt-get update
@@ -133,5 +136,4 @@ RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 WORKDIR /opt/app
 USER $NB_USER
 
-#ENTRYPOINT ["tini", "-g", "/usr/bin/prepare.sh"]
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
