@@ -2,28 +2,31 @@
 
 set -x
 
+# Testing ---------->
+echo " DEBUG: Our directory is: $PWD"
+
 # xcache setup
 export XCACHE_HOST="red-xcache1.unl.edu"
 
 # Condor token
-if [[ -f "/etc/cmsaf-secrets/condor_token" ]]; then
-    mkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token
+if [[ -f "$PWD/condor_token" ]]; then
+    mkdir -p /home/jovyan/.condor/tokens.d/ && cp $PWD/condor_token /home/jovyan/.condor/tokens.d/condor_token
 fi
  
 # Bearer token
-if [[ -f "/etc/cmsaf-secrets/xcache_token" ]]; then
-    export BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
+if [[ -f "$PWD/xcache_token" ]]; then
+    export BEARER_TOKEN_FILE="$PWD/xcache_token"
 fi
 
 # TLS env ("optional" variables)
-if [[ -f "/etc/cmsaf-secrets/ca.pem" ]]; then
-    PATH_CA_FILE="/etc/cmsaf-secrets/ca.pem"
+if [[ -f "$PWD/ca.pem" ]]; then
+    PATH_CA_FILE="$PWD/ca.pem"
 fi
-if [[ -f "/etc/cmsaf-secrets/usercert.pem" ]]; then
-    FILE_CERT="/etc/cmsaf-secrets/usercert.pem"
+if [[ -f "$PWD/usercert.pem" ]]; then
+    FILE_CERT="$PWD/usercert.pem"
 fi
-if [[ -f "/etc/cmsaf-secrets/userkey.pem" ]]; then
-    FILE_KEY="/etc/cmsaf-secrets/userkey.pem"
+if [[ -f "$PWD/userkey.pem" ]]; then
+    FILE_KEY="$PWD/userkey.pem"
 fi
 
 if [ -z "$PATH_CA_FILE" ] & [ -z "$FILE_CERT" ] & [ -z "$FILE_KEY" ]; then

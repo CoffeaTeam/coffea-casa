@@ -133,7 +133,9 @@ RUN chown -R jovyan:condor /opt/app
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
-WORKDIR /opt/app
+
+# No need to have it here, we hope to land in Condor DIR
+#WORKDIR /opt/app
 USER $NB_USER
 
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
