@@ -40,7 +40,7 @@ fi
 sleep 10
 
 # HTCondor port, hostname and external IP ("must" variables)
-if [ ! -z "$_CONDOR_JOB_AD"]; then
+if [ ! -z "$_CONDOR_JOB_AD" ]; then
     PORT=`cat $_CONDOR_JOB_AD | grep HostPort | tr -d '"' | awk '{print $NF;}'`
     HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
     NAME=`cat $_CONDOR_JOB_AD | grep DaskWorkerName | tr -d '"' | awk '{print $NF;}'`
