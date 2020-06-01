@@ -1,0 +1,13 @@
+diff --git a/dask_jobqueue/htcondor.py b/dask_jobqueue/htcondor.py
+index b2c8e08..5efe078 100644
+--- a/dask_jobqueue/htcondor.py
++++ b/dask_jobqueue/htcondor.py
+@@ -87,8 +87,6 @@ Queue
+                     "Log": "$(LogDirectory)/worker-$(ClusterId).log",
+                     # We kill all the workers to stop them so we need to stream their
+                     # output+error if we ever want to see anything
+-                    "Stream_Output": True,
+-                    "Stream_Error": True,
+                 }
+             )
+         if self.job_extra:

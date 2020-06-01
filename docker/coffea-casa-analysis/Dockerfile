@@ -20,6 +20,9 @@ COPY prepare-extra-packages.sh /usr/bin/prepare-extra-packages.sh
 #
 RUN mkdir -p /etc/cmsaf-secrets/
 
+#Preparing patches
+COPY patches/ $HOME/
+
 # Update repositories
 RUN apt-get update
 

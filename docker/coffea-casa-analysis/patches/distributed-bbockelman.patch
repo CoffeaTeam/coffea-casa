@@ -1,0 +1,34 @@
+diff --git a/distributed/deploy/spec.py b/distributed/deploy/spec.py
+index cdde4a81..7bd4295c 100644
+--- a/distributed/deploy/spec.py
++++ b/distributed/deploy/spec.py
+@@ -325,7 +325,7 @@ class SpecCluster(Cluster):
+                     opts["name"] = name
+                 if isinstance(cls, str):
+                     cls = import_term(cls)
+-                worker = cls(self.scheduler.address, **opts)
++                worker = cls(getattr(self.scheduler, "external_address", None) or self.scheduler.address, **opts)
+                 self._created.add(worker)
+                 workers.append(worker)
+             if workers:
+diff --git a/distributed/scheduler.py b/distributed/scheduler.py
+index 5c50fd4d..e1398dba 100644
+--- a/distributed/scheduler.py
++++ b/distributed/scheduler.py
+@@ -1055,6 +1055,7 @@ class Scheduler(ServerNode):
+         extensions=None,
+         validate=None,
+         scheduler_file=None,
++        external_address=None,
+         security=None,
+         worker_ttl=None,
+         idle_timeout=None,
+@@ -1090,6 +1091,8 @@ class Scheduler(ServerNode):
+         self.service_kwargs = service_kwargs or {}
+         self.services = {}
+         self.scheduler_file = scheduler_file
++        if external_address:
++                self.external_address = external_address
+         worker_ttl = worker_ttl or dask.config.get("distributed.scheduler.worker-ttl")
+         self.worker_ttl = parse_timedelta(worker_ttl) if worker_ttl else None
+         idle_timeout = idle_timeout or dask.config.get(
