@@ -28,7 +28,7 @@ if [[ -f "$PWD/usercert.pem" ]]; then
     FILE_KEY="$PWD/usercert.pem"
 fi
 
-if [ -z "$PATH_CA_FILE" ] & [ -z "$FILE_CERT" ] & [ -z "$FILE_KEY" ]; then
+if [ -z "$PATH_CA_FILE" ] && [ -z "$FILE_CERT" ] && [ -z "$FILE_KEY" ]; then
     echo 'Info: We have full TLS environment setuped'        
     TLS_ENV=true
 else
@@ -49,11 +49,11 @@ if [ -z "$_CONDOR_JOB_AD"]; then
 fi
 
 # Dask worker command - for --nprocs is default (=1)
-if [ "$TLS_ENV" = true ]; then
+if [ "$TLS_ENV" == "true" ]; then
     HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
         --name $NAME --tls-ca-file $PATH_CA_FILE --tls-cert $FILE_CERT --tls-key $FILE_KEY \
         --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
-else
+elif  [ "$TLS_ENV" == "false" ]; then
     HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
         --name $NAME --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
 fi
