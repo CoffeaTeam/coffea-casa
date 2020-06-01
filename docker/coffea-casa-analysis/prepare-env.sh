@@ -46,19 +46,19 @@ if [ ! -z "$_CONDOR_JOB_AD"]; then
     NAME=`cat $_CONDOR_JOB_AD | grep DaskWorkerName | tr -d '"' | awk '{print $NF;}'`
     # Requirement: to add to Condor job decription "+DaskSchedulerAddress": '"tcp://129.93.183.34:8787"',
     EXTERNALIP_PORT=`cat $_CONDOR_JOB_AD | grep DaskSchedulerAddress | tr -d '"' | awk '{print $NF;}'`
-fi
 
-# Dask worker command - for --nprocs is default (=1)
-if [ "$TLS_ENV" == "true" ]; then
-    HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
-        --name $NAME --tls-ca-file $PATH_CA_FILE --tls-cert $FILE_CERT --tls-key $FILE_KEY \
-        --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
-elif  [ "$TLS_ENV" == "false" ]; then
-    HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
-        --name $NAME --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
-fi
+    # Dask worker command - for --nprocs is default (=1)
+    if [ "$TLS_ENV" == "true" ]; then
+        HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
+            --name $NAME --tls-ca-file $PATH_CA_FILE --tls-cert $FILE_CERT --tls-key $FILE_KEY \
+            --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
+    elif  [ "$TLS_ENV" == "false" ]; then
+        HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
+            --name $NAME --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
+    fi
 
-echo "Copy of the job ClassAd:" 1>&2
-cat $_CONDOR_JOB_AD 1>&2
-echo $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787 1>&2
-exec $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787
+    echo "Copy of the job ClassAd:" 1>&2
+    cat $_CONDOR_JOB_AD 1>&2
+    echo $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787 1>&2
+    exec $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787
+fi
