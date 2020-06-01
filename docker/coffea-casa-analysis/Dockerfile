@@ -77,7 +77,7 @@ RUN pip install --no-cache-dir \
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
-    git checkout v4.12.1 &&\
+    git checkout v4.0.0 &&\
    # Patch is used for 5.0.0-HEAD
     # git apply /home/$NB_USER/xrootd-pr1199.patch && \
     mkdir build && \
