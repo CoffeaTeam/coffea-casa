@@ -75,6 +75,7 @@ RUN conda install --yes --freeze-installed \
     # IMPORTANT: Python 3.8 doesn't work with coffea
     # python==3.8 \
     python-blosc \
+    setuptools \
     cytoolz \
     #dask==2.16.0 \ -> we hope dask will be installed with dependencies later
     lz4 \
@@ -89,7 +90,6 @@ RUN conda install --yes --freeze-installed \
     #dask-jobqueue \
     # IMPORTANT: coffea-casa dependencies (in JH we build xrootd from scratch)
     # comment: we need to build it from scratch because we use need it for xrdcl-authz-plugin build as well
-    xrootd==4.11.3 \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
@@ -101,6 +101,8 @@ RUN conda install --yes --freeze-installed \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
     && rm -rf /opt/conda/pkgs \
     && conda clean -afy
+
+#RUN conda install xrootd==4.12.1
 
 # Coffea
 RUN pip install --no-cache-dir \
@@ -115,7 +117,6 @@ RUN pip install --no-cache-dir \
     jwt \
     # xrootd plugin compilation
     cmake
-    #xrootd
 
 # We will need to install a new version
 RUN pip uninstall -y dask distributed
@@ -144,20 +145,18 @@ RUN cd /tmp && \
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
-    git checkout v4.10.1 &&\
-   # Patch is used for 5.0.0-HEAD
-    # git apply /home/$NB_USER/xrootd-pr1199.patch && \
+    git checkout v4.12.1 &&\
+   # Patch is used for 5.0.0-HEAD (xrootd-pr1199.patch)
+    git apply /home/$NB_USER/xrootd-ubuntu.patch && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrootd -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
+    cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
     make -j4
 
 USER root
 RUN cd /tmp/xrootd/build && make install
     ##cd /tmp && \
     ##rm -rf xrootd
-
-USER $NB_UID
 
 RUN cd /tmp && \
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
