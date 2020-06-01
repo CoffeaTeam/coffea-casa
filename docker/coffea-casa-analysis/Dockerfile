@@ -54,7 +54,6 @@ RUN conda install --yes --freeze-installed \
     dask-jobqueue \
     # coffea-casa dependencies (in JH we build xrootd from scratch)
     cmake \
-    xrootd==4.11.3 \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
@@ -77,12 +76,12 @@ RUN pip install --no-cache-dir \
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
-    git checkout v4.10.1 &&\
-   # Patch is used for 5.0.0-HEAD
-    # git apply /home/$NB_USER/xrootd-pr1199.patch && \
+    git checkout v4.12.1 &&\
+   # Patch is used for 5.0.0-HEAD (xrootd-pr1199.patch)
+    git apply /home/$NB_USER/xrootd-ubuntu.patch && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrootd -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
+    cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
     make -j4
 
 USER root
