@@ -28,7 +28,7 @@ if [[ -f "$PWD/usercert.pem" ]]; then
     FILE_KEY="$PWD/usercert.pem"
 fi
 
-if [ -z "$PATH_CA_FILE" ] && [ -z "$FILE_CERT" ] && [ -z "$FILE_KEY" ]; then
+if [ ! -z "$PATH_CA_FILE" ] && [ ! -z "$FILE_CERT" ] && [ ! -z "$FILE_KEY" ]; then
     echo 'Info: We have full TLS environment setuped'        
     TLS_ENV=true
 else
@@ -40,7 +40,7 @@ fi
 sleep 10
 
 # HTCondor port, hostname and external IP ("must" variables)
-if [ -z "$_CONDOR_JOB_AD"]; then
+if [ ! -z "$_CONDOR_JOB_AD"]; then
     PORT=`cat $_CONDOR_JOB_AD | grep HostPort | tr -d '"' | awk '{print $NF;}'`
     HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
     NAME=`cat $_CONDOR_JOB_AD | grep DaskWorkerName | tr -d '"' | awk '{print $NF;}'`
