@@ -7,6 +7,8 @@ echo " DEBUG: Our directory is: $PWD"
 
 # xcache setup
 export XCACHE_HOST="red-xcache1.unl.edu"
+export XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+export LD_LIBRARY_PATH="/opt/conda/lib/"
 
 # Condor token
 if [[ -f "$PWD/condor_token" ]]; then
