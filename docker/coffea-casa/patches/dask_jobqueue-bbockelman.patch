@@ -1,5 +1,17 @@
+diff --git a/dask_jobqueue/core.py b/dask_jobqueue/core.py
+index 994bc88..4fe8fe9 100644
+--- a/dask_jobqueue/core.py
++++ b/dask_jobqueue/core.py
+@@ -515,6 +515,7 @@ class JobQueueCluster(SpecCluster):
+             silence_logs=silence_logs,
+             asynchronous=asynchronous,
+             name=name,
++            security=security,
+         )
+ 
+         if n_workers:
 diff --git a/dask_jobqueue/htcondor.py b/dask_jobqueue/htcondor.py
-index b2c8e08..5efe078 100644
+index d85a591..eced3da 100644
 --- a/dask_jobqueue/htcondor.py
 +++ b/dask_jobqueue/htcondor.py
 @@ -87,8 +87,6 @@ Queue
