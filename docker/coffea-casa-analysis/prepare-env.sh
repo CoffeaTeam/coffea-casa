@@ -32,10 +32,10 @@ fi
 
 if [ ! -z "$PATH_CA_FILE" ] && [ ! -z "$FILE_CERT" ] && [ ! -z "$FILE_KEY" ]; then
     echo 'Info: We have full TLS environment setuped'        
-    TLS_ENV=true
+    TLS_ENV="true"
 else
     echo 'Info: Some CA files are missing, we will launch Dask worker without TLS support'
-    TLS_ENV=false
+    TLS_ENV="false"
 fi
 
 # Small hack for Dask scheduler (to be investigated)
