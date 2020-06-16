@@ -32,10 +32,12 @@ RUN jupyter lab build --dev-build=False && jupyter lab clean && \
 COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
 RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
-# labextension.yml + kubernetes.yml
+# No Kubernetes yaml setup file (LocalCluster and HTCondorCluster)
+# COPY kubernetes.yml  $HOME/.config/dask/kubernetes.yml
+# + labextension.yml
 COPY dask_config.yml $CONDA_DIR/etc/dask.yml
 COPY dask_config.yml $HOME/.config/dask/dask.yml
-COPY kubernetes.yml  $HOME/.config/dask/kubernetes.yml
+# Labextention (config file just in case)
 COPY labextension.yml  $HOME/.config/dask/labextension.yml
 
 #Preparing patches

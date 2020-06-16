@@ -1,5 +1,4 @@
-labextension:
-  factory:
+# Part of dask_config.yml
     module: 'dask_jobqueue'
     class: 'HTCondorCluster'
     args: []
