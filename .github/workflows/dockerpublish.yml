@@ -1,0 +1,79 @@
+name: Docker
+
+on:
+  push:
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+  # Run tests for any PRs.
+  pull_request:
+
+env:
+  IMAGE_NAME_SCHEDULER: coffea-casa
+  IMAGE_NAME_WORKER: coffea-casa-analysis
+
+jobs:
+
+  # Push image to dockerhub
+  push:
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build scheduler image 
+        # Dask scheduler
+        run: docker build . --file docker/coffea-dask/Dockerfile --tag image
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u oshadura --password-stdin
+
+      - name: Push scheduler image
+        run: |
+          # Dask scheduler
+          IMAGE_IDS=coffeateam/$IMAGE_NAME_SCHEDULER
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Dask scheduler
+          echo IMAGE_IDS=$IMAGE_IDS
+          echo VERSION=$VERSION
+
+          docker tag image $IMAGE_IDS:$VERSION
+          docker push $IMAGE_IDS:$VERSION
+
+          docker tag image $IMAGE_IDS:latest
+          docker push $IMAGE_IDS:latest
+
+      - name: Build worker image 
+        # Dask worker
+        run: docker build . --file docker/coffea-dask-analysis/Dockerfile --tag image
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u oshadura --password-stdin
+
+      - name: Push worker image
+        run: |
+          # Dask worker
+          IMAGE_IDW=coffeateam/$IMAGE_NAME_WORKER
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Dask worker
+          echo IMAGE_IDW=$IMAGE_IDW
+          echo VERSION=$VERSION
+
+          docker tag image $IMAGE_IDW:$VERSION
+          docker push $IMAGE_IDW:$VERSION
+
+          docker tag image $IMAGE_IDW:latest
+          docker push $IMAGE_IDW:latest
