@@ -85,18 +85,14 @@ cluster = HTCondorCluster(cores=4,
                                      "+DaskSchedulerAddress": '"129.93.183.33:8787"',
                                     })
 
-
-cluster.scale(jobs=2)
+cluster.adapt(minimum_jobs=5, maximum_jobs=100, maximum_memory="4 GB")  # auto-scale between 5 and 100 jobs (maximum_memory="4 GB")
 
 client = Client(cluster, security=sec_dask)
 
-#cachestrategy = 'dask-worker'
 exe_args = {
         'client': client,
-        #'cachestrategy': cachestrategy,
-        #'savemetrics': True,
-        #'worker_affinity': True if cachestrategy is not None else False,
     }
+
 output = processor.run_uproot_job(fileset,
                                 treename = 'Events',
                                 processor_instance = METProcessor(),
