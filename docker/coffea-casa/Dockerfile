@@ -29,11 +29,11 @@ RUN jupyter lab build --dev-build=False && jupyter lab clean && \
 
 # sed -i -e "s|DASK_DASHBOARD_URL|${JUPYTERHUB_SERVICE_PREFIX}proxy/8787|g" jupyterlab-workspace.json
 # export DASK_DISTRIBUTED__DASHBOARD__LINK="${JUPYTERHUB_SERVICE_PREFIX}proxy/8787/status"
-COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
-RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
+COPY jupyterlab-workspace.json /home/$NB_UID/jupyterlab-workspace.json
+RUN jupyter lab workspaces import /home/$NB_UID/jupyterlab-workspace.json
 
 #Preparing patches
-COPY patches/ $HOME/
+COPY patches/ /home/$NB_UID/
 
 ###
 ### Dask
@@ -136,10 +136,10 @@ RUN cd /tmp && \
 
 # No need of for now Kubernetes yaml setup file (LocalCluster and HTCondorCluster)
 # Dask setup - >dask.yml
-RUN mkdir -p $HOME/.config/dask
-COPY dask_config.yml $HOME/.config/dask/dask.yaml
+RUN mkdir -p /home/$NB_UID/.config/dask
+COPY dask_config.yml /home/$NB_UID/.config/dask/dask.yaml
 # Labextention setup - >labextension.yml
-COPY labextension.yml  $HOME/.config/dask/labextension.yaml
+COPY labextension.yml  /home/$NB_UID/.config/dask/labextension.yaml
 
 USER $NB_UID
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
@@ -174,7 +174,7 @@ RUN cd /tmp/xrdcl-authz-plugin/build && make install
 
 # Add job spool directory for HTCondor
 RUN mkdir -p /var/lib/condor && \
-    mkdir -p $HOME/.condor/tokens.d && \
+    mkdir -p /home/$NB_UID/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
