@@ -76,7 +76,7 @@ cluster = HTCondorCluster(cores=4,
                                      # To be used with coffea-casa:0.1.11
                                      "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
                                      #"docker_network_type": "host",
-                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.11", 
+                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.15", 
                                      "container_service_names": "dask",
                                      "dask_container_port": "8787",
                                      "should_transfer_files": "YES",
@@ -84,7 +84,7 @@ cluster = HTCondorCluster(cores=4,
                                      "+DaskSchedulerAddress": '"129.93.183.33:8787"',
                                     })
 
-cluster.adapt(minimum_jobs=2, maximum_jobs=100)  # auto-scale between 5 and 100 jobs (interval=500, wait_count=1, target_duration=10 )
+cluster.adapt(minimum_jobs=2, maximum_jobs=10)  # auto-scale between 5 and 10 jobs (interval=500, wait_count=1, target_duration=10 )
 
 client = Client(cluster)
 
