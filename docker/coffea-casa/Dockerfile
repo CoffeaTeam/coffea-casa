@@ -1,6 +1,12 @@
 # Partually based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
 FROM jupyter/minimal-notebook:latest
 
+# Configure environment
+ENV SHELL /bin/bash
+ENV NB_USER jovyan
+ENV NB_UID 1000
+ENV HOME /home/$NB_USER
+ENV PATH=$HOME/.local/bin:$PATH
 ###
 ### Jupyterlab
 ###
@@ -22,19 +28,19 @@ RUN jupyter serverextension enable --sys-prefix jupyterlab_git
 # Build JupyterLab.
 RUN jupyter lab build --dev-build=False && jupyter lab clean && \
     npm cache clean --force && \
-    rm -rf /home/$NB_USER/.cache/yarn && \
-    rm -rf /home/$NB_USER/.node-gyp && \
+    rm -rf $HOME/.cache/yarn && \
+    rm -rf $HOME/.node-gyp && \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
 # sed -i -e "s|DASK_DASHBOARD_URL|${JUPYTERHUB_SERVICE_PREFIX}proxy/8787|g" jupyterlab-workspace.json
 # export DASK_DISTRIBUTED__DASHBOARD__LINK="${JUPYTERHUB_SERVICE_PREFIX}proxy/8787/status"
-COPY jupyterlab-workspace.json /home/$NB_UID/jupyterlab-workspace.json
-RUN jupyter lab workspaces import /home/$NB_UID/jupyterlab-workspace.json
+COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
+RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
 # Preparing patches
-RUN mkdir -p /home/$NB_UID/patches
-COPY patches/ /home/$NB_UID/patches/
+RUN mkdir -p $HOME/patches
+COPY patches/ $HOME/patches/
 
 ###
 ### Dask
@@ -122,7 +128,7 @@ RUN cd /tmp && \
     #>>> dask_jobqueue._version.version_json
     #'\n{\n "date": "2020-03-26T03:47:05+0100",\n "dirty": false,\n "error": null,\n "full-revisionid": "1033e4d56e363cc512f9c37d1ca51a0abbb0e562",\n "version": "0.7.1"\n}\n'
     git checkout tags/0.7.1 &&\
-    git apply /home/$NB_USER/patches/dask_jobqueue-bbockelman.patch && \
+    git apply $HOME/patches/dask_jobqueue-bbockelman.patch && \
     python setup.py install
 
 # Dask dependencies that needs to be patched (hopefully is will pull dask as well)
@@ -132,15 +138,15 @@ RUN cd /tmp && \
     #>>> distributed._version.version_json
     #'\n{\n "date": "2020-05-08T15:59:42-0500",\n "dirty": false,\n "error": null,\n "full-revisionid": "f66eda86c36e2f0b0496552c496736baf80c1c1e",\n "version": "2.16.0"\n}\n'
     git checkout tags/2.16.0 &&\
-    git apply /home/$NB_USER/patches/distributed-bbockelman.patch && \
+    git apply $HOME/patches/distributed-bbockelman.patch && \
     python setup.py install
 
 # No need of for now Kubernetes yaml setup file (we are using HTCondorCluster)
 # Dask setup - >dask.yml
-RUN mkdir -p /home/$NB_UID/.config/dask
-COPY dask_config.yml /home/$NB_UID/.config/dask/dask.yaml
+RUN mkdir -p $HOME/.config/dask
+COPY dask_config.yml $HOME/.config/dask/dask.yaml
 # Labextention setup - >labextension.yml
-COPY labextension.yml  /home/$NB_UID/.config/dask/labextension.yaml
+COPY labextension.yml  $HOME/.config/dask/labextension.yaml
 
 USER $NB_UID
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
@@ -149,7 +155,7 @@ RUN cd /tmp && \
     cd xrootd && \
     git checkout v4.12.1 &&\
    # Patch is used for 5.0.0-HEAD (xrootd-pr1199.patch)
-    git apply /home/$NB_USER/patches/xrootd-ubuntu.patch && \
+    git apply $HOME/patches/xrootd-ubuntu.patch && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/opt/conda -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
