@@ -7,3 +7,13 @@ The prototype analysis facility provides services for “low latency columnar an
 
 Docker images
 ============
+
+
+# coffea-casa image (Dask scheduler image)
+[![](https://images.microbadger.com/badges/image/coffeateam/coffea-casa.svg)](https://microbadger.com/images/coffeateam/coffea-casa "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/coffeateam/coffea-casa.svg)](https://microbadger.com/images/coffeateam/coffea-casa "Get your own version badge on microbadger.com")
+
+# coffea-casa-analysis image (Dask worker image)
+[![](https://images.microbadger.com/badges/image/coffeateam/coffea-casa-analysis.svg)](https://microbadger.com/images/coffeateam/coffea-casa-analysis "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/coffeateam/coffea-casa-analysis.svg)](https://microbadger.com/images/coffeateam/coffea-casa-analysis "Get your own version badge on microbadger.com")
+
