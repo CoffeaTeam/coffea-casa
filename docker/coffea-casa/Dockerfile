@@ -32,14 +32,6 @@ RUN jupyter lab build --dev-build=False && jupyter lab clean && \
 COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
 RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
-# No Kubernetes yaml setup file (LocalCluster and HTCondorCluster)
-# COPY kubernetes.yml  $HOME/.config/dask/kubernetes.yml
-# + labextension.yml
-COPY dask_config.yml $CONDA_DIR/etc/dask.yml
-COPY dask_config.yml $HOME/.config/dask/dask.yml
-# Labextention (config file just in case)
-COPY labextension.yml  $HOME/.config/dask/labextension.yml
-
 #Preparing patches
 COPY patches/ $HOME/
 
@@ -142,6 +134,14 @@ RUN cd /tmp && \
     git checkout tags/2.16.0 &&\
     git apply /home/$NB_USER/distributed-bbockelman.patch && \
     python setup.py install
+
+# No need of for now Kubernetes yaml setup file (LocalCluster and HTCondorCluster)
+# COPY kubernetes.yml  $HOME/.config/dask/kubernetes.yml
+# Dask setup - >dask.yml
+COPY dask_config.yml $CONDA_DIR/etc/dask.yml
+COPY dask_config.yml $HOME/.config/dask/dask.yml
+# Labextention setup - >labextension.yml
+COPY labextension.yml  $HOME/.config/dask/labextension.yml
 
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
 RUN cd /tmp && \

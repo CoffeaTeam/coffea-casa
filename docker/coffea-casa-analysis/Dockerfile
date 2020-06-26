@@ -121,10 +121,8 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 # Dask environment
-# TBD: should be changed to UNL home dir
 RUN mkdir /opt/app
 RUN chown -R jovyan:condor /opt/app
-#TBD: mount /hadoop?
 
 # Enable iptables
 #USER root
@@ -135,9 +133,7 @@ RUN chown -R jovyan:condor /opt/app
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
-
 # No need to have it here, we hope to land in Condor DIR
-#WORKDIR /opt/app
 USER $NB_USER
 
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]

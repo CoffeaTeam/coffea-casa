@@ -1,4 +1,4 @@
-# Part of dask_config.yml
+# Part of kubernetes.yml
 kubernetes:
     name: "dask-unl"
     namespace: default
@@ -45,7 +45,7 @@ kubernetes:
             beta.kubernetes.io/os: linux
         containers:
         - name: dask
-            image: oshadura/coffea-casa:latest
+            image: oshadura/coffea-casa:0.1.9
             env:
             - name: EXTRA_PIP_PACKAGES
             value: "joblib scikit-learn stumpy"

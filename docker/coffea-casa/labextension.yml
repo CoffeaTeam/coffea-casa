@@ -3,26 +3,13 @@ labextension:
     module: 'dask_jobqueue'
     class: 'HTCondorCluster'
     args: []
-    kwargs: {cores: 4,
-              memory: "2GB",
-              disk: 1GB",
-              log_directory: "logs",
-              silence_logs: "debug",
-              scheduler_options: {"dashboard_address":"8786","port":8787, "external_address": "129.93.183.33:8787"},
-              job_extra: {"universe": "docker",
-                                     "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
-                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.11", 
-                                     "container_service_names": "dask",
-                                     "dask_container_port": "8787",
-                                     "should_transfer_files": "YES",
-                                     "when_to_transfer_output": "ON_EXIT",
-                                     "+DaskSchedulerAddress": '"129.93.183.33:8787"',}}
+    kwargs: {}
                                      
   default:
-    workers: null
-    adapt: null
-      minimum: 2
-      maximum: 10
+    workers: 1
+    adapt:
+      minimum: 1
+      maximum: 100
 
   initial:
     - name: "default"
