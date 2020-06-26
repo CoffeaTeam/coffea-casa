@@ -83,9 +83,11 @@ cluster = HTCondorCluster(cores=4,
                                      "+DaskSchedulerAddress": '"129.93.183.33:8787"',
                                     })
 
-cluster.adapt(minimum_jobs=5, maximum_jobs=100, maximum_memory="4 GB")  # auto-scale between 5 and 100 jobs (maximum_memory="4 GB")
+cluster.adapt(interval=500, wait_count=1, target_duration=10, minimum_jobs=2, maximum_jobs=100)  # auto-scale between 5 and 100 jobs
 
 client = Client(cluster)
+
+dask.config.config
 
 exe_args = {
         'client': client,
