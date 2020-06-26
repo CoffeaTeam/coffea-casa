@@ -32,8 +32,9 @@ RUN jupyter lab build --dev-build=False && jupyter lab clean && \
 COPY jupyterlab-workspace.json /home/$NB_UID/jupyterlab-workspace.json
 RUN jupyter lab workspaces import /home/$NB_UID/jupyterlab-workspace.json
 
-#Preparing patches
-COPY patches/ /home/$NB_UID/
+# Preparing patches
+RUN mkdir -p /home/$NB_UID/patches
+COPY patches/ /home/$NB_UID/patches/
 
 ###
 ### Dask
