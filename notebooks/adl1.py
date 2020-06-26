@@ -84,7 +84,7 @@ cluster = HTCondorCluster(cores=4,
                                      "+DaskSchedulerAddress": '"129.93.183.33:8787"',
                                     })
 
-cluster.adapt(interval=500, wait_count=1, target_duration=10, minimum_jobs=2, maximum_jobs=100)  # auto-scale between 5 and 100 jobs
+cluster.adapt(minimum_jobs=2, maximum_jobs=100)  # auto-scale between 5 and 100 jobs (interval=500, wait_count=1, target_duration=10 )
 
 client = Client(cluster)
 
