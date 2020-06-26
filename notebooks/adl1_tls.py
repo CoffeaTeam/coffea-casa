@@ -1,4 +1,5 @@
 import os
+import dask
 
 from distributed.security import Security
 from coffea import hist
@@ -88,6 +89,8 @@ cluster = HTCondorCluster(cores=4,
 cluster.adapt(minimum_jobs=5, maximum_jobs=100, maximum_memory="4 GB")  # auto-scale between 5 and 100 jobs (maximum_memory="4 GB")
 
 client = Client(cluster, security=sec_dask)
+
+dask.config.config
 
 exe_args = {
         'client': client,

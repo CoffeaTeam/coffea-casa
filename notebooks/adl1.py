@@ -1,4 +1,5 @@
 import os
+import dask
 
 from distributed.security import Security
 from coffea import hist
