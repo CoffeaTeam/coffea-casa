@@ -60,7 +60,6 @@ RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-
     && rm -rf /var/lib/apt/lists/*
 
 USER $NB_UID
-
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
@@ -136,13 +135,13 @@ RUN cd /tmp && \
     python setup.py install
 
 # No need of for now Kubernetes yaml setup file (LocalCluster and HTCondorCluster)
-# COPY kubernetes.yml  $HOME/.config/dask/kubernetes.yml
 # Dask setup - >dask.yml
-COPY dask_config.yml $CONDA_DIR/etc/dask.yml
-COPY dask_config.yml $HOME/.config/dask/dask.yml
+RUN mkdir -p $HOME/.config/dask
+COPY dask_config.yml $HOME/.config/dask/dask.yaml
 # Labextention setup - >labextension.yml
-COPY labextension.yml  $HOME/.config/dask/labextension.yml
+COPY labextension.yml  $HOME/.config/dask/labextension.yaml
 
+USER $NB_UID
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
@@ -174,7 +173,7 @@ RUN cd /tmp/xrdcl-authz-plugin/build && make install
     #rm -rf xrdcl-authz-plugin
 
 # Add job spool directory for HTCondor
-RUN mkdir /var/lib/condor && \
+RUN mkdir -p /var/lib/condor && \
     mkdir -p $HOME/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files
