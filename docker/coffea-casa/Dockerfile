@@ -145,9 +145,13 @@ RUN cd /tmp && \
 # Dask setup - >dask.yml
 RUN mkdir -p $HOME/.config/dask && mkdir -p /etc/dask
 COPY dask.yaml $HOME/.config/dask/
-COPY dask.yaml /etc/dask/
 # Labextention setup - >labextension.yml
 COPY labextension.yaml  $HOME/.config/dask/
+
+USER root
+RUN  mkdir -p /etc/dask
+COPY dask.yaml /etc/dask/
+# Labextention setup - >labextension.yml
 COPY labextension.yaml  /etc/dask/
 
 USER $NB_UID
