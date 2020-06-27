@@ -143,7 +143,7 @@ RUN cd /tmp && \
 
 # No need of for now Kubernetes yaml setup file (we are using HTCondorCluster)
 # Dask setup - >dask.yml
-RUN mkdir -p $HOME/.config/dask && mkdir -p /etc/dask
+RUN mkdir -p $HOME/.config/dask
 COPY dask.yaml $HOME/.config/dask/
 # Labextention setup - >labextension.yml
 COPY labextension.yaml  $HOME/.config/dask/
