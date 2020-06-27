@@ -4,7 +4,7 @@ FROM jupyter/minimal-notebook:latest
 # Configure environment
 ENV SHELL /bin/bash
 ENV NB_USER jovyan
-ENV NB_UID 1000
+ENV NB_Ua 1000
 ENV HOME /home/$NB_USER
 ENV PATH=$HOME/.local/bin:$PATH
 ###
@@ -143,10 +143,12 @@ RUN cd /tmp && \
 
 # No need of for now Kubernetes yaml setup file (we are using HTCondorCluster)
 # Dask setup - >dask.yml
-RUN mkdir -p $HOME/.config/dask
-COPY dask_config.yml $HOME/.config/dask/dask.yaml
+RUN mkdir -p $HOME/.config/dask && mkdir -p /etc/dask
+COPY dask.yaml $HOME/.config/dask/
+COPY dask.yaml /etc/dask/
 # Labextention setup - >labextension.yml
-COPY labextension.yml  $HOME/.config/dask/labextension.yaml
+COPY labextension.yaml  $HOME/.config/dask/
+COPY labextension.yaml  /etc/dask/
 
 USER $NB_UID
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
