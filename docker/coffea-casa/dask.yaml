@@ -34,9 +34,9 @@ labextension:
     module: 'dask_jobqueue'
     class: 'HTCondorCluster'
     args: []
-    kwargs: {cores: 4,
+    kwargs: {cores: "4",
               memory: "2GB",
-              disk: 1GB",
+              disk: "1GB",
               log_directory: "logs",
               silence_logs: "debug",
               scheduler_options: {"dashboard_address":"8786","port":8787, "external_address": "129.93.183.33:8787"},
