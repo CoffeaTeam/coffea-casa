@@ -49,14 +49,9 @@ labextension:
                                      "when_to_transfer_output": "ON_EXIT",
                                      "+DaskSchedulerAddress": '"129.93.183.33:8787"'}}
                                      
-  default:
-    workers: 1
-    adapt:
-      minimum: 1
-      maximum: 10
 
   initial:
-    - name: "default"
+    - name: "UNL HTCondor cluster"
       workers: 1
       adapt:
         minimum: 1
