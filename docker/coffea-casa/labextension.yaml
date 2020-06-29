@@ -19,7 +19,7 @@ labextension:
                                      "+DaskSchedulerAddress": '"129.93.183.33:8787"'}}
                                      
 
-  initial:
+  default:
     - name: "UNL HTCondor cluster"
       workers: 1
       adapt:
