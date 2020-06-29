@@ -124,14 +124,17 @@ RUN groupadd -r condor && \
 RUN mkdir /opt/app
 RUN chown -R jovyan:condor /opt/app
 
-# Enable iptables
-#USER root
-# Open 8787 port in firewall
-#RUN ufw allow 8787/tcp && \
-#    ufw enable
+# xcache setup
+ENV XCACHE_HOST="red-xcache1.unl.edu"
+ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+ENV LD_LIBRARY_PATH="/opt/conda/lib/"
+ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
+ENV BEARER_TOKEN_FILE="xcache_token"
 
+# Prepare HTCondor ENV
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+
 
 # No need to have it here, we hope to land in Condor DIR
 USER $NB_USER

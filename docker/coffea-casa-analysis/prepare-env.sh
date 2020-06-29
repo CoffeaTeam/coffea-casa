@@ -5,14 +5,6 @@ set -x
 # Testing ---------->
 echo " DEBUG: Our directory is: $PWD"
 
-# xcache setup
-export XCACHE_HOST="red-xcache1.unl.edu"
-export XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
-export LD_LIBRARY_PATH="/opt/conda/lib/"
-export LD_LIBRARY_PATH="/opt/conda/lib/"
-export XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
-export BEARER_TOKEN_FILE="xcache_token"
-
 # Condor token
 if [[ -f "$PWD/condor_token" ]]; then
     mkdir -p /home/jovyan/.condor/tokens.d/ && cp $PWD/condor_token /home/jovyan/.condor/tokens.d/condor_token
