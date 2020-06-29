@@ -9,6 +9,9 @@ echo " DEBUG: Our directory is: $PWD"
 export XCACHE_HOST="red-xcache1.unl.edu"
 export XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 export LD_LIBRARY_PATH="/opt/conda/lib/"
+export LD_LIBRARY_PATH="/opt/conda/lib/"
+export XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
+export BEARER_TOKEN_FILE="xcache_token"
 
 # Condor token
 if [[ -f "$PWD/condor_token" ]]; then
@@ -49,7 +52,7 @@ if [ ! -z "$_CONDOR_JOB_AD" ]; then
     # Requirement: to add to Condor job decription "+DaskSchedulerAddress": '"tcp://129.93.183.34:8787"',
     EXTERNALIP_PORT=`cat $_CONDOR_JOB_AD | grep DaskSchedulerAddress | tr -d '"' | awk '{print $NF;}'`
 
-    echo "Copy of the job ClassAd:" 1>&2
+    echo "Print ClassAd:" 1>&2
     cat $_CONDOR_JOB_AD 1>&2
 
     # Dask worker command - for --nprocs is default (=1)
