@@ -53,7 +53,7 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     # Coffea-casa extras
     bokeh \
-    distributed==2.17 \
+    distributed \
     dask-jobqueue \
     # coffea-casa dependencies (in JH we build xrootd from scratch)
     cmake \
