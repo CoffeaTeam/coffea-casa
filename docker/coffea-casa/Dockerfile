@@ -57,7 +57,7 @@ RUN apt-get update
 
 # EGI CA certificates
 # (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
-RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-setuptools pkg-config -y \
+RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-setuptools pkg-config procps iputils-tracepath -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
@@ -137,7 +137,7 @@ RUN cd /tmp && \
     cd distributed && \
     #>>> distributed._version.version_json
     #'\n{\n "date": "2020-05-08T15:59:42-0500",\n "dirty": false,\n "error": null,\n "full-revisionid": "f66eda86c36e2f0b0496552c496736baf80c1c1e",\n "version": "2.16.0"\n}\n'
-    git checkout tags/2.16.0 &&\
+    git checkout tags/2.17.0 &&\
     git apply $HOME/patches/distributed-bbockelman.patch && \
     python setup.py install
 

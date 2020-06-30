@@ -27,7 +27,7 @@ COPY patches/ $HOME/
 RUN apt-get update
 
 # EGI CA certificates
-RUN apt-get install build-essential gnupg2 openssh-client libssl-dev zlib1g-dev uuid-dev -y \
+RUN apt-get install build-essential gnupg2 openssh-client libssl-dev zlib1g-dev uuid-dev procps iputils-tracepath -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
@@ -45,7 +45,7 @@ RUN conda install --yes --freeze-installed \
     # python==3.8 \
     python-blosc \
     cytoolz \
-    dask==2.16.0 \
+    dask==2.19.0 \
     lz4 \
     nomkl \
     numpy==1.18.1 \
@@ -53,7 +53,7 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     # Coffea-casa extras
     bokeh \
-    distributed \
+    distributed==2.17 \
     dask-jobqueue \
     # coffea-casa dependencies (in JH we build xrootd from scratch)
     cmake \
