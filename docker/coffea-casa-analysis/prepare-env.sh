@@ -20,9 +20,9 @@ if [[ -f "$PWD/ca.pem" ]]; then
     PATH_CA_FILE="$PWD/ca.pem"
 fi
 # Userkey is concatenated in usercert
-if [[ -f "$PWD/usercert.pem" ]]; then
-    FILE_CERT="$PWD/usercert.pem"
-    FILE_KEY="$PWD/usercert.pem"
+if [[ -f "$PWD/hostcert.pem" ]]; then
+    FILE_CERT="$PWD/hostcert.pem"
+    FILE_KEY="$PWD/hostcert.pem"
 fi
 
 if [ ! -z "$PATH_CA_FILE" ] && [ ! -z "$FILE_CERT" ] && [ ! -z "$FILE_KEY" ]; then
