@@ -20,6 +20,10 @@ distributed:
   
     logging:
       distributed: warning
+      distributed.client: debug
+      distributed.worker: debug
+      distributed.nanny: debug
+      distributed.scheduler: debug
       bokeh: critical
       tornado: critical
       tornado.application: error
