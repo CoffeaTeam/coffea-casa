@@ -54,10 +54,17 @@ RUN mkdir -p /etc/cmsaf-secrets/
 
 # Update repositories
 RUN apt-get update
+RUN apt-get install -y curl 
+RUN apt-get update && sudo apt-get install -y apt-transport-https gnupg2
+RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+RUN apt-get update
+RUN  apt-get install -y kubectl
+
 
 # EGI CA certificates
 # (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
-RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-setuptools pkg-config procps iputils-tracepath -y \
+RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-setuptools pkg-config procps iputils-tracepath  -y \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
@@ -198,6 +205,8 @@ COPY config.d  /etc/condor/config.d/
 # https://github.com/oshadura/coffea-casa/issues/2
 # UGLY HACK!!!
 #RUN sed -i '4imkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' /usr/local/bin/start-notebook.sh   
+
+
 
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
