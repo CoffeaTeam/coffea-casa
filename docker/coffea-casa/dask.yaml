@@ -19,11 +19,7 @@ distributed:
         limit: 5s
   
     logging:
-      distributed: warning
-      distributed.client: debug
-      distributed.worker: debug
-      distributed.nanny: debug
-      distributed.scheduler: debug
+      distributed: debug
       bokeh: critical
       tornado: critical
       tornado.application: error
