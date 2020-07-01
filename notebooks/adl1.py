@@ -55,10 +55,10 @@ class METProcessor(processor.ProcessorABC):
     
     
 sec_dask = Security(tls_ca_file='/etc/cmsaf-secrets/ca.pem',
-               tls_worker_cert='/etc/cmsaf-secrets/usercert.pem',
-               tls_worker_key='/etc/cmsaf-secrets/usercert.pem',
-               tls_client_cert='/etc/cmsaf-secrets/usercert.pem',
-               tls_client_key='/etc/cmsaf-secrets/usercert.pem',
+               tls_worker_cert='/etc/cmsaf-secrets/hostcert.pem',
+               tls_worker_key='/etc/cmsaf-secrets/hostcert.pem',
+               tls_client_cert='/etc/cmsaf-secrets/hostcert.pem',
+               tls_client_key='/etc/cmsaf-secrets/hostcert.pem',
                tls_scheduler_cert='/etc/cmsaf-secrets/hostcert.pem',
                tls_scheduler_key='/etc/cmsaf-secrets/hostcert.pem',
                require_encryption=True)
@@ -76,7 +76,7 @@ cluster = HTCondorCluster(cores=4,
                                      # To be used with coffea-casa:0.1.11
                                      "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
                                      #"docker_network_type": "host",
-                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.24", 
+                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.26", 
                                      "container_service_names": "dask",
                                      "dask_container_port": "8787",
                                      "should_transfer_files": "YES",
@@ -84,7 +84,7 @@ cluster = HTCondorCluster(cores=4,
                                      "+DaskSchedulerAddress": '"129.93.183.33:8787"',
                                     })
 
-cluster.adapt(minimum_jobs=2, maximum_jobs=10)  # auto-scale between 5 and 10 jobs (interval=500, wait_count=1, target_duration=10 )
+cluster.adapt(minimum_jobs=5, maximum_jobs=10)  # auto-scale between 5 and 10 jobs (interval=500, wait_count=1, target_duration=10 )
 
 client = Client(cluster)
 
