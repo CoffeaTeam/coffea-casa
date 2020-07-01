@@ -19,7 +19,7 @@ distributed:
         limit: 5s
   
     logging:
-      distributed: debug
+      distributed: info
       bokeh: critical
       tornado: critical
       tornado.application: error
