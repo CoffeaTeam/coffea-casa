@@ -126,9 +126,7 @@ RUN pip uninstall -y dask distributed
 RUN cd /tmp && \
     git clone https://github.com/dask/dask-jobqueue.git && \
     cd dask-jobqueue && \
-    #>>> dask_jobqueue._version.version_json
-    #'\n{\n "date": "2020-03-26T03:47:05+0100",\n "dirty": false,\n "error": null,\n "full-revisionid": "1033e4d56e363cc512f9c37d1ca51a0abbb0e562",\n "version": "0.7.1"\n}\n'
-    git checkout tags/0.7.1 &&\
+   git checkout tags/0.7.1 &&\
     git apply $HOME/patches/dask_jobqueue-bbockelman.patch && \
     python setup.py install
 
@@ -136,11 +134,16 @@ RUN cd /tmp && \
 RUN cd /tmp && \
     git clone https://github.com/dask/distributed.git && \
     cd distributed && \
-    #>>> distributed._version.version_json
-    #'\n{\n "date": "2020-05-08T15:59:42-0500",\n "dirty": false,\n "error": null,\n "full-revisionid": "f66eda86c36e2f0b0496552c496736baf80c1c1e",\n "version": "2.16.0"\n}\n'
     git checkout tags/2.19.0 &&\
     git apply $HOME/patches/distributed-bbockelman.patch && \
     python setup.py install
+
+
+# Coffea-casa mini module (still prototype)
+RUN cd /tmp && \
+    git clone https://github.com/CoffeaTeam/coffea-casa.git && \
+    cd coffea-casa && \
+    pip install -e . 
 
 # No need of for now Kubernetes yaml setup file (we are using HTCondorCluster)
 # Dask setup - >dask.yml
