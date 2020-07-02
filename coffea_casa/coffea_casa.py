@@ -72,7 +72,7 @@ def CoffeaCasaCluster(
         scheduler_options={
             "protocol": protocol,
             "dashboard_address": str(dashboard_port),
-            "port": str(scheduler_port),
+            "port": scheduler_port,
             "external_address": external_address,
         },
         job_extra=job_extra,
