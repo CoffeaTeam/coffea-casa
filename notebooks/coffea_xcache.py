@@ -10,7 +10,8 @@ from coffea.util import save
 from dask.distributed import Client, LocalCluster, get_worker
 from dask_jobqueue import HTCondorCluster
 from dask_jobqueue.htcondor import HTCondorJob
-from distributed.security import Security
+
+from coffea_casa.coffea_casa import CoffeaCasaCluster
 
 filelist = {
     "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8": [
@@ -39,43 +40,13 @@ filelist = {
         "root://xcache//store/mc/RunIIAutumn18NanoAODv5/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/Nano1June2019_102X_upgrade2018_realistic_v19-v1/110000/274599AC-1636-3641-B09F-ECA42B8F63A4.root",
     ],
 }
-sec_dask = Security(tls_ca_file='/etc/cmsaf-secrets/ca.pem',
-               tls_worker_cert='/etc/cmsaf-secrets/hostcert.pem',
-               tls_worker_key='/etc/cmsaf-secrets/hostcert.pem',
-               tls_client_cert='/etc/cmsaf-secrets/hostcert.pem',
-               tls_client_key='/etc/cmsaf-secrets/hostcert.pem',
-               tls_scheduler_cert='/etc/cmsaf-secrets/hostcert.pem',
-               tls_scheduler_key='/etc/cmsaf-secrets/hostcert.pem',
-               require_encryption=True)
 
 HTCondorJob.submit_command = "condor_submit -spool"
 
-cluster = HTCondorCluster(cores=4,
-                          memory="2GB",
-                          disk="1GB",
-                          log_directory="logs",
-                          silence_logs="DEBUG",
-                          env_extra=["LD_LIBRARY_PATH=/opt/conda/lib/", "XCACHE_HOST=red-xcache1.unl.edu", "XRD_PLUGIN=/opt/conda/lib/libXrdClAuthzPlugin.so", "BEARER_TOKEN_FILE=xcache_token"],
-                          scheduler_options= {"dashboard_address":"8786", "port":8787, "external_address": "129.93.183.33:8787"},
-                          # HTCondor submit script
-                          job_extra={"universe": "docker",
-                                     # To be used with coffea-casa:0.1.11
-                                     "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
-                                     "transfer_input_files": "/etc/cmsaf-secrets/xcache_token",
-                                     #"docker_network_type": "host",
-                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.26", 
-                                     "container_service_names": "dask",
-                                     "dask_container_port": "8787",
-                                     "should_transfer_files": "YES",
-                                     "when_to_transfer_output": "ON_EXIT",
-                                     "+DaskSchedulerAddress": '"129.93.183.33:8787"',
-                                    })
+host_ip = os.getenv("HOST_IP")
 
-cluster.adapt(minimum_jobs=5, maximum_jobs=10)  # auto-scale between 5 and 100 jobs (interval=500, wait_count=1, target_duration=10 )
+client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.26", external_ip=host_ip)
 
-client = Client(cluster)
-
-dask.config.config
 
 config = {
         'client': client,
