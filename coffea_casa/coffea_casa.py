@@ -22,6 +22,7 @@ def CoffeaCasaCluster(
             worker_image = sys.argv[2]
 
     external_address = str(external_ip)+':'+str(scheduler_port)
+    external_ip_string = '"'+ external_ip+'"'
     
     job_extra = {
         "universe": "docker",
@@ -30,7 +31,7 @@ def CoffeaCasaCluster(
         "dask_container_port": "8787",
         "should_transfer_files": "YES",
         "when_to_transfer_output": "ON_EXIT",
-        "+DaskSchedulerAddress": str(external_ip),
+        "+DaskSchedulerAddress": external_ip_string,
     }
     
     protocol = "tcp"
