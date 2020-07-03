@@ -22,7 +22,7 @@ def CoffeaCasaCluster(
             worker_image = sys.argv[2]
 
     external_address = str(external_ip)+':'+str(scheduler_port)
-    external_ip_string = '"'+ external_ip+'"'
+    external_ip_string = '"'+ external_address+'"'
     
     job_extra = {
         "universe": "docker",
