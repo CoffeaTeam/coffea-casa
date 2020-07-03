@@ -71,6 +71,7 @@ def CoffeaCasaCluster(
         log_directory="logs",
         silence_logs="DEBUG",
         security = security_tls,
+        env_extra=["LD_LIBRARY_PATH=/opt/conda/lib/", "XCACHE_HOST=red-xcache1.unl.edu", "XRD_PLUGIN=/opt/conda/lib/libXrdClAuthzPlugin.so", "BEARER_TOKEN_FILE=xcache_token"],
         scheduler_options={
             "protocol": protocol,
             "dashboard_address": str(dashboard_port),
