@@ -49,6 +49,7 @@ def CoffeaCasaCluster(
                require_encryption=True
                )    
         protocol = "tls"
+        external_address = 'tls://'+str(external_ip)+':'+str(scheduler_port)
         job_extra.update(
             {
                 "transfer_input_files": "/etc/cmsaf-secrets/xcache_token,/etc/cmsaf-secrets/ca.pem,/etc/cmsaf-secrets/hostcert.pem",
