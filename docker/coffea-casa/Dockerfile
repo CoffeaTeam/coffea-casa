@@ -134,7 +134,7 @@ RUN cd /tmp && \
 RUN cd /tmp && \
     git clone https://github.com/dask/distributed.git && \
     cd distributed && \
-    git checkout tags/2.20.0 &&\
+    git checkout tags/2.19.0 &&\
     git apply $HOME/patches/distributed-bbockelman.patch && \
     python setup.py install
 
