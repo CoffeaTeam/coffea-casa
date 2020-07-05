@@ -60,6 +60,7 @@ def CoffeaCasaCluster(
     else:
         job_extra.update(
             {
+                "transfer_input_files": "/etc/cmsaf-secrets/xcache_token",
                 "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
             }
         )
