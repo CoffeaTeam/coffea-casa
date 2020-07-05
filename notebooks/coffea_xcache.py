@@ -45,7 +45,7 @@ HTCondorJob.submit_command = "condor_submit -spool"
 
 host_ip = os.getenv("HOST_IP")
 
-client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.38", external_ip=host_ip, min_scale=5, max_scale=6)
+client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.39", external_ip=host_ip, min_scale=5, max_scale=6)
 
 config = {
         'client': client,

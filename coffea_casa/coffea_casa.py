@@ -67,8 +67,8 @@ def CoffeaCasaCluster(
 
     cluster = HTCondorCluster(
         cores=4,
-        memory="4GB",
-        disk="5GB",
+        memory="3GB",
+        disk="2GB",
         log_directory="logs",
         silence_logs="DEBUG",
         security = security_tls,
