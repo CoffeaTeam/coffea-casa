@@ -51,7 +51,7 @@ if [ ! -z "$_CONDOR_JOB_AD" ]; then
     if [ "$TLS_ENV" == "true" ]; then
         HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker tls://$EXTERNALIP_PORT \
             --name $NAME --tls-ca-file $PATH_CA_FILE --tls-cert $FILE_CERT --tls-key $FILE_KEY \
-            --nthreads 4  --memory-limit 2000.00MB --nanny --death-timeout 60"
+            --nthreads 4  --memory-limit 3000.00MB --nanny --death-timeout 60"
         echo $HTCONDOR_COMAND --protocol tls --contact-address tls://$HOST:$PORT --listen-address tls://0.0.0.0:8787 1>&2
         exec $HTCONDOR_COMAND --protocol tls --contact-address tls://$HOST:$PORT --listen-address tls://0.0.0.0:8787
     elif  [ "$TLS_ENV" == "false" ]; then
