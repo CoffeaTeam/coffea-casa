@@ -45,26 +45,27 @@ HTCondorJob.submit_command = "condor_submit -spool"
 
 host_ip = os.getenv("HOST_IP")
 
-client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.39", external_ip=host_ip, min_scale=5, max_scale=6)
+client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.40", external_ip=host_ip, min_scale=5, max_scale=6)
 
 config = {
-        'client': client,
-        'compression': 1,
-        'savemetrics': 1,
-        # 'xrootdconfig': {
-        #     'chunkbytes': 1024*128,
-        #     'limitbytes': 200 * 1024**2
-        # },
-        'cachestrategy': 'dask-worker',
-        'worker_affinity': True,
-        'nano': True,
-        #'priority': 1,
-    }
+    'client': client,
+    'compression': 1,
+    'savemetrics': 1,
+    # 'xrootdconfig': {
+    #     'chunkbytes': 1024*128,
+    #     'limitbytes': 200 * 1024**2
+    # },
+    #'cachestrategy': 'dask-worker',
+    #'worker_affinity': True,
+    'nano': True,
+    #'priority': 1,
+}
 
 chunksize = 100000
+p = NanoEventsProcessor(canaries=['0001fd0d874c9fff11e9a13cd2e55d9fbeef;Events;0;99159;Muon_pt'])
 
 tic = time.time()
-res = processor.run_uproot_job(filelist, 'Events', NanoTestProcessor(), processor.dask_executor, config, chunksize=chunksize, maxchunks=None)
+res = processor.run_uproot_job(filelist, 'Events', p, processor.dask_executor, config, chunksize=chunksize, maxchunks=None, pre_args={'client': client})
 toc = time.time()
 
 print("Dask client:", client)
