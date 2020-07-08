@@ -36,6 +36,7 @@ labextension:
     args: []
     kwargs: {cores: 4,
               memory: "6GB",
+              disk: "5GB",
               log_directory: "logs",
               silence_logs: "DEBUG",
               scheduler_options: {"dashboard_address": 8786,"port": 8787, "external_address": "{HOST_IP}:8787"},
