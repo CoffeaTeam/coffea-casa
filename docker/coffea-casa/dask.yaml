@@ -40,15 +40,15 @@ labextension:
               log_directory: "logs",
               silence_logs: "DEBUG",
               env_extra: ["LD_LIBRARY_PATH=/opt/conda/lib/", "XCACHE_HOST=red-xcache1.unl.edu", "XRD_PLUGIN=/opt/conda/lib/libXrdClAuthzPlugin.so", "BEARER_TOKEN_FILE=xcache_token"],
-              scheduler_options: {"dashboard_address": 8786,"port": 8787, "external_address": "129.93.183.33:8787"},
+              scheduler_options: {"dashboard_address": 8786,"port": 8787, "external_address": "{HOST_IP}:8787"},
               job_extra: {"universe": "docker",
                                      "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
-                                     "docker_image": "coffeateam/coffea-casa-analysis:latest", 
+                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.40", 
                                      "container_service_names": "dask",
                                      "dask_container_port": "8787",
                                      "should_transfer_files": "YES",
                                      "when_to_transfer_output": "ON_EXIT",
-                                     "+DaskSchedulerAddress": '"129.93.183.33:8787"'}}
+                                     "+DaskSchedulerAddress": '"{HOST_IP}:8787"'}}
     default:
       workers: null
       adapt:
