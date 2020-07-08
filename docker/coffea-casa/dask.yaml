@@ -35,14 +35,13 @@ labextension:
     class: 'HTCondorCluster'
     args: []
     kwargs: {cores: 4,
-              memory: "3GB",
-              disk: "1GB",
+              memory: "6GB",
               log_directory: "logs",
               silence_logs: "DEBUG",
               scheduler_options: {"dashboard_address": 8786,"port": 8787, "external_address": "{HOST_IP}:8787"},
               job_extra: {"universe": "docker",
                                      "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
-                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.40", 
+                                     "docker_image": "coffeateam/coffea-casa-analysis:0.1.45", 
                                      "container_service_names": "dask",
                                      "dask_container_port": "8787",
                                      "should_transfer_files": "YES",
