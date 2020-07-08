@@ -52,12 +52,14 @@ if [ ! -z "$_CONDOR_JOB_AD" ]; then
         HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker tls://$EXTERNALIP_PORT \
             --name $NAME --tls-ca-file $PATH_CA_FILE --tls-cert $FILE_CERT --tls-key $FILE_KEY \
             --nprocs 2 --nthreads 2 --memory-limit 8000.00MB --nanny --death-timeout 60"
-        echo $HTCONDOR_COMAND --protocol tls --contact-address tls://$HOST:$PORT --listen-address tls://0.0.0.0:8787 1>&2
-        exec $HTCONDOR_COMAND --protocol tls --contact-address tls://$HOST:$PORT --listen-address tls://0.0.0.0:8787
+        # --listen-address tls://0.0.0.0:8787 removed because of uncompatibility with --nprocs 
+        echo $HTCONDOR_COMAND --protocol tls --contact-address tls://$HOST:$PORT 1>&2
+        exec $HTCONDOR_COMAND --protocol tls --contact-address tls://$HOST:$PORT
     elif  [ "$TLS_ENV" == "false" ]; then
         HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker tcp://$EXTERNALIP_PORT \
             --name $NAME --nprocs 2 --nthreads 2 --memory-limit 8000.00MB --nanny --death-timeout 60"
-        echo $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787 1>&2
-        exec $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address tcp://0.0.0.0:8787
+        echo $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address 1>&2
+        # --listen-address tcp://0.0.0.0:8787 removed because of uncompatibility with --nprocs 
+        exec $HTCONDOR_COMAND --contact-address tcp://$HOST:$PORT --listen-address
     fi
 fi
