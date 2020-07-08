@@ -2,7 +2,7 @@ distributed:
     version: 2
   
     dashboard:
-      link: /user/{JUPYTERHUB_USER}/proxy/{port}/status
+      link: https://cmsaf-jh.unl.edu/user/{JUPYTERHUB_USER}/proxy/{port}/status
   
     scheduler:
       idle-timeout: 3600s
@@ -35,11 +35,10 @@ labextension:
     class: 'HTCondorCluster'
     args: []
     kwargs: {cores: 4,
-              memory: "2GB",
+              memory: "3GB",
               disk: "1GB",
               log_directory: "logs",
               silence_logs: "DEBUG",
-              env_extra: ["LD_LIBRARY_PATH=/opt/conda/lib/", "XCACHE_HOST=red-xcache1.unl.edu", "XRD_PLUGIN=/opt/conda/lib/libXrdClAuthzPlugin.so", "BEARER_TOKEN_FILE=xcache_token"],
               scheduler_options: {"dashboard_address": 8786,"port": 8787, "external_address": "{HOST_IP}:8787"},
               job_extra: {"universe": "docker",
                                      "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
@@ -50,14 +49,14 @@ labextension:
                                      "when_to_transfer_output": "ON_EXIT",
                                      "+DaskSchedulerAddress": '"{HOST_IP}:8787"'}}
     default:
-      workers: null
+      workers: 5
       adapt:
-        minimum: 1
-        maximum: 10
-    initial: []
+        minimum: 5
+        maximum: 25
+    #initial: []
     #- name: "UNL HTCondor cluster"
     #  workers: 1
     #  adapt:
-    #    minimum: 1
-    #    maximum: 10
+    #    minimum: 5
+    #    maximum: 25
   
