@@ -86,7 +86,7 @@ def CoffeaCasaCluster(
     if autoscale:
         cluster.adapt(minimum_jobs=min_scale, maximum_jobs=max_scale)  # auto-scale between min_scale and max_scale jobs
     else:
-        cluster.scale(max_scale)
+        cluster.scale(jobs=max_scale)
     
     if tls:
         client = Client(cluster, security=security_tls)
