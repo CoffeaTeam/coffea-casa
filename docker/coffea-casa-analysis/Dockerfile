@@ -73,7 +73,7 @@ RUN conda install --yes --freeze-installed \
 RUN pip install --no-cache-dir \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
-    coffea==0.6.39
+    coffea==0.6.40
 
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
 RUN cd /tmp && \

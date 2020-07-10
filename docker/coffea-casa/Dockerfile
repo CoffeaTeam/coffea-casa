@@ -110,7 +110,7 @@ RUN pip install --no-cache-dir \
     setuptools \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
-    coffea==0.6.39 \
+    coffea==0.6.40 \
     # Brian and Nicks scripts dependencies
     cryptography \
     pymacaroons \
