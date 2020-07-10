@@ -9,7 +9,7 @@ from distributed.security import Security
 
 # Inspired by https://github.com/JoshKarpel/dask-at-chtc
 def CoffeaCasaCluster(
-    worker_image=None, external_ip=None, tls=False, scheduler_port=8787, dashboard_port=8786, min_scale=5, max_scale=10):
+    worker_image=None, external_ip=None, tls=False, scheduler_port=8787, dashboard_port=8786, autoscale=True, min_scale=5, max_scale=10):
     shutil.rmtree("logs", ignore_errors=True)
 
     if worker_image is None:
@@ -83,7 +83,10 @@ def CoffeaCasaCluster(
         #extra=["--listen-address", "tcp://0.0.0.0:8787"],
     )
     
-    cluster.adapt(minimum_jobs=min_scale, maximum_jobs=max_scale)  # auto-scale between 5 and 10 jobs (maximum_memory="4 GB")
+    if autoscale:
+        cluster.adapt(minimum_jobs=min_scale, maximum_jobs=max_scale)  # auto-scale between min_scale and max_scale jobs
+    else:
+        cluster.scale(max_scale)
     
     if tls:
         client = Client(cluster, security=security_tls)
