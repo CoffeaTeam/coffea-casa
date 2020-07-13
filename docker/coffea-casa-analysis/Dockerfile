@@ -13,11 +13,6 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
 
 # Fix permissions
 RUN chown -R $NB_USER:users $HOME
-
-#Script that helps to work out missing packages without editing Docker image
-COPY prepare-extra-packages.sh /usr/bin/prepare-extra-packages.sh
-
-#
 RUN mkdir -p /etc/cmsaf-secrets/
 
 #Preparing patches
