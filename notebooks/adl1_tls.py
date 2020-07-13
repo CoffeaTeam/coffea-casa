@@ -10,7 +10,7 @@ from dask.distributed import Client, LocalCluster
 from dask_jobqueue import HTCondorCluster
 from dask_jobqueue.htcondor import HTCondorJob
 
-from coffea_casa.coffea_casa import CoffeaCasaCluster
+from coffea_casa.coffea_casa_method import CoffeaCasaCluster
 
 fileset = {
     'Jets': { 'files': ['root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root'],
@@ -56,11 +56,7 @@ class METProcessor(processor.ProcessorABC):
         return accumulator
     
 
-HTCondorJob.submit_command = "condor_submit -spool"
-
-host_ip = os.getenv("HOST_IP")
-
-client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.40", external_ip=host_ip, min_scale=5, max_scale=6, tls=True)
+client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.50", autoscale=False, max_scale=10, tls=True)
 
 exe_args = {
         'client': client,
