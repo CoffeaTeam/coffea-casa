@@ -3,8 +3,8 @@ import shutil
 import sys
 
 from dask.distributed import Client
-from dask_jobqueue import HTCondorCluster
 from distributed.security import Security
+from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
 
 
 # Inspired by https://github.com/JoshKarpel/dask-at-chtc
