@@ -43,7 +43,7 @@ if [ ! -z "$_CONDOR_JOB_AD" ]; then
     NAME=`cat $_CONDOR_JOB_AD | grep DaskWorkerName | tr -d '"' | awk '{print $NF;}'`
     CPUS=`cat $_CONDOR_JOB_AD | grep DaskWorkerCores | tr -d '"' | awk '{print $NF;}'`
     MEMORY=`cat $_CONDOR_JOB_AD | grep RequestMemory | tr -d '"' | awk '{print $NF;}'`
-    MEMORY_MB_FORMATTED=MEMORY+".00MB"
+    MEMORY_MB_FORMATTED=MEMORY".00MB"
     # Requirement: to add to Condor job decription "+DaskSchedulerAddress": '"tcp://129.93.183.34:8787"',
     EXTERNALIP_PORT=`cat $_CONDOR_JOB_AD | grep DaskSchedulerAddress | tr -d '"' | awk '{print $NF;}'`
 
