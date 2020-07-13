@@ -36,8 +36,6 @@ def CoffeaCasaCluster(
         "dask_container_port": "8787",
         "should_transfer_files": "YES",
         "when_to_transfer_output": "ON_EXIT",
-        "transfer_input_files": "/etc/cmsaf-secrets/xcache_token,/etc/cmsaf-secrets/ca.pem,/etc/cmsaf-secrets/hostcert.pem",
-        "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token,/etc/cmsaf-secrets/ca.pem,/etc/cmsaf-secrets/hostcert.pem",
         "+DaskSchedulerAddress": external_ip_string,
     }
     
@@ -60,6 +58,17 @@ def CoffeaCasaCluster(
         protocol = "tls"
         # Redefine address adding tls:// for Dask Scheduler
         external_address = 'tls://'+str(external_ip)+':'+str(scheduler_port)
+        job_extra.update(
+            {
+                "transfer_input_files": "/etc/cmsaf-secrets/xcache_token,/etc/cmsaf-secrets/ca.pem,/etc/cmsaf-secrets/hostcert.pem",
+                "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token,/etc/cmsaf-secrets/ca.pem,/etc/cmsaf-secrets/hostcert.pem",
+            })
+    else:
+        job_extra.update(
+            {
+                "transfer_input_files": "/etc/cmsaf-secrets/xcache_token",
+                "encrypt_input_files": "/etc/cmsaf-secrets/xcache_token",
+            })
         
     # Extend a submit_command for HTCondorJobs    
     HTCondorJob.submit_command = "condor_submit -spool"
