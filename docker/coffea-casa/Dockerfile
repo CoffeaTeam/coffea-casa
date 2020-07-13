@@ -219,6 +219,13 @@ RUN groupadd 1000 && usermod -g 1000 $NB_USER
 RUN mkdir /opt/app
 RUN chown -R jovyan:1000 /opt/app
 
+# xcache setup
+ENV XCACHE_HOST="red-xcache1.unl.edu"
+ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+ENV LD_LIBRARY_PATH="/opt/conda/lib/"
+ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
+ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
+
 WORKDIR /opt/app
 USER $NB_UID
 

@@ -129,7 +129,7 @@ ENV XCACHE_HOST="red-xcache1.unl.edu"
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/"
 ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
-ENV BEARER_TOKEN_FILE="xcache_token"
+ENV BEARER_TOKEN_FILE="/etc/xcache_token"
 
 # Prepare HTCondor ENV
 ADD prepare-env.sh /usr/local/bin/
