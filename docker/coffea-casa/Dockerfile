@@ -127,8 +127,8 @@ RUN cd /tmp && \
     git clone https://github.com/dask/dask-jobqueue.git && \
     cd dask-jobqueue && \
     git checkout tags/0.7.1 &&\
-    git apply $HOME/patches/dash_jobqueue-bbockelman.patch && \
-    #  For 0.2.0: git apply $HOME/patches/dash_jobqueue_bbockelman-oshadura.patch && \
+    git apply $HOME/patches/dask_jobqueue-bbockelman.patch && \
+    #  For 0.2.0: git apply $HOME/patches/dask_jobqueue_bbockelman-oshadura.patch && \
     python setup.py install
 
 # Dask dependencies that needs to be patched (hopefully is will pull dask as well)
