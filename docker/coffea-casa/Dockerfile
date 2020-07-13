@@ -147,7 +147,7 @@ RUN cd /tmp && \
     pip install -e . 
 
 # No need of for now Kubernetes yaml setup file (we are using HTCondorCluster)
-# Dask setup - >dask.yml
+# Dask setup - > dask.yml
 RUN mkdir -p $HOME/.config/dask
 COPY dask.yaml $HOME/.config/dask/
 # Labextention setup - >labextension.yml
@@ -199,13 +199,6 @@ COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
 
-# Tokens setup (moved to k8s)
-# https://github.com/oshadura/coffea-casa/issues/2
-# UGLY HACK!!!
-#RUN sed -i '4imkdir -p /home/jovyan/.condor/tokens.d/ && cp /etc/cmsaf-secrets/condor_token /home/jovyan/.condor/tokens.d/condor_token' /usr/local/bin/start-notebook.sh   
-
-
-
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
@@ -215,8 +208,6 @@ RUN groupadd -r condor && \
 RUN groupadd 1000 && usermod -g 1000 $NB_USER
 
 # Dask environment
-# TBD: should be changed to UNL home dir
-# TBD: mount /hadoop (no need for now)
 RUN mkdir /opt/app
 RUN chown -R jovyan:1000 /opt/app
 
