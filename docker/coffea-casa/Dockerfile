@@ -126,8 +126,8 @@ RUN pip uninstall -y dask distributed
 RUN cd /tmp && \
     git clone https://github.com/dask/dask-jobqueue.git && \
     cd dask-jobqueue && \
-   git checkout tags/0.7.1 &&\
-    git apply $HOME/patches/dask_jobqueue-bbockelman.patch && \
+    git checkout tags/0.7.1 &&\
+    git apply $HOME/patches/dask_jobqueue-bbockelman-oshadura.patch && \
     python setup.py install
 
 # Dask dependencies that needs to be patched (hopefully is will pull dask as well)

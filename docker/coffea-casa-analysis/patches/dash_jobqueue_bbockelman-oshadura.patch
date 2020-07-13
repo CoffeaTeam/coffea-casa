@@ -1,0 +1,186 @@
+diff --git a/dask_jobqueue/core.py b/dask_jobqueue/core.py
+index 994bc88..6886617 100644
+--- a/dask_jobqueue/core.py
++++ b/dask_jobqueue/core.py
+@@ -484,6 +484,7 @@ class JobQueueCluster(SpecCluster):
+             "dashboard_address": ":8787",
+             "security": security,
+         }
++
+         # scheduler_options overrides parameters common to both workers and scheduler
+         scheduler_options = dict(default_scheduler_options, **scheduler_options)
+ 
+@@ -512,6 +513,7 @@ class JobQueueCluster(SpecCluster):
+             scheduler=scheduler,
+             worker=worker,
+             loop=loop,
++            security=security,
+             silence_logs=silence_logs,
+             asynchronous=asynchronous,
+             name=name,
+diff --git a/dask_jobqueue/htcondor.py b/dask_jobqueue/htcondor.py
+index d85a591..5229b34 100644
+--- a/dask_jobqueue/htcondor.py
++++ b/dask_jobqueue/htcondor.py
+@@ -87,8 +87,6 @@ Queue
+                     "Log": "$(LogDirectory)/worker-$(ClusterId).log",
+                     # We kill all the workers to stop them so we need to stream their
+                     # output+error if we ever want to see anything
+-                    "Stream_Output": True,
+-                    "Stream_Error": True,
+                 }
+             )
+         if self.job_extra:
+@@ -110,8 +108,8 @@ Queue
+ 
+     def job_script(self):
+         """ Construct a job submission script """
+-        quoted_arguments = quote_arguments(["-c", self._command_template])
+-        quoted_environment = quote_environment(self.env_dict)
++        quoted_arguments = self.quote_arguments(["-c", self._command_template])
++        quoted_environment = self.quote_environment(self.env_dict)
+         job_header_lines = "\n".join(
+             "%s = %s" % (k, v) for k, v in self.job_header_dict.items()
+         )
+@@ -136,76 +134,76 @@ Queue
+         return "%s.0" % match.group(1)
+ 
+ 
+-def _double_up_quotes(instr):
+-    return instr.replace("'", "''").replace('"', '""')
++    def _double_up_quotes(self, instr):
++        return instr.replace("'", "''").replace('"', '""')
+ 
+ 
+-def quote_arguments(args):
+-    """Quote a string or list of strings using the Condor submit file "new" argument quoting rules.
++    def quote_arguments(self, args):
++        """Quote a string or list of strings using the Condor submit file "new" argument quoting rules.
+ 
+-    Returns
+-    -------
+-    str
+-        The arguments in a quoted form.
++        Returns
++        -------
++        str
++            The arguments in a quoted form.
+ 
+-    Warnings
+-    --------
+-    You will need to surround the result in double-quotes before using it in
+-    the Arguments attribute.
+-
+-    Examples
+-    --------
+-    >>> quote_arguments(["3", "simple", "arguments"])
+-    '3 simple arguments'
+-    >>> quote_arguments(["one", "two with spaces", "three"])
+-    'one \'two with spaces\' three'
+-    >>> quote_arguments(["one", "\"two\"", "spacy 'quoted' argument"])
+-    'one ""two"" \'spacey \'\'quoted\'\' argument\''
+-    """
+-    if isinstance(args, str):
+-        args_list = [args]
+-    else:
+-        args_list = args
+-
+-    quoted_args = []
+-    for a in args_list:
+-        qa = _double_up_quotes(a)
+-        if " " in qa or "'" in qa:
+-            qa = "'" + qa + "'"
+-        quoted_args.append(qa)
+-    return " ".join(quoted_args)
+-
+-
+-def quote_environment(env):
+-    """Quote a dict of strings using the Condor submit file "new" environment quoting rules.
+-
+-    Returns
+-    -------
+-    str
+-        The environment in quoted form.
+-
+-    Warnings
+-    --------
+-    You will need to surround the result in double-quotes before using it in
+-    the Environment attribute.
++        Warnings
++        --------
++        You will need to surround the result in double-quotes before using it in
++        the Arguments attribute.
+ 
+-    Examples
+-    --------
+-    >>> from collections import OrderedDict
+-    >>> quote_environment(OrderedDict([("one", 1), ("two", '"2"'), ("three", "spacey 'quoted' value")]))
+-    'one=1 two=""2"" three=\'spacey \'\'quoted\'\' value\''
+-    """
+-    if not isinstance(env, dict):
+-        raise TypeError("env must be a dict")
+-
+-    entries = []
+-    for k, v in env.items():
+-        qv = _double_up_quotes(str(v))
+-        if " " in qv or "'" in qv:
+-            qv = "'" + qv + "'"
+-        entries.append("%s=%s" % (k, qv))
+-
+-    return " ".join(entries)
++        Examples
++        --------
++        >>> quote_arguments(["3", "simple", "arguments"])
++        '3 simple arguments'
++        >>> quote_arguments(["one", "two with spaces", "three"])
++        'one \'two with spaces\' three'
++        >>> quote_arguments(["one", "\"two\"", "spacy 'quoted' argument"])
++        'one ""two"" \'spacey \'\'quoted\'\' argument\''
++        """
++        if isinstance(args, str):
++            args_list = [args]
++        else:
++            args_list = args
++
++        quoted_args = []
++        for a in args_list:
++            qa = self._double_up_quotes(a)
++            if " " in qa or "'" in qa:
++                qa = "'" + qa + "'"
++            quoted_args.append(qa)
++        return " ".join(quoted_args)
++
++
++    def quote_environment(self, env):
++        """Quote a dict of strings using the Condor submit file "new" environment quoting rules.
++
++        Returns
++        -------
++        str
++            The environment in quoted form.
++
++        Warnings
++        --------
++        You will need to surround the result in double-quotes before using it in
++        the Environment attribute.
++
++        Examples
++        --------
++        >>> from collections import OrderedDict
++        >>> quote_environment(OrderedDict([("one", 1), ("two", '"2"'), ("three", "spacey 'quoted' value")]))
++        'one=1 two=""2"" three=\'spacey \'\'quoted\'\' value\''
++        """
++        if not isinstance(env, dict):
++            raise TypeError("env must be a dict")
++
++        entries = []
++        for k, v in env.items():
++            qv = self._double_up_quotes(str(v))
++            if " " in qv or "'" in qv:
++                qv = "'" + qv + "'"
++            entries.append("%s=%s" % (k, qv))
++
++        return " ".join(entries)
+ 
+ 
+ class HTCondorCluster(JobQueueCluster):
