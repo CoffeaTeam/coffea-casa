@@ -2,7 +2,9 @@ distributed:
     version: 2
   
     dashboard:
-      link: /user/{JUPYTERHUB_USER}/proxy/{port}/status
+      link: https://cmsaf-jh.unl.edu/user/{JUPYTERHUB_USER}/proxy/{port}/status
+      
+    # Link is not working (reverting for demo!): /user/{JUPYTERHUB_USER}/proxy/{port}/status
   
     scheduler:
       idle-timeout: 3600s
