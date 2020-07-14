@@ -41,8 +41,17 @@ filelist = {
     ],
 }
 
-client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.50", autoscale=False, max_scale=15, tls=True)
+# Wrapper aroung dask_queue.HTCondorCluster, that allowed to launch Dask on an HTCondor cluster with a shared file system and customised for our analysis facility.
+# More information: https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.HTCondorCluster.html
+client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.50", autoscale=False, max_scale=15, tls=False)
 
+
+# A lot of interesting configuration: 
+# * client (distributed.client.Client) – A dask distributed client instance
+# * savemetrics': (int, optional) -  save metrics for I/O analysis
+# * compression (int, optional) – Compress accumulator outputs in flight with LZ4, at level specified (default 1). Set to None for no compression.
+# * priority (int, optional) – Task priority, default 0
+# * nano, mmap, flatten, cache_strategy, xrootdsettings and many more....
 config = {
     'client': client,
     'compression': 1,
@@ -57,13 +66,25 @@ config = {
     #'priority': 1,
 }
 
+# Maximum number of chunks to process per dataset
 chunksize = 100000
+
+# We are using a piece only: 17 Gb piece of dataset only
 p = NanoEventsProcessor(canaries=['0001fd0d874c9fff11e9a13cd2e55d9fbeef;Events;0;99159;Muon_pt'])
 
+# A convenience wrapper to submit jobs for a file set, which is a dictionary of dataset: [file list] entries.
+# Supports only uproot reading, via the LazyDataFrame class. 
+# * Parameters: processor_instance (ProcessorABC) – An instance of a class deriving from ProcessorABC
+# * Parameters: executor (callable) – A function that takes 3 arguments: items, function, accumulator and performs some action equivalent to: `for item in items: accumulator += function(item)`. See iterative_executor, futures_executor, dask_executor, or parsl_executor for available options.
+# * Parameters: executor_args (dict, optional) – Arguments to pass to executor. 
+# * Parameters: pre_args (dict, optional) – Similar to executor_args, defaults to executor_args
+# * Parameters: chunksize (int, optional) – Maximum number of entries to process at a time in the data frame
+# * Parameters: maxchunks (int, optional) – Maximum number of chunks to process per dataset Defaults to processing the whole dataset
 tic = time.time()
 res = processor.run_uproot_job(filelist, 'Events', p, processor.dask_executor, config, chunksize=chunksize, maxchunks=None, pre_args={'client': client})
 toc = time.time()
 
+# Let's print some staistics:
 print("Dask client:", client)
 print("Total time: %.0f" % (toc - tic))
 print("Events / s / thread: {:,.0f}".format(res[1]['entries'].value / res[1]['processtime'].value))
@@ -71,5 +92,3 @@ print("Bytes / s / thread: {:,.0f}".format(res[1]['bytesread'].value / res[1]['p
 print("Events / s: {:,.0f}".format(res[1]['entries'].value / (toc - tic)))
 print("Bytes / s: {:,.0f}".format(res[1]['bytesread'].value / (toc - tic)))
 
-from coffea.util import save
-save(res, 'runX.coffea')

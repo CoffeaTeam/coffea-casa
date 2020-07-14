@@ -55,13 +55,20 @@ class METProcessor(processor.ProcessorABC):
     def postprocess(self, accumulator):
         return accumulator
     
-
+# Wrapper aroung dask_queue.HTCondorCluster, that allowed to launch Dask on an HTCondor cluster with a shared file system and customised for our analysis facility.
+# More information: https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.HTCondorCluster.html
 client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.50", autoscale=False, max_scale=10, tls=True)
 
 exe_args = {
         'client': client,
     }
 
+
+# A convenience wrapper to submit jobs for a file set, which is a dictionary of dataset: [file list] entries.
+# Supports only uproot reading, via the LazyDataFrame class. 
+# * Parameters: processor_instance (ProcessorABC) – An instance of a class deriving from ProcessorABC
+# * Parameters: executor (callable) – A function that takes 3 arguments: items, function, accumulator and performs some action equivalent to: `for item in items: accumulator += function(item)`. See iterative_executor, futures_executor, dask_executor, or parsl_executor for available options.
+# * Parameters: executor_args (dict, optional) – Arguments to pass to executor. 
 output = processor.run_uproot_job(fileset,
                                 treename = 'Events',
                                 processor_instance = METProcessor(),
