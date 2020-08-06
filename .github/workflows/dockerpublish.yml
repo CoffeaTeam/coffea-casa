@@ -14,24 +14,21 @@ env:
   IMAGE_NAME_WORKER: coffea-casa-analysis
 
 jobs:
-
   # Push image to dockerhub
   push:
-
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
-
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build scheduler image 
-        # Dask scheduler
-        run: docker build . --file docker/coffea-dask/Dockerfile --tag image
+      - name: Build scheduler image
+        # Dask scheduler image
+        run: docker build . --file docker/coffea-casa/Dockerfile --tag image
 
       - name: Log into registry
-        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u oshadura --password-stdin
+        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
 
-      - name: Push scheduler image
+      - name: Push Dask scheduler image
         run: |
           # Dask scheduler
           IMAGE_IDS=coffeateam/$IMAGE_NAME_SCHEDULER
@@ -51,16 +48,16 @@ jobs:
           docker tag image $IMAGE_IDS:latest
           docker push $IMAGE_IDS:latest
 
-      - name: Build worker image 
-        # Dask worker
-        run: docker build . --file docker/coffea-dask-analysis/Dockerfile --tag image
+      - name: Build worker image
+        # Dask worker image
+        run: docker build . --file docker/coffea-casa-analysis/Dockerfile --tag image
 
       - name: Log into registry
-        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u oshadura --password-stdin
+        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
 
       - name: Push worker image
         run: |
-          # Dask worker
+          # Dask worker image
           IMAGE_IDW=coffeateam/$IMAGE_NAME_WORKER
 
           # Strip git ref prefix from version
