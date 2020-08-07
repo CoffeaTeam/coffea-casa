@@ -2,14 +2,23 @@
 
 set -x
 
-# Testing ---------->
-echo " DEBUG: Our directory is: $PWD"
+# From JoshKarpel/dask-chtc: wait for the job ad to be updated with <service>_HostPort
+# This happens during the first update, usually a few seconds after the job starts
+echo "Waiting for HostPort information..."
+while true; do
+  if grep HostPort "$_CONDOR_JOB_AD"; then
+    break
+  fi
+  sleep 1
+done
+echo "Got HostPort, proceeding..."
+echo
 
 # Condor token
 if [[ -f "$PWD/condor_token" ]]; then
     mkdir -p /home/jovyan/.condor/tokens.d/ && cp $PWD/condor_token /home/jovyan/.condor/tokens.d/condor_token
 fi
- 
+
 # Bearer token
 if [[ -f "$PWD/xcache_token" ]]; then
     export BEARER_TOKEN_FILE="$PWD/xcache_token"
@@ -26,15 +35,12 @@ if [[ -f "$PWD/hostcert.pem" ]]; then
 fi
 
 if [ ! -z "$PATH_CA_FILE" ] && [ ! -z "$FILE_CERT" ] && [ ! -z "$FILE_KEY" ]; then
-    echo 'Info: We have full TLS environment setuped'        
+    echo 'Info: We have full TLS environment setuped'
     TLS_ENV="true"
 else
     echo 'Info: Some CA files are missing, we will launch Dask worker without TLS support'
     TLS_ENV="false"
 fi
-
-# Small hack for Dask scheduler (to be investigated)
-sleep 10
 
 # HTCondor port, hostname and external IP ("must" variables)
 if [ ! -z "$_CONDOR_JOB_AD" ]; then
