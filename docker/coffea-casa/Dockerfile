@@ -1,4 +1,4 @@
-# Partually based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
+# Partially based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
 FROM jupyter/minimal-notebook:latest
 
 # Configure environment
@@ -7,78 +7,77 @@ ENV NB_USER jovyan
 ENV NB_Ua 1000
 ENV HOME /home/$NB_USER
 ENV PATH=$HOME/.local/bin:$PATH
-###
-### Jupyterlab
-###
+
+# Jupyterlab
 # Add extra plugins
-RUN jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager
-RUN jupyter labextension install --no-build @jupyterlab/git
-RUN jupyter labextension install --no-build @jupyterlab/github
-RUN jupyter labextension install --no-build dask-labextension
+RUN jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
+    jupyter labextension install --no-build @jupyterlab/git && \
+    jupyter labextension install --no-build @jupyterlab/github && \
+    jupyter labextension install --no-build dask-labextension
 
 # Dask extention (looks like it is not available in the image)
-RUN pip install \
+RUN pip install --no-cache-dir \
   dask_labextension \
   jupyterlab_git \
   jupyterlab_github
 
-# Enable the serverextensions that do not use the conf.d approach
-RUN jupyter serverextension enable --sys-prefix jupyterlab_git
-
-# Build JupyterLab.
-RUN jupyter lab build --dev-build=False && jupyter lab clean && \
+# Enable the serverextensions that do not use the conf.d approach and
+# build JupyterLab.
+RUN jupyter serverextension enable --sys-prefix jupyterlab_git && \
+    jupyter lab build --dev-build=False && jupyter lab clean && \
     npm cache clean --force && \
     rm -rf $HOME/.cache/yarn && \
     rm -rf $HOME/.node-gyp && \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
-# sed -i -e "s|DASK_DASHBOARD_URL|${JUPYTERHUB_SERVICE_PREFIX}proxy/8787|g" jupyterlab-workspace.json
-# export DASK_DISTRIBUTED__DASHBOARD__LINK="${JUPYTERHUB_SERVICE_PREFIX}proxy/8787/status"
+# Jupyter lab workspace setup
 COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
 RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
-# Preparing patches
-RUN mkdir -p $HOME/patches
-COPY patches/ $HOME/patches/
-
-###
-### Dask
-###
 USER root
-#Script that helps to work out missing packages without editing Docker image
-COPY prepare-extra-packages.sh /usr/bin/prepare-extra-packages.sh
-
-#
-RUN mkdir -p /etc/cmsaf-secrets/
-
-# Update repositories
-RUN apt-get update
-
+# Preparing directories for Dask conf files, patches and job spool directory for HTCondor
+RUN mkdir -p $HOME/.config/dask  && \
+    mkdir -p /etc/dask  && \
+    mkdir -p /var/lib/condor && \
+    mkdir -p /home/$NB_UID/.condor/tokens.d && \
+    mkdir -p /etc/condor/config.d  && \
+    mkdir -p $HOME/patches
+COPY patches/ $HOME/patches/
 
 # EGI CA certificates
 # (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
-RUN apt-get install gnupg2 libssl-dev zlib1g-dev uuid-dev openssh-client python-setuptools pkg-config procps iputils-tracepath  -y \
+RUN apt-get update \
+    && apt-get install -y gnupg2 \
+    # Xrootd dependencies (to be removed)
+    libssl-dev \
+    zlib1g-dev \
+    uuid-dev  \
+    openssh-client \
+    python-setuptools \
+    procps \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y ca-policy-egi-core \
+    && apt-get purge -y --auto-remove \
     && apt-get purge -y gnupg2 \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 USER $NB_UID
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
+    conda-build \
     # ->Dask image
     # IMPORTANT: Python 3.8 doesn't work with coffea
     # python==3.8 \
     python-blosc \
     setuptools \
     cytoolz \
-    #dask==2.16.0 \ -> we hope dask will be installed with dependencies later
+    #dask==2.20.0 \ -> we hope dask will be installed with dependencies later
     lz4 \
     nomkl \
     numpy==1.18.1 \
@@ -96,120 +95,101 @@ RUN conda install --yes --freeze-installed \
     matplotlib==3.2.1 \
     numba==0.48.0 \
     && conda clean -tipsy \
+    && jupyter lab clean \
+    && jlpm cache clean \
+    && npm cache clean --force \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
     && rm -rf /opt/conda/pkgs \
-    && conda clean -afy
-
-#RUN conda install xrootd==4.12.1
+    && conda build purge-all
 
 # Coffea
 RUN pip install --no-cache-dir \
-    setuptools \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.40 \
-    # Brian and Nicks scripts dependencies
-    cryptography \
-    pymacaroons \
-    kubernetes \
-    jwt \
-    # xrootd plugin compilation
+    # for xrootd plugin compilation
     cmake
 
 # We will need to install a new version
 RUN pip uninstall -y dask distributed
 
-# Dask dependencies that needs to be patched (hopefully is will pull dask as well)
+# Dask-jobqueue && distributed that needs to be patched (hopefully it will pull dask as well)
+# + coffea-casa mini module (still prototype)
+# -------Dask-jobqueue -------------------------------
 RUN cd /tmp && \
     git clone https://github.com/dask/dask-jobqueue.git && \
     cd dask-jobqueue && \
     git checkout tags/0.7.1 &&\
     git apply $HOME/patches/dask_jobqueue-bbockelman.patch && \
     #  For 0.2.0: git apply $HOME/patches/dask_jobqueue_bbockelman-oshadura.patch && \
-    python setup.py install
-
-# Dask dependencies that needs to be patched (hopefully is will pull dask as well)
-RUN cd /tmp && \
+    python setup.py install && \
+    # ------- distributed -------------------------------
+    cd /tmp && \
     git clone https://github.com/dask/distributed.git && \
     cd distributed && \
     git checkout tags/2.20.0 &&\
     git apply $HOME/patches/distributed-bbockelman.patch && \
-    python setup.py install
-
-
-# Coffea-casa mini module (still prototype)
-RUN cd /tmp && \
+    python setup.py install &&\
+    # ------- coffea-casa -------------------------------
+    cd /tmp && \
     git clone https://github.com/CoffeaTeam/coffea-casa.git && \
     cd coffea-casa && \
-    pip install -e . 
-
-# No need of for now Kubernetes yaml setup file (we are using HTCondorCluster)
-# Dask setup - > dask.yml
-RUN mkdir -p $HOME/.config/dask
-COPY dask.yaml $HOME/.config/dask/
-# Labextention setup - >labextension.yml
-COPY labextension.yaml  $HOME/.config/dask/
+    pip install --no-cache-dir -e .
 
 USER root
-RUN  mkdir -p /etc/dask
-COPY dask.yaml /etc/dask/
+# Dask setup - > dask.yml
 # Labextention setup - >labextension.yml
-COPY labextension.yaml  /etc/dask/
+COPY dask.yaml labextension.yaml $HOME/.config/dask/
+COPY dask.yaml labextension.yaml /etc/dask/
 
 USER $NB_UID
+# ------- xrootd -------------------------------
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
     git checkout v4.12.1 &&\
-   # Patch is used for 5.0.0-HEAD (xrootd-pr1199.patch)
+    # Patch for 5.0.0-HEAD (xrootd-pr1199.patch)
     git apply $HOME/patches/xrootd-ubuntu.patch && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/opt/conda -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
-    make -j4
-
-USER root
-RUN cd /tmp/xrootd/build && make install
-    ##cd /tmp && \
-    ##rm -rf xrootd
-
-RUN cd /tmp && \
+    make -j4 && \
+    make install && \
+    cd /tmp && \
+    # ------- xrdcl-authz-plugin -------------------------------
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
-    make
+    make && \
+    make install
 
 USER root
-RUN cd /tmp/xrdcl-authz-plugin/build && make install
-    #cd /tmp && \
-    #rm -rf xrdcl-authz-plugin
-
-# Add job spool directory for HTCondor
-RUN mkdir -p /var/lib/condor && \
-    mkdir -p /home/$NB_UID/.condor/tokens.d && \
-    mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
 
-RUN groupadd -r condor && \
-    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
-
-#change group for user $NB_USER
-#ERROR: Submitting jobs as user/group 0 (root) is not allowed for security reasons.
+# Setup HTCondor user/group and change group for user $NB_USER
+# Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it
-RUN groupadd 1000 && usermod -g 1000 $NB_USER
+RUN groupadd -r condor && \
+    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
+    groupadd 1000 && usermod -g 1000 $NB_USER
 
-# Dask environment
-RUN mkdir /opt/app
-RUN chown -R jovyan:1000 /opt/app
+# Cleanup
+RUN rm -rf /tmp/* \
+    && rm -rf $HOME/.cache/.pip/* \
+    && find /opt/conda/ -type f,l -name '*.a' -delete \
+    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
+    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
+    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
+    && rm -rf /opt/conda/pkgs
 
 # xcache setup
 ENV XCACHE_HOST="red-xcache1.unl.edu"
@@ -218,9 +198,7 @@ ENV LD_LIBRARY_PATH="/opt/conda/lib/"
 ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 
-WORKDIR /opt/app
 USER $NB_UID
-
 # Use bash login shell for entrypoint in order
 # to automatically source user's .bashrc
 CMD ["bash", "-l", "-c", "'/usr/local/bin/start-notebook.sh'"]
