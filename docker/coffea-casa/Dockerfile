@@ -123,9 +123,10 @@ RUN cd /tmp && \
     git clone https://github.com/dask/dask-jobqueue.git && \
     cd dask-jobqueue && \
     git checkout tags/0.7.1 &&\
-    git apply $HOME/patches/dask_jobqueue-bbockelman.patch && \
-    #  For 0.2.0: git apply $HOME/patches/dask_jobqueue_bbockelman-oshadura.patch && \
-    python setup.py install && \
+    # Testing coffea-casa GH issue #21 -> replace dask_jobqueue-bbockelman.patch
+    git apply $HOME/patches/dask_jobqueue-bbockelman-security.patch && \
+    ###  For coffea-casa 0.2.0: git apply $HOME/patches/dask_jobqueue_bbockelman-oshadura.patch && \
+    # python setup.py install && \
     # ------- distributed -------------------------------
     cd /tmp && \
     git clone https://github.com/dask/distributed.git && \
