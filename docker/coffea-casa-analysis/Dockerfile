@@ -9,32 +9,41 @@ ENV HOME /home/$NB_USER
 ENV PATH=$HOME/.local/bin:$PATH
 
 # Create jovyan user with UID=1000 and in the 'users' group
-RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
-
 # Fix permissions
-RUN chown -R $NB_USER:users $HOME
-RUN mkdir -p /etc/cmsaf-secrets/
-
-#Preparing patches
-COPY patches/ $HOME/
-
-# Update repositories
-RUN apt-get update
+RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER  && \
+    chown -R $NB_USER:users $HOME && \
+    mkdir -p /etc/cmsaf-secrets/ && \
+    mkdir -p /var/lib/condor && \
+    mkdir -p /home/$NB_UID/.condor/tokens.d  && \
+    mkdir -p $HOME/patches
+COPY patches/ $HOME/patches/
 
 # EGI CA certificates
-RUN apt-get install build-essential gnupg2 openssh-client libssl-dev zlib1g-dev uuid-dev procps iputils-tracepath -y \
+# (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
+RUN apt-get update \
+    && apt-get install -y gnupg2 \
+    # Xrootd dependencies (to be removed)
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    uuid-dev  \
+    openssh-client \
+    python-setuptools \
+    procps \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
     && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y ca-policy-egi-core \
     && apt-get purge -y gnupg2 \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get purge -y --auto-remove \
+    && apt-get clean
 
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
+    conda-build \
     # ->Dask image
     # Python 3.8 doesn't work with coffea
     # python==3.8 \
@@ -51,7 +60,6 @@ RUN conda install --yes --freeze-installed \
     distributed \
     dask-jobqueue \
     # coffea-casa dependencies (in JH we build xrootd from scratch)
-    cmake \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
@@ -62,62 +70,51 @@ RUN conda install --yes --freeze-installed \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
     && rm -rf /opt/conda/pkgs \
-    && conda clean -afy
+    && conda build purge-all
 
 # Coffea
 RUN pip install --no-cache-dir \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
-    coffea==0.6.40
+    coffea==0.6.40 \
+    # for xrootd plugin compilation
+    cmake
 
+# ------- xrootd -------------------------------
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
     git checkout v4.12.1 &&\
-   # Patch is used for 5.0.0-HEAD (xrootd-pr1199.patch)
-    git apply /home/$NB_USER/xrootd-ubuntu.patch && \
+    # Patch for 5.0.0-HEAD (xrootd-pr1199.patch)
+    git apply $HOME/patches/xrootd-ubuntu.patch && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/opt/conda -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
-    make -j4
-
-USER root
-RUN cd /tmp/xrootd/build && make install
-    ##cd /tmp && \
-    ##rm -rf xrootd
-
-USER $NB_UID
-
-RUN cd /tmp && \
+    make -j4 && \
+    make install && \
+    cd /tmp && \
+    # ------- xrdcl-authz-plugin -------------------------------
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
-    make
+    make && \
+    make install
 
 USER root
-RUN cd /tmp/xrdcl-authz-plugin/build && make install
-    #cd /tmp && \
-    #rm -rf xrdcl-authz-plugin
-
-USER root
-# Add job spool directory for HTCondor
-RUN mkdir /var/lib/condor && \
-    mkdir -p $HOME/.condor/tokens.d && \
-    mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
 
+# Setup HTCondor user/group and change group for user $NB_USER
+# Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
+# it configured from kubernetes side and updated in docker container to match it
 RUN groupadd -r condor && \
-    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
-
-# Dask environment
-RUN mkdir /opt/app
-RUN chown -R jovyan:condor /opt/app
+    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
+    groupadd 1000 && usermod -g 1000 $NB_USER
 
 # xcache setup
 ENV XCACHE_HOST="red-xcache1.unl.edu"
@@ -126,12 +123,18 @@ ENV LD_LIBRARY_PATH="/opt/conda/lib/"
 ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV BEARER_TOKEN_FILE="/etc/xcache_token"
 
+# Cleanup
+RUN rm -rf /tmp/* \
+    && rm -rf $HOME/.cache/.pip/* \
+    && find /opt/conda/ -type f,l -name '*.a' -delete \
+    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
+    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
+    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
+    && rm -rf /opt/conda/pkgs
+
 # Prepare HTCondor ENV
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
-
-# No need to have it here, we hope to land in Condor DIR
 USER $NB_USER
-
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
