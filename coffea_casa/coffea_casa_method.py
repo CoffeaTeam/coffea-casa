@@ -35,7 +35,7 @@ def coffea_casa_cluster(
         external_ip = sys.argv[2]
 
     # External IP to be used by scheduler
-    external_address = str(external_ip)+':'+str(scheduler_port)
+    external_address = str(external_ip) + ':' + str(scheduler_port)
     external_ip_string = '"' + external_address + '"'
 
     # Extra job parameters
@@ -66,7 +66,7 @@ def coffea_casa_cluster(
         # Redefine protocol as TLS for now
         protocol = "tls"
         # Redefine address adding tls:// for Dask Scheduler
-        external_address = 'tls://'+str(external_ip)+':'+str(scheduler_port)
+        external_address = 'tls://' + str(external_ip) + ':' + str(scheduler_port)
         job_extra.update(
             {
                 "transfer_input_files": "/etc/cmsaf-secrets/xcache_token,/etc/cmsaf-secrets/ca.pem,/etc/cmsaf-secrets/hostcert.pem",
