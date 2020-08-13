@@ -15,10 +15,6 @@ EXTRAS_REQUIRE = {}
 with io.open("README.md", "r", encoding="utf-8") as f:
     readme = f.read()
 
-about = {}
-with io.open("coffea_casa/version.py", "r", encoding="utf-8") as f:
-    exec(f.read(), about)
-
 setup(name='coffea_casa',
       version=versioneer.get_version(),
       cmdclass=versioneer.get_cmdclass(),
