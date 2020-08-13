@@ -8,3 +8,7 @@ from .coffea_casa import CoffeaCasaCluster
 from .coffea_casa_method import coffea_casa_cluster
 from .version import __version__
 from . import config
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
