@@ -10,3 +10,5 @@ recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
 include coffea_casa/version.py
+include versioneer.py
+include coffea_casa/_version.py
