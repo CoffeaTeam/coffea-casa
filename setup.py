@@ -5,6 +5,7 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 import io
+import versioneer
 
 INSTALL_REQUIRES = ['distributed',
                     'dask-jobqueue',
@@ -19,7 +20,8 @@ with io.open("coffea_casa/version.py", "r", encoding="utf-8") as f:
     exec(f.read(), about)
 
 setup(name='coffea_casa',
-      version=about["__version__"],
+      version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass(),
       packages=find_packages(),
       description='A Prototype U.S. CMS analysis facility',
       long_description=readme,
@@ -32,7 +34,7 @@ setup(name='coffea_casa',
       include_package_data=True,
       zip_safe=False,
       setup_requires=["pytest-runner", "flake8"],
-      tests_require=["pytest", 'htcondor'],
+      tests_require=["pytest"],
       classifiers=[
           "Development Status :: 4 - Beta",
           "Intended Audience :: Developers",
