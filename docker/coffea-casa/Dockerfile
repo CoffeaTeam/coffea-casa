@@ -97,7 +97,7 @@ RUN pip install --no-cache-dir \
 
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip
-RUN pip install -e git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed && \
+RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed && \
     pip install -e git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
 
 USER root
