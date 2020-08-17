@@ -49,11 +49,6 @@ COPY patches/ $HOME/patches/
 # (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
 RUN apt-get update \
     && apt-get install -y gnupg2 \
-    # Xrootd dependencies (to be removed)
-    libssl-dev \
-    zlib1g-dev \
-    uuid-dev  \
-    openssh-client \
     python-setuptools \
     procps \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
@@ -71,13 +66,11 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    # ->Dask image
     # IMPORTANT: Python 3.8 doesn't work with coffea
     # python==3.8 \
     python-blosc \
     setuptools \
     cytoolz \
-    #dask==2.20.0 \ -> we hope dask will be installed with dependencies later
     lz4 \
     nomkl \
     numpy==1.18.1 \
@@ -85,11 +78,11 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     # Coffea-casa extras
     bokeh \
-    # IMPORTANT: we need apply mini patches -> building from scratch
-    #distributed \
-    #dask-jobqueue \
-    # IMPORTANT: coffea-casa dependencies (in JH we build xrootd from scratch)
-    # comment: we need to build it from scratch because we use need it for xrdcl-authz-plugin build as well
+    # IMPORTANT: we need apply a patch for distributed: building it from scratch
+    # dask==2.20.0 \ Here we expect that dask will be installed with dependencies later
+    # distributed \
+    dask-jobqueue \
+    xrootd \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
@@ -109,8 +102,8 @@ RUN conda install --yes --freeze-installed \
 RUN pip install --no-cache-dir \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
-    coffea==0.6.40 \
-    # for xrootd plugin compilation
+    coffea==0.6.42 \
+    # Needed for xrootd-authz-plugin compilation
     cmake
 
 # We will need to install a new version
@@ -120,15 +113,7 @@ RUN pip uninstall -y dask distributed
 # + coffea-casa mini module (still prototype)
 # -------Dask-jobqueue -------------------------------
 RUN cd /tmp && \
-    git clone https://github.com/dask/dask-jobqueue.git && \
-    cd dask-jobqueue && \
-    git checkout tags/0.7.1 &&\
-    # Testing coffea-casa GH issue #21 -> replace dask_jobqueue-bbockelman.patch
-    git apply $HOME/patches/dask_jobqueue-bbockelman-security.patch && \
-    ###  For coffea-casa 0.2.0: git apply $HOME/patches/dask_jobqueue_bbockelman-oshadura.patch && \
-    # python setup.py install && \
     # ------- distributed -------------------------------
-    cd /tmp && \
     git clone https://github.com/dask/distributed.git && \
     cd distributed && \
     git checkout tags/2.20.0 &&\
@@ -150,17 +135,6 @@ USER $NB_UID
 # ------- xrootd -------------------------------
 # We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
 RUN cd /tmp && \
-    git clone https://github.com/xrootd/xrootd.git && \
-    cd xrootd && \
-    git checkout v4.12.1 &&\
-    # Patch for 5.0.0-HEAD (xrootd-pr1199.patch)
-    git apply $HOME/patches/xrootd-ubuntu.patch && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/opt/conda -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
-    make -j4 && \
-    make install && \
-    cd /tmp && \
     # ------- xrdcl-authz-plugin -------------------------------
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
