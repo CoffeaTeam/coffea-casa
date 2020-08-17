@@ -112,13 +112,8 @@ RUN pip uninstall -y dask distributed
 # + coffea-casa mini module (still prototype)
 # -------Dask-jobqueue -------------------------------
 RUN cd /tmp && \
-    # ------- distributed -------------------------------
-    git clone https://github.com/dask/distributed.git && \
-    cd distributed && \
-    git checkout tags/2.20.0 &&\
-    git apply $HOME/patches/distributed-bbockelman.patch && \
-    python setup.py install &&\
     # ------- coffea-casa -------------------------------
+    # (patched distributed will be installed as a part of coffea-casa module setup
     cd /tmp && \
     git clone https://github.com/CoffeaTeam/coffea-casa.git && \
     cd coffea-casa && \
