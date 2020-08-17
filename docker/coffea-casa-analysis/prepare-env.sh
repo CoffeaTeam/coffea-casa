@@ -5,14 +5,17 @@ set -x
 # From JoshKarpel/dask-chtc: wait for the job ad to be updated with <service>_HostPort
 # This happens during the first update, usually a few seconds after the job starts
 echo "Waiting for HostPort information..."
-while true; do
-  if grep HostPort "$_CONDOR_JOB_AD"; then
-    break
-  fi
-  sleep 1
-done
-echo "Got HostPort, proceeding..."
-echo
+# Check if we are not in GH CI environment (image check is stuck forever)
+if [ -z "$GITHUB_WORKFLOW"]
+  while true; do
+    if grep HostPort "$_CONDOR_JOB_AD"; then
+      break
+    fi
+    sleep 1
+  done
+  echo "Got HostPort, proceeding..."
+  echo
+fi
 
 # Condor token
 if [[ -f "$PWD/condor_token" ]]; then

@@ -100,7 +100,6 @@ RUN conda install --yes --freeze-installed \
 
 # Coffea
 RUN pip install --no-cache-dir \
-    #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.42 \
     # Needed for xrootd-authz-plugin compilation
@@ -132,8 +131,7 @@ COPY dask.yaml labextension.yaml $HOME/.config/dask/
 COPY dask.yaml labextension.yaml /etc/dask/
 
 USER $NB_UID
-# ------- xrootd -------------------------------
-# We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
+# ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
     # ------- xrdcl-authz-plugin -------------------------------
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
