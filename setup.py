@@ -7,8 +7,8 @@ except ImportError:
 import io
 import versioneer
 
-INSTALL_REQUIRES = ['distributed',
-                    'dask-jobqueue',
+# Add 'distributed' back when patches will be upstreamed
+INSTALL_REQUIRES = ['dask-jobqueue',
                     ]
 EXTRAS_REQUIRE = {}
 
@@ -30,6 +30,7 @@ setup(name='coffea_casa',
       include_package_data=True,
       zip_safe=False,
       setup_requires=["pytest-runner", "flake8"],
+      dependency_links=['git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed'],
       tests_require=["pytest"],
       classifiers=[
           "Development Status :: 4 - Beta",
