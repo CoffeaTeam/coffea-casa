@@ -68,7 +68,6 @@ RUN conda install --yes --freeze-installed \
 
 # Coffea
 RUN pip install --no-cache-dir \
-    #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
     coffea==0.6.42 \
     # for xrootd plugin compilation
