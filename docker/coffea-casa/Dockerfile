@@ -86,17 +86,7 @@ RUN conda install --yes --freeze-installed \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
-    numba==0.48.0 \
-    && conda clean -tipsy \
-    && jupyter lab clean \
-    && jlpm cache clean \
-    && npm cache clean --force \
-    && find /opt/conda/ -type f,l -name '*.a' -delete \
-    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
-    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
-    && rm -rf /opt/conda/pkgs \
-    && conda build purge-all
+    numba==0.48.0
 
 # Coffea
 RUN pip install --no-cache-dir \
@@ -144,11 +134,16 @@ RUN groupadd -r condor && \
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
+    && conda clean -tipsy \
+    && jupyter lab clean \
+    && jlpm cache clean \
+    && npm cache clean --force \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
-    && rm -rf /opt/conda/pkgs
+    && rm -rf /opt/conda/pkgs \
+    && conda build purge-all
 
 # xcache setup
 ENV XCACHE_HOST="red-xcache1.unl.edu"
