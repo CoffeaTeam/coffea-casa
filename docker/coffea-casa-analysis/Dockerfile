@@ -22,12 +22,6 @@ COPY patches/ $HOME/patches/
 # (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
 RUN apt-get update \
     && apt-get install -y gnupg2 \
-    # Xrootd dependencies (to be removed)
-    build-essential \
-    libssl-dev \
-    zlib1g-dev \
-    uuid-dev  \
-    openssh-client \
     python-setuptools \
     procps \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
@@ -44,7 +38,6 @@ RUN apt-get update \
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    # ->Dask image
     # Python 3.8 doesn't work with coffea
     # python==3.8 \
     python-blosc \
@@ -59,7 +52,7 @@ RUN conda install --yes --freeze-installed \
     bokeh \
     distributed \
     dask-jobqueue \
-    # coffea-casa dependencies (in JH we build xrootd from scratch)
+    xrootd \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
@@ -76,24 +69,12 @@ RUN conda install --yes --freeze-installed \
 RUN pip install --no-cache-dir \
     #dask-jobqueue==0.7.1 \
     xxhash==1.3.0 \
-    coffea==0.6.40 \
+    coffea==0.6.42 \
     # for xrootd plugin compilation
     cmake
 
-# ------- xrootd -------------------------------
-# We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
+# ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
-    git clone https://github.com/xrootd/xrootd.git && \
-    cd xrootd && \
-    git checkout v4.12.1 &&\
-    # Patch for 5.0.0-HEAD (xrootd-pr1199.patch)
-    git apply $HOME/patches/xrootd-ubuntu.patch && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/opt/conda -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
-    make -j4 && \
-    make install && \
-    cd /tmp && \
     # ------- xrdcl-authz-plugin -------------------------------
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
