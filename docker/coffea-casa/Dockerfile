@@ -106,16 +106,9 @@ RUN pip install --no-cache-dir \
     cmake
 
 # Since we need to install patched version of distributed version, it is will be
-# preferable to pull proper dask and distributed versions via pip 
-RUN pip uninstall -y dask distributed
-
-RUN cd /tmp && \
-    # ------- coffea-casa -------------------------------
-    # (patched distributed will be installed as a part of coffea-casa module setup
-    cd /tmp && \
-    git clone https://github.com/CoffeaTeam/coffea-casa.git && \
-    cd coffea-casa && \
-    pip install --no-cache-dir -e .
+# preferable to pull proper dask and distributed versions via pip
+RUN pip uninstall -y dask distributed && \
+    pip install -e git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=distributed
 
 USER root
 # Dask setup - > dask.yml
