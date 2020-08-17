@@ -6,7 +6,7 @@ set -x
 # This happens during the first update, usually a few seconds after the job starts
 echo "Waiting for HostPort information..."
 # Check if we are not in GH CI environment (image check is stuck forever)
-if [ -z "$GITHUB_WORKFLOW"]
+if [ -z "$GITHUB_WORKFLOW" ]; then
   while true; do
     if grep HostPort "$_CONDOR_JOB_AD"; then
       break
