@@ -105,12 +105,10 @@ RUN pip install --no-cache-dir \
     # Needed for xrootd-authz-plugin compilation
     cmake
 
-# We will need to install a new version
+# Since we need to install patched version of distributed version, it is will be
+# preferable to pull proper dask and distributed versions via pip 
 RUN pip uninstall -y dask distributed
 
-# Dask-jobqueue && distributed that needs to be patched (hopefully it will pull dask as well)
-# + coffea-casa mini module (still prototype)
-# -------Dask-jobqueue -------------------------------
 RUN cd /tmp && \
     # ------- coffea-casa -------------------------------
     # (patched distributed will be installed as a part of coffea-casa module setup
