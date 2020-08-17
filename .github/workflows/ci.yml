@@ -71,4 +71,4 @@ jobs:
         python -m pip list
     - name: Test with pytest
       run: |
-        coverage run --source=coffea_casa/ setup.py pytest
+        coverage run -m pytest
