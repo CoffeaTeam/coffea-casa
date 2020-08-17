@@ -9,13 +9,13 @@ The prototype analysis facility provides services for “low latency columnar an
 
 Docker images
 ============
-# coffea-casa
+## coffea-casa
 
 Dask scheduler image used in CMSAF:
 [![](https://images.microbadger.com/badges/image/coffeateam/coffea-casa.svg)](https://microbadger.com/images/coffeateam/coffea-casa)
 [![](https://images.microbadger.com/badges/version/coffeateam/coffea-casa.svg)](https://microbadger.com/images/coffeateam/coffea-casa)
 
-# coffea-casa-analysis
+## coffea-casa-analysis
 
 Dask worker image used in CMSAF:
 [![](https://images.microbadger.com/badges/image/coffeateam/coffea-casa-analysis.svg)](https://microbadger.com/images/coffeateam/coffea-casa-analysis )
