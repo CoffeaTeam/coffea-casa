@@ -82,7 +82,7 @@ RUN conda install --yes --freeze-installed \
     # dask==2.20.0 \ Here we expect that dask will be installed with dependencies later
     # distributed \
     dask-jobqueue \
-    xrootd \
+    xrootd==5.0.1 \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \

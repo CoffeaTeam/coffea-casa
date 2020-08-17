@@ -53,7 +53,7 @@ RUN conda install --yes --freeze-installed \
     bokeh \
     distributed \
     dask-jobqueue \
-    xrootd \
+    xrootd==5.0.1 \
     htcondor \
     # Extra packages
     matplotlib==3.2.1 \
