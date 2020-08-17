@@ -1,7 +1,7 @@
 coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framework For Effective Analysis
 =========================================================
 
-![tests](https://github.com/coffeateam/coffea-casa/workflows/tests/badge.svg)
+![CI/CD status](https://github.com/coffeateam/coffea-casa/workflows/CI/CD/badge.svg)
 ![GitHub issues](https://img.shields.io/github/issues/coffeateam/coffea-casa)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/coffeateam/coffea-casa)
 
@@ -9,13 +9,13 @@ The prototype analysis facility provides services for “low latency columnar an
 
 Docker images
 ============
-# coffea-casa image
+# coffea-casa
 
 Dask scheduler image used in CMSAF:
 [![](https://images.microbadger.com/badges/image/coffeateam/coffea-casa.svg)](https://microbadger.com/images/coffeateam/coffea-casa)
 [![](https://images.microbadger.com/badges/version/coffeateam/coffea-casa.svg)](https://microbadger.com/images/coffeateam/coffea-casa)
 
-# coffea-casa-analysis image
+# coffea-casa-analysis
 
 Dask worker image used in CMSAF:
 [![](https://images.microbadger.com/badges/image/coffeateam/coffea-casa-analysis.svg)](https://microbadger.com/images/coffeateam/coffea-casa-analysis )
