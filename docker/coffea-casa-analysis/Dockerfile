@@ -14,12 +14,9 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER  && \
     chown -R $NB_USER:users $HOME && \
     mkdir -p /etc/cmsaf-secrets/ && \
     mkdir -p /var/lib/condor && \
-    mkdir -p /home/$NB_UID/.condor/tokens.d  && \
-    mkdir -p $HOME/patches
-COPY patches/ $HOME/patches/
+    mkdir -p /home/$NB_UID/.condor/tokens.d
 
 # EGI CA certificates
-# (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
 RUN apt-get update \
     && apt-get install -y gnupg2 \
     build-essential \
