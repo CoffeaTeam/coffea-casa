@@ -61,6 +61,8 @@ class CoffeaCasaCluster(HTCondorCluster):
         dashboard_port
         job_kwargs
         """
+        if security:
+            self.security = security
         job_kwargs = self._modify_job_kwargs(
             job_kwargs,
             security=security,
@@ -68,7 +70,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             scheduler_port=scheduler_port,
             dashboard_port=dashboard_port,
         )
-        # Instantiate args and parameters from parent abstract class
+        # Instantiate args and parameters from parent abstract class security=security
         super().__init__(**job_kwargs)
 
     @classmethod
@@ -82,24 +84,24 @@ class CoffeaCasaCluster(HTCondorCluster):
                            dashboard_port=DEFAULT_DASHBOARD_PORT,
                            ):
         job_config = job_kwargs.copy()
-        ## Security settings
-        # todo(oksana) -> I can't run local tests with my own Security object
-        if security:
+        # If we have ready security object lets try to use TLS
+        #security.get_connection_args("scheduler").get("require_encryption") is True
+        if security and security.get_connection_args("scheduler")['require_encryption']:
             job_config["protocol"] = 'tls://'
             job_config["security"] = security
-            # We hope we have files locally and it is used
+            # We hope we have files locally and it should be used
             # for local tests only for now.
             files = ""
+        # If we have certs in env lets try to use TLS
+        elif CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")['require_encryption']:
+            job_config["protocol"] = 'tls://'
+            job_config["security"] = cls.security()
+            input_files = [CA_FILE, CERT_FILE, XCACHE_FILE]
+            files = ", ".join(str(path) for path in input_files)
         else:
-            if CA_FILE.is_file() and CERT_FILE.is_file():
-                job_config["protocol"] = 'tls://'
-                job_config["security"] = cls.security()
-                input_files = [CA_FILE, CERT_FILE, XCACHE_FILE]
-                files = ", ".join(str(path) for path in input_files)
-            else:
-                job_config["protocol"] = 'tcp://'
-                input_files = [XCACHE_FILE]
-                files = ", ".join(str(path) for path in input_files)
+            job_config["protocol"] = 'tcp://'
+            input_files = [XCACHE_FILE]
+            files = ", ".join(str(path) for path in input_files)
         ## Networking settings
         try:
             external_ip = os.environ['HOST_IP']

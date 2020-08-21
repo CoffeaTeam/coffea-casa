@@ -31,7 +31,7 @@ def test_default_protocol(default_modified_kwargs):
 
 
 @pytest.mark.skip(reason="TLS is still not working out-of-the-box")
-def test_can_override_security():
+def test_args_security():
     dirname = os.path.dirname(__file__)
     key = os.path.join(dirname, "key.pem")
     cert = os.path.join(dirname, "ca.pem")
@@ -44,6 +44,13 @@ def test_can_override_security():
         tls_client_key=key,
         tls_client_cert=cert,
         require_encryption=True)
-    kwargs = CoffeaCasaCluster._modify_job_kwargs(dict(security=security))
-    assert kwargs["security"] == security
-    assert kwargs["scheduler_options"]["protocol"] == 'tls'
+    with CoffeaCasaCluster(cores=1,
+                           memory="100MB",
+                           disk="100MB",
+                           worker_image="coffeateam/coffea-casa:0.2.5",
+                           security=security
+                           ) as cluster:
+        kwargs = cluster._modify_job_kwargs({})
+        assert security.get_connection_args("scheduler").get("require_encryption") is True
+        assert kwargs["security"] == security
+        assert kwargs["scheduler_options"]["protocol"] == 'tls'

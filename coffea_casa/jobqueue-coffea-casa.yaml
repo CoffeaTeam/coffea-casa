@@ -3,10 +3,9 @@ jobqueue:
 
     # Dask worker options, taken from https://github.com/dask/dask-jobqueue/tree/master/dask_jobqueue
     cores: 4                 # Total number of cores per job
-    memory: "4 GiB"                # Total amount of memory per job
+    memory: "6 GiB"                # Total amount of memory per job
     processes: null                # Number of Python processes per jobs
-    disk: "5 GiB"          # Amount of disk per worker job
-    worker-image: "coffeateam/coffea-casa:latest"
+    worker-image: "coffeateam/coffea-casa-analysis:0.2.5"
 
     # Comunication settings
     interface: null             # Network interface to use like eth0 or ib0
@@ -15,7 +14,7 @@ jobqueue:
     extra: []
 
     # HTCondor Resource Manager options
-    disk: null                  # Total amount of disk per job
+    disk: "5 GiB"          # Amount of disk per worker job
     env-extra: []
     job-extra: {}               # Extra submit attributes
     log-directory: null
