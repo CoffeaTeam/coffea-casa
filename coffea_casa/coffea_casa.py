@@ -86,19 +86,18 @@ class CoffeaCasaCluster(HTCondorCluster):
         job_config = job_kwargs.copy()
         # If we have certs in env, lets try to use TLS
         if CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")['require_encryption']:
-            job_config["protocol"] = 'tls://'
+            job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
             input_files = [CA_FILE, CERT_FILE, XCACHE_FILE]
             files = ", ".join(str(path) for path in input_files)
-        # If we have ready security object lets try to use TLS
-        #elif security and security.get_connection_args("scheduler")['require_encryption']:
-        #    job_config["protocol"] = 'tls://'
-        #    job_config["security"] = security
-        #    # We hope we have files locally and it should be used
-        #    # for local tests only for now.
-        #    files = ""
+        elif security and security.get_connection_args("scheduler")['require_encryption']:
+            job_config["protocol"] = "tls://"
+            job_config["security"] = security
+            # We hope we have files locally and it should be used
+            # for local tests only for now.
+            files = ""
         else:
-            job_config["protocol"] = 'tcp://'
+            job_config["protocol"] = "tcp://"
             input_files = [XCACHE_FILE]
             files = ", ".join(str(path) for path in input_files)
         ## Networking settings
@@ -123,7 +122,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "port": scheduler_port,
                 "dashboard_address": str(dashboard_port),
                 "protocol": scheduler_protocol.replace("://",""),
-                "external_address": external_address_short,
+                "external_address": external_address,
             },
             job_kwargs.get(
                 "scheduler_options",
@@ -142,11 +141,11 @@ class CoffeaCasaCluster(HTCondorCluster):
             },
             {"transfer_input_files": files},
             {"encrypt_input_files": files},
-            {"transfer_output_files": '""'},
-            {"when_to_transfer_output": '"ON_EXIT"'},
-            {"should_transfer_files": '"YES"'},
-            {"Stream_Output": 'False'},
-            {"Stream_Error": 'False'},
+            {"transfer_output_files": ""},
+            {"when_to_transfer_output": "ON_EXIT"},
+            {"should_transfer_files": "YES"},
+            {"Stream_Output": "False"},
+            {"Stream_Error": "False"},
             {"+DaskSchedulerAddress": external_ip_string},
             job_kwargs.get("job_extra", dask.config.get(f"jobqueue.{cls.config_name}.job-extra")),
         )
