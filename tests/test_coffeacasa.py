@@ -13,7 +13,7 @@ def test_header():
     with CoffeaCasaCluster(cores=1,
                            memory="100MB",
                            disk="100MB",
-                           worker_image="coffeateam/coffea-casa:latest"
+                           worker_image="coffeateam/coffea-casa:0.2.5"
                            ) as cluster:
         job_script = cluster.job_script()
         print("HTCondor Job script:", job_script)
@@ -30,7 +30,7 @@ def test_job_script():
                            processes=4,
                            memory="500MB",
                            disk="500MB",
-                           worker_image="coffeateam/coffea-casa:latest",
+                           worker_image="coffeateam/coffea-casa:0.2.5",
                            env_extra=['export LANG="en_US.utf8"',
                                       'export LC_ALL="en_US.utf8"'],
                            job_extra={"+Extra": "True"},
@@ -62,7 +62,7 @@ def test_scheduler():
     with CoffeaCasaCluster(cores=1,
                            memory="100MB",
                            disk="100MB",
-                           worker_image="coffeateam/coffea-casa:latest",
+                           worker_image="coffeateam/coffea-casa:0.2.5",
                            scheduler_options={
                                "dashboard_address": 8786,
                                "port": 8788}
@@ -93,25 +93,24 @@ def test_security():
         tls_client_cert=cert,
         require_encryption=True,
     )
-
-    with CoffeaCasaCluster(cores=1,
-                           memory="100MB",
-                           disk="100MB",
-                           worker_image="coffeateam/coffea-casa:latest",
-                           security=security) as cluster:
-        job_script = cluster.job_script()
-        print("HTCondor JobAd script:", job_script)
-        print("Scheduler specs:", cluster.scheduler_spec)
-        kwargs = CoffeaCasaCluster._modify_job_kwargs({})
-        print("CoffeaCasaCluster arguments:", kwargs)
-        assert cluster.security == 'mioa'
-        assert cluster.security == security
-        assert cluster.scheduler_spec["options"]["security"] == security
-        assert "--tls-key {}".format(key) in job_script
-        assert "--tls-cert {}".format(cert) in job_script
-        assert "--tls-ca-file {}".format(cert) in job_script
-        #cluster.scale(jobs=1)
-        #with Client(cluster, security=security) as client:
-        #    future = client.submit(lambda x: x + 1, 10)
-        #    result = future.result()
-        #    assert result == 11
+    cluster = CoffeaCasaCluster(cores=1,
+                                memory="100MB",
+                                disk="100MB",
+                                worker_image="coffeateam/coffea-casa:0.2.5",
+                                security=security)
+    assert security.get_connection_args("scheduler").get("require_encryption") is True
+    job_script = cluster.job_script()
+    print("HTCondor JobAd script:", job_script)
+    print("Scheduler specs:", cluster.scheduler_spec)
+    kwargs = CoffeaCasaCluster._modify_job_kwargs({})
+    print("CoffeaCasaCluster arguments:", kwargs)
+    assert cluster.security == security
+    assert cluster.scheduler_spec["options"]["security"] == security
+    assert "--tls-key {}".format(key) in job_script
+    assert "--tls-cert {}".format(cert) in job_script
+    assert "--tls-ca-file {}".format(cert) in job_script
+    #cluster.scale(jobs=1)
+    #with Client(cluster, security=security) as client:
+    #    future = client.submit(lambda x: x + 1, 10)
+    #    result = future.result()
+    #    assert result == 11
