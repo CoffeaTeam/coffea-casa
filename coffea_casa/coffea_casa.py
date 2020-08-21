@@ -84,20 +84,19 @@ class CoffeaCasaCluster(HTCondorCluster):
                            dashboard_port=DEFAULT_DASHBOARD_PORT,
                            ):
         job_config = job_kwargs.copy()
-        # If we have ready security object lets try to use TLS
-        #security.get_connection_args("scheduler").get("require_encryption") is True
-        if security and security.get_connection_args("scheduler")['require_encryption']:
-            job_config["protocol"] = 'tls://'
-            job_config["security"] = security
-            # We hope we have files locally and it should be used
-            # for local tests only for now.
-            files = ""
-        # If we have certs in env lets try to use TLS
-        elif CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")['require_encryption']:
+        # If we have certs in env, lets try to use TLS
+        if CA_FILE.is_file() and CERT_FILE.is_file() and security.get_connection_args("scheduler")['require_encryption']:
             job_config["protocol"] = 'tls://'
             job_config["security"] = cls.security()
             input_files = [CA_FILE, CERT_FILE, XCACHE_FILE]
             files = ", ".join(str(path) for path in input_files)
+        # If we have ready security object lets try to use TLS
+        #elif security and security.get_connection_args("scheduler")['require_encryption']:
+        #    job_config["protocol"] = 'tls://'
+        #    job_config["security"] = security
+        #    # We hope we have files locally and it should be used
+        #    # for local tests only for now.
+        #    files = ""
         else:
             job_config["protocol"] = 'tcp://'
             input_files = [XCACHE_FILE]
