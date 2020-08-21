@@ -1,52 +1,45 @@
 distributed:
     version: 2
-  
+
+# Link is not working (reverting for demo!): /user/{JUPYTERHUB_USER}/proxy/{port}/status
     dashboard:
       link: https://cmsaf-jh.unl.edu/user/{JUPYTERHUB_USER}/proxy/{port}/status
-      
-    # Link is not working (reverting for demo!): /user/{JUPYTERHUB_USER}/proxy/{port}/status
-  
+
     scheduler:
       idle-timeout: 3600s
-  
+
   # uncomment to force new worker pods after 2 hrs
   #  worker:
   #    lifetime:
   #      duration: "2 hours"
   #      stagger: "10 s"
   #      restart: true
-  
+
     admin:
       tick:
         limit: 5s
-  
+
     logging:
       distributed: info
       bokeh: critical
       tornado: critical
       tornado.application: error
 
-# Specific to each hub
-#gateway:
-  #  address: xxxx/services/dask-gateway/
-  #  proxy-address: tls://xx.xxx.xx:8786
-  
 labextension:
   factory:
-    module: 'dask_jobqueue'
-    class: 'HTCondorCluster'
+    module: 'coffea_casa'
+    class: 'CoffeaCasaCluster'
     args: []
     kwargs: {}
-    
+
     default:
-      workers: 5
+      workers: null
       adapt:
-        minimum: 5
-        maximum: 25
+        minimum: 1
+        maximum: 10
     #initial: []
     #- name: "UNL HTCondor cluster"
     #  workers: 1
     #  adapt:
     #    minimum: 5
     #    maximum: 25
-  

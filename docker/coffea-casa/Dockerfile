@@ -103,8 +103,8 @@ RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadu
 USER root
 # Dask setup - > dask.yml
 # Labextention setup - >labextension.yml
-COPY dask.yaml labextension.yaml $HOME/.config/dask/
-COPY dask.yaml labextension.yaml /etc/dask/
+COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
+COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
 
 USER $NB_UID
 # ------- xrootd-authz-plugin -------------------------------
