@@ -64,7 +64,7 @@ def test_scheduler():
                            disk="100MB",
                            worker_image="coffeateam/coffea-casa:0.2.5",
                            scheduler_options={
-                               "dashboard_address": 8786,
+                               "dashboard_address": 8787,
                                "port": 8788}
                            ) as cluster:
         job_script = cluster.job_script()

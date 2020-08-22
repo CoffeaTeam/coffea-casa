@@ -15,7 +15,7 @@ def default_modified_kwargs():
 
 
 def test_default_dask_container_port(default_modified_kwargs):
-    assert default_modified_kwargs["job_extra"]["dask_container_port"] == 8787
+    assert default_modified_kwargs["job_extra"]["dask_container_port"] == 8786
 
 
 def test_can_override_dask_container_port():

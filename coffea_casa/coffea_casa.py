@@ -106,17 +106,17 @@ class CoffeaCasaCluster(HTCondorCluster):
         except KeyError:
             print("Please check with system administarator why external IP was not assigned for you.")
             sys.exit(1)
+        scheduler_protocol = job_config["protocol"]
         if external_ip:
             address_list = [external_ip, DEFAULT_SCHEDULER_PORT]
             external_address_short = ":".join(str(item) for item in address_list)
             ###
-            full_address_list = [job_config["protocol"], external_address_short]
+            full_address_list = [scheduler_protocol, external_address_short]
             external_address = "".join(str(item) for item in full_address_list)
             external_ip_string = '"' + external_address + '"'
         ## Scheduler settings
         # we need to pass and check protocol for scheduler
         # (format should be not 'tls://'' but 'tls')
-        scheduler_protocol = job_config["protocol"]
         job_config["scheduler_options"] = merge_dicts(
             {
                 "port": scheduler_port,
