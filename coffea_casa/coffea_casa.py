@@ -8,9 +8,9 @@ from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
 from distributed.security import Security
 
 # Port settings
-DEFAULT_SCHEDULER_PORT = 8787
-DEFAULT_DASHBOARD_PORT = 8786
-DEFAULT_CONTAINER_PORT = 8787
+DEFAULT_SCHEDULER_PORT = 8786
+DEFAULT_DASHBOARD_PORT = 8787
+DEFAULT_CONTAINER_PORT = 8786
 
 # Security settings for Dask scheduler
 SECRETS_DIR = Path('/etc/cmsaf-secrets')

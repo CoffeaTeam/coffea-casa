@@ -99,7 +99,7 @@ RUN pip install --no-cache-dir \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed \
-    git+git://github.com/dask/dask-jobqueue.git@master#egg=dask-jobqueue \
+    git+git://github.com/dask/dask-jobqueue.git@master#egg=dask_jobqueue \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
 
 USER root
