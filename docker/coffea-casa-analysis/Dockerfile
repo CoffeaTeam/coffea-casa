@@ -65,11 +65,16 @@ RUN conda install --yes --freeze-installed \
     && conda build purge-all
 
 # Coffea
+# Since we need to install patched version of distributed version, it is will be
+# preferable to pull proper dask and distributed versions via pip.
+# dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.42 \
     # for xrootd plugin compilation
-    cmake
+    cmake \
+    git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed \
+    git+git://github.com/dask/dask-jobqueue.git@master#egg=dask_jobqueue
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
