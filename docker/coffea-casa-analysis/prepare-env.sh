@@ -62,7 +62,7 @@ if [ ! -z "$_CONDOR_JOB_AD" ]; then
 
     # Dask worker command - for --nprocs is default (=1)
     if [ "$TLS_ENV" == "true" ]; then
-        HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker tls://$EXTERNALIP_PORT \
+        HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
             --name $NAME --tls-ca-file $PATH_CA_FILE --tls-cert $FILE_CERT --tls-key $FILE_KEY \
             --nthreads $CPUS --memory-limit $MEMORY_MB_FORMATTED --nanny --death-timeout 60"
         # --listen-address tls://0.0.0.0:8787   --contact-address tcp://$HOST:$PORT removed because of uncompatibility with --nprocs
