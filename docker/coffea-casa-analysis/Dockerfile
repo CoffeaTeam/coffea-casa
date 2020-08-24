@@ -38,11 +38,11 @@ RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
     # Python 3.8 doesn't work with coffea
-    python==3.8 \
+    python==3.8.5 \
     python-blosc \
     cytoolz \
-    dask==2.20.0 \
-    lz4 \
+    dask==2.24.0 \
+    lz4==3.1.0 \
     nomkl \
     numpy==1.18.1 \
     pandas==1.0.1 \
@@ -65,15 +65,16 @@ RUN conda install --yes --freeze-installed \
     && conda build purge-all
 
 # Coffea
-# Since we need to install patched version of distributed version, it is will be
-# preferable to pull proper dask and distributed versions via pip.
-# dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.42 \
     # for xrootd plugin compilation
-    cmake \
-    git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed \
+    cmake
+
+# Since we need to install patched version of distributed version, it is will be
+# preferable to pull proper dask and distributed versions via pip.
+# dask-jobqueue.git -> master has required fixes (no need to patch)
+RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed \
     git+git://github.com/dask/dask-jobqueue.git@master#egg=dask_jobqueue
 
 # ------- xrootd-authz-plugin -------------------------------
