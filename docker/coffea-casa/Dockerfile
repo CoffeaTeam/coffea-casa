@@ -49,6 +49,7 @@ COPY patches/ $HOME/patches/
 # (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
 RUN apt-get update \
     && apt-get install -y gnupg2 \
+    openssh-client \
     python-setuptools \
     procps \
     && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \

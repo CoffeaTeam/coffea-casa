@@ -18,7 +18,8 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER  && \
 
 # EGI CA certificates
 RUN apt-get update \
-    && apt-get install -y gnupg2 openssh-client \
+    && apt-get install -y gnupg2 \
+    openssh-client \
     build-essential \
     python-setuptools \
     procps \
