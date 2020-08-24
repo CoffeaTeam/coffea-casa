@@ -38,7 +38,7 @@ RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
     # Python 3.8 doesn't work with coffea
-    python==3.7 \
+    # python==3.8 \
     python-blosc \
     cytoolz \
     dask==2.20.0 \
