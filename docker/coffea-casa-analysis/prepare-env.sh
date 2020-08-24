@@ -6,7 +6,7 @@ set -x
 # This happens during the first update, usually a few seconds after the job starts
 echo "Waiting for HostPort information..."
 # Check if we are not in GH CI environment (image check is stuck forever)
-if [ ! -z "$GITHUB_WORKFLOW" ]; then
+if [ -z "$GITHUB_WORKFLOW" ]; then
   while true; do
     if grep HostPort "$_CONDOR_JOB_AD"; then
       break
@@ -48,6 +48,7 @@ fi
 # HTCondor port, hostname and external IP ("must" variables)
 if [ ! -z "$_CONDOR_JOB_AD" ]; then
     PORT=`cat $_CONDOR_JOB_AD | grep HostPort | tr -d '"' | awk '{print $NF;}'`
+    CONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep ContainerPort | tr -d '"' | awk '{print $NF;}'`
     HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
     NAME=`cat $_CONDOR_JOB_AD | grep "DaskWorkerName "  | tr -d '"' | awk '{print $NF;}'`
     CPUS=`cat $_CONDOR_JOB_AD | grep "DaskWorkerCores " | tr -d '"' | awk '{print $NF;}'`
@@ -65,13 +66,13 @@ if [ ! -z "$_CONDOR_JOB_AD" ]; then
             --name $NAME --tls-ca-file $PATH_CA_FILE --tls-cert $FILE_CERT --tls-key $FILE_KEY \
             --nthreads $CPUS --memory-limit $MEMORY_MB_FORMATTED --nanny --death-timeout 60"
         # --listen-address tls://0.0.0.0:8787   --contact-address tcp://$HOST:$PORT removed because of uncompatibility with --nprocs
-        echo $HTCONDOR_COMAND --protocol tls --listen-address tls://0.0.0.0:8787  --contact-address tls://$HOST:$PORT 1>&2
-        exec $HTCONDOR_COMAND --protocol tls --listen-address tls://0.0.0.0:8787  --contact-address tls://$HOST:$PORT
+        echo $HTCONDOR_COMAND --protocol tls --listen-address tls://0.0.0.0:$CONTAINER_PORT  --contact-address tls://$HOST:$PORT 1>&2
+        exec $HTCONDOR_COMAND --protocol tls --listen-address tls://0.0.0.0:$CONTAINER_PORT  --contact-address tls://$HOST:$PORT
     elif  [ "$TLS_ENV" == "false" ]; then
         HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker tcp://$EXTERNALIP_PORT \
             --name $NAME --nthreads $CPUS --memory-limit $MEMORY_MB_FORMATTED --nanny --death-timeout 60"
-        echo $HTCONDOR_COMAND --listen-address tcp://0.0.0.0:8787  --contact-address tcp://$HOST:$PORT
+        echo $HTCONDOR_COMAND --listen-address tcp://0.0.0.0:$CONTAINER_PORT  --contact-address tcp://$HOST:$PORT
         # --listen-address tcp://0.0.0.0:8787  --contact-address tcp://$HOST:$PORT removed because of uncompatibility with --nprocs
-        exec $HTCONDOR_COMAND --listen-address tcp://0.0.0.0:8787  --contact-address tcp://$HOST:$PORT
+        exec $HTCONDOR_COMAND --listen-address tcp://0.0.0.0:$CONTAINER_PORT  --contact-address tcp://$HOST:$PORT
     fi
 fi
