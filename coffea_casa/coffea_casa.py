@@ -114,6 +114,9 @@ class CoffeaCasaCluster(HTCondorCluster):
             full_address_list = [scheduler_protocol, external_address_short]
             external_address = "".join(str(item) for item in full_address_list)
             external_ip_string = '"' + external_address + '"'
+        # HTCondor logging
+        job_config["log_directory"] = "logs"
+        job_config["silence_logs"] = "DEBUG"
         ## Scheduler settings
         # we need to pass and check protocol for scheduler
         # (format should be not 'tls://'' but 'tls')
