@@ -1,16 +1,12 @@
 import os
-import dask
 
-from distributed.security import Security
 from coffea import hist
 from coffea.analysis_objects import JaggedCandidateArray
 import coffea.processor as processor
 
-from dask.distributed import Client, LocalCluster
-from dask_jobqueue import HTCondorCluster
-from dask_jobqueue.htcondor import HTCondorJob
+from dask.distributed import Client
 
-from coffea_casa.coffea_casa_method import CoffeaCasaCluster
+from coffea_casa import CoffeaCasaCluster
 
 fileset = {
     'Jets': { 'files': ['root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root'],
@@ -55,8 +51,13 @@ class METProcessor(processor.ProcessorABC):
     def postprocess(self, accumulator):
         return accumulator
 
-client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.50", cores=2, min_scale=5, max_scale=10)
+cluster = CoffeaCasaCluster()
+cluster.scale(10)
+client = Client(cluster)
 
+exe_args = {
+        'client': client,
+    }
 exe_args = {
         'client': client,
     }

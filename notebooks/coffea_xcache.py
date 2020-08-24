@@ -7,11 +7,9 @@ from coffea import processor as processor
 from coffea.analysis_objects import JaggedCandidateArray
 from coffea.processor.test_items import NanoTestProcessor, NanoEventsProcessor
 from coffea.util import save
-from dask.distributed import Client, LocalCluster, get_worker
-from dask_jobqueue import HTCondorCluster
-from dask_jobqueue.htcondor import HTCondorJob
+from dask.distributed import Client
 
-from coffea_casa.coffea_casa_method import CoffeaCasaCluster
+from coffea_casa import CoffeaCasaCluster
 
 filelist = {
     "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8": [
@@ -43,10 +41,11 @@ filelist = {
 
 # Wrapper aroung dask_queue.HTCondorCluster, that allowed to launch Dask on an HTCondor cluster with a shared file system and customised for our analysis facility.
 # More information: https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.HTCondorCluster.html
-client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.50", autoscale=False, max_scale=15, tls=False)
+cluster = CoffeaCasaCluster()
+cluster.scale(10)
+client = Client(cluster)
 
-
-# A lot of interesting configuration: 
+# A lot of interesting configuration:
 # * client (distributed.client.Client) – A dask distributed client instance
 # * savemetrics': (int, optional) -  save metrics for I/O analysis
 # * compression (int, optional) – Compress accumulator outputs in flight with LZ4, at level specified (default 1). Set to None for no compression.
@@ -73,10 +72,10 @@ chunksize = 100000
 p = NanoEventsProcessor(canaries=['0001fd0d874c9fff11e9a13cd2e55d9fbeef;Events;0;99159;Muon_pt'])
 
 # A convenience wrapper to submit jobs for a file set, which is a dictionary of dataset: [file list] entries.
-# Supports only uproot reading, via the LazyDataFrame class. 
+# Supports only uproot reading, via the LazyDataFrame class.
 # * Parameters: processor_instance (ProcessorABC) – An instance of a class deriving from ProcessorABC
 # * Parameters: executor (callable) – A function that takes 3 arguments: items, function, accumulator and performs some action equivalent to: `for item in items: accumulator += function(item)`. See iterative_executor, futures_executor, dask_executor, or parsl_executor for available options.
-# * Parameters: executor_args (dict, optional) – Arguments to pass to executor. 
+# * Parameters: executor_args (dict, optional) – Arguments to pass to executor.
 # * Parameters: pre_args (dict, optional) – Similar to executor_args, defaults to executor_args
 # * Parameters: chunksize (int, optional) – Maximum number of entries to process at a time in the data frame
 # * Parameters: maxchunks (int, optional) – Maximum number of chunks to process per dataset Defaults to processing the whole dataset
@@ -91,4 +90,3 @@ print("Events / s / thread: {:,.0f}".format(res[1]['entries'].value / res[1]['pr
 print("Bytes / s / thread: {:,.0f}".format(res[1]['bytesread'].value / res[1]['processtime'].value))
 print("Events / s: {:,.0f}".format(res[1]['entries'].value / (toc - tic)))
 print("Bytes / s: {:,.0f}".format(res[1]['bytesread'].value / (toc - tic)))
-

@@ -1,16 +1,13 @@
 import os
-import dask
 
 from distributed.security import Security
 from coffea import hist
 from coffea.analysis_objects import JaggedCandidateArray
 import coffea.processor as processor
 
-from dask.distributed import Client, LocalCluster
-from dask_jobqueue import HTCondorCluster
-from dask_jobqueue.htcondor import HTCondorJob
+from dask.distributed import Client
 
-from coffea_casa.coffea_casa_method import CoffeaCasaCluster
+from coffea_casa import CoffeaCasaCluster
 
 fileset = {
     'Jets': { 'files': ['root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root'],
@@ -54,10 +51,12 @@ class METProcessor(processor.ProcessorABC):
 
     def postprocess(self, accumulator):
         return accumulator
-    
+
 # Wrapper aroung dask_queue.HTCondorCluster, that allowed to launch Dask on an HTCondor cluster with a shared file system and customised for our analysis facility.
 # More information: https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.HTCondorCluster.html
-client = CoffeaCasaCluster(worker_image="coffeateam/coffea-casa-analysis:0.1.50", autoscale=False, max_scale=10, tls=True)
+cluster = CoffeaCasaCluster()
+cluster.adapt(minimum=4, maximum=10)
+client = Client(cluster)
 
 exe_args = {
         'client': client,
@@ -65,10 +64,10 @@ exe_args = {
 
 
 # A convenience wrapper to submit jobs for a file set, which is a dictionary of dataset: [file list] entries.
-# Supports only uproot reading, via the LazyDataFrame class. 
+# Supports only uproot reading, via the LazyDataFrame class.
 # * Parameters: processor_instance (ProcessorABC) – An instance of a class deriving from ProcessorABC
 # * Parameters: executor (callable) – A function that takes 3 arguments: items, function, accumulator and performs some action equivalent to: `for item in items: accumulator += function(item)`. See iterative_executor, futures_executor, dask_executor, or parsl_executor for available options.
-# * Parameters: executor_args (dict, optional) – Arguments to pass to executor. 
+# * Parameters: executor_args (dict, optional) – Arguments to pass to executor.
 output = processor.run_uproot_job(fileset,
                                 treename = 'Events',
                                 processor_instance = METProcessor(),
