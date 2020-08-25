@@ -1,4 +1,18 @@
 diff --git a/distributed/deploy/spec.py b/distributed/deploy/spec.py
+index 9e47413f..704e5a32 100644
+--- a/distributed/deploy/spec.py
++++ b/distributed/deploy/spec.py
+@@ -325,7 +325,8 @@ class SpecCluster(Cluster):
+             to_close = set(self.workers) - set(self.worker_spec)
+             if to_close:
+                 if self.scheduler.status == Status.running:
+-                    await self.scheduler_comm.retire_workers(workers=list(to_close))
++                    worker_names = ["htcondor--%s--" % self.workers[idx].job_id for idx in to_close]
++                    await self.scheduler_comm.retire_workers(names=worker_names)
+                 tasks = [self.workers[w].close() for w in to_close if w in self.workers]
+                 await asyncio.wait(tasks)
+                 for task in tasks:  # for tornado gen.coroutine support
+diff --git a/distributed/deploy/spec.py b/distributed/deploy/spec.py
 index cdde4a81..7bd4295c 100644
 --- a/distributed/deploy/spec.py
 +++ b/distributed/deploy/spec.py
