@@ -78,7 +78,7 @@ def test_scheduler():
         #cluster.scale(1)
         #assert expected in str(cluster.worker_spec)
 
-@pytest.mark.skip(reason="TLS is still not working out-of-the-box")
+@pytest.mark.skip(reason="TLS is still not working with custom Security object")
 def test_security():
     dirname = os.path.dirname(__file__)
     key = os.path.join(dirname, "key.pem")

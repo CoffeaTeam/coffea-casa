@@ -51,13 +51,11 @@ class METProcessor(processor.ProcessorABC):
     def postprocess(self, accumulator):
         return accumulator
 
+
 cluster = CoffeaCasaCluster()
 cluster.scale(10)
 client = Client(cluster)
 
-exe_args = {
-        'client': client,
-    }
 exe_args = {
         'client': client,
     }

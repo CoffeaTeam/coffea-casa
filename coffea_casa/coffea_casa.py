@@ -13,7 +13,7 @@ DEFAULT_DASHBOARD_PORT = 8787
 DEFAULT_CONTAINER_PORT = 8786
 
 # Security settings for Dask scheduler
-SECRETS_DIR = Path('/etc/cmsaf-secrets')
+SECRETS_DIR = Path("/etc/cmsaf-secrets")
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
 # XCache
@@ -33,12 +33,17 @@ def merge_dicts(*dict_args):
 
 class CoffeaCasaJob(HTCondorJob):
     """
+
     """
     submit_command = "condor_submit -spool"
     config_name = "coffea-casa"
 
 
 class CoffeaCasaCluster(HTCondorCluster):
+    """
+    This is a  subclass expanding settings for launch Dask via HTCondorCluster
+    over HTCondor in US.CMS facility.
+    """
     job_cls = CoffeaCasaJob
     config_name = "coffea-casa"
 
@@ -49,17 +54,41 @@ class CoffeaCasaCluster(HTCondorCluster):
                  scheduler_options=None,
                  scheduler_port=DEFAULT_SCHEDULER_PORT,
                  dashboard_port=DEFAULT_DASHBOARD_PORT,
-                 **job_kwargs
-                 ):
+                 **job_kwargs):
         """
         Parameters
         ----------
-        worker_image
+        worker_image:
             Defaults to ``coffeateam/coffea-casa-analysis``
             (https://hub.docker.com/r/coffeateam/coffea-casa-analysis).
-        scheduler_port
-        dashboard_port
-        job_kwargs
+            Check the default version of container in `.dask/jobqueue-coffea-casa.yaml` or
+            `/etc/dask/jobqueue-coffea-casa.yaml`
+        scheduler_port:
+            Defaults to 8786.
+        dashboard_port:
+            Defaults to 8787.
+        container_port:
+            Defaults to 8786.
+        disk:
+            Total amount of disk per job (defaults to 5 GiB).
+        cores:
+            Total number of cores per job (defaults to 4 cores).
+        memory:
+            Total amount of memory per job (defaults to 6 GB).
+        scheduler_options : dict
+            Extra scheduler options for the job (Dask specific).
+        job_extra : dict
+            Extra submit file attributes for the job (HTCondor specific).
+
+        Examples
+        --------
+        >>> from coffea_casa import CoffeaCasaCluster
+        >>> cluster = CoffeaCasaCluster()
+        >>> cluster.scale(jobs=10)  # ask for 10 jobs
+        >>> from dask.distributed import Client
+        >>> client = Client(cluster)
+        This also works with adaptive clusters and launches and kill workers based on load.
+        >>> cluster.adapt(maximum_jobs=20)
         """
         if security:
             self.security = security
@@ -81,16 +110,21 @@ class CoffeaCasaCluster(HTCondorCluster):
                            worker_image=None,
                            scheduler_options=None,
                            scheduler_port=DEFAULT_SCHEDULER_PORT,
-                           dashboard_port=DEFAULT_DASHBOARD_PORT,
-                           ):
+                           dashboard_port=DEFAULT_DASHBOARD_PORT):
         job_config = job_kwargs.copy()
         # If we have certs in env, lets try to use TLS
-        if CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")['require_encryption']:
+        if (
+            CA_FILE.is_file()
+            and CERT_FILE.is_file()
+            and cls.security().get_connection_args("scheduler")["require_encryption"]
+        ):
             job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
             input_files = [CA_FILE, CERT_FILE, XCACHE_FILE]
             files = ", ".join(str(path) for path in input_files)
-        elif security and security.get_connection_args("scheduler")['require_encryption']:
+        elif (
+            security and security.get_connection_args("scheduler")["require_encryption"]
+        ):
             job_config["protocol"] = "tls://"
             job_config["security"] = security
             # We hope we have files locally and it should be used
@@ -102,15 +136,16 @@ class CoffeaCasaCluster(HTCondorCluster):
             files = ", ".join(str(path) for path in input_files)
         ## Networking settings
         try:
-            external_ip = os.environ['HOST_IP']
+            external_ip = os.environ["HOST_IP"]
         except KeyError:
-            print("Please check with system administarator why external IP was not assigned for you.")
+            print(
+                "Please check with system administarator why external IP was not assigned for you."
+            )
             sys.exit(1)
         scheduler_protocol = job_config["protocol"]
         if external_ip:
             address_list = [external_ip, DEFAULT_SCHEDULER_PORT]
             external_address_short = ":".join(str(item) for item in address_list)
-            ###
             full_address_list = [scheduler_protocol, external_address_short]
             external_address = "".join(str(item) for item in full_address_list)
             external_ip_string = '"' + external_address + '"'
@@ -124,7 +159,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             {
                 "port": scheduler_port,
                 "dashboard_address": str(dashboard_port),
-                "protocol": scheduler_protocol.replace("://",""),
+                "protocol": scheduler_protocol.replace("://", ""),
                 "external_address": external_address,
             },
             job_kwargs.get(
@@ -136,7 +171,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         job_config["job_extra"] = merge_dicts(
             {
                 "universe": "docker",
-                "docker_image": worker_image or dask.config.get(f"jobqueue.{cls.config_name}.worker-image"),
+                "docker_image": worker_image or dask.config.get(f"jobqueue.{cls.config_name}.worker-image")
             },
             {
                 "container_service_names": "dask",
@@ -150,7 +185,9 @@ class CoffeaCasaCluster(HTCondorCluster):
             {"Stream_Output": "False"},
             {"Stream_Error": "False"},
             {"+DaskSchedulerAddress": external_ip_string},
-            job_kwargs.get("job_extra", dask.config.get(f"jobqueue.{cls.config_name}.job-extra")),
+            job_kwargs.get(
+                "job_extra", dask.config.get(f"jobqueue.{cls.config_name}.job-extra")
+            ),
         )
         print(job_config)
         return job_config
@@ -158,6 +195,7 @@ class CoffeaCasaCluster(HTCondorCluster):
     @classmethod
     def security(cls):
         """
+        Return the Dask ``Security`` object used by CoffeaCasa.
         """
         ca_file = str(CA_FILE)
         cert_file = str(CERT_FILE)

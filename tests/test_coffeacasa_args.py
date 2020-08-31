@@ -30,7 +30,7 @@ def test_default_protocol(default_modified_kwargs):
         assert default_modified_kwargs["scheduler_options"]["protocol"] == 'tcp'
 
 
-@pytest.mark.skip(reason="TLS is still not working out-of-the-box")
+@pytest.mark.skip(reason="TLS is still not working with custom Security object")
 def test_args_security():
     dirname = os.path.dirname(__file__)
     key = os.path.join(dirname, "key.pem")
