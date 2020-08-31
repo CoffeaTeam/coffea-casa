@@ -4,6 +4,7 @@ coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framewo
 ![CI/CD status](https://github.com/coffeateam/coffea-casa/workflows/CI/CD/badge.svg)
 ![GitHub issues](https://img.shields.io/github/issues/coffeateam/coffea-casa)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/coffeateam/coffea-casa)
+[![Documentation Status](https://readthedocs.org/projects/coffea-casa/badge/?version=latest)](https://coffea-casa.readthedocs.io/en/latest/?badge=latest)
 
 Latest DockerHub Images: https://hub.docker.com/orgs/coffeateam/repositories
 
