@@ -113,11 +113,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                            dashboard_port=DEFAULT_DASHBOARD_PORT):
         job_config = job_kwargs.copy()
         # If we have certs in env, lets try to use TLS
-        if (
-            CA_FILE.is_file()
-            and CERT_FILE.is_file()
-            and cls.security().get_connection_args("scheduler")["require_encryption"]
-        ):
+        if (CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")["require_encryption"]):
             job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
             input_files = [CA_FILE, CERT_FILE, XCACHE_FILE]
