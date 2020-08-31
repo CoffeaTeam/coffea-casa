@@ -14,15 +14,16 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import coffea_casa
 
 # -- Project information -----------------------------------------------------
 
 project = 'coffea-casa'
-copyright = '2020, Oksana Shadura, UNL'
-author = 'Oksana Shadura, UNL'
+copyright = '2020, coffea-casa'
+author = 'coffea-casa, UNL'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = coffea_casa.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -31,6 +32,12 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.viewcode",
+    "IPython.sphinxext.ipython_console_highlighting",
+    "sphinx.ext.todo"
 ]
 
 # Add any paths that contain templates here, relative to this directory.

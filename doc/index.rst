@@ -1,12 +1,12 @@
-Coffea-Casa
-=========
+coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framework For Effective Analysis
+==============================================================================================================
 
 .. py:currentmodule:: coffea_casa
 
 
 The prototype analysis facility provides services for “low latency columnar analysis”,
 enabling rapid processing of data in a column-wise fashion.
-Coffea-casa Analysis Facility (AF) services, based on Dask and Jupyter notebooks,
+``Coffea-casa Analysis Facility (AF)`` services, based on Dask and Jupyter notebooks,
 aim to dramatically lower time for analysis and provide an easily-scalable
 and user-friendly computational environment that will simplify, facilitate,
 and accelerate the delivery of HEP results.
@@ -16,20 +16,20 @@ with resources allocated via fairshare through the local HTCondor system.
 
 .. note::
 
-    Coffea-casa is still a prototype software. Please if you had noticed a bug,
+    ``Coffea-casa is`` still a prototype software. Please if you had noticed a bug,
     we invite you to open an issue directly in GH issues: <https://github.com/CoffeaTeam/coffea-casa/>
 
-How to start to work with Coffea-casa:
+How to start to work with ``coffea-casa``:
 
-:doc:`installation`
-    How to setup Coffea-casa JH notebook.
+:doc:`setup`
+    How to setup ``coffea-casa`` JH notebook.
 
 
 :doc:`examples`
-    A brief examples Jupyter notebooks,using :class:`CoffeaCasaCluster`
+    A brief examples Jupyter notebooks, using :class:`CoffeaCasaCluster`
 
 
-Configuration of Coffea-casa AF together with JupyterLab extension:
+Configuration of ``coffea-casa`` AF together with JupyterLab extension:
 
 
 :doc:`configuration`
