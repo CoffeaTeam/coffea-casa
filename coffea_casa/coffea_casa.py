@@ -61,7 +61,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         worker_image:
             Defaults to ``coffeateam/coffea-casa-analysis``
             (https://hub.docker.com/r/coffeateam/coffea-casa-analysis).
-            Check the default version of container in `.dask/jobqueue-coffea-casa.yaml` or
+            Check the default version of container in `~/.config/dask/jobqueue-coffea-casa.yaml` or
             `/etc/dask/jobqueue-coffea-casa.yaml`
         scheduler_port:
             Defaults to 8786.

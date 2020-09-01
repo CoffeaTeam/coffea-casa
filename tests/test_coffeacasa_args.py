@@ -47,7 +47,7 @@ def test_args_security():
     with CoffeaCasaCluster(cores=1,
                            memory="100MB",
                            disk="100MB",
-                           worker_image="coffeateam/coffea-casa-analysis:0.2.22",
+                           worker_image="coffeateam/coffea-casa-analysis:0.2.23",
                            security=security
                            ) as cluster:
         kwargs = cluster._modify_job_kwargs({})
