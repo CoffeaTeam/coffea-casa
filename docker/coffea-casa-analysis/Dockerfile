@@ -51,6 +51,7 @@ RUN conda install --yes --freeze-installed \
     bokeh \
     distributed \
     dask-jobqueue \
+    cloudpickle==1.6.0 \
     xrootd==5.0.1 \
     htcondor \
     # Extra packages
