@@ -8,14 +8,13 @@ import io
 import versioneer
 
 # Add 'distributed' back when patches will be upstreamed
-INSTALL_REQUIRES = ['dask-jobqueue',
-                    ]
+INSTALL_REQUIRES = ['dask-jobqueue']
 TESTS_REQUIRE = ['pytest', 'pytest-cov'
                  'pytest-timeout', 'pytest-rerunfailures']
 EXTRAS_REQUIRE = {
-    'doc': ['ipython', 'sphinx == 1.8.5', 'sphinx_rtd_theme',
-            'sphinx-gallery', 'nbsphinx', 'nbstripout', 'docutils == 0.15.2'],
-    'test': TESTS_REQUIRE
+    'docs': ['ipython', 'sphinx == 1.8.5', 'sphinx_rtd_theme',
+             'sphinx-gallery', 'nbsphinx', 'nbstripout', 'docutils == 0.15.2',],
+    'test': ['pytest', 'pytest-cov', 'pytest-timeout', 'pytest-rerunfailures']
 }
 
 EXTRAS_REQUIRE['all'] = sorted(set(sum(EXTRAS_REQUIRE.values(), [])))

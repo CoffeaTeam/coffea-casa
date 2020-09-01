@@ -4,6 +4,10 @@ coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framewo
 .. py:currentmodule:: coffea_casa
 
 
+coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framework For Effective Analysis
+==============================================================================================================
+
+
 The prototype analysis facility provides services for “low latency columnar analysis”,
 enabling rapid processing of data in a column-wise fashion.
 ``Coffea-casa Analysis Facility (AF)`` services, based on Dask and Jupyter notebooks,
@@ -24,14 +28,6 @@ How to start to work with ``coffea-casa``:
 
 :doc:`setup`
     How to setup ``coffea-casa`` JH notebook.
-
-
-:doc:`adl1`
-    A brief examples Jupyter notebook, using :class:`CoffeaCasaCluster`
-
-
-:doc:`coffea_xcache`
-    A brief examples Jupyter notebook using XCache, using :class:`CoffeaCasaCluster`
 
 
 Configuration of ``coffea-casa`` AF together with Dask JupyterLab extension:
@@ -60,8 +56,6 @@ Detailed information on the Python API:
    :caption: Quick Start
 
    setup
-   adl1
-   coffea_xcache
 
 .. toctree::
    :maxdepth: 2

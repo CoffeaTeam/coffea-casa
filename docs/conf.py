@@ -33,11 +33,12 @@ release = coffea_casa.__version__
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
+    "nbsphinx",
     "IPython.sphinxext.ipython_console_highlighting",
-    "sphinx.ext.todo"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
