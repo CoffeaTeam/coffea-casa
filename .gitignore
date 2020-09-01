@@ -1,7 +1,7 @@
 *.pyc
 *.egg-info
 .eggs/
-docs/build
+docs/_build
 build/
 dist/
 .idea/
@@ -13,4 +13,3 @@ log
 *.swo
 .cache/
 .pytest_cache
-docs/source/generated

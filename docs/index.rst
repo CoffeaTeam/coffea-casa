@@ -21,15 +21,20 @@ with resources allocated via fairshare through the local HTCondor system.
 
 How to start to work with ``coffea-casa``:
 
+
 :doc:`setup`
     How to setup ``coffea-casa`` JH notebook.
 
 
-:doc:`examples`
-    A brief examples Jupyter notebooks, using :class:`CoffeaCasaCluster`
+:doc:`adl1`
+    A brief examples Jupyter notebook, using :class:`CoffeaCasaCluster`
 
 
-Configuration of ``coffea-casa`` AF together with JupyterLab extension:
+:doc:`coffea_xcache`
+    A brief examples Jupyter notebook using XCache, using :class:`CoffeaCasaCluster`
+
+
+Configuration of ``coffea-casa`` AF together with Dask JupyterLab extension:
 
 
 :doc:`configuration`
@@ -37,6 +42,7 @@ Configuration of ``coffea-casa`` AF together with JupyterLab extension:
 
 
 Detailed information on the Python API:
+
 
 :doc:`api`
     API documentation for ``coffea_casa``.
@@ -54,18 +60,19 @@ Detailed information on the Python API:
    :caption: Quick Start
 
    setup
-   examples
+   adl1
+   coffea_xcache
 
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: How to configure
+   :caption: How to configure Dask Labextension cluster
 
    configuration
 
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: ``coffea_casa`` API
+   :caption: ``coffea_casa`` module API
 
    api
