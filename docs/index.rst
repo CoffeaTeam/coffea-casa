@@ -1,14 +1,14 @@
-coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framework For Effective Analysis
-==============================================================================================================
+.. _index:
 
 .. py:currentmodule:: coffea_casa
 
 
-coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framework For Effective Analysis
+coffea-casa
 ==============================================================================================================
 
 
-The prototype analysis facility provides services for “low latency columnar analysis”,
+A Prototype U.S. CMS analysis facility for Columnar Object Framework For Effective Analysis,
+provides services for “low latency columnar analysis”,
 enabling rapid processing of data in a column-wise fashion.
 ``Coffea-casa Analysis Facility (AF)`` services, based on Dask and Jupyter notebooks,
 aim to dramatically lower time for analysis and provide an easily-scalable
@@ -20,28 +20,29 @@ with resources allocated via fairshare through the local HTCondor system.
 
 .. note::
 
-    ``Coffea-casa is`` still a prototype software. Please if you had noticed a bug,
+    ``Coffea-casa is`` a prototype: please if you had noticed a bug,
     we invite you to open an issue directly in GH issues: <https://github.com/CoffeaTeam/coffea-casa/>
 
-How to start to work with ``coffea-casa``:
 
+
+How to start to work with ``coffea-casa``:
 
 :doc:`setup`
     How to setup ``coffea-casa`` JH notebook.
 
 
-Configuration of ``coffea-casa`` AF together with Dask JupyterLab extension:
 
+Configuration of ``coffea-casa`` AF together with Dask JupyterLab extension:
 
 :doc:`configuration`
     Information on using Dask JupyterLab extension.
 
 
+
 Detailed information on the Python API:
 
-
 :doc:`api`
-    API documentation for ``coffea_casa``.
+    API documentation for ``coffea_casa`` module.
 
 
 .. toctree::
@@ -53,20 +54,17 @@ Detailed information on the Python API:
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Quick Start
 
    setup
 
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: How to configure Dask Labextension cluster
 
    configuration
 
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: ``coffea_casa`` module API
 
    api

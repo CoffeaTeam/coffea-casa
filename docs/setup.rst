@@ -3,7 +3,7 @@
 .. py:currentmodule:: coffea_casa
 
 
-Setup
+Quick Start
 ============
 
 Next snippet will set up a cluster by instantiating a Dask Client for :class:`CoffeaCasaCluster,

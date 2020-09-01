@@ -2,8 +2,8 @@
 
 .. py:currentmodule:: coffea_casa
 
-API Reference
-=============
+``coffea_casa`` module API
+===========================
 
 .. autoclass:: CoffeaCasaCluster
    :members: security
