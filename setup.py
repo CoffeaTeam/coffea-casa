@@ -10,7 +10,15 @@ import versioneer
 # Add 'distributed' back when patches will be upstreamed
 INSTALL_REQUIRES = ['dask-jobqueue',
                     ]
-EXTRAS_REQUIRE = {}
+TESTS_REQUIRE = ['pytest', 'pytest-cov'
+                 'pytest-timeout', 'pytest-rerunfailures']
+EXTRAS_REQUIRE = {
+    'doc': ['ipython', 'sphinx == 1.8.5', 'sphinx_rtd_theme',
+            'sphinx-gallery', 'nbsphinx', 'nbstripout', 'docutils == 0.15.2'],
+    'test': TESTS_REQUIRE
+}
+
+EXTRAS_REQUIRE['all'] = sorted(set(sum(EXTRAS_REQUIRE.values(), [])))
 
 with io.open("README.md", "r", encoding="utf-8") as f:
     readme = f.read()
@@ -31,7 +39,7 @@ setup(name='coffea_casa',
       zip_safe=False,
       setup_requires=["pytest-runner", "flake8"],
       dependency_links=['git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed'],
-      tests_require=["pytest"],
+      tests_require=TESTS_REQUIRE,
       classifiers=[
           "Development Status :: 4 - Beta",
           "Intended Audience :: Developers",
