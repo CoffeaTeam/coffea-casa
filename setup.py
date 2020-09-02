@@ -13,7 +13,7 @@ TESTS_REQUIRE = ['pytest', 'pytest-cov'
                  'pytest-timeout', 'pytest-rerunfailures']
 EXTRAS_REQUIRE = {
     'docs': ['ipython', 'sphinx == 1.8.5', 'sphinx_rtd_theme',
-             'sphinx-gallery', 'nbsphinx', 'nbstripout', 'docutils == 0.15.2',],
+             'sphinx-gallery', 'nbsphinx', 'nbstripout', 'docutils == 0.15.2', 'sphinx_rtd_theme'],
     'test': ['pytest', 'pytest-cov', 'pytest-timeout', 'pytest-rerunfailures']
 }
 
