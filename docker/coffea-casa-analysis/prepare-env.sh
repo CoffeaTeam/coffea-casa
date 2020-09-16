@@ -32,7 +32,7 @@ fi
 # /etc/cmsaf-secrets/hostcert.pem --tls-key /etc/cmsaf-secrets/hostcert.pem \
 # --listen-address tls://0.0.0.0:8788 --name kubernetes-worker --contact-address \
 # tls://$HOST_IP:8786 tls://localhost:8786
-if [[ -v COFFEA_CASA_SIDECAR ] && [ ! -z "$COFFEA_CASA_SIDECAR" ]]; then
+if [[ -v COFFEA_CASA_SIDECAR && ! -z "$COFFEA_CASA_SIDECAR" ]]; then
   # From chtc/dask-chtc: wait for the job ad to be updated with <service>_HostPort
   # This happens during the first update, usually a few seconds after the job starts
   echo "Waiting for HostPort information..."
