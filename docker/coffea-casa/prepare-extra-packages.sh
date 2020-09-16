@@ -2,10 +2,6 @@
 
 set -x
 
-# FIXME: We will use it later, mostly here or for worker-sidecar
-# (some ideas how to use it in helm: https://github.com/dask/dask-docker/issues/59)
-# Entrypoint shoudl be changed to -> ENTRYPOINT ["tini", "--", "/usr/bin/prepare-extra-packages.sh"]
-
 # We start by adding extra apt packages, since pip modules may required library
 if [ "$EXTRA_APT_PACKAGES" ]; then
     echo "EXTRA_APT_PACKAGES environment variable found.  Installing."
