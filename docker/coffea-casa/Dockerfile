@@ -155,6 +155,9 @@ ENV LD_LIBRARY_PATH="/opt/conda/lib/"
 ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 
+ADD prepare-extra-packages.sh /usr/local/bin/
+RUN chmod ugo+x /usr/local/bin/prepare-extra-packages.sh
+
 USER $NB_UID
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
 # Use bash login shell for entrypoint in order
