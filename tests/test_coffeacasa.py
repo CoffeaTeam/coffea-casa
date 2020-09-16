@@ -13,7 +13,7 @@ def test_header():
     with CoffeaCasaCluster(cores=1,
                            memory="100MB",
                            disk="100MB",
-                           worker_image="coffeateam/coffea-casa-analysis:0.2.23"
+                           worker_image="coffeateam/coffea-casa-analysis:0.2.25"
                            ) as cluster:
         job_script = cluster.job_script()
         print("HTCondor Job script:", job_script)
@@ -30,7 +30,7 @@ def test_job_script():
                            processes=4,
                            memory="500MB",
                            disk="500MB",
-                           worker_image="coffeateam/coffea-casa-analysis:0.2.23",
+                           worker_image="coffeateam/coffea-casa-analysis:0.2.25",
                            env_extra=['export LANG="en_US.utf8"',
                                       'export LC_ALL="en_US.utf8"'],
                            job_extra={"+Extra": "True"},
@@ -62,7 +62,7 @@ def test_scheduler():
     with CoffeaCasaCluster(cores=1,
                            memory="100MB",
                            disk="100MB",
-                           worker_image="coffeateam/coffea-casa-analysis:0.2.23",
+                           worker_image="coffeateam/coffea-casa-analysis:0.2.25",
                            scheduler_options={
                                "dashboard_address": 8787,
                                "port": 8788}
@@ -96,7 +96,7 @@ def test_security():
     cluster = CoffeaCasaCluster(cores=1,
                                 memory="100MB",
                                 disk="100MB",
-                                worker_image="coffeateam/coffea-casa-analysis:0.2.23",
+                                worker_image="coffeateam/coffea-casa-analysis:0.2.25",
                                 security=security)
     assert security.get_connection_args("scheduler").get("require_encryption") is True
     job_script = cluster.job_script()
