@@ -102,7 +102,7 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
     groupadd 1000 && usermod -g 1000 $NB_USER
 
-# xcache setup
+# xcache setup (we setup BEARER_TOKEN_FILE later in prepare-env.sh)
 ENV XCACHE_HOST="red-xcache1.unl.edu"
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/"
@@ -118,7 +118,9 @@ RUN rm -rf /tmp/* \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
     && rm -rf /opt/conda/pkgs
 
-# Prepare HTCondor ENV
+# Prepare HTCondor spec. environment and execute dask-worker command
+# If we using this container as a sidecar, we don't setup any HTCondor spec. environment
+# nor and execute dask-worker command
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
