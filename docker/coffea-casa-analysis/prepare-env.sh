@@ -103,4 +103,6 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       echo $HTCONDOR_COMAND 1>&2
       exec $HTCONDOR_COMAND --protocol tls --listen-address tls://0.0.0.0:$CONTAINER_PORT  --contact-address tls://$HOST:$PORT
   fi
+else
+  exec "@"
 fi
