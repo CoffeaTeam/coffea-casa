@@ -95,13 +95,13 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --tls-key $FILE_KEY \
       --nthreads $CPUS \
       --memory-limit $MEMORY_MB_FORMATTED \
-      --nanny --death-timeout 60" \
+      --nanny --death-timeout 60 \
       --protocol tls \
       --listen-address tls://0.0.0.0:$CONTAINER_PORT \
-      --contact-address tls://$HOST:$PORT
+      --contact-address tls://$HOST:$PORT"
       # Debug print
       echo $HTCONDOR_COMAND 1>&2
-      exec $HTCONDOR_COMAND --protocol tls --listen-address tls://0.0.0.0:$CONTAINER_PORT  --contact-address tls://$HOST:$PORT
+      exec $HTCONDOR_COMAND
   fi
 else
   exec "@"

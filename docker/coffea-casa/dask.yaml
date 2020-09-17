@@ -49,14 +49,14 @@ labextension:
     kwargs: {}
 
   default:
-    workers: 1
+    workers: null
     adapt:
       minimum: 5
       maximum: 10
 
   initial:
   - name: "UNL HTCondor Cluster"
-    workers: 1
+    workers: null
     adapt:
       minimum: 5
       maximum: 10
