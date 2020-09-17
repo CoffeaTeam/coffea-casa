@@ -10,7 +10,8 @@ labextension:
       adapt:
         minimum: 1
         maximum: 10
-    initial: []
+
+    initial:
     - name: "UNL HTCondor cluster"
       workers: null
       adapt:
