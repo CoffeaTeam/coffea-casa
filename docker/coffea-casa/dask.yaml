@@ -52,11 +52,11 @@ labextension:
     workers: null
     adapt:
       minimum: 5
-      maximum: 10
+      maximum: 100
 
   initial:
   - name: "UNL HTCondor Cluster"
     workers: null
     adapt:
       minimum: 5
-      maximum: 10
+      maximum: 100
