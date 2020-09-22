@@ -8,12 +8,12 @@ labextension:
   default:
     workers: null
     adapt:
-      minimum: 5
+      minimum: 1
       maximum: 100
 
   initial:
   - name: "UNL HTCondor Cluster"
     workers: null
     adapt:
-      minimum: 5
+      minimum: 1
       maximum: 100
