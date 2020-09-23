@@ -57,6 +57,10 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   # Bearer token
   if [[ -f "$PWD/xcache_token" ]]; then
       export BEARER_TOKEN_FILE="$PWD/xcache_token"
+      export XCACHE_HOST="red-xcache1.unl.edu"
+      export XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+      export LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
+      export XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
   fi
   # CA certificate securily transfered from scheduler
   if [[ -f "$PWD/ca.pem" ]]; then
