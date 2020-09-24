@@ -50,27 +50,32 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     echo
   fi
 
+  if [ -z "$_CONDOR_JOB_IWD" ]; then
+    echo "Error: something is wrong, $_CONDOR_JOB_IWD (path to the initial working directory the job was born with) was not defined!"
+    exit 1
+  fi
+
   # Condor token securily transfered from scheduler
-  if [[ -f "$PWD/condor_token" ]]; then
-      mkdir -p /home/jovyan/.condor/tokens.d/ && cp $PWD/condor_token /home/jovyan/.condor/tokens.d/condor_token
+  if [[ -f "$_CONDOR_JOB_IWD/condor_token" ]]; then
+      mkdir -p /home/jovyan/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/jovyan/.condor/tokens.d/condor_token
   fi
   # Bearer token
-  if [[ -f "$PWD/xcache_token" ]]; then
-      export BEARER_TOKEN_FILE="$PWD/xcache_token"
+  if [[ -f "$_CONDOR_JOB_IWD/xcache_token" ]]; then
+      export BEARER_TOKEN_FILE="$_CONDOR_JOB_IWD/xcache_token"
       export XCACHE_HOST="red-xcache1.unl.edu"
       export XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
       export LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
       export XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
   fi
   # CA certificate securily transfered from scheduler
-  if [[ -f "$PWD/ca.pem" ]]; then
-      PATH_CA_FILE="$PWD/ca.pem"
+  if [[ -f "$_CONDOR_JOB_IWD/ca.pem" ]]; then
+      PATH_CA_FILE="$_CONDOR_JOB_IWD/ca.pem"
   fi
   # Hostcertn securily transfered from scheduler and
   # userkey here is simply concatenated in usercert
-  if [[ -f "$PWD/hostcert.pem" ]]; then
-      FILE_CERT="$PWD/hostcert.pem"
-      FILE_KEY="$PWD/hostcert.pem"
+  if [[ -f "$_CONDOR_JOB_IWD/hostcert.pem" ]]; then
+      FILE_CERT="$_CONDOR_JOB_IWD/hostcert.pem"
+      FILE_KEY="$_CONDOR_JOB_IWD/hostcert.pem"
   fi
 
   # HTCondor port, hostname and external IP ("must" variables)
