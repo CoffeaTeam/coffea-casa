@@ -10,7 +10,8 @@ Dask JupyterLab extension package provides a JupyterLab extension to manage Dask
 
 Files ``~/.config/dask/jobqueue-coffea-casa.yaml`` or ``/etc/dask/jobqueue-coffea-casa.yaml`` are usually default configuration files used for :class:`CoffeaCasaCluster`:
 
-Example:
+Example of file:
+
 .. code-block:: yaml
 
     jobqueue:

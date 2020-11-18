@@ -15,7 +15,7 @@ Please shut down ``UNL HTCondor Cluster`` (powered by Dask Labextention and avai
 
 .. image:: _static/coffea-casa-labext.png
    :alt: Default Dask Labextention powered cluster available Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 100%
+   :width: 50%
    :align: center
 
 
@@ -27,6 +27,9 @@ scaled to use 10 jobs:
 
 .. code-block:: python
 
+    from distributed import Client
+    from coffea_casa import CoffeaCasaCluster
+
     cluster = CoffeaCasaCluster()
     cluster.scale(10)
     client = Client(cluster)
@@ -35,6 +38,9 @@ You can use an adaptive mechanism for Dask job autoscaling.
 This will scales Dask clusters automatically based on scheduler activity:
 
 .. code-block:: python
+
+    from distributed import Client
+    from coffea_casa import CoffeaCasaCluster
 
     cluster = CoffeaCasaCluster()
     cluster.adapt(minimum=4, maximum=10)

@@ -6,6 +6,7 @@ Setup
 -----
 
 In this example, we'll try to run a simple analysis example at Coffea-Casa Analysis Facility and use  ``coffea_casa`` wrapper library that allowed to use pre-configured settings for HTCondor configuration and Dask scheduler and worker images.
+
 Our goal of this `toy` analysis is to plot the missing *ET* of all events from dataset, converted from 2012 CMS Open Data (17 GB, 54 million events), available in public EOS (root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root)
 
 
@@ -16,10 +17,11 @@ Please use [this address](https://cmsaf-jh.unl.edu) as an access point to Coffea
 
 .. image:: _static/coffea-casa-enter.png
    :alt: Access to Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 100%
+   :width: 50%
    :align: center
 
 Currently Coffea-casa Analysis Facility @ T2 Nebraska provide access to any member of CMS VO organisation.
+
 
 CMS AuthZ Authentification Instance
 -----
@@ -41,7 +43,7 @@ For high efficient analysis using *coffea* package, powered with *Dask* and *HTC
 
 .. image:: _static/coffea-casa-image.png
     :alt:  Coffea Casa analysis image available at Coffea-casa Analysis Facility @ T2 Nebraska
-    :width: 100%
+    :width: 50%
     :align: center
 
 
@@ -123,8 +125,8 @@ Coffea provides the coffea.processor module, which allows users to worry just ab
         output['MET'].fill(dataset=dataset, MET=MET.flatten())
         return output
 
-     def postprocess(self, accumulator):
-       return accumulator
+      def postprocess(self, accumulator):
+        return accumulator
 
 
 Select `Run2012B_SingleMu.root` dataset converted from 2012 CMS Open Data (17 GB, 54 million events), available in public public EOS:
@@ -144,6 +146,7 @@ Simply connect to Dask Labextention powered cluster available Coffea-casa Analys
 Next step is to run a developed Processor() Coffea processor using uproot for data delivery and Dask executor:
 
 .. code-block:: python
+
     output = processor.run_uproot_job(fileset=fileset,
                       treename="Events",
                       processor_instance=Processor(),

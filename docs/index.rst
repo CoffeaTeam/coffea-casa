@@ -77,7 +77,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Deploying ``Coffea-casa`` at Kubernetes Cluster
+   :caption: Deploying Coffea-casa at K8s Cluster
 
    cc_deployment.rst
 
@@ -85,7 +85,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Detailed Information on the Python API ``Coffea_casa``
+   :caption: Detailed Information on the coffea_casa
 
    cc_api.rst
 
