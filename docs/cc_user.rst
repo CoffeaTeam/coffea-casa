@@ -6,22 +6,22 @@ Setup
 -----
 
 In this example, we'll try to run a simple analysis example at Coffea-Casa Analysis Facility and use  ``coffea_casa`` wrapper library that allowed to use pre-configured settings for HTCondor configuration and Dask scheduler and worker images.
-Our goal of this `toy` analysis is to plot the missing <i>E</i><sub>T</sub> of all events from dataset converted from 2012 CMS Open Data (17 GB, 54 million events), available in public EOS <root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root>
+Our goal of this `toy` analysis is to plot the missing *ET* of all events from dataset, converted from 2012 CMS Open Data (17 GB, 54 million events), available in public EOS (root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root)
 
 
 Access
 -----
 
-Please use (this address)[https://cmsaf-jh.unl.edu] as an access point to Coffea-casa Analysis Facility @ T2 Nebraska
+Please use [this address](https://cmsaf-jh.unl.edu) as an access point to Coffea-casa Analysis Facility @ T2 Nebraska.
 
 .. image:: _static/coffea-casa-enter.png
    :alt: Access to Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 100%
    :align: center
 
-Currently Coffea-casa Analysis Facility @ T2 Nebraska support any member of CMS VO organisation.
+Currently Coffea-casa Analysis Facility @ T2 Nebraska provide access to any member of CMS VO organisation.
 
-CMS Authz Authentification
+CMS AuthZ Authentification Instance
 -----
 
 Currently Coffea-casa Analysis Facility @ T2 Nebraska support any member of CMS VO organisation.
@@ -30,14 +30,14 @@ To access it please sign in or sign up using ``Create account``
 
 .. image:: _static/coffea-casa-authz.png
    :alt: CMS Authz authentification to Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 100%
+   :width: 50%
    :align: center
 
 
 Docker image to be selected
 -----
 
-For high efficient  analysis with Coffea package, powered with Dask and HTCondor please select:
+For high efficient analysis using *coffea* package, powered with *Dask* and *HTCondor* please select:
 
 .. image:: _static/coffea-casa-image.png
     :alt:  Coffea Casa analysis image available at Coffea-casa Analysis Facility @ T2 Nebraska
@@ -56,12 +56,12 @@ After you will be forwarded to your personal Jupyterhub instance running at Anal
 Available resources Coffea-casa Analysis Facility @ T2 Nebraska
 -----
 
-Check if you have started your Coffea-Casa Dask Cluster  with the ``distributed`` scheduler and 2 Dask workers on the cluster.
+Check if you have started your Coffea-Casa Dask Cluster  with the ``distributed`` scheduler and 2 Dask workers (first launched at Kubernetes cluster and other one directly available in HTCondor queue) on the cluster.
 
 
 .. image:: _static/coffea-casa-startr.png
    :alt: Default Dask Labextention powered cluster available Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 100%
+   :width: 50%
    :align: center
 
 As soon as you will start your computations, you will notice that available resources at Coffea-casa Analysis Facility @ T2 Nebraska can easily autoscale depending to available resources at HTCondor pool at Nebraska Tier 2.
@@ -69,16 +69,17 @@ As soon as you will start your computations, you will notice that available reso
 
 .. image:: _static/coffea-casa-labext.png
    :alt: Autoscaling with Dask Labextention powered cluster available at Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 100%
+   :width: 50%
    :align: center
 
 
 Simple example
 ------------
 
-Import  `` coffea`` libraries used in this example:
+Import  ``coffea`` libraries used in this example:
 
 .. code-block:: python
+
     import numpy as np
     from coffea import hist
     from coffea.analysis_objects import JaggedCandidateArray
@@ -160,5 +161,5 @@ As a result you should see next plot:
 
 .. image:: _static/example1-plot.png
    :alt: Final plot that you should see at the end of example
-   :width: 100%
+   :width: 50%
    :align: center
