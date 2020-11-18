@@ -3,8 +3,24 @@
 .. py:currentmodule:: coffea_casa
 
 
-Quick Start
+Coffea-casa setup without Dask Labextention
 ============
+
+
+Preparations
+-----------
+
+Please shut down ``UNL HTCondor Cluster`` (powered by Dask Labextention and available by default), pushing button ``Shut Down``:
+
+
+.. image:: _static/coffea-casa-labext.png
+   :alt: Default Dask Labextention powered cluster available Coffea-casa Analysis Facility @ T2 Nebraska
+   :width: 100%
+   :align: center
+
+
+Instantiating own CoffeaCasaCluster
+-----------
 
 Next snippet will set up a cluster by instantiating a Dask Client for :class:`CoffeaCasaCluster,
 scaled to use 10 jobs:
@@ -15,7 +31,7 @@ scaled to use 10 jobs:
     cluster.scale(10)
     client = Client(cluster)
 
-You can usa an adaptive mechanism for Dask job autoscaling.
+You can use an adaptive mechanism for Dask job autoscaling.
 This will scales Dask clusters automatically based on scheduler activity:
 
 .. code-block:: python
@@ -23,6 +39,19 @@ This will scales Dask clusters automatically based on scheduler activity:
     cluster = CoffeaCasaCluster()
     cluster.adapt(minimum=4, maximum=10)
     client = Client(cluster)
+
+
+.. note::
+
+   Don't forget to shutdown ``Coffea-casa`` cluster, before start a new:
+
+   .. code-block:: python
+
+       cluster.close()
+
+
+CoffeaCasaCluster
+--------------
 
 
 Default :class:`CoffeaCasaCluster` constructor settings:
@@ -76,4 +105,4 @@ or
     ``Coffea-casa is`` using only communication using TLS protocol. You will not be able to disable TLS!
 
 
-To use Dask Labextention, please check :doc:`configuration`.
+To how to use Dask Labextention, please check :doc:`configuration`.
