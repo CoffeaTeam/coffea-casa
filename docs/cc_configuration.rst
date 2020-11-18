@@ -8,8 +8,9 @@ How to configure Dask Labextension cluster
 
 Dask JupyterLab extension package provides a JupyterLab extension to manage Dask clusters, as well as embed Dask's dashboard plots directly into JupyterLab panes.
 
-``~/.config/dask/jobqueue-coffea-casa.yaml`` or ``/etc/dask/jobqueue-coffea-casa.yaml`` is a default configuration file for :class:`CoffeaCasaCluster`:
+Files ``~/.config/dask/jobqueue-coffea-casa.yaml`` or ``/etc/dask/jobqueue-coffea-casa.yaml`` are usually default configuration files used for :class:`CoffeaCasaCluster`:
 
+Example:
 .. code-block:: yaml
 
     jobqueue:
@@ -39,8 +40,7 @@ Dask JupyterLab extension package provides a JupyterLab extension to manage Dask
         name: dask-worker
 
 
-To configure the cluster that it launches, you write a Dask configuration
-file, typically stored at ``~/.config/dask/labextension.yaml`` or ``/etc/dask/labextension.yaml``.
+To configure the cluster that is launched using it, you should adjust a Dask configuration file, typically stored at ``~/.config/dask/labextension.yaml`` or ``/etc/dask/labextension.yaml``.
 
 .. code-block:: yaml
 
@@ -61,7 +61,7 @@ file, typically stored at ``~/.config/dask/labextension.yaml`` or ``/etc/dask/la
 Users can edit `kwargs: {}` to be able to change a :class:`CoffeaCasaCluster` constructor directly (see more details in :doc:`cc_setup`).
 
 
-To get an address of scheduler's address to be used for client connection, try next:
+To get an address of scheduler that will be used during client connection, try next:
 
 .. image:: _static/dask_labextension_address.png
 
