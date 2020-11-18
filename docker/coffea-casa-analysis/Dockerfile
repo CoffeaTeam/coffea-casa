@@ -70,7 +70,10 @@ RUN pip install --no-cache-dir \
     xxhash==1.3.0 \
     coffea==0.6.42 \
     # for xrootd plugin compilation
-    cmake
+    cmake \
+    # for running/restarting Dask worker in sidecar container
+    supervisor
+
 
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
@@ -90,6 +93,9 @@ RUN cd /tmp && \
     make install
 
 USER root
+# Setup supervisord files
+COPY supervisord.conf  /etc/supervisor/supervisord.conf
+
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
