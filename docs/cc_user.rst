@@ -13,7 +13,7 @@ Our goal of this `toy` analysis is to plot the missing *ET* of all events from d
 Access
 -----
 
-Please use [this address](https://cmsaf-jh.unl.edu) as an access point to Coffea-casa Analysis Facility @ T2 Nebraska.
+Please use `this address <https://cmsaf-jh.unl.edu>`_ as an access point to Coffea-casa Analysis Facility @ T2 Nebraska.
 
 .. image:: _static/coffea-casa-enter.png
    :alt: Access to Coffea-casa Analysis Facility @ T2 Nebraska
