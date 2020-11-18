@@ -7,9 +7,9 @@ Welcome to Coffea-casa project!
 ==============================================================================================================
 
 
-Coffea-casa is a prototype of a U.S. CMS analysis facility that provides services for “low latency columnar analysis”, enabling rapid processing of data in a column-wise fashion.
+**Coffea-casa** is a prototype of a U.S. CMS analysis facility that provides services for “low latency columnar analysis”, enabling rapid processing of data in a column-wise fashion.
 
-Coffea-casa Analysis Facility (AF) services, based on Dask and Jupyter notebooks technologies, aim to dramatically lower time for analysis and provide an easily-scalable and user-friendly computational environment that will simplify, facilitate, and accelerate the delivery of HEP results.
+Coffea-casa Analysis Facility (AF) services, based on *Dask* and *Jupyter notebooks* technologies, aim to dramatically lower time for analysis and provide an easily-scalable and user-friendly computational environment that will simplify, facilitate, and accelerate the delivery of HEP results.
 
 .. image:: _static/coffea-casa-draft.png
    :alt: Prototype of Coffea-casa Analysis Facility @ T2 Nebraska
@@ -26,7 +26,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 
 .. note::
 
-    ``Coffea-casa is`` a prototype and currently is actively developing: if you had noticed a bug or would like to leave us a feedback,
+    **Coffea-casa** a prototype and currently is actively developing: if you had noticed a bug or would like to leave us a feedback,
     we invite you to open an issue directly in GH: <https://github.com/CoffeaTeam/coffea-casa/issues>
 
 
@@ -35,8 +35,6 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :hidden:
    :caption: Getting Started
 
-   cc_setup.rst
-   cc_support.rst
    Why Dask? <https://docs.dask.org/en/latest/why.html>
    Dask-jobqueue introduction <https://jobqueue.dask.org/en/latest/howitworks.html>
    Dask-labextention introduction <https://pypi.org/project/dask-labextension/>
@@ -45,7 +43,8 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: How To Use ``Coffea-casa``
+   :caption: How To Use Coffea-casa
+
    Coffea documentation <https://coffeateam.github.io/coffea/>
    cc_user.rst
 
@@ -53,7 +52,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Gallery of ``Coffea-casa`` Examples
+   :caption: Gallery of Coffea-casa Examples
 
    ADL benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example1.ipynb>
    ADL benchmark 2 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example2.ipynb>
@@ -69,23 +68,24 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 .. toctree::
   :maxdepth: 1
   :hidden:
-  :caption: For Developer - Deeper Look Into ``Coffea-casa`` Internals
+  :caption: Deeper Look Into ``Coffea-casa`` Internals
 
+  cc_setup.rst
   cc_configuration.rst
 
+
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: For Developer - Deploying ``Coffea-casa`` at Kubernetes Cluster
+   :caption: Deploying ``Coffea-casa`` at Kubernetes Cluster
 
    cc_deployment.rst
-   cc_setup.rst
 
 
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: For Developer - Detailed Information on the Python API ``Coffea_casa``
+   :caption: Detailed Information on the Python API ``Coffea_casa``
 
    cc_api.rst
 

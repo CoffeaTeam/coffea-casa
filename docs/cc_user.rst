@@ -5,7 +5,7 @@ First steps at Coffea-casa
 Setup
 -----
 
-In this example, we'll  try to run a simple analysis example at Coffea-Casa Analysis Facility and use  ``coffea_casa`` wrapper library that allowed to use preconfigured settings for HTCondor configuration and Dask scheduler and worker images.
+In this example, we'll try to run a simple analysis example at Coffea-Casa Analysis Facility and use  ``coffea_casa`` wrapper library that allowed to use pre-configured settings for HTCondor configuration and Dask scheduler and worker images.
 Our goal of this `toy` analysis is to plot the missing <i>E</i><sub>T</sub> of all events from dataset converted from 2012 CMS Open Data (17 GB, 54 million events), available in public EOS <root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root>
 
 
