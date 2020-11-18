@@ -19,7 +19,7 @@ Dask JupyterLab extension package provides a JupyterLab extension to manage Dask
         cores: 4                 # Total number of cores per job
         memory: "6 GiB"                # Total amount of memory per job
         processes: null                # Number of Python processes per jobs
-        worker-image: "coffeateam/coffea-casa-analysis:0.2.23"
+        worker-image: "coffeateam/coffea-casa-analysis:0.xx.xx"
 
         # Comunication settings
         interface: null             # Network interface to use like eth0 or ib0
@@ -58,14 +58,10 @@ file, typically stored at ``~/.config/dask/labextension.yaml`` or ``/etc/dask/la
             maximum: 10
 
 
-Users can edit `kwargs: {}` to be able to change a :class:`CoffeaCasaCluster` constructor directly (see more details in :doc:`setup`).
+Users can edit `kwargs: {}` to be able to change a :class:`CoffeaCasaCluster` constructor directly (see more details in :doc:`cc_setup`).
 
 
-Creating a new cluster by clicking ``+NEW``:
-
-.. image:: _static/dask_labextension.png
-
-And for the address to be used for client connection, try next:
+To get an address of scheduler's address to be used for client connection, try next:
 
 .. image:: _static/dask_labextension_address.png
 
@@ -75,4 +71,12 @@ Then you can use it directly in the code "Inject Dask connection code", as it is
 
     from dask.distributed import Client
     client = Client("tls://oksana-2eshadura-40cern-2ech.dask.coffea.casa:8786")
+    client
+
+or simply:
+
+.. code-block:: python
+
+    from dask.distributed import Client
+    client = Client("tls://localhost:8786")
     client
