@@ -70,7 +70,7 @@ RUN conda install --yes --freeze-installed \
     python-blosc \
     setuptools \
     cytoolz \
-    lz4 \
+    lz4==3.1.1 \
     nomkl \
     numpy==1.18.1 \
     pandas==1.0.1 \
@@ -78,14 +78,14 @@ RUN conda install --yes --freeze-installed \
     # Coffea-casa extras
     bokeh \
     # IMPORTANT: we need apply a patch for distributed: building it from scratch
-    # dask==2.20.0 \ Here we expect that dask will be installed with dependencies later
+    # dask==2.30.0 \ Here we expect that dask will be installed with dependencies later
     # distributed \
     dask-jobqueue \
-    xrootd==5.0.1 \
+    xrootd==5.0.3 \
     htcondor \
     # Extra packages
-    matplotlib==3.2.1 \
-    numba==0.48.0
+    matplotlib==3.3.3 \
+    numba>=0.50.0
 
 # Coffea
 RUN pip install --no-cache-dir \
