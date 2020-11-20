@@ -39,8 +39,8 @@ RUN conda install --yes --freeze-installed \
     conda-build \
     python-blosc \
     cytoolz \
-    dask==2.24.0 \
-    lz4==3.1.0 \
+    dask==2.30.0 \
+    lz4==3.1.1 \
     nomkl \
     numpy==1.18.1 \
     pandas==1.0.1 \
@@ -50,11 +50,11 @@ RUN conda install --yes --freeze-installed \
     distributed \
     dask-jobqueue \
     cloudpickle==1.6.0 \
-    xrootd==5.0.1 \
+    xrootd==5.0.3 \
     htcondor \
     # Extra packages
-    matplotlib==3.2.1 \
-    numba==0.48.0 \
+    matplotlib==3.3.3 \
+    numba>=0.50.0 \
     && conda clean -tipsy \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
