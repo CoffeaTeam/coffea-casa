@@ -67,8 +67,6 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    # IMPORTANT: Python 3.8 doesn't work with coffea
-    # python==3.8 \
     python-blosc \
     setuptools \
     cytoolz \
@@ -91,10 +89,12 @@ RUN conda install --yes --freeze-installed \
 
 # Coffea
 RUN pip install --no-cache-dir \
-    xxhash==1.3.0 \
+    xxhash \
     coffea==0.6.46 \
     # Needed for xrootd-authz-plugin compilation
-    cmake
+    cmake \
+    # Servicex
+    servicex-clients
 
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.

@@ -37,8 +37,6 @@ RUN apt-get update \
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    # Python 3.8 doesn't work with coffea
-    python==3.8.5 \
     python-blosc \
     cytoolz \
     dask==2.24.0 \
@@ -67,7 +65,7 @@ RUN conda install --yes --freeze-installed \
 
 # Coffea
 RUN pip install --no-cache-dir \
-    xxhash==1.3.0 \
+    xxhash \
     coffea==0.6.46 \
     # for xrootd plugin compilation
     cmake \
