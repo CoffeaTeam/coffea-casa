@@ -67,6 +67,7 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
+    python==3.8.5 \
     python-blosc \
     setuptools \
     cytoolz \
