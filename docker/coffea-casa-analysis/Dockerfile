@@ -93,7 +93,7 @@ RUN cd /tmp && \
 
 USER root
 # Setup supervisord files
-COPY supervisord.conf  /etc/supervisor/supervisord.conf
+COPY supervisord.conf  /etc/supervisor/
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
