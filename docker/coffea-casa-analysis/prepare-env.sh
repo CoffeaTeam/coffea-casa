@@ -113,5 +113,5 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       exec $HTCONDOR_COMAND
   fi
 else
-  exec "@"
+  exec "$@"
 fi
