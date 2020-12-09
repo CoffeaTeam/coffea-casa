@@ -67,7 +67,7 @@ RUN conda install --yes --freeze-installed \
 # Coffea
 RUN pip install --no-cache-dir \
     xxhash \
-    coffea==0.6.46 \
+    coffea==0.6.47 \
     # for xrootd plugin compilation
     cmake \
     # for running/restarting Dask worker in sidecar container
