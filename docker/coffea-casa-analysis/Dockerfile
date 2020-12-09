@@ -37,7 +37,7 @@ RUN apt-get update \
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.5 \
+    python==3.8.6 \
     python-blosc \
     cytoolz \
     dask==2.30.0 \
@@ -56,6 +56,7 @@ RUN conda install --yes --freeze-installed \
     # Extra packages
     matplotlib==3.3.3 \
     numba>=0.50.0 \
+    fsspec \
     && conda clean -tipsy \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \

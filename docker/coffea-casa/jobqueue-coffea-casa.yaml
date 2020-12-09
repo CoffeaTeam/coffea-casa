@@ -5,7 +5,7 @@ jobqueue:
     cores: 4                 # Total number of cores per job
     memory: "6 GiB"                # Total amount of memory per job
     processes: null                # Number of Python processes per jobs
-    worker-image: "coffeateam/coffea-casa-analysis:0.2.38"
+    worker-image: "coffeateam/coffea-casa-analysis:0.2.39"
 
     # Comunication settings
     interface: null             # Network interface to use like eth0 or ib0

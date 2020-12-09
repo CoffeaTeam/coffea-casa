@@ -67,7 +67,7 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.5 \
+    python==3.8.6 \
     python-blosc \
     setuptools \
     cytoolz \
@@ -86,7 +86,8 @@ RUN conda install --yes --freeze-installed \
     htcondor \
     # Extra packages
     matplotlib==3.3.3 \
-    numba>=0.50.0
+    numba>=0.50.0 \
+    fsspec
 
 # Coffea
 RUN pip install --no-cache-dir \

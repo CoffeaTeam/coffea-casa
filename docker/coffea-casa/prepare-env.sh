@@ -4,7 +4,7 @@ set -x
 
 # servicex token generation
 if [[ -f "/etc/cmsaf-secrets/.servicex" ]]; then
-    export condor_token=$(</etc/cmsaf-secrets/servicex_token)
+    export condor_token=$(</etc/cmsaf-secrets/.servicex)
 
     echo "
 api_endpoints:
