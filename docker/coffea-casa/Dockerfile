@@ -91,7 +91,7 @@ RUN conda install --yes --freeze-installed \
 # Coffea
 RUN pip install --no-cache-dir \
     xxhash \
-    coffea==0.6.46 \
+    coffea==0.6.47 \
     # Needed for xrootd-authz-plugin compilation
     cmake \
     # Servicex
