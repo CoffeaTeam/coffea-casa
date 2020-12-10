@@ -78,16 +78,13 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     # Coffea-casa extras
     bokeh \
-    # IMPORTANT: we need apply a patch for distributed: building it from scratch
-    # dask==2.30.0 \ Here we expect that dask will be installed with dependencies later
-    # distributed \
+    dask[dataframe] \
     dask-jobqueue \
     xrootd==5.0.3 \
     htcondor \
     # Extra packages
     matplotlib==3.3.3 \
-    numba>=0.50.0 \
-    fsspec
+    numba>=0.50.0
 
 # Coffea
 RUN pip install --no-cache-dir \

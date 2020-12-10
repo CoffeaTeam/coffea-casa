@@ -48,7 +48,7 @@ RUN conda install --yes --freeze-installed \
     tini==0.18.0 \
     # Coffea-casa extras
     bokeh \
-    distributed \
+    dask[dataframe] \
     dask-jobqueue \
     cloudpickle==1.6.0 \
     xrootd==5.0.3 \
@@ -56,7 +56,6 @@ RUN conda install --yes --freeze-installed \
     # Extra packages
     matplotlib==3.3.3 \
     numba>=0.50.0 \
-    fsspec \
     && conda clean -tipsy \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
@@ -78,8 +77,7 @@ RUN pip install --no-cache-dir \
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed \
-    git+git://github.com/dask/dask-jobqueue.git@master#egg=dask_jobqueue
+RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
