@@ -67,7 +67,7 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.6 \
+    python==3.8.5 \
     python-blosc \
     setuptools \
     cytoolz \
@@ -89,7 +89,7 @@ RUN conda install --yes --freeze-installed \
 # Coffea
 RUN pip install --no-cache-dir \
     xxhash \
-    coffea==0.6.47 \
+    coffea==0.6.46 \
     # Needed for xrootd-authz-plugin compilation
     cmake \
     # Servicex
@@ -98,7 +98,7 @@ RUN pip install --no-cache-dir \
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2.31.0.dev0-coffea-casa#egg=distributed \
+RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2.30.1-coffea-casa#egg=distributed \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
 
 USER root
