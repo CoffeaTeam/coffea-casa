@@ -37,7 +37,7 @@ RUN apt-get update \
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.5 \
+    python==3.8.6 \
     python-blosc \
     cytoolz \
     dask==2.30.0 \
