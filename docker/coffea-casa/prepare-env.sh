@@ -5,7 +5,8 @@ set -x
 # servicex token generation
 if [[ -f "/etc/cmsaf-secrets/.servicex" ]]; then
     export servicex_token=$(</etc/cmsaf-secrets/.servicex)
-
+    # debug: it work locally in Hub, let's try to touch file
+    touch /home/jovyan/.servicex
     echo "
 api_endpoints:
   - endpoint: https://uproot.servicex.coffea.casa
