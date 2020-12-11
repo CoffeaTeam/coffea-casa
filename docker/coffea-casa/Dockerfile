@@ -67,7 +67,7 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.6 \
+    python==3.8 \
     python-blosc \
     setuptools \
     cytoolz \
@@ -89,7 +89,7 @@ RUN conda install --yes --freeze-installed \
     xxhash \
     coffea==0.6.47
 
-# 
+#
 RUN pip install --no-cache-dir \
     # Needed for xrootd-authz-plugin compilation
     cmake \
