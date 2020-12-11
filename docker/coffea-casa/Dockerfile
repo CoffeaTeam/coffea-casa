@@ -73,8 +73,8 @@ RUN conda install --yes --freeze-installed \
     cytoolz \
     lz4==3.1.1 \
     nomkl \
-    numpy==1.18.1 \
-    pandas==1.0.1 \
+    numpy \
+    pandas \
     tini==0.18.0 \
     # Coffea-casa extras
     bokeh \
@@ -89,7 +89,7 @@ RUN conda install --yes --freeze-installed \
 # Coffea
 RUN pip install --no-cache-dir \
     xxhash \
-    coffea==0.6.46 \
+    coffea==0.6.47 \
     # Needed for xrootd-authz-plugin compilation
     cmake \
     # Servicex

@@ -4,21 +4,21 @@ set -x
 
 # servicex token generation
 if [[ -f "/etc/cmsaf-secrets/.servicex" ]]; then
-    export condor_token=$(</etc/cmsaf-secrets/.servicex)
+    export servicex_token=$(</etc/cmsaf-secrets/.servicex)
 
     echo "
 api_endpoints:
   - endpoint: https://uproot.servicex.coffea.casa
     token:
     type: uproot
-    " > $HOME/.servicex
+    " > /home/jovyan/.servicex
 
     python -c '
 import yaml, os
-servicex=os.environ.get("HOME")+"/.servicex"
+servicex="/home/jovyan/.servicex"
 with open(servicex) as f:
     list_yaml=yaml.load(f,Loader=yaml.Loader)
-list_yaml["api_endpoints"][0]["token"] = os.environ.get("condor_token")
+list_yaml["api_endpoints"][0]["token"] = os.environ.get("servicex_token")
 with open(servicex, "w") as f:
     yaml.dump(list_yaml,f)'
 

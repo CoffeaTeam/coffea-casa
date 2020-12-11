@@ -43,8 +43,8 @@ RUN conda install --yes --freeze-installed \
     dask==2.30.0 \
     lz4==3.1.1 \
     nomkl \
-    numpy==1.18.1 \
-    pandas==1.0.1 \
+    numpy \
+    pandas \
     tini==0.18.0 \
     # Coffea-casa extras
     bokeh \
@@ -67,7 +67,7 @@ RUN conda install --yes --freeze-installed \
 # Coffea
 RUN pip install --no-cache-dir \
     xxhash \
-    coffea==0.6.46 \
+    coffea==0.6.47 \
     # for xrootd plugin compilation
     cmake \
     # for running/restarting Dask worker in sidecar container
