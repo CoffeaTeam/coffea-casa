@@ -94,7 +94,7 @@ USER root
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
 # Fixes https://github.com/CoffeaTeam/jhub/issues/37
-RUN export WORKER_ID=($RANDOM); sed -i "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" -i /etc/supervisor/supervisord.conf
+RUN export WORKER_ID=$(echo $RANDOM); sed -i "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" -i /etc/supervisor/supervisord.conf
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
