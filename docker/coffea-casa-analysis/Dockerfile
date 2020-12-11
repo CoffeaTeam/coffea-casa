@@ -56,6 +56,8 @@ RUN conda install --yes --freeze-installed \
     # Extra packages
     matplotlib==3.3.3 \
     numba>=0.50.0 \
+    xxhash \
+    coffea==0.6.47 \
     && conda clean -tipsy \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
@@ -64,10 +66,8 @@ RUN conda install --yes --freeze-installed \
     && rm -rf /opt/conda/pkgs \
     && conda build purge-all
 
-# Coffea
+# 
 RUN pip install --no-cache-dir \
-    xxhash \
-    coffea==0.6.47 \
     # for xrootd plugin compilation
     cmake \
     # for running/restarting Dask worker in sidecar container

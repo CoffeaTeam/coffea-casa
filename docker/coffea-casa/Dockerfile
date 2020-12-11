@@ -80,16 +80,17 @@ RUN conda install --yes --freeze-installed \
     bokeh \
     dask[dataframe] \
     dask-jobqueue \
+    cloudpickle==1.6.0 \
     xrootd==5.0.3 \
     htcondor \
     # Extra packages
     matplotlib==3.3.3 \
-    numba>=0.50.0
-
-# Coffea
-RUN pip install --no-cache-dir \
+    numba>=0.50.0 \
     xxhash \
-    coffea==0.6.47 \
+    coffea==0.6.47
+
+# 
+RUN pip install --no-cache-dir \
     # Needed for xrootd-authz-plugin compilation
     cmake \
     # Servicex
