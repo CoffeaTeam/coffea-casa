@@ -57,8 +57,8 @@ RUN conda install --yes --freeze-installed \
     python-blosc \
     setuptools \
     cytoolz \
-    dask==2.30.0 \
-    distributed==2.30.0 \
+    dask \
+    distributed \
     dask-jobqueue \
     nomkl \
     tini==0.18.0 \
@@ -78,7 +78,7 @@ RUN pip install --no-cache-dir \
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2.31.0.dev0-coffea-casa#egg=distributed \
+RUN pip install --no-cache-dir git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
 
 USER root
