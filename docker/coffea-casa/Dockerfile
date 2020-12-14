@@ -45,61 +45,44 @@ RUN mkdir -p $HOME/.config/dask  && \
     mkdir -p $HOME/patches
 COPY patches/ $HOME/patches/
 
-# EGI CA certificates
-# (as well as xrootd dependencies: libssl-dev zlib1g-dev uuid-dev)
-RUN apt-get update \
-    && apt-get install -y gnupg2 \
-    openssh-client \
-    python-setuptools \
-    procps \
-    && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
-    && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get install -y ca-policy-egi-core \
-    && apt-get purge -y --auto-remove \
-    && apt-get purge -y gnupg2 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
-
 USER $NB_UID
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8 \
+    python==3.8.6 \
+    voms \
+    ca-policy-lcg \
     python-blosc \
     setuptools \
-    cytoolz \
-    lz4==3.1.1 \
-    nomkl \
-    numpy \
-    pandas \
-    tini==0.18.0 \
-    # Coffea-casa extras
-    bokeh \
-    dask[dataframe] \
+    cytoolz
+    dask \
+    distributed \
     dask-jobqueue \
-    cloudpickle==1.6.0 \
+    nomkl \
+    tini==0.18.0 \
+    scipy==1.5.3 \
+    bokeh \
+    cloudpickle \
     xrootd==5.0.3 \
     htcondor \
-    # Extra packages
-    matplotlib==3.3.3 \
-    numba>=0.50.0 \
-    xxhash \
     coffea==0.6.47
+    # Extra packages
+    cmake
 
 #
 RUN pip install --no-cache-dir \
-    # Needed for xrootd-authz-plugin compilation
-    cmake \
     # Servicex
     servicex-clients
+
+# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
+RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
 
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2.30.1-coffea-casa#egg=distributed \
+RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
 
 USER root
@@ -143,8 +126,7 @@ RUN rm -rf /tmp/* \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
-    && rm -rf /opt/conda/pkgs \
+    && conda clean --all -f -y \
     && conda build purge-all
 
 # xcache setup

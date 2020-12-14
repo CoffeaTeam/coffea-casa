@@ -16,68 +16,46 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER  && \
     mkdir -p /var/lib/condor && \
     mkdir -p /home/$NB_UID/.condor/tokens.d
 
-# EGI CA certificates
-RUN apt-get update \
-    && apt-get install -y gnupg2 \
-    openssh-client \
-    build-essential \
-    python-setuptools \
-    procps \
-    && wget -q -O - https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3 | apt-key add - \
-    && echo "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" >> /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get install -y ca-policy-egi-core \
-    && apt-get purge -y gnupg2 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get purge -y --auto-remove \
-    && apt-get clean
-
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8 \
+    python==3.8.6 \
+    voms \
+    ca-policy-lcg \
     python-blosc \
     cytoolz \
-    dask==2.30.0 \
-    lz4==3.1.1 \
-    nomkl \
-    numpy \
-    pandas \
-    tini==0.18.0 \
-    # Coffea-casa extras
-    bokeh \
-    dask[dataframe] \
+    dask \
+    distributed \
     dask-jobqueue \
-    cloudpickle==1.6.0 \
+    nomkl \
+    tini==0.18.0 \
+    scipy==1.5.3 \
+    bokeh \
+    cloudpickle \
     xrootd==5.0.3 \
     htcondor \
-    # Extra packages
-    matplotlib==3.3.3 \
-    numba>=0.50.0 \
-    xxhash \
     coffea==0.6.47 \
-    && conda clean -tipsy \
+    cmake \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
-    && rm -rf /opt/conda/pkgs \
+    && conda clean --all -f -y \
     && conda build purge-all
 
 #
 RUN pip install --no-cache-dir \
-    # for xrootd plugin compilation
-    cmake \
     # for running/restarting Dask worker in sidecar container
     supervisor
 
+# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
+RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
 
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2.30.1-coffea-casa#egg=distributed
+RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
@@ -94,7 +72,8 @@ USER root
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
 # Fixes https://github.com/CoffeaTeam/jhub/issues/37
-RUN export WORKER_ID=$(echo $RANDOM); sed -i "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" -i /etc/supervisor/supervisord.conf
+RUN export WORKER_ID=`< /dev/random tr -dc 'A-Z-a-z-0-9' | head -c 20` \
+    && sed --in-place "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
