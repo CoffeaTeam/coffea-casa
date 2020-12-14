@@ -54,7 +54,7 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.5 \
+    python==3.7 \
     voms \
     ca-policy-lcg \
     python-blosc \

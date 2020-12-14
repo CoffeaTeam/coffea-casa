@@ -19,16 +19,13 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER  && \
 RUN apt-get update \
     && apt-get install -y gcc build-essential
 
-# Fixes https://github.com/CoffeaTeam/jhub/issues/37
-RUN WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5); \
-    sed --in-place "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.5 \
+    python==3.7 \
     voms \
     ca-policy-lcg \
     python-blosc \
@@ -77,6 +74,9 @@ RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
 
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
+# Fixes https://github.com/CoffeaTeam/jhub/issues/37
+RUN WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5); \
+    sed --in-place "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
