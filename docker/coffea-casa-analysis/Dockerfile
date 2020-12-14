@@ -73,9 +73,6 @@ RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
 
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
-# Fixes https://github.com/CoffeaTeam/jhub/issues/37
-RUN export WORKER_ID=`< /dev/random tr -dc 'A-Z-a-z-0-9' | head -c 20` \
-    && sed --in-place "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/

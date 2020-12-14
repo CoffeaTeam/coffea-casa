@@ -2,6 +2,10 @@
 
 set -x
 
+# Fixes https://github.com/CoffeaTeam/jhub/issues/37
+export WORKER_ID=`< /dev/random tr -dc 'A-Z-a-z-0-9' | head -c 20`
+sed --in-place "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
+
 # We start by adding extra apt packages, since pip modules may required library
 if [ "$EXTRA_APT_PACKAGES" ]; then
     echo "EXTRA_APT_PACKAGES environment variable found.  Installing."
