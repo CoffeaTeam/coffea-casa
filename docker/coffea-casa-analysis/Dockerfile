@@ -21,7 +21,7 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER  && \
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.6 \
+    python==3.8.5 \
     voms \
     ca-policy-lcg \
     python-blosc \
@@ -49,7 +49,7 @@ RUN pip install --no-cache-dir \
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --no-cache-dir git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed dask-jobqueue
+RUN pip install --ignore-installed --no-cache-dir git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed dask-jobqueue
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
