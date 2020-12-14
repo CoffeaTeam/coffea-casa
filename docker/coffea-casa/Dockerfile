@@ -56,9 +56,9 @@ RUN conda install --yes --freeze-installed \
     ca-policy-lcg \
     python-blosc \
     setuptools \
-    cytoolz
-    dask \
-    distributed \
+    cytoolz \
+    dask==2.30.0 \
+    distributed==2.30.0 \
     dask-jobqueue \
     nomkl \
     tini==0.18.0 \
@@ -67,8 +67,7 @@ RUN conda install --yes --freeze-installed \
     cloudpickle \
     xrootd==5.0.3 \
     htcondor \
-    coffea==0.6.47
-    # Extra packages
+    coffea==0.6.47 \
     cmake
 
 #
@@ -76,13 +75,10 @@ RUN pip install --no-cache-dir \
     # Servicex
     servicex-clients
 
-# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
-RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
-
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed \
+RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2.31.0.dev0-coffea-casa#egg=distributed \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
 
 USER root
@@ -104,6 +100,9 @@ RUN cd /tmp && \
     make install
 
 USER root
+# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
+RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
+
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)

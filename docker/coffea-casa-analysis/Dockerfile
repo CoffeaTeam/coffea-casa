@@ -26,8 +26,8 @@ RUN conda install --yes --freeze-installed \
     ca-policy-lcg \
     python-blosc \
     cytoolz \
-    dask \
-    distributed \
+    dask==2.30.0 \
+    distributed==2.30.0 \
     dask-jobqueue \
     nomkl \
     tini==0.18.0 \
@@ -48,14 +48,10 @@ RUN conda install --yes --freeze-installed \
 RUN pip install --no-cache-dir \
     # for running/restarting Dask worker in sidecar container
     supervisor
-
-# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
-RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
-
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --force-reinstall --ignore-installed git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed
+RUN pip install --ignore-installed git+git://github.com/oshadura/distributed.git@2.31.0.dev0-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
@@ -69,6 +65,9 @@ RUN cd /tmp && \
     make install
 
 USER root
+# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
+RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
+
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
 # Fixes https://github.com/CoffeaTeam/jhub/issues/37
