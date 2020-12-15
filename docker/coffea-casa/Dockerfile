@@ -10,20 +10,25 @@ ENV PATH=$HOME/.local/bin:$PATH
 
 # Jupyterlab
 # Add extra plugins
-RUN jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager && \
-    jupyter labextension install --no-build @jupyterlab/git && \
-    jupyter labextension install --no-build @jupyterlab/github && \
-    jupyter labextension install --no-build dask-labextension
+#RUN jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager@2 && \
+#    jupyter labextension install --no-build @jupyterlab/git && \
+#    jupyter labextension install --no-build @jupyterlab/github && \
+#    jupyter labextension install --no-build dask-labextension
 
 # Dask extention (looks like it is not available in the image)
 RUN pip install --no-cache-dir \
+  jupyterlab_widgets \
   dask_labextension \
   jupyterlab_git \
   jupyterlab_github
 
 # Enable the serverextensions that do not use the conf.d approach and
 # build JupyterLab.
-RUN jupyter serverextension enable --sys-prefix jupyterlab_git && \
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
+    jupyter serverextension enable --sys-prefix jupyterlab_git && \
+    jupyter serverextension enable --sys-prefix jupyterlab_github && \
+    jupyter labextension install dask-labextension && \
+    jupyter serverextension enable dask_labextension && \
     jupyter lab build --dev-build=False && jupyter lab clean && \
     npm cache clean --force && \
     rm -rf $HOME/.cache/yarn && \
@@ -54,7 +59,7 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.7 \
+    python==3.8.6 \
     voms \
     ca-policy-lcg \
     python-blosc \
@@ -68,7 +73,7 @@ RUN conda install --yes --freeze-installed \
     cloudpickle \
     xrootd==5.0.3 \
     htcondor \
-    coffea==0.6.47 \
+    coffea==0.6.45 \
     cmake
 
 #

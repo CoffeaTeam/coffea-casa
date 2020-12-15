@@ -25,7 +25,7 @@ RUN apt-get update \
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.7 \
+    python==3.8.6 \
     voms \
     ca-policy-lcg \
     python-blosc \
@@ -38,7 +38,7 @@ RUN conda install --yes --freeze-installed \
     cloudpickle \
     xrootd==5.0.3 \
     htcondor \
-    coffea==0.6.47 \
+    coffea==0.6.45 \
     cmake \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
@@ -75,8 +75,8 @@ RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
 # Fixes https://github.com/CoffeaTeam/jhub/issues/37
-RUN WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5); \
-    sed --in-place "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
+#RUN WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5)
+#    sed --in-place "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
