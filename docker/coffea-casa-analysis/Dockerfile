@@ -38,7 +38,7 @@ RUN conda install --yes --freeze-installed \
     cloudpickle \
     xrootd==5.0.3 \
     htcondor \
-    coffea==0.6.45 \
+    coffea==0.6.44 \
     cmake \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
