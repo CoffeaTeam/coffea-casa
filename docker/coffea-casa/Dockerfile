@@ -19,6 +19,20 @@ ENV CONDA_DIR=/opt/conda \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
 
+
+# Install all OS dependencies for notebook server that starts but lacks all
+# features (e.g., download as all possible file formats)
+RUN apt-get update \
+     && apt-get install -yq --no-install-recommends \
+        wget \
+        sudo \
+        locales \
+        fonts-liberation \
+     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+        locale-gen
+
 # Copy a script that we will use to correct permissions after running certain commands
 COPY fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
@@ -54,6 +68,7 @@ RUN mkdir "/home/$NB_USER/work" && \
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
+    -c conda-forge \
     'notebook=6.1.6' \
     'jupyterhub=1.3.0' \
     'jupyterlab=2.2.9' && \
@@ -110,14 +125,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# Jupyterlab
-# Add extra plugins
-#RUN jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager@2 && \
-#    jupyter labextension install --no-build @jupyterlab/git && \
-#    jupyter labextension install --no-build @jupyterlab/github && \
-#    jupyter labextension install --no-build dask-labextension
-
+USER $NB_UID
 # Dask extention (looks like it is not available in the image)
 RUN pip install --no-cache-dir \
   jupyterlab_widgets \
@@ -135,20 +143,18 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
     jupyter lab build --dev-build=False && jupyter lab clean && \
     npm cache clean --force && \
     rm -rf $HOME/.cache/yarn && \
-    rm -rf $HOME/.node-gyp && \
-    fix-permissions $CONDA_DIR && \
-    fix-permissions /home/$NB_USER
+    rm -rf $HOME/.node-gyp
 
-# Jupyter lab workspace setup
-COPY jupyterlab-workspace.json $HOME/jupyterlab-workspace.json
-RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
+# TBD: Jupyter lab workspace setup
+#COPY jupyterlab-workspace.json $HOME/
+#RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p $HOME/.config/dask  && \
     mkdir -p /etc/dask  && \
     mkdir -p /var/lib/condor && \
-    mkdir -p /home/$NB_UID/.condor/tokens.d && \
+    mkdir -p $HOME/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d  && \
     mkdir -p $HOME/patches
 COPY patches/ $HOME/patches/
@@ -163,10 +169,7 @@ RUN conda install --yes --freeze-installed \
     htcondor \
     cmake
 
-RUN pip install --no-cache-dir \
-    # Servicex
-    servicex-clients
-# Since we need to install patched version of distributed version, it is will be
+# Distributed & dask-jobqueue: we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
@@ -174,13 +177,9 @@ RUN pip install --ignore-installed --no-cache-dir \
     dask-jobqueue \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
 
-USER root
-# Dask setup - > dask.yml
-# Labextention setup - >labextension.yml
-COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
-COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
+# TBD Servicex
+# RUN pip install --no-cache-dir servicex-clients
 
-USER $NB_UID
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
     # ------- xrdcl-authz-plugin -------------------------------
@@ -191,6 +190,12 @@ RUN cd /tmp && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
     make && \
     make install
+
+USER root
+# Dask setup - > dask.yml
+# Labextention setup - >labextension.yml
+COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
+COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
