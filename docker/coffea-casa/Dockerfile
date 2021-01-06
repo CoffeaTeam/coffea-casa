@@ -1,5 +1,4 @@
-# Partially based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
-FROM jupyter/minimal-notebook:latest
+FROM coffeateam/coffea-dask:latest
 
 # Configure environment
 ENV SHELL /bin/bash
@@ -54,29 +53,12 @@ RUN apt-get update \
     && apt-get install -y gcc build-essential
 
 USER $NB_UID
-# Dask dependencies and HTCondor
-# https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    python==3.8.6 \
-    voms \
-    ca-policy-lcg \
-    python-blosc \
-    setuptools \
-    cytoolz \
-    dask \
-    nomkl \
-    tini==0.18.0 \
-    scipy==1.5.3 \
-    bokeh \
-    cloudpickle \
-    xrootd==5.0.3 \
     htcondor \
-    coffea==0.6.44 \
     cmake
 
-#
 RUN pip install --no-cache-dir \
     # Servicex
     servicex-clients
@@ -105,10 +87,6 @@ RUN cd /tmp && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
     make && \
     make install
-
-USER root
-# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
-RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/

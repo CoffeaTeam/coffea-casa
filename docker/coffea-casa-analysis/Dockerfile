@@ -1,5 +1,4 @@
-# based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
-FROM continuumio/miniconda3:latest
+FROM coffeateam/coffea-dask:latest
 
 # Configure environment
 ENV SHELL /bin/bash
@@ -24,25 +23,8 @@ RUN apt-get update \
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
-    conda-build \
-    python==3.8.6 \
-    voms \
-    ca-policy-lcg \
-    python-blosc \
-    cytoolz \
-    dask \
-    nomkl \
-    tini==0.18.0 \
-    scipy==1.5.3 \
-    bokeh \
-    cloudpickle \
-    xrootd==5.0.3 \
     htcondor \
-    coffea==0.6.44 \
     cmake \
-    && find /opt/conda/ -type f,l -name '*.a' -delete \
-    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
-    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
     && conda clean --all -f -y \
     && conda build purge-all
 
@@ -69,9 +51,6 @@ RUN cd /tmp && \
     make install
 
 USER root
-# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
-RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
-
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
 # Fixes https://github.com/CoffeaTeam/jhub/issues/37
