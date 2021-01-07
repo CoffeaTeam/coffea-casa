@@ -36,7 +36,8 @@ distributed:
         limit: 5s
 
     logging:
-      distributed: debug
+      distributed: info
+      distributed.worker: debug
       bokeh: critical
       tornado: critical
       tornado.application: error
