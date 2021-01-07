@@ -8,6 +8,8 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="jovyan"
 ARG NB_UID="1000"
 ARG NB_GID="100"
+ARG HOME="/home/$NB_USER"
+
 
 # Configure environment
 ENV CONDA_DIR=/opt/conda \
@@ -76,9 +78,7 @@ RUN conda install --quiet --yes \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
     rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
-    rm -rf /home/$NB_USER/.cache/yarn && \
-    fix-permissions $CONDA_DIR && \
-    fix-permissions /home/$NB_USER
+    rm -rf /home/$NB_USER/.cache/yarn
 
 EXPOSE 8888
 
@@ -233,6 +233,7 @@ ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 USER $NB_UID
+WORKDIR $HOME
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
 # Use bash login shell for entrypoint in order
 # to automatically source user's .bashrc
