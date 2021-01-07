@@ -39,9 +39,6 @@ RUN pip install --ignore-installed --no-cache-dir \
     git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed \
     dask-jobqueue
 
-# Logging@worker
-COPY dask.yaml $HOME/.config/dask/
-
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
     # ------- xrdcl-authz-plugin -------------------------------

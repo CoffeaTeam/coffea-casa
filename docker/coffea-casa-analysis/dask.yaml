@@ -1,6 +1,0 @@
-distributed:
-    logging:
-      distributed: debug
-      bokeh: critical
-      tornado: critical
-      tornado.application: error
