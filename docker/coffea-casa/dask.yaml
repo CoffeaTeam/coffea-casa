@@ -37,7 +37,6 @@ distributed:
 
     logging:
       distributed: info
-      distributed.worker: debug
       bokeh: critical
       tornado: critical
       tornado.application: error
