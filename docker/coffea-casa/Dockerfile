@@ -178,6 +178,7 @@ RUN pip install --ignore-installed --no-cache-dir \
     git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed \
     dask-jobqueue \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
+    yaml
 
 # TBD Servicex
 # RUN pip install --no-cache-dir servicex-clients
@@ -236,7 +237,9 @@ RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 USER $NB_UID
 WORKDIR $HOME
+ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
+
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
 # Use bash login shell for entrypoint in order
 # to automatically source user's .bashrc
-CMD ["bash", "-l", "-c", "'/usr/local/bin/prepare-env.sh && /usr/local/bin/start-notebook.sh'"]
+CMD ["bash", "-l", "-c", "'/usr/local/bin/start-notebook.sh'"]
