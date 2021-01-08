@@ -12,15 +12,15 @@ ARG NB_GID="100"
 
 # Configure environment
 ENV CONDA_DIR=/opt/conda \
-    HOME=/home/$NB_USER \
     SHELL=/bin/bash \
     NB_USER=$NB_USER \
     NB_UID=$NB_UID \
     NB_GID=$NB_GID \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8 \
-    PATH=$HOME/.local/bin:$CONDA_DIR/bin:$PATH
+    LANGUAGE=en_US.UTF-8
+ENV PATH=$CONDA_DIR/bin:$PATH \
+    HOME=/home/$NB_USER
 
 
 # Install all OS dependencies for notebook server that starts but lacks all
