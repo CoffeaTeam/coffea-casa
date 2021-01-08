@@ -177,7 +177,7 @@ RUN conda install --yes --freeze-installed \
 RUN pip install --ignore-installed --no-cache-dir \
     git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed \
     dask-jobqueue \
-    git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa
+    git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa \
     yaml
 
 # TBD Servicex
