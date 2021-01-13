@@ -92,7 +92,7 @@ If you wish to commit, push, or pull from the repository you currently have acti
 
 The buttons in the top right allow for pulling and pushing respectively. When you have edited files in a directory, they will show up under the *Changed* category, at which point you can hit the **+** to add them to a commit (at which point they will show up under *Staged*). Filling out the box at the bottom of the sidebar will file your commit, and prepare it for you to push.
 
-Setup
+Example
 -----
 In this example (which corresponds to `ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example1.ipynb>`_), we'll try to run a simple analysis example on the Coffea-Casa Analysis Facility. We will use the ``coffea_casa`` wrapper library, which allows use of pre-configured settings for HTCondor configuration and Dask scheduler/worker images.
 
@@ -185,3 +185,13 @@ As a result you should see next plot:
    :alt: Final plot that you should see at the end of example
    :width: 50%
    :align: center
+   
+Important Note for CMS Data
+-----
+Above, we used a public data file to run through our example. If your analysis makes use of CMS data, or data which is otherwise certificate-protected, you will run into authentication errors. The Coffea-Casa Analysis Facility @ T2 Nebraska comes equipped with xcache tokens that permit you to access this data, but you will need to edit the path you're using to access the root file by changing the redirector portion to ``xache``. For example:
+
+``root://`` **xrootd.unl.edu** ``//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root``
+
+becomes
+
+``root://`` **xcache** ``//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root``
