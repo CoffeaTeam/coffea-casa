@@ -3,14 +3,14 @@
 .. py:currentmodule:: dask_casa
 
 
-How to configure Dask Labextension cluster
+How to Configure Dask Labextension Cluster
 ===========================================
 
-Dask JupyterLab extension package provides a JupyterLab extension to manage Dask clusters, as well as embed Dask's dashboard plots directly into JupyterLab panes.
+The Dask JupyterLab extension package provides a JupyterLab extension to manage Dask clusters, as well as to embed Dask's dashboard plots directly into JupyterLab panes.
 
-Files ``~/.config/dask/jobqueue-coffea-casa.yaml`` or ``/etc/dask/jobqueue-coffea-casa.yaml`` are usually default configuration files used for :class:`CoffeaCasaCluster`:
+The ``~/.config/dask/jobqueue-coffea-casa.yaml`` or ``/etc/dask/jobqueue-coffea-casa.yaml`` files are usually the default configuration files used for :class:`CoffeaCasaCluster`:
 
-Example of file:
+Example of a file:
 
 .. code-block:: yaml
 
@@ -41,7 +41,7 @@ Example of file:
         name: dask-worker
 
 
-To configure the cluster that is launched using it, you should adjust a Dask configuration file, typically stored at ``~/.config/dask/labextension.yaml`` or ``/etc/dask/labextension.yaml``.
+To configure a cluster that is launched using it, you should adjust the Dask configuration file, typically stored at ``~/.config/dask/labextension.yaml`` or ``/etc/dask/labextension.yaml``.
 
 .. code-block:: yaml
 
@@ -59,14 +59,17 @@ To configure the cluster that is launched using it, you should adjust a Dask con
             maximum: 10
 
 
-Users can edit `kwargs: {}` to be able to change a :class:`CoffeaCasaCluster` constructor directly (see more details in :doc:`cc_setup`).
+Users can edit `kwargs: {}` to change a :class:`CoffeaCasaCluster` constructor directly (see more details in :doc:`cc_setup`).
 
 
-To get an address of scheduler that will be used during client connection, try next:
+To get an address of scheduler that will be used during client connection, try right-clicking on the cluster in the sidebar:
 
 .. image:: _static/dask_labextension_address.png
+   :alt: Dask Labextention powered cluster, with right-click menu
+   :width: 50%
+   :align: center
 
-Then you can use it directly in the code "Inject Dask connection code", as it is shown in example below:
+And then pressing *Inject Dask Client Connection Code*, as is shown in example below:
 
 .. code-block:: python
 
@@ -74,7 +77,7 @@ Then you can use it directly in the code "Inject Dask connection code", as it is
     client = Client("tls://oksana-2eshadura-40cern-2ech.dask.coffea.casa:8786")
     client
 
-or simply:
+or, more simply:
 
 .. code-block:: python
 
