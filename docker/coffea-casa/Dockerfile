@@ -9,18 +9,19 @@ ARG NB_USER="jovyan"
 ARG NB_UID="1000"
 ARG NB_GID="100"
 
-
-# Configure environment
-ENV CONDA_DIR=/opt/conda \
-    SHELL=/bin/bash \
-    NB_USER=$NB_USER \
-    NB_UID=$NB_UID \
-    NB_GID=$NB_GID \
-    LC_ALL=en_US.UTF-8 \
+USER root
+ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
-ENV PATH=$CONDA_DIR/bin:$PATH \
-    HOME=/home/$NB_USER
+
+# Configure environment
+ENV CONDA_DIR /opt/conda
+ENV SHELL /bin/bash
+ENV NB_USER $NB_USER
+ENV NB_UID $NB_UID
+ENV NB_GID $NB_GID
+ENV HOME /home/$NB_USER
+ENV PATH "/opt/conda/bin/:$PATH"
 
 
 # Install all OS dependencies for notebook server that starts but lacks all
@@ -59,7 +60,6 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     fix-permissions $CONDA_DIR
 
 USER $NB_UID
-
 # Setup work directory for backward-compatibility
 RUN mkdir "/home/$NB_USER/work" && \
     fix-permissions "/home/$NB_USER"
@@ -72,9 +72,12 @@ RUN mkdir "/home/$NB_USER/work" && \
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
     -c conda-forge \
-    'notebook=6.1.6' \
-    'jupyterhub=1.3.0' \
-    'jupyterlab=2.2.9' && \
+    'notebook==6.1.6' \
+    'jupyterhub==1.3.0' \
+    'jupyterlab==2.2.9' \
+    jupyterlab_widgets \
+    jupyterlab-git \
+    dask_labextension && \
     conda clean --all -f -y && \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
@@ -130,9 +133,6 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 USER $NB_UID
 # Dask extention (looks like it is not available in the image)
 RUN pip install --no-cache-dir \
-  jupyterlab_widgets \
-  dask_labextension \
-  jupyterlab_git \
   jupyterlab_github
 
 # Enable the serverextensions that do not use the conf.d approach and
@@ -190,7 +190,7 @@ RUN cd /tmp && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/conda && \
     make && \
     make install
 
@@ -199,6 +199,11 @@ USER root
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
+
+# Fix permissions on /etc/jupyter as root
+RUN fix-permissions /etc/jupyter/ && \
+    fix-permissions "$(dirname $CONDA_DIR)" && \
+    fix-permissions "$(dirname $HOME)"
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
