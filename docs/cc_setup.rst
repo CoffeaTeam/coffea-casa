@@ -109,4 +109,4 @@ or
     ``Coffea-casa`` is using communication through the TLS protocol. You will not be able to disable TLS!
 
 
-To learn how to use Dask Labextention, please check :doc:`How to Configure Dask Labextension Cluster`.
+To learn how to use Dask Labextention, please check :doc:`cc_configuration`.
