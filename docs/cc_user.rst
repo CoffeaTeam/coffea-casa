@@ -25,7 +25,7 @@ To access it please sign in or sign up using ``Apply for an account``.
    :align: center
 
 
-Docker Image to Be Selected
+Docker Image Selection
 -----
 
 For high efficient analysis using *coffea* package, powered with *Dask* and *HTCondor* please select:
