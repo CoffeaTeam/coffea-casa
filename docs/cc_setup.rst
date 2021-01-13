@@ -10,7 +10,7 @@ Coffea-Casa Setup Without Dask Labextention
 Preparations
 -----------
 
-Please shut down ``UNL HTCondor Cluster`` (powered by Dask Labextention and available by default), by pushing the button labeled ``Shut Down``:
+Please shut down ``UNL HTCondor Cluster`` (powered by Dask Labextention and available by default), by pushing the button labeled ``Shutdown``:
 
 
 .. image:: _static/coffea-casa-labext.png
