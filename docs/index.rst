@@ -3,20 +3,20 @@
 .. py:currentmodule:: coffea_casa
 
 
-Welcome to Coffea-casa project!
+Welcome to the Coffea-Casa Project!
 ==============================================================================================================
 
 
-**Coffea-casa** is a prototype of a U.S. CMS analysis facility that provides services for “low latency columnar analysis”, enabling rapid processing of data in a column-wise fashion.
+**Coffea-casa** is a prototype of a U.S. CMS analysis facility that provides services for “low latency columnar analysis,” enabling rapid processing of data in a column-wise fashion.
 
-Coffea-casa Analysis Facility (AF) services, based on *Dask* and *Jupyter notebooks* technologies, aim to dramatically lower time for analysis and provide an easily-scalable and user-friendly computational environment that will simplify, facilitate, and accelerate the delivery of HEP results.
+Coffea-casa Analysis Facility (AF) services, based on *Dask* and *Jupyter Notebook* technologies, aim to dramatically lower time for analysis and provide an easily-scalable and user-friendly computational environment that will simplify, facilitate, and accelerate the delivery of HEP results.
 
 .. image:: _static/coffea-casa-draft.png
    :alt: Prototype of Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 100%
    :align: center
 
-The facility is built on top of a Kubernetes cluster and integrates with dedicated resources with resources allocated via fair share through the local HTCondor system and Nebraska Tier-2 resources.
+The facility is built on top of a Kubernetes cluster and integrates with dedicated resources, with resources allocated via fair share through the local HTCondor system and Nebraska Tier-2.
 
 
 .. image:: _static/coffea-casa-resources.png
@@ -26,8 +26,8 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 
 .. note::
 
-    **Coffea-casa** a prototype and currently is actively developing: if you had noticed a bug or would like to leave us a feedback,
-    we invite you to open an issue directly in GH: <https://github.com/CoffeaTeam/coffea-casa/issues>
+    **Coffea-casa** is a prototype and is currently in active development: if you had noticed a bug or would like to leave us feedback,
+    we invite you to open an issue directly on GitHub: <https://github.com/CoffeaTeam/coffea-casa/issues>
 
 
 .. toctree::
@@ -45,30 +45,31 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :hidden:
    :caption: How To Use Coffea-casa
 
-   Coffea documentation <https://coffeateam.github.io/coffea/>
+   Coffea Documentation <https://coffeateam.github.io/coffea/>
    cc_user.rst
-
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Gallery of Coffea-casa Examples
 
-   ADL benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example1.ipynb>
-   ADL benchmark 2 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example2.ipynb>
-   ADL benchmark 3 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example3.ipynb>
-   ADL benchmark 4 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example4.ipynb>
-   ADL benchmark 5 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example5.ipynb>
-   ADL benchmark 6 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example6.ipynb>
-   ADL benchmark 7 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example7.ipynb>
-   ADL benchmark 8 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/benchmarks/example8.ipynb>
-   Single top-Higgs production (tHq) analysis <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analysis-casa.ipynb>
+   Coffea-Casa Template <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/coffea-casa-template.ipynb>
+   ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example1.ipynb>
+   ADL Benchmark 2 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example2.ipynb>
+   ADL Benchmark 3 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example3.ipynb>
+   ADL Benchmark 4 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example4.ipynb>
+   ADL Benchmark 5 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example5.ipynb>
+   ADL Benchmark 6 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example6.ipynb>
+   ADL Benchmark 7 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example7.ipynb>
+   ADL Benchmark 8 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example8.ipynb>
+   Single Top-Higgs Production (tHq) Analysis <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analysis/analysis-casa.ipynb>
+   Single Top-Higgs Production (tHq) Analysis Tutorial <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analysis/analysis_tutorial.ipynb>
 
 
 .. toctree::
   :maxdepth: 1
   :hidden:
-  :caption: Deeper Look Into ``Coffea-casa`` Internals
+  :caption: Deeper Look Into ``Coffea-Casa`` Internals
 
   cc_setup.rst
   cc_configuration.rst
@@ -77,7 +78,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Deploying Coffea-casa at K8s Cluster
+   :caption: Deploying Coffea-Casa at K8s Cluster
 
    cc_deployment.rst
 
@@ -85,7 +86,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Detailed Information on the coffea_casa
+   :caption: Detailed Information on Coffea-Casa
 
    cc_api.rst
 
