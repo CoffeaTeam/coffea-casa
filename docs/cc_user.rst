@@ -1,5 +1,8 @@
 First Steps at Coffea-Casa
 =========
+Prerequisites
+-----
+The primary mode of analysis with coffea-casa is `coffea <https://coffeateam.github.io/coffea/examples.html>`_. Knowledge of `Python <https://docs.python.org/3/tutorial/>`_ is also assumed. Standard coffea analyses are contained within `Jupyter Notebooks <https://jupyter.org/>`_, which allow for dynamic, block-by-block execution of code. Coffea-casa employs the `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/user/interface.html>`_ interface. JupyterLab is designed for hosting Jupyter Notebooks on the web, and permits the usage of additional features within its environment, including Git access, compatibility with cluster computing tools, and much, much more.
 
 Access
 -----
