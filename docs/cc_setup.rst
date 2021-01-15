@@ -3,14 +3,14 @@
 .. py:currentmodule:: coffea_casa
 
 
-Coffea-casa setup without Dask Labextention
+Coffea-Casa Setup Without Dask Labextention
 ============
 
 
 Preparations
 -----------
 
-Please shut down ``UNL HTCondor Cluster`` (powered by Dask Labextention and available by default), pushing button ``Shut Down``:
+Please shut down ``UNL HTCondor Cluster`` (powered by Dask Labextention and available by default), by pushing the button labeled ``Shutdown``:
 
 
 .. image:: _static/coffea-casa-labext.png
@@ -19,11 +19,10 @@ Please shut down ``UNL HTCondor Cluster`` (powered by Dask Labextention and avai
    :align: center
 
 
-Instantiating own CoffeaCasaCluster
+Instantiating Your Own CoffeaCasaCluster
 -----------
 
-Next snippet will set up a cluster by instantiating a Dask Client for :class:`CoffeaCasaCluster,
-scaled to use 10 jobs:
+The next snippet will set up a cluster by instantiating a Dask Client with :class:`CoffeaCasaCluster`, scaled to use 10 jobs:
 
 .. code-block:: python
 
@@ -34,8 +33,7 @@ scaled to use 10 jobs:
     cluster.scale(10)
     client = Client(cluster)
 
-You can use an adaptive mechanism for Dask job autoscaling.
-This will scales Dask clusters automatically based on scheduler activity:
+You can use an adaptive mechanism for Dask job autoscaling. This will scale Dask workers automatically based on scheduler activity:
 
 .. code-block:: python
 
@@ -49,7 +47,7 @@ This will scales Dask clusters automatically based on scheduler activity:
 
 .. note::
 
-   Don't forget to shutdown ``Coffea-casa`` cluster, before start a new:
+   Don't forget to shutdown your ``Coffea-casa`` cluster before starting a new one:
 
    .. code-block:: python
 
@@ -60,7 +58,7 @@ CoffeaCasaCluster
 --------------
 
 
-Default :class:`CoffeaCasaCluster` constructor settings:
+The default :class:`CoffeaCasaCluster` constructor settings:
 
 .. code-block:: python
 
@@ -108,7 +106,7 @@ or
 
 .. note::
 
-    ``Coffea-casa is`` using only communication using TLS protocol. You will not be able to disable TLS!
+    ``Coffea-casa`` is using communication through the TLS protocol. You will not be able to disable TLS!
 
 
-To how to use Dask Labextention, please check :doc:`configuration`.
+To learn how to use Dask Labextention, please check :doc:`cc_configuration`.

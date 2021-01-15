@@ -1,34 +1,30 @@
-First steps at Coffea-casa
+First Steps at Coffea-Casa
 =========
-
-
-Setup
+Prerequisites
 -----
+The primary mode of analysis with coffea-casa is `coffea <https://coffeateam.github.io/coffea/index.html>`_. Coffea provides plenty of examples to users in its `documentation <https://coffeateam.github.io/coffea/examples.html>`_. A good starting point may be `this tutorial <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analysis/analysis_tutorial.ipynb>`_ on columnar analysis in coffea.
 
-In this example, we'll try to run a simple analysis example at Coffea-Casa Analysis Facility and use  ``coffea_casa`` wrapper library that allowed to use pre-configured settings for HTCondor configuration and Dask scheduler and worker images.
+Knowledge of `Python <https://docs.python.org/3/tutorial/>`_ is also assumed. Standard coffea analyses are contained within `Jupyter Notebooks <https://jupyter.org/>`_, which allow for dynamic, block-by-block execution of code. Coffea-casa employs the `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/user/interface.html>`_ interface. JupyterLab is designed for hosting Jupyter Notebooks on the web, and permits the usage of additional features within its environment, including Git access, compatibility with cluster computing tools, and much, much more.
 
-Our goal of this `toy` analysis is to plot the missing *ET* of all events from dataset, converted from 2012 CMS Open Data (17 GB, 54 million events), available in public EOS (root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root)
-
+If you aren't familiar with any of these tools, please click on the links above for additional resources, and get acquainted with how they work. If you want examples of how coffea-casa merges these tools, refer to the gallery of coffea-casa examples.
 
 Access
 -----
 
-Please use `this address <https://cmsaf-jh.unl.edu>`_ as an access point to Coffea-casa Analysis Facility @ T2 Nebraska.
+Please use `https://cmsaf-jh.unl.edu <https://cmsaf-jh.unl.edu>`_ as an access point to the Coffea-Casa Analysis Facility @ T2 Nebraska.
 
 .. image:: _static/coffea-casa-enter.png
    :alt: Access to Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
-Currently Coffea-casa Analysis Facility @ T2 Nebraska provide access to any member of CMS VO organisation.
 
-
-CMS AuthZ Authentification Instance
+CMS AuthZ Authentication Instance
 -----
 
-Currently Coffea-casa Analysis Facility @ T2 Nebraska support any member of CMS VO organisation.
+Currently Coffea-Casa Analysis Facility @ T2 Nebraska support any member of CMS VO organisation.
 
-To access it please sign in or sign up using ``Create account``
+To access it please sign in or sign up using ``Apply for an account``.
 
 .. image:: _static/coffea-casa-authz.png
    :alt: CMS Authz authentification to Coffea-casa Analysis Facility @ T2 Nebraska
@@ -36,7 +32,7 @@ To access it please sign in or sign up using ``Create account``
    :align: center
 
 
-Docker image to be selected
+Docker Image Selection
 -----
 
 For high efficient analysis using *coffea* package, powered with *Dask* and *HTCondor* please select:
@@ -55,30 +51,61 @@ After you will be forwarded to your personal Jupyterhub instance running at Anal
    :align: center
 
 
-Available resources Coffea-casa Analysis Facility @ T2 Nebraska
+Cluster Resources in Coffea-Casa Analysis Facility @ T2 Nebraska
 -----
 
-Check if you have started your Coffea-Casa Dask Cluster  with the ``distributed`` scheduler and 2 Dask workers (first launched at Kubernetes cluster and other one directly available in HTCondor queue) on the cluster.
-
+By default, the Coffea-casa Dask cluster should provide you with a scheduler and workers, which you can see by clicking on the colored Dask icon in the left sidebar.
 
 .. image:: _static/coffea-casa-startr.png
    :alt: Default Dask Labextention powered cluster available Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
-As soon as you will start your computations, you will notice that available resources at Coffea-casa Analysis Facility @ T2 Nebraska can easily autoscale depending to available resources at HTCondor pool at Nebraska Tier 2.
+As soon as you will start your computations, you will notice that available resources at the Coffea-Casa Analysis Facility @ T2 Nebraska can easily autoscale depending on available resources in the HTCondor pool at Nebraska Tier 2.
 
 
 .. image:: _static/coffea-casa-labext.png
    :alt: Autoscaling with Dask Labextention powered cluster available at Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
+   
+Using Git in the Coffea-Casa Analysis Facility @ T2 Nebraska
+-----
 
+Cloning a repository in the Coffea-casa Analysis Facility @ T2 Nebraska is simple, though it can be a little confusing because it is spread across two tabs in the sidebar: the *File Browser* and the *Git* tabs.
 
-Simple example
-------------
+In order to clone a repository, first go to the Git tab. It should look like this:
 
-Import  ``coffea`` libraries used in this example:
+.. image:: _static/git.png
+   :alt: The Git tab at Coffea-casa Analysis Facility @ T2 Nebraska
+   :width: 50%
+   :align: center
+
+Simply click the appropriate button (initialize a repository, or clone a repository) and you'll be hooked up to GitHub. This should then take you to the *File Browser* tab, which is where you can see all of the repositories you have cloned in your JupyterLab instance. The File Browser should look like this:
+
+.. image:: _static/browser.png
+   :alt: The File Browser tab at Coffea-casa Analysis Facility @ T2 Nebraska
+   :width: 50%
+   :align: center
+
+If you wish to change repositories, simply click the folder button to enter the root directory. If you are in the root directory, the Git tab will reset and allow you to clone another repository.
+
+If you wish to commit, push, or pull from the repository you currently have active in the File Browser, then you can return to the Git tab. It should change to look like this, so long as you have a repository open in the File Browser:
+
+.. image:: _static/git2.png
+   :alt: The Git tab at Coffea-casa Analysis Facility @ T2 Nebraska, after a repository is activated
+   :width: 50%
+   :align: center
+
+The buttons in the top right allow for pulling and pushing respectively. When you have edited files in a directory, they will show up under the *Changed* category, at which point you can hit the **+** to add them to a commit (at which point they will show up under *Staged*). Filling out the box at the bottom of the sidebar will file your commit, and prepare it for you to push.
+
+Example
+-----
+In this example (which corresponds to `ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example1.ipynb>`_), we'll try to run a simple analysis example on the Coffea-Casa Analysis Facility. We will use the ``coffea_casa`` wrapper library, which allows use of pre-configured settings for HTCondor configuration and Dask scheduler/worker images.
+
+Our goal in this `toy` analysis is to plot the missing transverse energy (*MET*) of all events from a sample dataset; this data was converted from 2012 CMS Open Data (17 GB, 54 million events), and is available in public EOS (root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root).
+
+First, we need to import the ``coffea`` libraries used in this example:
 
 .. code-block:: python
 
@@ -87,8 +114,14 @@ Import  ``coffea`` libraries used in this example:
     from coffea.analysis_objects import JaggedCandidateArray
     import coffea.processor as processor
     %matplotlib inline
+    
+To select the aforementioned data in a coffea-friendly syntax, we employ a dictionary of datasets, where each dataset (key) corresponds to a list of files (values):
 
-Coffea provides the coffea.processor module, which allows users to worry just about the actual analysis code and not about how to implement efficient parallelization, assuming that the parallization is a trivial map-reduce operation (e.g. filling histograms and adding them together).
+.. code-block:: python
+
+    fileset = {'SingleMu' : ["root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root"]}
+
+Coffea provides the coffea.processor module, where users may write their analysis code without worrying about the details of efficient parallelization, assuming that the parallelization is a trivial map-reduce operation (e.g., filling histograms and adding them together).
 
 .. code-block:: python
 
@@ -129,21 +162,14 @@ Coffea provides the coffea.processor module, which allows users to worry just ab
         return accumulator
 
 
-Select `Run2012B_SingleMu.root` dataset converted from 2012 CMS Open Data (17 GB, 54 million events), available in public public EOS:
-
-.. code-block:: python
-
-    fileset = {'SingleMu' : ["root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root"]}
-
-
-Simply connect to Dask Labextention powered cluster available Coffea-casa Analysis Facility @ T2 Nebraska:
+With our data in our fileset variable and our processor ready to go, we simply need to connect to the Dask Labextention-powered cluster available within the Coffea-Casa Analysis Facility @ T2 Nebraska. This can be done by dragging the scheduler into the notebook, or by manually typing the following:
 
 .. code-block:: python
 
     from dask.distributed import Client
     client = Client("tls://localhost:8786")
 
-Next step is to run a developed Processor() Coffea processor using uproot for data delivery and Dask executor:
+Then we bundle everything up to run our job, making use of the Dask executor. To do this, we must point to a client within executor_args.
 
 .. code-block:: python
 
@@ -154,7 +180,7 @@ Next step is to run a developed Processor() Coffea processor using uproot for da
                       executor_args={'client': client, 'nano': True},
                       chunksize=250000)
 
-Final step is to generates a 1D histogram from the data output to the 'MET' key. fill_opts are optional, to fill the graph (default is a line).
+The final step is to generates a 1D histogram from the data output to the 'MET' key. fill_opts are optional arguments to fill the graph (default is a line).
 
 .. code-block:: python
 
@@ -166,3 +192,13 @@ As a result you should see next plot:
    :alt: Final plot that you should see at the end of example
    :width: 50%
    :align: center
+   
+Important Note for CMS Data
+-----
+Above, we used a public data file to run through our example. If your analysis makes use of CMS data, or data which is otherwise certificate-protected, you will run into authentication errors. The Coffea-Casa Analysis Facility @ T2 Nebraska comes equipped with xcache tokens that permit you to access this data, but you will need to edit the path you're using to access the root file by changing the redirector portion to ``xache``. For example:
+
+``root://`` **xrootd.unl.edu** ``//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root``
+
+becomes
+
+``root://`` **xcache** ``//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root``
