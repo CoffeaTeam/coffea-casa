@@ -247,4 +247,4 @@ ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
 # Use bash login shell for entrypoint in order
 # to automatically source user's .bashrc
-CMD ["bash", "-l", "-c", "'/usr/local/bin/start-notebook.sh'"]
+CMD ["start-notebook.sh"]
