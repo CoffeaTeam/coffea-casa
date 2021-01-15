@@ -27,7 +27,7 @@ with open(servicex, "w") as f:
     yaml.dump(list_yaml,f)'
 
     echo "Tokens: ServiceX config file was succesfully generated."
-    unset condor_token
+    unset servicex_token
 fi
 
 # We start by adding extra apt packages, since pip modules may required library
