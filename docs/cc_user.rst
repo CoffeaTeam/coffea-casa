@@ -195,10 +195,10 @@ As a result you should see next plot:
    
 Important Note for CMS Data
 -----
-Above, we used a public data file to run through our example. If your analysis makes use of CMS data, or data which is otherwise certificate-protected, you will run into authentication errors. The Coffea-Casa Analysis Facility @ T2 Nebraska comes equipped with xcache tokens that permit you to access this data, but you will need to edit the path you're using to access the root file by changing the redirector portion to ``xache``. For example:
+Above, we used a public data file to run through our example. If your analysis makes use of CMS data, or data which is otherwise certificate-protected, you will run into authentication errors. The Coffea-Casa Analysis Facility @ T2 Nebraska comes equipped with xcache tokens that permit you to access this data, but you will need to edit the path you're using to access the root file by changing the redirector portion to ``xcache``. For example:
 
-``root://`` **xrootd.unl.edu** ``//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root``
+*root://* **xrootd.unl.edu** *//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root*
 
 becomes
 
-``root://`` **xcache** ``//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root``
+*root://* **xcache** *//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root*
