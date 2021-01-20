@@ -107,11 +107,11 @@ RUN groupadd -r condor && \
     groupadd 1000 && usermod -g 1000 $NB_USER
 
 # xcache setup (we setup BEARER_TOKEN_FILE later in prepare-env.sh)
-ENV XCACHE_HOST="red-xcache1.unl.edu"
-ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
-ENV LD_LIBRARY_PATH="/opt/conda/lib/"
-ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
-ENV BEARER_TOKEN_FILE="/etc/xcache_token"
+#ENV XCACHE_HOST="red-xcache1.unl.edu"
+#ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+#ENV LD_LIBRARY_PATH="/opt/conda/lib/"
+#ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
+#ENV BEARER_TOKEN_FILE="/etc/xcache_token"
 
 # Cleanup
 RUN rm -rf /tmp/* \
