@@ -186,6 +186,19 @@ RUN pip install --ignore-installed --no-cache-dir \
 # TBD Servicex
 # RUN pip install --no-cache-dir servicex-clients
 
+USER $NB_UID
+# ------- xrootd -------------------------------
+# We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
+RUN cd /tmp && \
+    git clone https://github.com/xrootd/xrootd.git && \
+    cd xrootd && \
+    git checkout v5.0.3 && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DCMAKE_BUILD_TYPE=Debug -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/opt/conda -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
+    make -j4 && \
+    make install
+
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
     # ------- xrdcl-authz-plugin -------------------------------
