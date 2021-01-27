@@ -8,11 +8,11 @@ if [[ -f "/etc/cmsaf-secrets/.servicex" ]]; then
     # debug: it work locally in Hub, let's try to touch file
     touch /home/jovyan/.servicex
     echo "Tokens: generating ServiceX config file."
-    # We are using second test instance to test JWT integration:
+    # We are using dev instance to test JWT integration:
     # replace later with https://uproot.servicex.coffea.casa
     echo "
 api_endpoints:
-  - endpoint: https://uproot-jwt.servicex.coffea.casa
+  - endpoint: https://uproot-dev.servicex.coffea.casa
     token:
     type: uproot
     " > /home/jovyan/.servicex
@@ -30,16 +30,9 @@ with open(servicex, "w") as f:
     unset servicex_token
 fi
 
-# We start by adding extra apt packages, since pip modules may required library
-if [ "$EXTRA_APT_PACKAGES" ]; then
-    echo "apt: EXTRA_APT_PACKAGES environment variable found.  Installing."
-    apt update -y
-    apt install -y $EXTRA_APT_PACKAGES
-fi
-
 if [ -e "$HOME/environment.yml" ]; then
     echo "conda: environment.yml found. Installing packages"
-    /opt/conda/bin/conda env update -f /opt/app/environment.yml
+    /opt/conda/bin/conda env update -f $HOME/environment.yml
 else
     echo "no environment.yml"
 fi

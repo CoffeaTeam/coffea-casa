@@ -6,16 +6,9 @@ set -x
 WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5)
 sed --in-place "s/kubernetes-worker-%(ENV_WORKER_ID)s/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
-# We start by adding extra apt packages, since pip modules may required library
-if [ "$EXTRA_APT_PACKAGES" ]; then
-    echo "apt: EXTRA_APT_PACKAGES environment variable found.  Installing."
-    apt update -y
-    apt install -y $EXTRA_APT_PACKAGES
-fi
-
 if [ -e "$HOME/environment.yml" ]; then
     echo "conda: environment.yml found. Installing packages"
-    /opt/conda/bin/conda env update -f /opt/app/environment.yml
+    /opt/conda/bin/conda env update -f $HOME/environment.yml
 else
     echo "no environment.yml"
 fi
@@ -65,11 +58,11 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   fi
   # Bearer token
   if [[ -f "$_CONDOR_JOB_IWD/xcache_token" ]]; then
-      #export BEARER_TOKEN_FILE="$_CONDOR_JOB_IWD/xcache_token"
-      #export XCACHE_HOST="red-xcache1.unl.edu"
-      #export XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
-      #export LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-      #export XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
+      export BEARER_TOKEN_FILE="$_CONDOR_JOB_IWD/xcache_token"
+      export XCACHE_HOST="red-xcache1.unl.edu"
+      export XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+      export LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
+      export XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
   fi
   # CA certificate securily transfered from scheduler
   if [[ -f "$_CONDOR_JOB_IWD/ca.pem" ]]; then

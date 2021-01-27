@@ -253,11 +253,11 @@ RUN rm -rf /tmp/* \
     && conda build purge-all
 
 # xcache setup
-#ENV XCACHE_HOST="red-xcache1.unl.edu"
-#ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
-#ENV LD_LIBRARY_PATH="/opt/conda/lib/"
-#ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
-#ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
+ENV XCACHE_HOST="red-xcache1.unl.edu"
+ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+ENV LD_LIBRARY_PATH="/opt/conda/lib/"
+ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
+ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
