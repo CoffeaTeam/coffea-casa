@@ -14,10 +14,17 @@ USER root
 # features (e.g., download as all possible file formats)
 RUN apt-get update \
      && apt-get install -yq --no-install-recommends \
-        wget \
-        sudo \
-        locales \
-        fonts-liberation \
+     libssl-dev \
+     zlib1g-dev \
+     uuid-dev  \
+     openssh-client \
+     python-setuptools \
+     procps \
+     vim \
+     wget \
+     sudo \
+     locales \
+     fonts-liberation \
      && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
@@ -186,9 +193,8 @@ RUN pip install --ignore-installed --no-cache-dir \
 # TBD Servicex
 # RUN pip install --no-cache-dir servicex-clients
 
-USER $NB_UID
+# Enabled for debugging purposes (combination of conda xrootd 5.0.3 + xrdcl-authz-plugin is broken)
 # ------- xrootd -------------------------------
-# We need to build xrootd and xrdcl-authz-plugin from scratch :( - xrootd looks like is not distributed on Ubuntu
 RUN cd /tmp && \
     git clone https://github.com/xrootd/xrootd.git && \
     cd xrootd && \
