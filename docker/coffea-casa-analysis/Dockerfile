@@ -1,48 +1,74 @@
-# based on https://github.com/dask/dask-docker/blob/master/base/Dockerfile
-FROM continuumio/miniconda3:latest
+FROM coffeateam/coffea-dask:latest
+
+USER root
+LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
+ARG NB_USER="jovyan"
+ARG NB_UID="1000"
+ARG NB_GID="100"
+
+USER root
+ENV LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8
 
 # Configure environment
+ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
-ENV NB_USER jovyan
-ENV NB_UID 1000
+ENV NB_USER $NB_USER
+ENV NB_UID $NB_UID
+ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
-ENV PATH=$HOME/.local/bin:$PATH
+ENV PATH "/opt/conda/bin/:$PATH"
 
-# Create jovyan user with UID=1000 and in the 'users' group
-# Fix permissions
-RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER  && \
-    chown -R $NB_USER:users $HOME && \
+# Install all OS dependencies for notebook server that starts but lacks all
+# features (e.g., download as all possible file formats)
+RUN apt-get update \
+     && apt-get install -yq --no-install-recommends \
+     libssl-dev \
+     zlib1g-dev \
+     uuid-dev  \
+     openssh-client \
+     python-setuptools \
+     procps \
+     vim \
+     wget \
+     sudo \
+     locales \
+     fonts-liberation \
+     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+        locale-gen
+
+# Copy a script that we will use to correct permissions after running certain commands
+COPY fix-permissions /usr/local/bin/fix-permissions
+RUN chmod a+rx /usr/local/bin/fix-permissions
+
+# Create NB_USER with name jovyan user with UID=1000 and in the 'users' group
+# and make sure these dirs are writable by the `users` group.
+RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
+    sed -i.bak -e 's/^%admin/#%admin/' /etc/sudoers && \
+    sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
+    useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
+    mkdir -p $CONDA_DIR && \
     mkdir -p /etc/cmsaf-secrets/ && \
     mkdir -p /var/lib/condor && \
-    mkdir -p /home/$NB_UID/.condor/tokens.d
+    mkdir -p /home/$NB_UID/.condor/tokens.d && \
+    chown $NB_USER:$NB_GID $CONDA_DIR && \
+    chmod g+w /etc/passwd && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
 RUN apt-get update \
     && apt-get install -y gcc build-essential
 
-
+USER $NB_UID
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
-    conda-build \
-    python==3.8.6 \
-    voms \
-    ca-policy-lcg \
-    python-blosc \
-    cytoolz \
-    dask \
-    nomkl \
-    tini==0.18.0 \
-    scipy==1.5.3 \
-    bokeh \
-    cloudpickle \
-    xrootd==5.0.3 \
     htcondor \
-    coffea==0.6.44 \
     cmake \
-    && find /opt/conda/ -type f,l -name '*.a' -delete \
-    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
-    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
     && conda clean --all -f -y \
     && conda build purge-all
 
@@ -57,21 +83,29 @@ RUN pip install --ignore-installed --no-cache-dir \
     git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed \
     dask-jobqueue
 
+# Enabled for debugging purposes (combination of conda xrootd 5.0.3 + xrdcl-authz-plugin is broken)
+# ------- xrootd -------------------------------
+RUN cd /tmp && \
+    git clone https://github.com/xrootd/xrootd.git && \
+    cd xrootd && \
+    git checkout v5.0.3 && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DCMAKE_BUILD_TYPE=Debug -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/opt/conda -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
+    make -j4 && \
+    make install
+
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
-    # ------- xrdcl-authz-plugin -------------------------------
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/conda && \
     make && \
     make install
 
 USER root
-# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
-RUN ln -s /opt/conda/etc/grid-security /etc/grid-security
-
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
 # Fixes https://github.com/CoffeaTeam/jhub/issues/37

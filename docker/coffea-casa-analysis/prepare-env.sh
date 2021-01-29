@@ -2,27 +2,24 @@
 
 set -x
 
-# We start by adding extra apt packages, since pip modules may required library
-if [ "$EXTRA_APT_PACKAGES" ]; then
-    echo "EXTRA_APT_PACKAGES environment variable found.  Installing."
-    apt update -y
-    apt install -y $EXTRA_APT_PACKAGES
-fi
+# Debug 'random' name for kubernetes worker
+WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5)
+sed --in-place "s/kubernetes-worker-%(ENV_WORKER_ID)s/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
-if [ -e "$PWD/environment.yml" ]; then
-    echo "environment.yml found. Installing packages"
-    /opt/conda/bin/conda env update -f /opt/app/environment.yml
+if [ -e "$HOME/environment.yml" ]; then
+    echo "conda: environment.yml found. Installing packages"
+    /opt/conda/bin/conda env update -f $HOME/environment.yml
 else
     echo "no environment.yml"
 fi
 
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
-    echo "EXTRA_CONDA_PACKAGES environment variable found.  Installing."
+    echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."
     /opt/conda/bin/conda install -y $EXTRA_CONDA_PACKAGES
 fi
 
 if [ "$EXTRA_PIP_PACKAGES" ]; then
-    echo "EXTRA_PIP_PACKAGES environment variable found.  Installing".
+    echo "pip: EXTRA_PIP_PACKAGES environment variable found.  Installing".
     /opt/conda/bin/pip install $EXTRA_PIP_PACKAGES
 fi
 
