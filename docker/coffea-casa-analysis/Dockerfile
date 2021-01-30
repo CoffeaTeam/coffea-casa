@@ -97,8 +97,9 @@ RUN cd /tmp && \
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
-    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+    git clone https://github.com/oshadura/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
+    git checkout fix-mem-leak && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/conda && \
