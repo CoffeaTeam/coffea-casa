@@ -128,10 +128,15 @@ RUN groupadd -r condor && \
 # xcache setup (we setup BEARER_TOKEN_FILE later in prepare-env.sh)
 ENV XCACHE_HOST="red-xcache1.unl.edu"
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
-ENV LD_LIBRARY_PATH="/opt/conda/lib/:LD_LIBRARY_PATH"
+ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
 ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV BEARER_TOKEN_FILE="/etc/xcache_token"
 ENV PATH="/opt/conda/bin/:$PATH"
+
+# FIXME: we have a wrong path, let's make a link.
+# jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
+# /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 
 # Cleanup
 RUN rm -rf /tmp/* \

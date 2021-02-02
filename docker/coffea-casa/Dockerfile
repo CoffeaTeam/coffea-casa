@@ -261,6 +261,11 @@ ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ENV PATH="/opt/conda/bin/:$PATH"
 
+# FIXME: we have a wrong path, let's make a link.
+# jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
+# /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
+
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
