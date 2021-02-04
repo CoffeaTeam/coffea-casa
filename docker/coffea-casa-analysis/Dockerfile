@@ -141,7 +141,7 @@ ENV PATH="/opt/conda/bin/:$PATH"
 RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 
 #FIXME (recheck patch with new release)
-RUN patch /opt/conda/lib/python3.8/site-packages/coffea/processor/executor.py < $HOME/coffea-xrootd.patch
+RUN patch /opt/conda/lib/python3.8/site-packages/coffea/processor/executor.py < $HOME/patches/coffea-xrootd.patch
 
 # Cleanup
 RUN rm -rf /tmp/* \
