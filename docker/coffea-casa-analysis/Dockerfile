@@ -53,11 +53,14 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     mkdir -p $CONDA_DIR && \
     mkdir -p /etc/cmsaf-secrets/ && \
     mkdir -p /var/lib/condor && \
+    mkdir -p $HOME/patches && \
     mkdir -p /home/$NB_UID/.condor/tokens.d && \
     chown $NB_USER:$NB_GID $CONDA_DIR && \
     chmod g+w /etc/passwd && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
+
+COPY patches/ $HOME/patches/
 
 RUN apt-get update \
     && apt-get install -y gcc build-essential
@@ -136,6 +139,9 @@ ENV PATH="/opt/conda/bin/:$PATH"
 # jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
+
+#FIXME (recheck patch with new release)
+RUN patch /opt/conda/lib/python3.8/site-packages/coffea/processor/executor.py < $HOME/coffea-xrootd.patch
 
 # Cleanup
 RUN rm -rf /tmp/* \
