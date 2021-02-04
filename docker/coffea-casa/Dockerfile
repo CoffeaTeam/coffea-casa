@@ -169,7 +169,7 @@ RUN mkdir -p $HOME/.config/dask  && \
     mkdir -p $HOME/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d  && \
     mkdir -p $HOME/patches
-COPY patches/ $HOME/patches/
+COPY patches/coffea-xrootd.patch $HOME/patches/
 
 RUN apt-get update \
     && apt-get install -y gcc build-essential
