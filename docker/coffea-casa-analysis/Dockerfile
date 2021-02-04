@@ -60,7 +60,7 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-COPY patches/coffea-xrootd.patches $HOME/patches/
+COPY patches/coffea-xrootd.patch $HOME/patches/
 
 RUN apt-get update \
     && apt-get install -y gcc build-essential
