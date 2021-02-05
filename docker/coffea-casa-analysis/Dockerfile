@@ -24,11 +24,6 @@ ENV PATH "/opt/conda/bin/:$PATH"
 # features (e.g., download as all possible file formats)
 RUN apt-get update \
      && apt-get install -yq --no-install-recommends \
-     libssl-dev \
-     zlib1g-dev \
-     uuid-dev  \
-     openssh-client \
-     python-setuptools \
      procps \
      vim \
      wget \
@@ -83,20 +78,7 @@ RUN pip install --no-cache-dir \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.01.1-coffea-casa#egg=distributed \
-    dask-jobqueue
-
-# Enabled for debugging purposes (combination of conda xrootd 5.0.3 + xrdcl-authz-plugin is broken)
-# ------- xrootd -------------------------------
-RUN cd /tmp && \
-    git clone https://github.com/xrootd/xrootd.git && \
-    cd xrootd && \
-    git checkout v5.0.3 && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrootd -DENABLE_XRDCL=ON -DBUILD_PYTHON=ON -DCMAKE_BUILD_TYPE=Debug -DENABLE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/opt/conda -DPYTHON_EXECUTABLE=/opt/conda/bin/python && \
-    make -j4 && \
-    make install
+    git+git://github.com/oshadura/distributed.git@2021.01.1-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
@@ -104,7 +86,7 @@ RUN cd /tmp && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
     make && \
     make install
 
