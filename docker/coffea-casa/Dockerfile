@@ -185,7 +185,7 @@ RUN conda install --yes --freeze-installed \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2020.12.0-coffea-casa#egg=distributed \
+    git+git://github.com/oshadura/distributed.git@2021.01.1-coffea-casa#egg=distributed \
     dask-jobqueue \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa \
     pyyaml
