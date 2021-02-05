@@ -13,6 +13,13 @@ else
     echo "no environment.yml"
 fi
 
+if [ -e "$HOME/requirements.txt" ]; then
+    echo "pip: requirements.txt found. Installing packages"
+    /opt/conda/bin/python -m pip install -r $HOME/requirements.txt
+else
+    echo "no requirements.txt"
+fi
+
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."
     /opt/conda/bin/conda install -y $EXTRA_CONDA_PACKAGES
