@@ -6,20 +6,6 @@ set -x
 WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5)
 sed --in-place "s/kubernetes-worker-%(ENV_WORKER_ID)s/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
-if [ -e "$HOME/environment.yml" ]; then
-    echo "conda: environment.yml found. Installing packages"
-    /opt/conda/bin/conda env update -f $HOME/environment.yml
-else
-    echo "no environment.yml"
-fi
-
-if [ -e "$HOME/requirements.txt" ]; then
-    echo "pip: requirements.txt found. Installing packages"
-    /opt/conda/bin/python -m pip install -r $HOME/requirements.txt
-else
-    echo "no requirements.txt"
-fi
-
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."
     /opt/conda/bin/conda install -y $EXTRA_CONDA_PACKAGES
@@ -71,6 +57,21 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       export LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
       export XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
   fi
+  
+  if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
+    echo "conda: environment.yml found. Installing packages"
+    /opt/conda/bin/conda env update -f $HOME/environment.yml
+  else
+    echo "no environment.yml"
+  fi
+
+  if [ -e "$_CONDOR_JOB_IWD/requirements.txt" ]; then
+    echo "pip: requirements.txt found. Installing packages"
+    /opt/conda/bin/python -m pip install -r $HOME/requirements.txt
+  else
+    echo "no requirements.txt"
+  fi
+  
   # CA certificate securily transfered from scheduler
   if [[ -f "$_CONDOR_JOB_IWD/ca.pem" ]]; then
       PATH_CA_FILE="$_CONDOR_JOB_IWD/ca.pem"
