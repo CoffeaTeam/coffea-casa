@@ -61,6 +61,9 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
     echo "conda: environment.yml found. Installing packages"
     /opt/conda/bin/conda env update -f $HOME/environment.yml
+  elif [ -e "$_CONDOR_JOB_IWD/environment.yaml" ]; then
+    echo "conda: environment.yaml found. Installing packages"
+    /opt/conda/bin/conda env update -f $HOME/environment.yaml
   else
     echo "no environment.yml"
   fi
