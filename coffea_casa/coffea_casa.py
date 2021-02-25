@@ -16,8 +16,13 @@ DEFAULT_CONTAINER_PORT = 8786
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
+HOME_DIR = Path(os.getenv("HOME"))
 # XCache
 XCACHE_FILE = SECRETS_DIR / "xcache_token"
+# pip
+PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
+# conda
+CONDA_ENV = HOME_DIR / "environment.yaml"
 
 
 def merge_dicts(*dict_args):
@@ -112,24 +117,21 @@ class CoffeaCasaCluster(HTCondorCluster):
                            scheduler_port=DEFAULT_SCHEDULER_PORT,
                            dashboard_port=DEFAULT_DASHBOARD_PORT):
         job_config = job_kwargs.copy()
+        input_files = []
+        if PIP_REQUIREMENTS.is_file():
+            input_files += [PIP_REQUIREMENTS]
+        if CONDA_ENV.is_file():
+            input_files += [CONDA_ENV]
         # If we have certs in env, lets try to use TLS
         if (CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")["require_encryption"]):
             job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
-            input_files = [CA_FILE, CERT_FILE, XCACHE_FILE]
-            files = ", ".join(str(path) for path in input_files)
-        elif (
-            security and security.get_connection_args("scheduler")["require_encryption"]
-        ):
-            job_config["protocol"] = "tls://"
-            job_config["security"] = security
-            # We hope we have files locally and it should be used
-            # for local tests only for now.
-            files = ""
+            input_files += [CA_FILE, CERT_FILE, XCACHE_FILE]
         else:
-            job_config["protocol"] = "tcp://"
-            input_files = [XCACHE_FILE]
-            files = ", ".join(str(path) for path in input_files)
+            raise KeyError("Please check with system administarator why you do not have a certificate.")
+            
+        files = ", ".join(str(path) for path in input_files)
+        
         ## Networking settings
         try:
             external_ip = os.environ["HOST_IP"]
