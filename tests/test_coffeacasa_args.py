@@ -26,8 +26,9 @@ def test_can_override_dask_container_port():
 def test_default_protocol(default_modified_kwargs):
     if CA_FILE.is_file() and CERT_FILE.is_file():
         assert default_modified_kwargs["scheduler_options"]["protocol"] == 'tls'
+    # tcp no longer supported on coffea-casa
     else:
-        assert default_modified_kwargs["scheduler_options"]["protocol"] == 'tcp'
+        raise KeyError("coffea-casa uses TLS, but a certificate could not be detected. Please check with your system administrator.")
 
 
 @pytest.mark.skip(reason="TLS is still not working with custom Security object")
