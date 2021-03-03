@@ -16,7 +16,7 @@ DEFAULT_CONTAINER_PORT = 8786
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
-HOME_DIR = Path(os.getenv("HOME"))
+HOME_DIR = Path.home()
 # XCache
 XCACHE_FILE = SECRETS_DIR / "xcache_token"
 # pip
