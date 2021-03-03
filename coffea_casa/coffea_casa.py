@@ -132,9 +132,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             input_files += [CA_FILE, CERT_FILE, XCACHE_FILE]
         else:
             raise KeyError("Please check with system administarator why you do not have a certificate.")
-            
         files = ", ".join(str(path) for path in input_files)
-        
         ## Networking settings
         try:
             external_ip = os.environ["HOST_IP"]
