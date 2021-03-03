@@ -14,6 +14,7 @@ def test_header():
                            memory="100MB",
                            disk="100MB",
                            worker_image="coffeateam/coffea-casa-analysis:0.2.26"
+                           scheduler_options={'protocol': 'tls'}
                            ) as cluster:
         job_script = cluster.job_script()
         print("HTCondor Job script:", job_script)
@@ -31,6 +32,7 @@ def test_job_script():
                            memory="500MB",
                            disk="500MB",
                            worker_image="coffeateam/coffea-casa-analysis:0.2.26",
+                           scheduler_options={'protocol': 'tls'}
                            env_extra=['export LANG="en_US.utf8"',
                                       'export LC_ALL="en_US.utf8"'],
                            job_extra={"+Extra": "True"},
@@ -65,7 +67,8 @@ def test_scheduler():
                            worker_image="coffeateam/coffea-casa-analysis:0.2.26",
                            scheduler_options={
                                "dashboard_address": 8787,
-                               "port": 8788}
+                               "port": 8788,
+                               "protocol": 'tls'}
                            ) as cluster:
         job_script = cluster.job_script()
         print("HTCondor Job script:", job_script)
