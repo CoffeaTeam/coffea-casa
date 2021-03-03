@@ -25,7 +25,7 @@ PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
 if (HOME_DIR / "environment.yml").is_file():
     CONDA_ENV = HOME_DIR / "environment.yml"
 elif (HOME_DIR / "environment.yaml").is_file():
-    CONDA_ENV = HOME_DOR / "environment.yaml"
+    CONDA_ENV = HOME_DIR / "environment.yaml"
 
 
 def merge_dicts(*dict_args):
