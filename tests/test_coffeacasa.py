@@ -13,7 +13,7 @@ def test_header():
     with CoffeaCasaCluster(cores=1,
                            memory="100MB",
                            disk="100MB",
-                           worker_image="coffeateam/coffea-casa-analysis:0.2.26"
+                           worker_image="coffeateam/coffea-casa-analysis:0.2.26",
                            scheduler_options={'protocol': 'tls'}
                            ) as cluster:
         job_script = cluster.job_script()
@@ -32,7 +32,7 @@ def test_job_script():
                            memory="500MB",
                            disk="500MB",
                            worker_image="coffeateam/coffea-casa-analysis:0.2.26",
-                           scheduler_options={'protocol': 'tls'}
+                           scheduler_options={'protocol': 'tls'},
                            env_extra=['export LANG="en_US.utf8"',
                                       'export LC_ALL="en_US.utf8"'],
                            job_extra={"+Extra": "True"},
