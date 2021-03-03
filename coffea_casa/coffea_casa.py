@@ -22,10 +22,10 @@ XCACHE_FILE = SECRETS_DIR / "xcache_token"
 # pip
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
 # conda, with yml/yaml both supported
-if (HOME_DIR / "environment.yml").is_file():
-    CONDA_ENV = HOME_DIR / "environment.yml"
-elif (HOME_DIR / "environment.yaml").is_file():
+if (HOME_DIR / "environment.yaml").is_file():
     CONDA_ENV = HOME_DIR / "environment.yaml"
+else:
+    CONDA_ENV = HOME_DIR / "environment.yml"
 
 
 def merge_dicts(*dict_args):
