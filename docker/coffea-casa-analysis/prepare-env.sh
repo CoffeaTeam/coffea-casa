@@ -29,7 +29,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   # Check if we are not in GH CI environment (otherwise image check will stuck forever)
   # docs: Always set to true when GitHub Actions is running the workflow.
   # You can use this variable to differentiate when tests are being run locally or by GitHub Actions.
-  if [[ -z "$GITHUB_ACTIONS" ]]; then
+  if [[ ! -v GITHUB_ACTIONS ]]; then
     while true; do
       if grep HostPort "$_CONDOR_JOB_AD"; then
         break
