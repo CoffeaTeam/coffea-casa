@@ -4,7 +4,7 @@
  _PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
  DEFAULT_METADATA_CACHE = LRUCache(100000)
  
-+uproot4.open.defaults["xrootd_handler"] = uproot4.source.xrootd.MultithreadedXRootDSource
++uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
  
  class FileMeta(object):
      __slots__ = ['dataset', 'filename', 'treename', 'metadata']
