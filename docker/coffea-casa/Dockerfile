@@ -184,8 +184,8 @@ RUN pip install --ignore-installed --no-cache-dir \
     git+git://github.com/CoffeaTeam/coffea-casa.git@master#egg=coffea_casa \
     pyyaml
 
-# Servicex
-RUN pip install --no-cache-dir servicex-clients
+# Servicex (still wrong dependencies)
+#RUN pip install --no-cache-dir servicex-clients
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
