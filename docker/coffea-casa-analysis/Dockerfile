@@ -1,4 +1,5 @@
-FROM coffeateam/coffea-dask:latest
+FROM coffeateam/coffea-dask:0.7.1-gd5339d7
+# for using latest tag, see issue #86
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
