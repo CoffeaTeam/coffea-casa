@@ -1,6 +1,7 @@
-FROM coffeateam/coffea-dask:0.7.1-gd5339d7
-# for using latest tag, see issue #86
-
+FROM coffeateam/coffea-dask:0.7.1-g5e669a7
+# 0.7.1-g5e669a7 Trying 2022.03.0
+# 0.7.1-gd5339d7: for using latest tag, see issue #86
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="jovyan"
@@ -67,7 +68,7 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     htcondor \
-    cmake \
+    xgboost \
     && conda clean --all -f -y \
     && conda build purge-all
 
@@ -79,7 +80,7 @@ RUN pip install --no-cache-dir \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2022.02.1-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.03.1-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
