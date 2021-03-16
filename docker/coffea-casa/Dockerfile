@@ -175,6 +175,8 @@ RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
     htcondor \
+    xgboost \
+    pyhf \
     cmake
 
 # Distributed & dask-jobqueue: we need to install patched version of distributed version, it is will be

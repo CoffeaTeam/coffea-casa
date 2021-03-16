@@ -69,6 +69,8 @@ RUN conda install --yes --freeze-installed \
     -c conda-forge \
     htcondor \
     xgboost \
+    xgboost \
+    pyhf \
     && conda clean --all -f -y \
     && conda build purge-all
 
