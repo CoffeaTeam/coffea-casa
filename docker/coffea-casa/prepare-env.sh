@@ -2,6 +2,8 @@
 
 set -x
 
+export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
+
 # servicex token generation
 if [[ -f "/etc/cmsaf-secrets/.servicex" ]]; then
     export servicex_token=$(</etc/cmsaf-secrets/.servicex)
@@ -31,18 +33,21 @@ with open(servicex, "w") as f:
 fi
 
 if [ -e "$HOME/environment.yml" ]; then
-    echo "conda: environment.yml found. Installing packages"
+    echo "Conda: environment.yml found. Installing packages."
     /opt/conda/bin/conda env update -f $HOME/environment.yml
-else
-    echo "no environment.yml"
-fi
+  elif [ -e "$HOME/environment.yaml" ]; then
+    echo "Conda: environment.yaml found. Installing packages."
+    /opt/conda/bin/conda env update -f $HOME/environment.yaml
+  else
+    echo "No environment.yml, conda will not install any package."
+  fi
 
-if [ -e "$HOME/requirements.txt" ]; then
-    echo "pip: requirements.txt found. Installing packages"
+  if [ -e "$HOME/requirements.txt" ]; then
+    echo "Pip: requirements.txt found. Installing packages."
     /opt/conda/bin/python -m pip install -r $HOME/requirements.txt
-else
-    echo "no requirements.txt"
-fi
+  else
+    echo "No requirements.txt, pip will not install any module."
+  fi
 
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."

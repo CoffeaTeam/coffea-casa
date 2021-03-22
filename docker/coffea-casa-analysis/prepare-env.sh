@@ -2,7 +2,7 @@
 
 set -x
 
-export PYTHONPATH="$HOME:$PYTHONPATH"
+export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 
 # Debug 'random' name for kubernetes worker
 WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5)
@@ -14,7 +14,7 @@ if [ "$EXTRA_CONDA_PACKAGES" ]; then
 fi
 
 if [ "$EXTRA_PIP_PACKAGES" ]; then
-    echo "pip: EXTRA_PIP_PACKAGES environment variable found.  Installing".
+    echo "pip: EXTRA_PIP_PACKAGES environment variable found.  Installing"
     /opt/conda/bin/pip install $EXTRA_PIP_PACKAGES
 fi
 
@@ -62,17 +62,17 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   
   if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
     echo "Conda: environment.yml found. Installing packages."
-    /opt/conda/bin/conda env update -f $HOME/environment.yml
+    /opt/conda/bin/conda env update -f $_CONDOR_JOB_IWD/environment.yml
   elif [ -e "$_CONDOR_JOB_IWD/environment.yaml" ]; then
     echo "Conda: environment.yaml found. Installing packages."
-    /opt/conda/bin/conda env update -f $HOME/environment.yaml
+    /opt/conda/bin/conda env update -f $_CONDOR_JOB_IWD/environment.yaml
   else
     echo "No environment.yml, conda will not install any package."
   fi
 
   if [ -e "$_CONDOR_JOB_IWD/requirements.txt" ]; then
     echo "Pip: requirements.txt found. Installing packages."
-    /opt/conda/bin/python -m pip install -r $HOME/requirements.txt
+    /opt/conda/bin/python -m pip install -r $_CONDOR_JOB_IWD/requirements.txt
   else
     echo "No requirements.txt, pip will not install any module."
   fi
