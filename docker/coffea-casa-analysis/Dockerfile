@@ -71,6 +71,7 @@ RUN conda install --yes --freeze-installed \
     xgboost \
     xgboost \
     pyhf \
+    cmake \
     && conda clean --all -f -y \
     && conda build purge-all
 
