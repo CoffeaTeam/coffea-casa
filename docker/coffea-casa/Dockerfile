@@ -79,6 +79,7 @@ RUN conda install --quiet --yes \
     'jupyterhub==1.3.0' \
     'jupyterlab==2.2.9' \
     jupyterlab_widgets \
+    jupyterlab-lsp \
     jupyterlab-git \
     dask_labextension && \
     conda clean --all -f -y && \
@@ -174,6 +175,7 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
+    python-language-server \
     htcondor \
     xgboost \
     pyhf \

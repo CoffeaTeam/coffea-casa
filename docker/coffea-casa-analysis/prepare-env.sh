@@ -2,6 +2,8 @@
 
 set -x
 
+export PYTHONPATH="$HOME:$PYTHONPATH"
+
 # Debug 'random' name for kubernetes worker
 WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5)
 sed --in-place "s/kubernetes-worker-%(ENV_WORKER_ID)s/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
@@ -59,20 +61,20 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   fi
   
   if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
-    echo "conda: environment.yml found. Installing packages"
+    echo "Conda: environment.yml found. Installing packages."
     /opt/conda/bin/conda env update -f $HOME/environment.yml
   elif [ -e "$_CONDOR_JOB_IWD/environment.yaml" ]; then
-    echo "conda: environment.yaml found. Installing packages"
+    echo "Conda: environment.yaml found. Installing packages."
     /opt/conda/bin/conda env update -f $HOME/environment.yaml
   else
-    echo "no environment.yml"
+    echo "No environment.yml, conda will not install any package."
   fi
 
   if [ -e "$_CONDOR_JOB_IWD/requirements.txt" ]; then
-    echo "pip: requirements.txt found. Installing packages"
+    echo "Pip: requirements.txt found. Installing packages."
     /opt/conda/bin/python -m pip install -r $HOME/requirements.txt
   else
-    echo "no requirements.txt"
+    echo "No requirements.txt, pip will not install any module."
   fi
   
   # CA certificate securily transfered from scheduler
