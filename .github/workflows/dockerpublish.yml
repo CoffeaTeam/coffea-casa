@@ -1,76 +1,45 @@
-name: Docker
+# Re-tag staging SHA-tagged image with git tag and 'latest'
+# tags can be anything, but typically calver string (2020.06.10)
+name: Docker Publish
 
 on:
   push:
-    # Publish `v1.2.3` tags as releases.
     tags:
-      - v*
-
-  # Run tests for any PRs.
-  pull_request:
+      - '*'
 
 env:
-  IMAGE_NAME_SCHEDULER: coffea-casa
-  IMAGE_NAME_WORKER: coffea-casa-analysis
+  DOCKER_ORG: coffeateam
+  GITHUB_SHA: ${{ github.sha }}
+  GITHUB_REF: ${{ github.ref }}
+
 
 jobs:
-  # Push image to dockerhub
-  push:
+  matrix-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        IMAGE: [coffea-casa, coffea-casa-analysis]
+    name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-      - name: Build scheduler image
-        # Dask scheduler image
-        run: docker build . --file docker/coffea-casa/Dockerfile --tag image
-
-      - name: Log into registry
-        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
-
-      - name: Push Dask scheduler image
-        run: |
-          # Dask scheduler
-          IMAGE_IDS=coffeateam/$IMAGE_NAME_SCHEDULER
-
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          # Dask scheduler
-          echo IMAGE_IDS=$IMAGE_IDS
-          echo VERSION=$VERSION
-
-          docker tag image $IMAGE_IDS:$VERSION
-          docker push $IMAGE_IDS:$VERSION
-
-          docker tag image $IMAGE_IDS:latest
-          docker push $IMAGE_IDS:latest
-
-      - name: Build worker image
-        # Dask worker image
-        run: docker build . --file docker/coffea-casa-analysis/Dockerfile --tag image
-
-      - name: Log into registry
-        run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
-
-      - name: Push worker image
-        run: |
-          # Dask worker image
-          IMAGE_IDW=coffeateam/$IMAGE_NAME_WORKER
-
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          # Dask worker
-          echo IMAGE_IDW=$IMAGE_IDW
-          echo VERSION=$VERSION
-
-          docker tag image $IMAGE_IDW:$VERSION
-          docker push $IMAGE_IDW:$VERSION
-
-          docker tag image $IMAGE_IDW:latest
-          docker push $IMAGE_IDW:latest
+    - name: Set Job Environment Variables
+      run: |
+        SHA7="${GITHUB_SHA::7}"
+        TAG="${GITHUB_REF##*/}"
+        echo "SHA7=${SHA7}" >> $GITHUB_ENV
+        echo "TAG=${TAG}" >> $GITHUB_ENV
+    - name: Pull Image for Corresponding GitHub Commit
+      run: |
+        docker pull ${DOCKER_ORG}/${{ matrix.IMAGE }}:${SHA7}
+    - name: Authenticate with DockerHub
+      run: |
+        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
+    - name: Retag and Push Image
+      run: |
+        docker tag ${DOCKER_ORG}/${{ matrix.IMAGE }}:${SHA7} ${DOCKER_ORG}/${{ matrix.IMAGE }}:latest
+        docker tag ${DOCKER_ORG}/${{ matrix.IMAGE }}:${SHA7} ${DOCKER_ORG}/${{ matrix.IMAGE }}:${TAG}
+        docker push ${DOCKER_ORG}/${{ matrix.IMAGE }}:latest
+        docker push ${DOCKER_ORG}/${{ matrix.IMAGE }}:${TAG}

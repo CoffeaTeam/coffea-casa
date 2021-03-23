@@ -1,7 +1,5 @@
 FROM coffeateam/coffea-dask:0.7.1-g5e669a7
-# 0.7.1-g5e669a7 Trying 2022.03.0
-# 0.7.1-gd5339d7: for using latest tag, see issue #86
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="jovyan"
