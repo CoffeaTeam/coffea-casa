@@ -205,9 +205,11 @@ RUN cd /tmp && \
 
 USER root
 # Dask setup - > dask.yml
+# Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
-COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
-COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
+COPY dask.yaml labextension.yaml /opt/conda/lib/python3.8/site-packages/coffea_casa/jobqueue-coffea-casa.yaml $HOME/.config/dask/
+# REMOVE ME AFTER TAG!
+#COPY dask.yaml labextension.yaml /opt/conda/lib/python3.8/site-packages/coffea_casa/jobqueue-coffea-casa.yamlj /etc/dask/
 
 # Fix permissions on /etc/jupyter as root
 RUN fix-permissions /etc/jupyter/ && \
