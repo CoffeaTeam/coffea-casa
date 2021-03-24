@@ -31,9 +31,9 @@ jobs:
         TAG="${GITHUB_REF##*/}"
         echo "TAG=${TAG}" >> $GITHUB_ENV
 
-    - name: Authenticate with DockerHub
-      run: |
-        echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
+    - name: Log into registry
+      run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_ACCOUNT }} --password-stdin
+
 
     - name: Push image
       run: |
