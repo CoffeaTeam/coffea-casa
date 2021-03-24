@@ -34,7 +34,7 @@ jobs:
     - name: Build image
       run: |
         cd docker/${{ matrix.IMAGE }}
-        docker build ${DOCKER_ORG}/${{ matrix.IMAGE }}:temp-image .
+        docker build -t ${DOCKER_ORG}/${{ matrix.IMAGE }}:temp-image .
 
     - name: Log into registry
       run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
