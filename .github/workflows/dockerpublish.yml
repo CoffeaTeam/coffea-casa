@@ -21,25 +21,27 @@ jobs:
         IMAGE: [coffea-casa, coffea-casa-analysis]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
     - name: Set Job Environment Variables
       run: |
-        SHA7="${GITHUB_SHA::7}"
         TAG="${GITHUB_REF##*/}"
-        echo "SHA7=${SHA7}" >> $GITHUB_ENV
         echo "TAG=${TAG}" >> $GITHUB_ENV
-    - name: Pull Image for Corresponding GitHub Commit
-      run: |
-        docker pull ${DOCKER_ORG}/${{ matrix.IMAGE }}:${SHA7}
+
     - name: Authenticate with DockerHub
       run: |
         echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
-    - name: Retag and Push Image
+
+    - name: Push image
       run: |
-        docker tag ${DOCKER_ORG}/${{ matrix.IMAGE }}:${SHA7} ${DOCKER_ORG}/${{ matrix.IMAGE }}:latest
-        docker tag ${DOCKER_ORG}/${{ matrix.IMAGE }}:${SHA7} ${DOCKER_ORG}/${{ matrix.IMAGE }}:${TAG}
-        docker push ${DOCKER_ORG}/${{ matrix.IMAGE }}:latest
-        docker push ${DOCKER_ORG}/${{ matrix.IMAGE }}:${TAG}
+        IMAGE_ID=$DOCKER_ORG/${{ matrix.IMAGE }}
+        echo IMAGE_ID=$IMAGE_ID
+        echo VERSION=$VERSION
+        docker tag temp-image $IMAGE_ID:$TAG
+        docker push $IMAGE_ID:$TAG
+        docker tag temp-image $IMAGE_ID:latest
+        docker push $IMAGE_ID:latest
+        echo "image_tag=$IMAGE_ID:$TAG" >> $GITHUB_ENV
