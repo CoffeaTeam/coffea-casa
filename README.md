@@ -30,13 +30,13 @@ The prototype analysis facility provides services for “low latency columnar an
 Contact us
 ============
 
-Interested? You can reach us in ![Github Discussions]https://github.com/CoffeaTeam/coffea-casa/discussions or in IRIS-HEP Slack channel.
+Interested? You can reach us in ![Github Discussions](https://github.com/CoffeaTeam/coffea-casa/discussions) or in IRIS-HEP Slack channel.
 
 
 Docker images used for Coffea-casa
 ============
 
-Latest ![DockerHub Images](https://hub.docker.com/orgs/coffeateam/repositories)
+Latest ![DockerHub Images](https://hub.docker.com/orgs/coffeateam/repositories):
 
 | Image           | Description                                   |  Size | Pulls | Version | Layers |
 |-----------------|-----------------------------------------------|--------------|-------------|-------------|-------------|
