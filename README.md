@@ -1,4 +1,4 @@
-coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framework For Effective Analysis
+Coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framework For Effective Analysis
 =========================================================
 
 [![Actions Status][actions-badge]][actions-link]
@@ -10,7 +10,7 @@ coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framewo
 ![GitHub issues](https://img.shields.io/github/issues/coffeateam/coffea-casa)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/coffeateam/coffea-casa)
 
-[actions-badge]:            https://github.com/CoffeaTeam/coffea-casa/workflows/CI/badge.svg
+[actions-badge]:            https://github.com/CoffeaTeam/coffea-casa/workflows/CI/CD/badge.svg
 [actions-link]:             https://github.com/CoffeaTeam/coffea-casa/actions
 [black-badge]:              https://img.shields.io/badge/code%20style-black-000000.svg
 [black-link]:               https://github.com/psf/black
@@ -22,7 +22,7 @@ coffea-casa - A Prototype U.S. CMS analysis facility for Columnar Object Framewo
 [rtd-badge]:                https://readthedocs.org/projects/coffea-casa/badge/?version=latest
 [rtd-link]:                 https://coffea-casa.readthedocs.io/en/latest/?badge=latest
 
-About Coffea-Casa
+About Coffea-casa
 ============
 
 The prototype analysis facility provides services for “low latency columnar analysis”, enabling rapid processing of data in a column-wise fashion. These services, based on Dask and Jupyter notebooks, aim to dramatically lower time for analysis and provide an easily-scalable and user-friendly computational environment that will simplify, facilitate, and accelerate the delivery of HEP results. The facility is built on top of a Kubernetes cluster and integrates dedicated resources with resources allocated via fairshare through the local HTCondor system. In addition to the user-facing interfaces such as Dask, the facility also manages access control through single-sign-on and authentication & authorization for data access. The notebooks in this repository and ![Coffea-casa tutorials](https://github.com/CoffeaTeam/coffea-casa-tutorials) include simple HEP analysis examples, managed interactively in a Jupyter notebook and scheduled on Dask workers and accessing both public and protected data.
@@ -41,15 +41,15 @@ Latest DockerHub Images: https://hub.docker.com/orgs/coffeateam/repositories
 Image tagging and "continuous building"
 ============
 
-This repository uses GitHub Actions to build images, run tests, and push images to DockerHub (syncronised with releases).
+This repository uses GitHub Actions to build images, run tests, and push images to DockerHub (Docker image tags are syncronised with Coffea-casa releases).
 
 1. Tags pushed to GitHub represent "production" releases with corresponding tags on dockerhub `coffeateam/coffea-casa:x.x.x` and `coffeateam/coffea-casa-analysis:x.x.x`. The latest tag also corresponds to the most recent GitHub tag.
 
-Please note we are using ![date-based versioning](https://calver.org/) for coffea-casa Docker images and Pypi module.
+Please note we are using ![date-based versioning](https://calver.org/) for Coffea-casa Docker images and Pypi module.
 
 References
 ============
 
 * Coffea-casa: an analysis facility prototype, M. Adamec, G. Attebury, K. Bloom, B. Bockelman, C. Lundstedt, O. Shadura and J. Thiltges, arXiv ![2103.01871](https://arxiv.org/abs/2103.01871) (02 Mar 2021).
-* PyHEP coffea-casa proceedings [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4136273.svg)](https://doi.org/10.5281/zenodo.4136273)
-* The PyHEP introductory Youtube video is [here](https://www.youtube.com/watch?v=CDIFd1gDbSc).
+* PyHEP 2020 coffea-casa proceedings: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4136273.svg)](https://doi.org/10.5281/zenodo.4136273)
+* The PyHEP 2020 introductory Youtube video is [here](https://www.youtube.com/watch?v=CDIFd1gDbSc).
