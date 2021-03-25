@@ -44,7 +44,6 @@ jobs:
       run: |
         IMAGE_ID=${DOCKER_ORG}/${{ matrix.IMAGE }}
         echo IMAGE_ID=$IMAGE_ID
-        echo VERSION=$VERSION
         docker tag temp-image $IMAGE_ID:$TAG
         docker push $IMAGE_ID:$TAG
         docker tag temp-image $IMAGE_ID:latest
