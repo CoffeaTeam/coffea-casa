@@ -1,0 +1,3 @@
+[submodule "coffea-casa-tutorials"]
+	path = coffea-casa-tutorials
+	url = git@github.com:CoffeaTeam/coffea-casa-tutorials.git
