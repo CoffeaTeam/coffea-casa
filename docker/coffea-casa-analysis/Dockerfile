@@ -6,11 +6,6 @@ ARG NB_USER="jovyan"
 ARG NB_UID="1000"
 ARG NB_GID="100"
 
-USER root
-ENV LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8
-
 # Configure environment
 ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
@@ -30,10 +25,14 @@ RUN apt-get update \
      sudo \
      locales \
      fonts-liberation \
+     gcc build-essential \
      && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
         locale-gen
+ENV LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8
 
 # Copy a script that we will use to correct permissions after running certain commands
 COPY fix-permissions /usr/local/bin/fix-permissions
@@ -55,18 +54,20 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
+
 COPY patches/coffea-xrootd.patch $HOME/patches/
 
-RUN apt-get update \
-    && apt-get install -y gcc build-essential
-
 USER $NB_UID
+WORKDIR $HOME
+# Setup work directory for backward-compatibility
+RUN mkdir "/home/$NB_USER/work" && \
+    fix-permissions "/home/$NB_USER"
+
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     htcondor \
-    xgboost \
     xgboost \
     pyhf \
     cmake \

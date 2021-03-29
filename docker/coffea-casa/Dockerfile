@@ -3,12 +3,21 @@ FROM coffeateam/coffea-dask:0.7.1-g5e669a7
 # Update: 6.01.2021
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
+USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="jovyan"
 ARG NB_UID="1000"
 ARG NB_GID="100"
 
-USER root
+# Configure environment
+ENV CONDA_DIR /opt/conda
+ENV SHELL /bin/bash
+ENV NB_USER $NB_USER
+ENV NB_UID $NB_UID
+ENV NB_GID $NB_GID
+ENV HOME /home/$NB_USER
+ENV PATH "/opt/conda/bin/:$PATH"
+     
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
 RUN apt-get update \
@@ -19,6 +28,7 @@ RUN apt-get update \
      sudo \
      locales \
      fonts-liberation \
+     gcc build-essential \
      && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
@@ -27,15 +37,6 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
 ENV LC_ALL=en_US.UTF-8 \
         LANG=en_US.UTF-8 \
         LANGUAGE=en_US.UTF-8
-
-# Configure environment
-ENV CONDA_DIR /opt/conda
-ENV SHELL /bin/bash
-ENV NB_USER $NB_USER
-ENV NB_UID $NB_UID
-ENV NB_GID $NB_GID
-ENV HOME /home/$NB_USER
-ENV PATH "/opt/conda/bin/:$PATH"
 
 # Copy a script that we will use to correct permissions after running certain commands
 COPY fix-permissions /usr/local/bin/fix-permissions
@@ -166,9 +167,6 @@ RUN mkdir -p $HOME/.config/dask  && \
     mkdir -p /etc/condor/config.d  && \
     mkdir -p $HOME/patches
 COPY patches/coffea-xrootd.patch $HOME/patches/
-
-RUN apt-get update \
-    && apt-get install -y gcc build-essential
 
 USER $NB_UID
 RUN conda install --yes --freeze-installed \
