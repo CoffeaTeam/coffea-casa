@@ -211,8 +211,8 @@ USER root
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
-# REMOVE ME AFTER TAG!
-#COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yamlj /etc/dask/
+# WE NEED to overwrite installed files!
+COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
 
 # Fix permissions on /etc/jupyter as root
 RUN fix-permissions /etc/jupyter/ && \
