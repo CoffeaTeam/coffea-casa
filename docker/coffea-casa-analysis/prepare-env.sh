@@ -25,13 +25,15 @@ fi
 # --listen-address tls://0.0.0.0:8788 --name kubernetes-worker --contact-address \
 # tls://$HOST_IP:8786
 if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
-  # From chtc/dask-chtc: wait for the job ad to be updated with <service>_HostPort
-  # This happens during the first update, usually a few seconds after the job starts
-  echo "Waiting for HostPort information..."
-  # Check if we are not in GH CI environment (otherwise image check will stuck forever)
-  # docs: Always set to true when GitHub Actions is running the workflow.
-  # You can use this variable to differentiate when tests are being run locally or by GitHub Actions.
-  if [ ! -z "$GITHUB_ACTIONS" ] || [ "$GITHUB_ACTIONS" != 'true' ]; then
+  if [ "${GITHUB_ACTIONS:-}" == "true" ]; then
+    echo "CI mode, no need to test HostPort info..."
+  else
+    # From chtc/dask-chtc: wait for the job ad to be updated with <service>_HostPort
+    # This happens during the first update, usually a few seconds after the job starts
+    echo "Waiting for HostPort information..."
+    # Check if we are not in GH CI environment (otherwise image check will stuck forever)
+    # docs: Always set to true when GitHub Actions is running the workflow.
+    # You can use this variable to differentiate when tests are being run locally or by GitHub Actions.
     while true; do
       if grep HostPort "$_CONDOR_JOB_AD"; then
         break
