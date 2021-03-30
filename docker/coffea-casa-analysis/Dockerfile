@@ -6,6 +6,9 @@ ARG NB_USER="jovyan"
 ARG NB_UID="1000"
 ARG NB_GID="100"
 
+# Hack for GH Actions
+ARG GITHUB_ACTIONS="false"
+
 # Configure environment
 ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
