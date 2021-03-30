@@ -45,6 +45,7 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
     useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir -p $CONDA_DIR && \
+    mkdir -p $HOME/.local && \
     mkdir -p /etc/cmsaf-secrets/ && \
     mkdir -p /var/lib/condor && \
     mkdir -p $HOME/patches && \
@@ -53,7 +54,6 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     chmod g+w /etc/passwd && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
-
 
 COPY patches/coffea-xrootd.patch $HOME/patches/
 
@@ -144,6 +144,9 @@ RUN rm -rf /tmp/* \
 # nor and execute dask-worker command
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+
+# https://github.com/conda/conda/issues/7267#issuecomment-458661530
+RUN touch $CONDA_DIR/pkgs/urls.txt
 
 USER $NB_USER
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
