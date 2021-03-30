@@ -133,11 +133,13 @@ RUN patch /opt/conda/lib/python3.8/site-packages/coffea/processor/executor.py < 
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
+    && conda clean -tipsy \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
-    && rm -rf /opt/conda/pkgs
+    && conda clean --all -f -y \
+    && conda build purge-all
 
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
