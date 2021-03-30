@@ -42,11 +42,11 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     done
     echo "Got HostPort, proceeding..."
     echo
-  fi
 
-  if [ -z "$_CONDOR_JOB_IWD" ]; then
-    echo "Error: something is wrong, $_CONDOR_JOB_IWD (path to the initial working directory the job was born with) was not defined!"
-    exit 1
+    if [ -z "$_CONDOR_JOB_IWD" ]; then
+      echo "Error: something is wrong, $_CONDOR_JOB_IWD (path to the initial working directory the job was born with) was not defined!"
+      exit 1
+    fi
   fi
 
   # Condor token securily transfered from scheduler
