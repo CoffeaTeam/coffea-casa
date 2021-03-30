@@ -49,8 +49,9 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     mkdir -p /etc/cmsaf-secrets/ && \
     mkdir -p /var/lib/condor && \
     mkdir -p $HOME/patches && \
-    mkdir -p /home/$NB_UID/.condor/tokens.d && \
+    mkdir -p $HOME/.condor/tokens.d && \
     chown $NB_USER:$NB_GID $CONDA_DIR && \
+    chown $NB_USER:$NB_GID $HOME && \
     chmod g+w /etc/passwd && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
