@@ -260,9 +260,6 @@ RUN patch /opt/conda/lib/python3.8/site-packages/coffea/processor/executor.py < 
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
-# https://github.com/conda/conda/issues/7267#issuecomment-458661530
-RUN touch $CONDA_DIR/pkgs/urls.txt
-
 USER $NB_UID
 WORKDIR $HOME
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
