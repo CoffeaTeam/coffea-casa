@@ -48,24 +48,25 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
     useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir -p $CONDA_DIR && \
-    mkdir -p $HOME/.local && \
-    mkdir -p /etc/cmsaf-secrets/ && \
+    mkdir -p /etc/cmsaf-secrets && \
     mkdir -p /var/lib/condor && \
-    mkdir -p $HOME/patches && \
-    mkdir -p $HOME/.condor/tokens.d && \
     chown $NB_USER:$NB_GID $CONDA_DIR && \
     chown $NB_USER:$NB_GID $HOME && \
     chmod g+w /etc/passwd && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-COPY patches/coffea-xrootd.patch $HOME/patches/
-
 USER $NB_UID
 WORKDIR $HOME
 # Setup work directory for backward-compatibility
-RUN mkdir "/home/$NB_USER/work" && \
-    fix-permissions "/home/$NB_USER"
+RUN mkdir $HOME/work && \
+    mkdir -p $HOME/.local && \
+    mkdir -p $HOME/patches && \
+    mkdir -p $HOME/.condor/tokens.d && \
+    fix-permissions $HOME
+
+
+COPY patches/coffea-xrootd.patch $HOME/patches/
 
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
