@@ -62,8 +62,8 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    ADL Benchmark 6 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example6.ipynb>
    ADL Benchmark 7 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example7.ipynb>
    ADL Benchmark 8 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example8.ipynb>
-   Single Top-Higgs Production (tHq) Analysis <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analysis/analysis-casa.ipynb>
-   Single Top-Higgs Production (tHq) Analysis Tutorial <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analysis/analysis_tutorial.ipynb>
+   Single Top-Higgs Production (tHq) Analysis <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analyses/thq/analysis-casa.ipynb>
+   Single Top-Higgs Production (tHq) Analysis Tutorial <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analyses/thq/analysis_tutorial.ipynb>
 
 
 .. toctree::
