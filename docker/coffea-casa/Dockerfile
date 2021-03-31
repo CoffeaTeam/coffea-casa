@@ -64,7 +64,7 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-USER $NB_UID
+USER $NB_USER
 WORKDIR $HOME
 # Setup work directory for backward-compatibility
 RUN mkdir "/home/$NB_USER/work" && \
@@ -192,7 +192,7 @@ RUN pip install --ignore-installed --no-cache-dir \
     pyyaml
 
 # Servicex client package (for func_adl.uproot)
-#RUN pip install servicex==2.2b6
+#RUN pip install servicex-clients
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \

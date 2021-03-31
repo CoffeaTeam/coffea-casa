@@ -56,7 +56,7 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
 
-USER $NB_UID
+USER $NB_USER
 WORKDIR $HOME
 # Setup work directory for backward-compatibility
 RUN mkdir $HOME/work && \
