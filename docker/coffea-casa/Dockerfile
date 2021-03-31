@@ -58,7 +58,6 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
     useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir -p $CONDA_DIR && \
-    mkdir -p $HOME/.local && \
     chown $NB_USER:$NB_GID $CONDA_DIR && \
     chown $NB_USER:$NB_GID $HOME && \
     chmod g+w /etc/passwd && \
@@ -192,8 +191,8 @@ RUN pip install --ignore-installed --no-cache-dir \
     coffea_casa \
     pyyaml
 
-# Servicex (still wrong dependencies)
-#RUN pip install --no-cache-dir servicex-clients
+# Servicex client package (for func_adl.uproot)
+RUN pip install servicex==2.2b6
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
