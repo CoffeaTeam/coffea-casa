@@ -2,9 +2,9 @@ FROM coffeateam/coffea-dask:0.7.1-g5e669a7
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
-ARG NB_USER="cms-jovyan"
-ARG NB_UID="6440"
-ARG NB_GID="11265"
+ARG NB_USER="jovyan"
+ARG NB_UID="1000"
+ARG NB_GID="100"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
