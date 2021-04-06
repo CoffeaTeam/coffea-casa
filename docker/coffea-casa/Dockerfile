@@ -192,7 +192,7 @@ RUN pip install --ignore-installed --no-cache-dir \
     pyyaml
 
 # Servicex client package (for func_adl.uproot)
-#RUN pip install servicex-clients
+RUN pip install servicex-clients
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
