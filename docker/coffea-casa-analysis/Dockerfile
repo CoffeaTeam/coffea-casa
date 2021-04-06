@@ -61,12 +61,8 @@ WORKDIR $HOME
 # Setup work directory for backward-compatibility
 RUN mkdir $HOME/work && \
     mkdir -p $HOME/.local && \
-    mkdir -p $HOME/patches && \
     mkdir -p $HOME/.condor/tokens.d && \
     fix-permissions $HOME
-
-
-COPY patches/coffea-xrootd.patch $HOME/patches/
 
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
@@ -131,9 +127,6 @@ ENV PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 # jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
-
-#FIXME (recheck patch with new release)
-RUN patch /opt/conda/lib/python3.8/site-packages/coffea/processor/executor.py < $HOME/patches/coffea-xrootd.patch
 
 # Cleanup
 RUN rm -rf /tmp/* \

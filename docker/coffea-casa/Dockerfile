@@ -168,9 +168,7 @@ RUN mkdir -p $HOME/.config/dask  && \
     mkdir -p /etc/dask  && \
     mkdir -p /var/lib/condor && \
     mkdir -p $HOME/.condor/tokens.d && \
-    mkdir -p /etc/condor/config.d  && \
-    mkdir -p $HOME/patches
-COPY patches/coffea-xrootd.patch $HOME/patches/
+    mkdir -p /etc/condor/config.d
 
 USER $NB_UID
 RUN conda install --yes --freeze-installed \
@@ -256,9 +254,6 @@ ENV PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 # jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
-
-#FIXME (recheck patch with new release)
-RUN patch /opt/conda/lib/python3.8/site-packages/coffea/processor/executor.py < $HOME/patches/coffea-xrootd.patch
 
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
