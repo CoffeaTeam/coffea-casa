@@ -47,6 +47,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 
    Coffea Documentation <https://coffeateam.github.io/coffea/>
    cc_user.rst
+   cc_metrics.rst
 
 .. toctree::
    :maxdepth: 1
