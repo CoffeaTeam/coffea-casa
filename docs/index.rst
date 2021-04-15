@@ -55,18 +55,12 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :maxdepth: 1
    :hidden:
    :caption: Gallery of Coffea-casa Examples
+   :glob:
 
-   Coffea-Casa Template <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/coffea-casa-template.ipynb>
-   ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example1.ipynb>
-   ADL Benchmark 2 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example2.ipynb>
-   ADL Benchmark 3 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example3.ipynb>
-   ADL Benchmark 4 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example4.ipynb>
-   ADL Benchmark 5 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example5.ipynb>
-   ADL Benchmark 6 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example6.ipynb>
-   ADL Benchmark 7 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example7.ipynb>
-   ADL Benchmark 8 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example8.ipynb>
-   Single Top-Higgs Production (tHq) Analysis <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analyses/thq/analysis-casa.ipynb>
-   Single Top-Higgs Production (tHq) Analysis Tutorial <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analyses/thq/analysis_tutorial.ipynb>
+   ../coffea-casa-tutorials/analysis_tutorial
+   ../coffea-casa-tutorials/examples/*
+   ../coffea-casa-tutorials/analyses/thq/analysis-casa
+   ../coffea-casa-tutorials/analyses/thq/analysis_tutorial
 
 
 .. toctree::
