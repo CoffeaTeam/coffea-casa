@@ -13,3 +13,7 @@ Runtime Issues
 **The terminal appears to terminate without an error, or I have noticed strange "core.####" files within my file browser.**
 
 If your terminal is terminating without errors, please check for the aforementioned core files within your file browser. If they are present, then you are generating core dumps. In either case, report an issue on GitHub specifying what you are trying to do, which step is going wrong, and whether you are getting core dumps. This will help us pinpoint what's going wrong.
+
+**I have installed a package through the terminal, but I still get ModuleNotFound errors when attempting to run my processor.**
+
+Ensure that you have installed your package onto the workers as well. A guide for this can be found `here in our documentation <https://coffea-casa.readthedocs.io/en/latest/cc_packages.html>`_.
