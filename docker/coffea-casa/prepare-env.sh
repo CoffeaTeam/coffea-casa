@@ -8,20 +8,20 @@ export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 if [[ -f "/etc/cmsaf-secrets/.servicex" ]]; then
     export servicex_token=$(</etc/cmsaf-secrets/.servicex)
     # debug: it work locally in Hub, let's try to touch file
-    touch /home/jovyan/.servicex
+    touch /home/cms-jovyan/.servicex
     echo "Tokens: generating ServiceX config file."
     # We are using dev instance to test JWT integration:
     # replace later with https://uproot.servicex.coffea.casa
     echo "
 api_endpoints:
-  - endpoint: https://uproot-dev.servicex.coffea.casa
+  - endpoint: https://cmsaf-servicex.servicex.coffea.casa
     token:
     type: uproot
-    " > /home/jovyan/.servicex
+    " > /home/cms-jovyan/.servicex
 
     /opt/conda/bin/python -c '
 import yaml, os
-servicex="/home/jovyan/.servicex"
+servicex="/home/cms-jovyan/.servicex"
 with open(servicex) as f:
     list_yaml=yaml.load(f,Loader=yaml.Loader)
 list_yaml["api_endpoints"][0]["token"] = os.environ.get("servicex_token")

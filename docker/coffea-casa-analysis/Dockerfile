@@ -41,7 +41,7 @@ ENV LC_ALL=en_US.UTF-8 \
 COPY fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
-# Create NB_USER with name jovyan user with UID and in the 'users' group
+# Create NB_USER with name cms-jovyan user with UID and in the 'users' group
 # and make sure these dirs are writable by the `users` group.
 RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%admin/#%admin/' /etc/sudoers && \
@@ -124,7 +124,7 @@ ENV PATH="/opt/conda/bin/:$PATH"
 ENV PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 
 # FIXME: we have a wrong path, let's make a link.
-# jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
+# cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 

@@ -251,7 +251,7 @@ ENV PATH="/opt/conda/bin/:$PATH"
 ENV PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 
 # FIXME: we have a wrong path, let's make a link.
-# jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
+# cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 

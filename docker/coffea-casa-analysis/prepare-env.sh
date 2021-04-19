@@ -51,7 +51,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
 
   # Condor token securily transfered from scheduler
   if [[ -f "$_CONDOR_JOB_IWD/condor_token" ]]; then
-      mkdir -p /home/jovyan/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/jovyan/.condor/tokens.d/condor_token
+      mkdir -p /home/cms-jovyan/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/cms-jovyan/.condor/tokens.d/condor_token
   fi
   # Bearer token
   if [[ -f "$_CONDOR_JOB_IWD/xcache_token" ]]; then
