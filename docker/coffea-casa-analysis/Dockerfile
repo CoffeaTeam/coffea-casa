@@ -2,9 +2,9 @@ FROM coffeateam/coffea-dask:0.7.2-g34df691
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
-ARG NB_USER="jovyan"
-ARG NB_UID="1000"
-ARG NB_GID="100"
+ARG NB_USER="cms-jovyan"
+ARG NB_UID="6440"
+ARG NB_GID="11265"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -41,7 +41,7 @@ ENV LC_ALL=en_US.UTF-8 \
 COPY fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
-# Create NB_USER with name jovyan user with UID=1000 and in the 'users' group
+# Create NB_USER with name jovyan user with UID and in the 'users' group
 # and make sure these dirs are writable by the `users` group.
 RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%admin/#%admin/' /etc/sudoers && \
@@ -50,8 +50,8 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     mkdir -p $CONDA_DIR && \
     mkdir -p /etc/cmsaf-secrets && \
     mkdir -p /var/lib/condor && \
-    chown $NB_USER:$NB_GID $CONDA_DIR && \
-    chown $NB_USER:$NB_GID $HOME && \
+    chown -R $NB_UID:$NB_GID $CONDA_DIR && \
+    chown -R $NB_UID:$NB_GID $HOME && \
     chmod g+w /etc/passwd && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
@@ -112,7 +112,7 @@ COPY config.d  /etc/condor/config.d/
 # it configured from kubernetes side and updated in docker container to match it
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
-    groupadd 1000 && usermod -g 1000 $NB_USER
+    groupadd $NB_GID && usermod -g 0 $NB_USER
 
 # xcache setup (we setup BEARER_TOKEN_FILE later in prepare-env.sh)
 ENV XCACHE_HOST="red-xcache1.unl.edu"

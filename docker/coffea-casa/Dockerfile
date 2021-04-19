@@ -5,9 +5,9 @@ FROM coffeateam/coffea-dask:0.7.2-g34df691
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
-ARG NB_USER="jovyan"
-ARG NB_UID="1000"
-ARG NB_GID="100"
+ARG NB_USER="cms-jovyan"
+ARG NB_UID="6440"
+ARG NB_GID="11265"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -58,8 +58,8 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
     useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir -p $CONDA_DIR && \
-    chown $NB_USER:$NB_GID $CONDA_DIR && \
-    chown $NB_USER:$NB_GID $HOME && \
+    chown -R $NB_UID:$NB_GID $CONDA_DIR && \
+    chown -R $NB_UID:$NB_GID $HOME && \
     chmod g+w /etc/passwd && \
     fix-permissions $HOME && \
     fix-permissions $CONDA_DIR
@@ -78,9 +78,9 @@ RUN mkdir "/home/$NB_USER/work" && \
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
     -c conda-forge \
-    'notebook==6.1.6' \
-    'jupyterhub==1.3.0' \
-    'jupyterlab==2.2.9' \
+    'notebook=6.3.0' \
+    'jupyterhub=1.3.0' \
+    'jupyterlab=3.0.12' \
     jupyterlab_widgets \
     # Conflicts needs to be resolved before
     #jupyterlab-lsp \
