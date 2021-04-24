@@ -5,16 +5,13 @@ set -x
 export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 
 # servicex token generation
-if [[ -f "/etc/cmsaf-secrets/.servicex" ]]; then
+if [[ -f "/etc/cmsaf-secrets/.servicex" ]] && [[ "$SERVICEX_HOST" ]]; then
     export servicex_token=$(</etc/cmsaf-secrets/.servicex)
-    # debug: it work locally in Hub, let's try to touch file
     touch /home/cms-jovyan/.servicex
     echo "Tokens: generating ServiceX config file."
-    # We are using dev instance to test JWT integration:
-    # replace later with https://uproot.servicex.coffea.casa
     echo "
 api_endpoints:
-  - endpoint: https://cmsaf-servicex.servicex.coffea.casa
+  - endpoint: $SERVICEX_HOST
     token:
     type: uproot
     " > /home/cms-jovyan/.servicex
