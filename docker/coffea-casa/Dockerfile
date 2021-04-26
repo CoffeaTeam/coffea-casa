@@ -94,11 +94,6 @@ RUN conda install --quiet --yes \
 
 EXPOSE 8888
 
-# Configure container startup
-ENTRYPOINT ["tini", "-g", "--"]
-
-# Copy local files as late as possible to avoid cache busting
-COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 # Currently need to have both jupyter_notebook_config and jupyter_server_config to support classic and lab
 COPY jupyter_notebook_config.py /etc/jupyter/
 
@@ -257,6 +252,9 @@ RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+
+# Copy local files as late as possible to avoid cache busting
+COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 
 USER $NB_UID
 WORKDIR $HOME
