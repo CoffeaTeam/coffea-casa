@@ -41,23 +41,23 @@ run-hooks /usr/local/bin/start-notebook.d
 # Handle special flags if we're root
 if [ $(id -u) == 0 ] ; then
 
-    # Only attempt to change the jovyan username if it exists
-    if id jovyan &> /dev/null ; then
+    # Only attempt to change the cms-jovyan username if it exists
+    if id cms-jovyan &> /dev/null ; then
         echo "Set username to: $NB_USER"
-        usermod -d /home/$NB_USER -l $NB_USER jovyan
+        usermod -d /home/$NB_USER -l $NB_USER cms-jovyan
     fi
 
     # handle home and working directory if the username changed
-    if [[ "$NB_USER" != "jovyan" ]]; then
+    if [[ "$NB_USER" != "cms-jovyan" ]]; then
         # changing username, make sure homedir exists
         # (it could be mounted, and we shouldn't create it if it already exists)
         if [[ ! -e "/home/$NB_USER" ]]; then
             echo "Relocating home dir to /home/$NB_USER"
-            mv /home/jovyan "/home/$NB_USER" || ln -s /home/jovyan "/home/$NB_USER"
+            mv /home/cms-jovyan "/home/$NB_USER" || ln -s /home/cms-jovyan "/home/$NB_USER"
         fi
-        # if workdir is in /home/jovyan, cd to /home/$NB_USER
-        if [[ "$PWD/" == "/home/jovyan/"* ]]; then
-            newcwd="/home/$NB_USER/${PWD:13}"
+        # if workdir is in /home/cms-jovyan, cd to /home/$NB_USER
+        if [[ "$PWD/" == "/home/cms-jovyan/"* ]]; then
+            newcwd="/home/$NB_USER"
             echo "Setting CWD to $newcwd"
             cd "$newcwd"
         fi
@@ -84,6 +84,7 @@ if [ $(id -u) == 0 ] ; then
         fi
         userdel $NB_USER
         useradd --home /home/$NB_USER -u $NB_UID -g $NB_GID -G 100 -l $NB_USER
+        fix-permissions /home/$NB_USER
     fi
 
     # Enable sudo if requested
@@ -101,7 +102,7 @@ if [ $(id -u) == 0 ] ; then
     echo "Executing the command: ${cmd[@]}"
     exec sudo -E -H -u $NB_USER PATH=$PATH XDG_CACHE_HOME=/home/$NB_USER/.cache PYTHONPATH=${PYTHONPATH:-} "${cmd[@]}"
 else
-    if [[ "$NB_UID" == "$(id -u jovyan 2>/dev/null)" && "$NB_GID" == "$(id -g jovyan 2>/dev/null)" ]]; then
+    if [[ "$NB_UID" == "$(id -u cms-jovyan 2>/dev/null)" && "$NB_GID" == "$(id -g cms-jovyan 2>/dev/null)" ]]; then
         # User is not attempting to override user/group via environment
         # variables, but they could still have overridden the uid/gid that
         # container runs as. Check that the user has an entry in the passwd
@@ -110,8 +111,8 @@ else
         if [[ "$STATUS" != "0" ]]; then
             if [[ -w /etc/passwd ]]; then
                 echo "Adding passwd file entry for $(id -u)"
-                cat /etc/passwd | sed -e "s/^jovyan:/nayvoj:/" > /tmp/passwd
-                echo "jovyan:x:$(id -u):$(id -g):,,,:/home/jovyan:/bin/bash" >> /tmp/passwd
+                cat /etc/passwd | sed -e "s/^cms-jovyan:/nayvoj:/" > /tmp/passwd
+                echo "cms-jovyan:x:$(id -u):$(id -g):,,,:/home/cms-jovyan:/bin/bash" >> /tmp/passwd
                 cat /tmp/passwd > /etc/passwd
                 rm /tmp/passwd
             else
@@ -120,7 +121,7 @@ else
         fi
 
         # Warn if the user isn't going to be able to write files to $HOME.
-        if [[ ! -w /home/jovyan ]]; then
+        if [[ ! -w /home/cms-jovyan ]]; then
             echo 'Container must be run with group "users" to update files'
         fi
     else
