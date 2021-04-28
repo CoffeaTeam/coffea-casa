@@ -8,6 +8,10 @@ There's a plethora of issues which seem specific to certain web browsers. If you
 
 If opening coffea-casa in a new browser solves the issue, you are still encouraged to provide information within `this issue <https://github.com/CoffeaTeam/coffea-casa/issues/93/>`_ to help us gather data.
 
+**Running a manually-configured Dask cluster gives me a dashboard link, but the dashboard link does not work.**
+
+This is expected behavior. If you go into the Dask sidebar of JupyterLab, however, the orange keys should still work and give you access to the information you'd find within the dashboard. If the keys are grey or any other problems arise, please submit an issue.
+
 Runtime Issues
 -----
 **The terminal appears to terminate without an error, or I have noticed strange "core.####" files within my file browser.**
