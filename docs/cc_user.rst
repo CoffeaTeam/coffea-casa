@@ -69,7 +69,33 @@ As soon as you will start your computations, you will notice that available reso
    :width: 50%
    :align: center
    
-Using Git in the Coffea-Casa Analysis Facility @ T2 Nebraska
+
+Opening a New Console or File
+-----
+There are three ways by which you can open a new tab within coffea-casa. Two are located within the **File** menu at the very top of the JupyterLab interface: *New* and *New Launcher.*
+
+.. image:: _static/coffea-casa-newtab.png
+   :alt: The File menu of the coffea-casa JupyterLab interface.
+   :width: 50%
+   :align: center
+   
+The *New* dropdown menu allows you to open the console or a file of a specified format directly. The *New Launcher* option creates a new tab with buttons that permit you to launch a console or a new file, exactly like the interface you are shown when you first open coffea-casa.
+
+The final way is specific to the **File Browser** tab of the sidebar.
+
+.. image:: _static/coffea-casa-newlauncher.png
+   :alt: The File Browser tab of the coffea-casa JupyterLab interface, showcasing the New Launcher button.
+   :width: 50%
+   :align: center
+
+This behaves exactly like the *New Launcher* option above.
+
+.. note::
+
+    Regardless of the method you use to open a new file, the file will be saved to the current directory of your **File Browser.**
+
+
+Using Git
 -----
 
 Cloning a repository in the Coffea-casa Analysis Facility @ T2 Nebraska is simple, though it can be a little confusing because it is spread across two tabs in the sidebar: the *File Browser* and the *Git* tabs.
