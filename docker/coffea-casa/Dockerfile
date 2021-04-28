@@ -9,6 +9,8 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 
+# FIXME: Skyhook FS expected to have something like 'cephfs'
+ARG SKYHOOK_FS
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
 
@@ -32,7 +34,10 @@ RUN apt-get update \
      locales \
      fonts-liberation \
      gcc build-essential \
+     ceph-fuse \
      && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN if [ "$SKYHOOK_FS" ]; then mkdir -p /mnt/cephfs && ceph-fuse --client_fs $SKYHOOK_FS /mnt/cephfs ; fi
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
         locale-gen
