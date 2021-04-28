@@ -48,3 +48,13 @@ To use this code for your own purposes, you merely have to put in your list of d
     ])
     
 and your workers should have both pytest and topcoffea installed onto them.
+
+Sending Files to Workers (Without Pip)
+-----
+If you have a file that you wish to import without pip, and you need to send it to your workers, then you can do so by initializing your client and providing it the following line:
+
+.. code-block:: python
+
+    client.upload_file('foo.py')
+    
+Where ``foo.py`` is replaced by the file you are attempting to import.
