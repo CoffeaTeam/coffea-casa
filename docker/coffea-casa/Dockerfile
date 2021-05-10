@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.2-g859ceb2
+FROM coffeateam/coffea-dask:0.7.3-g5efa651
 
 # Update: 6.01.2021
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
