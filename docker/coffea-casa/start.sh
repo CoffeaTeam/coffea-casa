@@ -93,6 +93,7 @@ if [ $(id -u) == 0 ] ; then
         echo "$NB_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/notebook
     fi
 
+    source /usr/local/bin/prepare-env.sh
     # Add $CONDA_DIR/bin to sudo secure_path
     sed -r "s#Defaults\s+secure_path\s*=\s*\"?([^\"]+)\"?#Defaults secure_path=\"\1:$CONDA_DIR/bin\"#" /etc/sudoers | grep secure_path > /etc/sudoers.d/path
 
@@ -142,6 +143,7 @@ else
     fi
 
     # Execute the command
+    source /usr/local/bin/prepare-env.sh
     run-hooks /usr/local/bin/before-notebook.d
     echo "Executing the command: ${cmd[@]}"
     exec "${cmd[@]}"
