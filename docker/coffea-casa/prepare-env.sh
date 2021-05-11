@@ -7,18 +7,18 @@ export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 # servicex token generation
 if [[ -f "/etc/cmsaf-secrets/.servicex" ]] && [[ "$SERVICEX_HOST" ]]; then
     export servicex_token=$(</etc/cmsaf-secrets/.servicex)
-    touch /home/$NB_USER/.servicex
+    touch $HOME/.servicex
     echo "Tokens: generating ServiceX config file."
     echo "
 api_endpoints:
   - endpoint: $SERVICEX_HOST
     token:
     type: uproot
-    " > /home/$NB_USER/.servicex
+    " > $HOME/.servicex
 
     /opt/conda/bin/python -c '
 import yaml, os
-servicex="/home/$NB_USER/.servicex"
+servicex="$HOME/.servicex"
 with open(servicex) as f:
     list_yaml=yaml.load(f,Loader=yaml.Loader)
 list_yaml["api_endpoints"][0]["token"] = os.environ.get("servicex_token")

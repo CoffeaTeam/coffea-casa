@@ -38,6 +38,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    Why Dask? <https://docs.dask.org/en/latest/why.html>
    Dask-jobqueue introduction <https://jobqueue.dask.org/en/latest/howitworks.html>
    Dask-labextention introduction <https://pypi.org/project/dask-labextension/>
+   Coffea Documentation <https://coffeateam.github.io/coffea/>
 
 
 .. toctree::
@@ -45,7 +46,6 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :hidden:
    :caption: How To Use Coffea-casa
 
-   Coffea Documentation <https://coffeateam.github.io/coffea/>
    cc_user.rst
    cc_packages.rst
    cc_metrics.rst

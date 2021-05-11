@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.2-g34df691
+FROM coffeateam/coffea-dask:0.7.2-g859ceb2
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
@@ -29,6 +29,7 @@ RUN apt-get update \
      locales \
      fonts-liberation \
      gcc build-essential \
+     ceph-fuse \
      && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
@@ -83,7 +84,7 @@ RUN pip install --no-cache-dir \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.04.0-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.04.1-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
