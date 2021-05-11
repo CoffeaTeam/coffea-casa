@@ -85,6 +85,7 @@ if [ $(id -u) == 0 ] ; then
         userdel $NB_USER
         useradd --home /home/$NB_USER -u $NB_UID -g $NB_GID -G 100 -l $NB_USER
         fix-permissions /home/$NB_USER
+        export HOME=/home/$NB_USER
     fi
 
     # Enable sudo if requested
