@@ -264,7 +264,7 @@ COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 
 USER $NB_UID
 WORKDIR $HOME
-ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
+ENTRYPOINT ["tini", "-g", "--"]
 
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
 # Use bash login shell for entrypoint in order
