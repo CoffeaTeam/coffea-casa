@@ -250,7 +250,6 @@ ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
 #ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ENV PATH="/opt/conda/bin/:$PATH"
-ENV PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
