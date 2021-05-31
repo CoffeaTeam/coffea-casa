@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.3-g5efa651
+FROM coffeateam/coffea-dask:0.7.3-gb48d239
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
@@ -84,7 +84,7 @@ RUN pip install --no-cache-dir \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.05.0-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.05.1-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
