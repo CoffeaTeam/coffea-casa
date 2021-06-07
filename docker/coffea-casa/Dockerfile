@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.3-gb48d239
+FROM coffeateam/coffea-dask:0.7.3-ge7b30fc
 
 # Update: 6.01.2021
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
@@ -181,7 +181,7 @@ RUN conda install --yes --freeze-installed \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.05.1-coffea-casa#egg=distributed \
+    git+git://github.com/oshadura/distributed.git@2021.06.0-coffea-casa#egg=distributed \
     coffea_casa \
     pyyaml
 
