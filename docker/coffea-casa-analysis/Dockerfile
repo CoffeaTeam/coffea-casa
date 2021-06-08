@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.3-ge7b30fc
+FROM coffeateam/coffea-dask:0.7.4-g4acf042
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
