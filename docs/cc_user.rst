@@ -11,7 +11,7 @@ If you aren't familiar with any of these tools, please click on the links above 
 Access
 ------
 
-.. important:: access to coffea-casa@Nebraska
+.. important::
    Please use `https://cmsaf-jh.unl.edu <https://cmsaf-jh.unl.edu>`_ as an access point to the Coffea-Casa Analysis Facility @ T2 Nebraska.
 
 .. image:: _static/coffea-casa-enter.png
