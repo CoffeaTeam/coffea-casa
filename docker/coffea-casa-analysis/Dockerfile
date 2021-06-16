@@ -72,6 +72,10 @@ RUN conda install --yes --freeze-installed \
     htcondor \
     xgboost \
     pyhf \
+    vector \
+    hist \
+    mplhep \
+    iminuit \
     cmake \
     && conda clean --all -f -y \
     && conda build purge-all
@@ -79,7 +83,10 @@ RUN conda install --yes --freeze-installed \
 #
 RUN pip install --no-cache-dir \
     # for running/restarting Dask worker in sidecar container
-    supervisor
+    supervisor \
+    correctionlib \
+    cabinetry
+
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
