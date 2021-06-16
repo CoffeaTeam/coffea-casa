@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.2-g859ceb2
+FROM coffeateam/coffea-dask:0.7.4-g4acf042
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
@@ -72,6 +72,10 @@ RUN conda install --yes --freeze-installed \
     htcondor \
     xgboost \
     pyhf \
+    vector \
+    hist \
+    mplhep \
+    iminuit \
     cmake \
     && conda clean --all -f -y \
     && conda build purge-all
@@ -79,12 +83,15 @@ RUN conda install --yes --freeze-installed \
 #
 RUN pip install --no-cache-dir \
     # for running/restarting Dask worker in sidecar container
-    supervisor
+    supervisor \
+    correctionlib \
+    cabinetry
+
 # Since we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.04.1-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.06.0-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
