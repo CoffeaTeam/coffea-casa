@@ -1,7 +1,7 @@
 First Steps at Coffea-Casa
-=========
+==========================
 Prerequisites
------
+-------------
 The primary mode of analysis with coffea-casa is `coffea <https://coffeateam.github.io/coffea/index.html>`_. Coffea provides plenty of examples to users in its `documentation <https://coffeateam.github.io/coffea/examples.html>`_. A good starting point may be `this tutorial <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analysis/analysis_tutorial.ipynb>`_ on columnar analysis in coffea.
 
 Knowledge of `Python <https://docs.python.org/3/tutorial/>`_ is also assumed. Standard coffea analyses are contained within `Jupyter Notebooks <https://jupyter.org/>`_, which allow for dynamic, block-by-block execution of code. Coffea-casa employs the `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/user/interface.html>`_ interface. JupyterLab is designed for hosting Jupyter Notebooks on the web, and permits the usage of additional features within its environment, including Git access, compatibility with cluster computing tools, and much, much more.
@@ -9,9 +9,10 @@ Knowledge of `Python <https://docs.python.org/3/tutorial/>`_ is also assumed. St
 If you aren't familiar with any of these tools, please click on the links above for additional resources, and get acquainted with how they work. If you want examples of how coffea-casa merges these tools, refer to the gallery of coffea-casa examples.
 
 Access
------
+------
 
-Please use `https://cmsaf-jh.unl.edu <https://cmsaf-jh.unl.edu>`_ as an access point to the Coffea-Casa Analysis Facility @ T2 Nebraska.
+.. important:: access to coffea-casa@Nebraska
+   Please use `https://cmsaf-jh.unl.edu <https://cmsaf-jh.unl.edu>`_ as an access point to the Coffea-Casa Analysis Facility @ T2 Nebraska.
 
 .. image:: _static/coffea-casa-enter.png
    :alt: Access to Coffea-casa Analysis Facility @ T2 Nebraska
@@ -20,7 +21,7 @@ Please use `https://cmsaf-jh.unl.edu <https://cmsaf-jh.unl.edu>`_ as an access p
 
 
 CMS AuthZ Authentication Instance
------
+---------------------------------
 
 Currently Coffea-Casa Analysis Facility @ T2 Nebraska support any member of CMS VO organisation.
 
@@ -32,8 +33,14 @@ To access it please sign in or sign up using ``Apply for an account``.
    :align: center
 
 
+.. image:: _static/coffea-casa-authz-approval.png
+   :alt: Approval required for CMS Authz authentification to Coffea-casa Analysis Facility @ T2 Nebraska
+   :width: 50%
+   :align: center
+
+
 Docker Image Selection
------
+----------------------
 
 For high efficient analysis using *coffea* package, powered with *Dask* and *HTCondor* please select:
 
@@ -52,7 +59,7 @@ After you will be forwarded to your personal Jupyterhub instance running at Anal
 
 
 Cluster Resources in Coffea-Casa Analysis Facility @ T2 Nebraska
------
+----------------------------------------------------------------
 
 By default, the Coffea-casa Dask cluster should provide you with a scheduler and workers, which you can see by clicking on the colored Dask icon in the left sidebar.
 
@@ -71,7 +78,7 @@ As soon as you will start your computations, you will notice that available reso
    
 
 Opening a New Console or File
------
+-----------------------------
 There are three ways by which you can open a new tab within coffea-casa. Two are located within the **File** menu at the very top of the JupyterLab interface: *New* and *New Launcher.*
 
 .. image:: _static/coffea-casa-newtab.png
@@ -96,7 +103,7 @@ This behaves exactly like the *New Launcher* option above.
 
 
 Using Git
------
+---------
 
 Cloning a repository in the Coffea-casa Analysis Facility @ T2 Nebraska is simple, though it can be a little confusing because it is spread across two tabs in the sidebar: the *File Browser* and the *Git* tabs.
 
@@ -126,7 +133,7 @@ If you wish to commit, push, or pull from the repository you currently have acti
 The buttons in the top right allow for pulling and pushing respectively. When you have edited files in a directory, they will show up under the *Changed* category, at which point you can hit the **+** to add them to a commit (at which point they will show up under *Staged*). Filling out the box at the bottom of the sidebar will file your commit, and prepare it for you to push.
 
 Example
------
+-------
 In this example (which corresponds to `ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example1.ipynb>`_), we'll try to run a simple analysis example on the Coffea-Casa Analysis Facility. We will use the ``coffea_casa`` wrapper library, which allows use of pre-configured settings for HTCondor configuration and Dask scheduler/worker images.
 
 Our goal in this `toy` analysis is to plot the missing transverse energy (*MET*) of all events from a sample dataset; this data was converted from 2012 CMS Open Data (17 GB, 54 million events), and is available in public EOS (root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root).
@@ -220,11 +227,16 @@ As a result you should see next plot:
    :align: center
    
 Important Note for CMS Data
------
-Above, we used a public data file to run through our example. If your analysis makes use of CMS data, or data which is otherwise certificate-protected, you will run into authentication errors. The Coffea-Casa Analysis Facility @ T2 Nebraska comes equipped with xcache tokens that permit you to access this data, but you will need to edit the path you're using to access the root file by changing the redirector portion to ``xcache``. For example:
+---------------------------
 
-*root://* **xrootd.unl.edu** *//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root*
+.. important::
+   Above, we used a public data file to run through our example. If your analysis makes use of CMS data, or data which is otherwise certificate-protected, you will run into authentication errors.
+   The Coffea-Casa Analysis Facility @ T2 Nebraska comes equipped with xcache tokens that permit you to access this data, but you will need to edit the path you're using to access the root file by changing the redirector portion to ``xcache``. For example:
 
-becomes
+Example:
 
-*root://* **xcache** *//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root*
+`root://*xrootd.unl.edu*//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root`
+
+becomes:
+
+`root://*xcache*//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root`
