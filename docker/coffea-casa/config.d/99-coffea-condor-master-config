@@ -1,0 +1,21 @@
+#####
+#File contains mandatory Condor environment settings for Coffea-casa scaling
+#Ultimately this will be the only file here
+####
+
+CONDOR_HOST    = red-condor.unl.edu
+
+COLLECTOR_NAME = Nebraska T2
+
+ALLOW_ADMINISTRATOR = $(ALLOW_ADMINISTRATOR)
+
+UID_DOMAIN       = unl.edu
+
+SCHEDD_HOST = t3.unl.edu
+
+
+### NO ENV NEEDED FOR THESE, THESE VALUES SHOULD BE GOOD
+START=FALSE
+DAEMON_LIST = MASTER
+
+
