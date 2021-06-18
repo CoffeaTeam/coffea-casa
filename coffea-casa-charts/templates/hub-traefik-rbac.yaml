@@ -1,0 +1,33 @@
+
+{{- if  .Values.rbac.enabled -}}
+# Create a role allowing list and patch of ingressroutetcps
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hub-traefik
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups:
+  - traefik.containo.us
+  resources:
+  - ingressroutetcps
+  verbs:
+  - list
+  - patch
+
+# Give the hub the role to manage ingressroutetcps for dask
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hub-traefik
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hub-traefik
+subjects:
+- kind: ServiceAccount
+  name: hub
+{{- end }}
