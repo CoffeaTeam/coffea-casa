@@ -94,14 +94,14 @@ RUN pip install --ignore-installed --no-cache-dir \
     git+git://github.com/oshadura/distributed.git@2021.06.0-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
-RUN cd /tmp && \
-    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-    cd xrdcl-authz-plugin && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
-    make && \
-    make install
+#RUN cd /tmp && \
+#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+#    cd xrdcl-authz-plugin && \
+#    mkdir build && \
+#    cd  build && \
+#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+#    make && \
+#    make install
 
 USER root
 # Setup supervisord files
@@ -124,9 +124,9 @@ RUN groupadd -r condor && \
 
 # xcache setup (we setup BEARER_TOKEN_FILE later in prepare-env.sh)
 ENV XCACHE_HOST="red-xcache1.unl.edu"
-ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+#ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
+#ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV BEARER_TOKEN_FILE="/etc/xcache_token"
 ENV PATH="/opt/conda/bin/:$PATH"
 ENV PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
