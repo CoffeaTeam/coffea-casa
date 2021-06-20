@@ -194,15 +194,15 @@ RUN pip install --ignore-installed --no-cache-dir \
 
 
 # ------- xrootd-authz-plugin -------------------------------
-RUN cd /tmp && \
-    # ------- xrdcl-authz-plugin -------------------------------
-    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-    cd xrdcl-authz-plugin && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
-    make && \
-    make install
+#RUN cd /tmp && \
+#    # ------- xrdcl-authz-plugin -------------------------------
+#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+#    cd xrdcl-authz-plugin && \
+#    mkdir build && \
+#    cd  build && \
+#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+#    make && \
+#    make install
 
 USER root
 # Dask setup - > dask.yml
@@ -246,7 +246,7 @@ RUN rm -rf /tmp/* \
 ENV XCACHE_HOST="red-xcache1.unl.edu"
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
+#ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ENV PATH="/opt/conda/bin/:$PATH"
 ENV PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
