@@ -32,7 +32,29 @@ RUN apt-get update \
      locales \
      fonts-liberation \
      gcc build-essential \
-     ceph-fuse \
+     # Security updates
+     libbsd0=0.9.1-2+deb10u1 \
+     libgnutls30=3.6.7-4+deb10u7 \
+     liblz4-1=1.8.3-1+deb10u1 \
+     libx11-data=2:1.6.7-1+deb10u2 \
+     libcurl3-gnutls=7.64.0-4+deb10u2 \
+     libgcrypt20=1.8.4-5+deb10u1 \
+     libglib2.0-0=2.58.3-2+deb10u3 \
+     libglib2.0-data=2.58.3-2+deb10u3 \
+     libhogweed4=3.4.1-1+deb10u1 \
+     libldap-2.4-2=2.4.47+dfsg-3+deb10u6 \
+     libldap-common=2.4.47+dfsg-3+deb10u6 \
+     libnettle6=3.4.1-1+deb10u1 \
+     libp11-kit0=0.23.15-2+deb10u1 \
+     libssl1.1=1.1.1d-0+deb10u6 \
+     libsvn1=1.10.4-1+deb10u2 \
+     libxml2=2.9.4+dfsg1-7+deb10u2 \
+     openssl=1.1.1d-0+deb10u6 \
+     subversion=1.10.4-1+deb10u2 \
+     apt=1.8.2.2 \
+     libapt-pkg5.0=1.8.2.2 \
+     libcurl3-gnutls=7.64.0-4+deb10u2 \
+     libzstd1=1.3.8+dfsg-3+deb10u2 \
      && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
