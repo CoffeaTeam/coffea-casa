@@ -25,6 +25,10 @@ ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
+# Configure ServiceX
+ENV XCACHE_HOST $XCACHE_HOST
+ARG BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
+ARG SERVICEX_TOKEN $SERVICEX_TOKEN
      
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
@@ -183,7 +187,7 @@ RUN conda install --yes --freeze-installed \
     iminuit \
     cmake
 
-RUN pip install --no-cache-dir servicex-clients \
+RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1b7 \
     correctionlib \
     cabinetry \
     pyyaml

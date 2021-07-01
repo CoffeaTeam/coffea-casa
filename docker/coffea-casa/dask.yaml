@@ -27,31 +27,3 @@ distributed:
   admin:
     tick:
       limit: 5s # time allowed before triggering a warning
-
-  # logging:
-  #   distributed: info
-  #   distributed.client: warning
-  #   bokeh: critical
-  #   # http://stackoverflow.com/questions/21234772/python-tornado-disable-logging-to-stderr
-  #   tornado: critical
-  #   tornado.application: error
-
-labextension:
-  factory:
-    module: 'coffea_casa'
-    class: 'CoffeaCasaCluster'
-    args: []
-    kwargs: {}
-
-  default:
-    workers: null
-    adapt:
-      minimum: 1
-      maximum: 50
-
-  initial:
-  - name: "UNL HTCondor Cluster"
-    workers: null
-    adapt:
-      minimum: 1
-      maximum: 50
