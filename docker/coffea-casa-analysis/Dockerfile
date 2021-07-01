@@ -1,10 +1,14 @@
-FROM coffeateam/coffea-dask:0.7.4-g4acf042
+FROM coffeateam/coffea-dask:0.7.4-gb677714
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
+# Jupyterhub
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
+# XCACHE
+ARG XCACHE_HOST="red-xcache1.unl.edu"
+ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -92,24 +96,21 @@ RUN pip install --no-cache-dir \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.06.0-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.06.2-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
-#RUN cd /tmp && \
-#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-#    cd xrdcl-authz-plugin && \
-#    mkdir build && \
-#    cd  build && \
-#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
-#    make && \
-#    make install
+RUN cd /tmp && \
+    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+    cd xrdcl-authz-plugin && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+    make && \
+    make install
 
 USER root
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
-# Fixes https://github.com/CoffeaTeam/jhub/issues/37
-#RUN WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5)
-#    sed --in-place "s/kubernetes-worker/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
 
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
@@ -123,14 +124,11 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
     groupadd $NB_GID && usermod -g 0 $NB_USER
 
-# xcache setup (we setup BEARER_TOKEN_FILE later in prepare-env.sh)
-ENV XCACHE_HOST="red-xcache1.unl.edu"
-#ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
+# xcache setup
+ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-#ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
-ENV BEARER_TOKEN_FILE="/etc/xcache_token"
+ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV PATH="/opt/conda/bin/:$PATH"
-ENV PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH

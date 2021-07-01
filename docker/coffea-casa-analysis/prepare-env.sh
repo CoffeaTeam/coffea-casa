@@ -4,10 +4,6 @@ set -x
 
 export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 
-# Debug 'random' name for kubernetes worker
-WORKER_ID=$(cat /dev/urandom | tr -dc '0-9' | fold -w 256 | head -n 1 | sed -e 's/^0*//' | head --bytes 5)
-sed --in-place "s/kubernetes-worker-%(ENV_WORKER_ID)s/kubernetes-worker-${WORKER_ID}/g" /etc/supervisor/supervisord.conf
-
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."
     /opt/conda/bin/conda install -y $EXTRA_CONDA_PACKAGES
@@ -51,15 +47,11 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
 
   # Condor token securily transfered from scheduler
   if [[ -f "$_CONDOR_JOB_IWD/condor_token" ]]; then
-      mkdir -p /home/cms-jovyan/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/cms-jovyan/.condor/tokens.d/condor_token
+      mkdir -p /home/$NB_USER/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/$NB_USER/.condor/tokens.d/condor_token
   fi
-  # Bearer token
+  # Bearer token (overwrite value preconfigured for k8s)
   if [[ -f "$_CONDOR_JOB_IWD/xcache_token" ]]; then
       export BEARER_TOKEN_FILE="$_CONDOR_JOB_IWD/xcache_token"
-      export XCACHE_HOST="red-xcache1.unl.edu"
-      export XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
-      export LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-      export XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
   fi
   
   if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then

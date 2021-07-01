@@ -4,9 +4,9 @@ set -x
 
 export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
 
-# servicex token generation
-if [[ -f "/etc/cmsaf-secrets/.servicex" ]] && [[ "$SERVICEX_HOST" ]]; then
-    export servicex_token=$(</etc/cmsaf-secrets/.servicex)
+# ServiceX token generation
+if [[ -f "$SERVICEX_TOKEN" ]] && [[ "$SERVICEX_HOST" ]]; then
+    export servicex_token=$(<$SERVICEX_TOKEN)
     touch /home/$NB_USER/.servicex
     echo "Tokens: generating ServiceX config file (available only from Jupyterhub notebook)"
     echo "

@@ -1,13 +1,18 @@
-FROM coffeateam/coffea-dask:0.7.4-g4acf042
+FROM coffeateam/coffea-dask:0.7.4-gb677714
 
 # Update: 6.01.2021
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
+# Jupyterhub
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
+# XCACHE
+ARG XCACHE_HOST="red-xcache1.unl.edu"
+ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
+ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -84,8 +89,6 @@ RUN conda install --quiet --yes \
     'jupyterhub=1.3.0' \
     'jupyterlab=3.0.12' \
     jupyterlab_widgets \
-    # Conflicts needs to be resolved before
-    #jupyterlab-lsp \
     jupyterlab-git \
     dask_labextension && \
     conda clean --all -f -y && \
@@ -171,8 +174,6 @@ USER $NB_UID
 RUN conda install --yes --freeze-installed \
     -c conda-forge \
     conda-build \
-    # Conflicts needs to be resolved before
-    #python-language-server \
     htcondor \
     xgboost \
     pyhf \
@@ -190,20 +191,20 @@ RUN pip install --no-cache-dir servicex-clients \
 # Distributed: we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.06.0-coffea-casa#egg=distributed \
+    git+git://github.com/oshadura/distributed.git@2021.06.2-coffea-casa#egg=distributed \
     coffea_casa
 
 
 # ------- xrootd-authz-plugin -------------------------------
-#RUN cd /tmp && \
-#    # ------- xrdcl-authz-plugin -------------------------------
-#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-#    cd xrdcl-authz-plugin && \
-#    mkdir build && \
-#    cd  build && \
-#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
-#    make && \
-#    make install
+RUN cd /tmp && \
+    # ------- xrdcl-authz-plugin -------------------------------
+    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+    cd xrdcl-authz-plugin && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+    make && \
+    make install
 
 USER root
 # Dask setup - > dask.yml
@@ -244,11 +245,9 @@ RUN rm -rf /tmp/* \
     && conda build purge-all
 
 # xcache setup
-ENV XCACHE_HOST="red-xcache1.unl.edu"
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-#ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
-ENV BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
+ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV PATH="/opt/conda/bin/:$PATH"
 
 # FIXME: we have a wrong path, let's make a link.
