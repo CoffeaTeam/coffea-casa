@@ -128,6 +128,10 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
     groupadd $NB_GID && usermod -g 0 $NB_USER
 
+# Patching coffea sources (broken xrootd-authz-plugin with xrootd > 5.2.0)
+COPY coffea_xrd_source.patch /opt/conda/lib/python3.8/site-packages/
+RUN cd /opt/conda/lib/python3.8/site-packages/ && patch -p1 < coffea_xrd_source.patch
+
 # xcache setup
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"

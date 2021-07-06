@@ -235,6 +235,10 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
     groupadd 1000 && usermod -g 1000 $NB_USER
 
+# Patching coffea sources (broken xrootd-authz-plugin with xrootd > 5.2.0)
+COPY coffea_xrd_source.patch /opt/conda/lib/python3.8/site-packages/
+RUN cd /opt/conda/lib/python3.8/site-packages/ && patch -p1 < coffea_xrd_source.patch
+
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \

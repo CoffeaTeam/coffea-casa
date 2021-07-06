@@ -1,0 +1,12 @@
+diff --git a/coffea/__init__.py b/coffea/__init__.py
+index 9494009..67b04ba 100644
+--- a/coffea/__init__.py
++++ b/coffea/__init__.py
+@@ -45,3 +45,7 @@ if sys.version_info.major < 3:
+ deprecations_as_errors = False
+ 
+ __all__ = ["deprecations_as_errors"]
++
++# patch for coffea-casa (broken xrootd-authz-plugin with xrootd > 5.2.0)
++import uproot
++uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource

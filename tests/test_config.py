@@ -4,4 +4,4 @@ import coffea_casa.config
 
 
 def test_dask_config():
-    assert dask.config.get('jobqueue.coffea-casa.worker-image') == "coffeateam/coffea-casa-analysis:2021.07.01post0"
+    assert dask.config.get('jobqueue.coffea-casa.worker-image') == "coffeateam/coffea-casa-analysis:2021.07.06"
