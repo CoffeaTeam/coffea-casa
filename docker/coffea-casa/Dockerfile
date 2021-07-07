@@ -242,7 +242,7 @@ COPY config.d  /etc/condor/config.d/
 # it configured from kubernetes side and updated in docker container to match it
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
-    groupadd 1000 && usermod -g 1000 $NB_USER
+    groupadd ${NB_GID} && usermod -g ${NB_GID} $NB_USER
 
 # Patching coffea sources (broken xrootd-authz-plugin with xrootd > 5.2.0)
 COPY coffea_xrd_source.patch /opt/conda/lib/python3.8/site-packages/
