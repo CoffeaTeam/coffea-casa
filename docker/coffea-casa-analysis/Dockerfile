@@ -64,6 +64,8 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
     useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
     mkdir -p "${CONDA_DIR}" && \
+    mkdir -p /etc/cmsaf-secrets && \
++   mkdir -p /var/lib/condor && \
     chown "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
     chown "${NB_USER}:${NB_GID}" "${HOME}" && \
     chmod g+w /etc/passwd && \
