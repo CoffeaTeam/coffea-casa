@@ -3,6 +3,9 @@ FROM coffeateam/coffea-dask:0.7.5-g09cdb89
 # Update: 6.01.2021
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
+# Fix DL4006
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Jupyterhub
@@ -32,21 +35,21 @@ ARG SERVICEX_TOKEN $SERVICEX_TOKEN
      
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
-RUN apt-get update \
-     && apt-get upgrade -y \
-     && apt-get install -yq --no-install-recommends \
-     procps \
-     vim \
-     wget \
-     sudo \
-     locales \
-     fonts-liberation \
-     gcc build-essential \
-     ceph-fuse \
-     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-        locale-gen
+RUN apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
+    tini \
+    wget \
+    ca-certificates \
+    sudo \
+    locales \
+    fonts-liberation \
+    procps \
+    vim \
+    gcc build-essential \
+    run-one && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen
 
 ENV LC_ALL=en_US.UTF-8 \
         LANG=en_US.UTF-8 \
@@ -67,19 +70,19 @@ RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashr
 RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%admin/#%admin/' /etc/sudoers && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
-    useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
-    mkdir -p $CONDA_DIR && \
-    chown -R $NB_UID:$NB_GID $CONDA_DIR && \
-    chown -R $NB_UID:$NB_GID $HOME && \
+    useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
+    mkdir -p "${CONDA_DIR}" && \
+    chown "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
+    chown "${NB_USER}:${NB_GID}" "${HOME}" && \
     chmod g+w /etc/passwd && \
-    fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
+    fix-permissions "${HOME}" && \
+    fix-permissions "${CONDA_DIR}"
 
 USER $NB_USER
 WORKDIR $HOME
 # Setup work directory for backward-compatibility
-RUN mkdir "/home/$NB_USER/work" && \
-    fix-permissions "/home/$NB_USER"
+RUN mkdir "/home/${NB_USER}/work" && \
+    fix-permissions "/home/${NB_USER}"
 
 # Install Jupyter Notebook, Lab, and Hub
 # Generate a notebook server config
@@ -89,43 +92,44 @@ RUN mkdir "/home/$NB_USER/work" && \
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
     -c conda-forge \
-    'notebook=6.3.0' \
-    'jupyterhub=1.3.0' \
-    'jupyterlab=3.0.12' \
+    'notebook=6.4.0' \
+    'jupyterhub=1.4.1' \
+    'jupyterlab=3.0.16' && \
     jupyterlab_widgets \
     jupyterlab-git \
     dask_labextension && \
     conda clean --all -f -y && \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
-    rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
-    rm -rf /home/$NB_USER/.cache/yarn
+    jupyter lab clean && \
+    rm -rf "/home/${NB_USER}/.cache/yarn"
+    #fix-permissions "${CONDA_DIR}" && \
+    #fix-permissions "/home/${NB_USER}"
 
 EXPOSE 8888
 
+# Copy local files as late as possible to avoid cache busting
+COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 # Currently need to have both jupyter_notebook_config and jupyter_server_config to support classic and lab
-COPY jupyter_notebook_config.py /etc/jupyter/
+#COPY jupyter_notebook_config.py /etc/jupyter/
 
 # Fix permissions on /etc/jupyter as root
 USER root
 
 # Prepare upgrade to JupyterLab V3.0 #1205
 RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
-    /etc/jupyter/jupyter_notebook_config.py > /etc/jupyter/jupyter_server_config.py
-
-# Fix permissions on /etc/jupyter as root
-RUN fix-permissions /etc/jupyter/ && \
+    /etc/jupyter/jupyter_notebook_config.py > /etc/jupyter/jupyter_server_config.py && \
+    fix-permissions /etc/jupyter/  && \
     fix-permissions "$(dirname $CONDA_DIR)" && \
     fix-permissions "$(dirname $HOME)"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Update: 6.01.2021
+# Update: 7.06.2021
 # https://github.com/jupyter/docker-stacks/blob/master/minimal-notebook/Dockerfile
 
 # Install all OS dependencies for fully functional notebook server
-RUN apt-get update && apt-get install -yq --no-install-recommends \
-    build-essential \
-    gdb \
+RUN apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
     vim-tiny \
     git \
     inkscape \
@@ -134,6 +138,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     libxrender1 \
     lmodern \
     netcat \
+    openssh-client \
     # ---- nbconvert dependencies ----
     texlive-xetex \
     texlive-fonts-recommended \
@@ -141,11 +146,16 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     # ----
     tzdata \
     unzip \
-    nano-tiny \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    gdb \
+    nano-tiny && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create alternative for nano -> nano-tiny
+RUN update-alternatives --install /usr/bin/nano nano /bin/nano-tiny 10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-USER $NB_UID
+# Switch back to jovyan to avoid accidental container runs as root
+USER ${NB_UID}
 # Dask extention (looks like it is not available in the image)
 RUN pip install --no-cache-dir \
   jupyterlab_github
@@ -271,7 +281,8 @@ COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 
 USER $NB_UID
 WORKDIR $HOME
-ENTRYPOINT ["tini", "-g", "--"]
+#ENTRYPOINT ["tini", "-g", "--"]
+ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
 
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
 # Use bash login shell for entrypoint in order

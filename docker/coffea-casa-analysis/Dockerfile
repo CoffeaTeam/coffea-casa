@@ -28,21 +28,22 @@ ARG SERVICEX_TOKEN $SERVICEX_TOKEN
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
-RUN apt-get update \
-     && apt-get upgrade -y \
-     && apt-get install -yq --no-install-recommends \
-     procps \
-     vim \
-     wget \
-     sudo \
-     locales \
-     fonts-liberation \
-     gcc build-essential \
-     ceph-fuse \
-     && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
+    tini \
+    wget \
+    ca-certificates \
+    sudo \
+    locales \
+    fonts-liberation \
+    procps \
+    vim \
+    gcc build-essential \
+    run-one && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen
 
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-        locale-gen
 ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
@@ -51,20 +52,24 @@ ENV LC_ALL=en_US.UTF-8 \
 COPY fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
-# Create NB_USER with name cms-jovyan user with UID and in the 'users' group
+# Enable prompt color in the skeleton .bashrc before creating the default NB_USER
+# hadolint ignore=SC2016
+RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashrc && \
+   # Add call to conda init script see https://stackoverflow.com/a/58081608/4413446
+   echo 'eval "$(command conda shell.bash hook 2> /dev/null)"' >> /etc/skel/.bashrc
+
+# Create NB_USER with name jovyan user with UID=1000 and in the 'users' group
 # and make sure these dirs are writable by the `users` group.
 RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%admin/#%admin/' /etc/sudoers && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
-    useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
-    mkdir -p $CONDA_DIR && \
-    mkdir -p /etc/cmsaf-secrets && \
-    mkdir -p /var/lib/condor && \
-    chown -R $NB_UID:$NB_GID $CONDA_DIR && \
-    chown -R $NB_UID:$NB_GID $HOME && \
+    useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
+    mkdir -p "${CONDA_DIR}" && \
+    chown "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
+    chown "${NB_USER}:${NB_GID}" "${HOME}" && \
     chmod g+w /etc/passwd && \
-    fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
+    fix-permissions "${HOME}" && \
+    fix-permissions "${CONDA_DIR}"
 
 USER $NB_USER
 WORKDIR $HOME

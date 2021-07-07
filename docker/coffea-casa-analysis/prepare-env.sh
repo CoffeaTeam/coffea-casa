@@ -2,8 +2,6 @@
 
 set -x
 
-export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
-
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."
     /opt/conda/bin/conda install -y $EXTRA_CONDA_PACKAGES

@@ -2,8 +2,6 @@
 
 set -x
 
-export PYTHONPATH="$HOME/.local/lib/python3.8/site-packages:$PYTHONPATH"
-
 if [[ "$SERVICEX_HOST" ]]; then
     touch $HOME/.servicex
     echo "Tokens: generating ServiceX config file (available only from Jupyterhub notebook)"
