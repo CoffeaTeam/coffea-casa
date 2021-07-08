@@ -93,7 +93,7 @@ RUN conda install --quiet --yes \
     -c conda-forge \
     'notebook=6.4.0' \
     'jupyterhub=1.4.1' \
-    'jupyterlab=3.0.16' && \
+    'jupyterlab=3.0.16' \
     jupyterlab_widgets \
     jupyterlab-git \
     dask_labextension && \
@@ -101,9 +101,9 @@ RUN conda install --quiet --yes \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
     jupyter lab clean && \
-    rm -rf "/home/${NB_USER}/.cache/yarn" && \
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
+    rm -rf "/home/${NB_USER}/.cache/yarn"
+    #fix-permissions "${CONDA_DIR}" && \
+    #fix-permissions "/home/${NB_USER}"
 
 EXPOSE 8888
 
@@ -114,13 +114,6 @@ COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 
 # Fix permissions on /etc/jupyter as root
 USER root
-
-# Prepare upgrade to JupyterLab V3.0 #1205
-RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
-    /etc/jupyter/jupyter_notebook_config.py > /etc/jupyter/jupyter_server_config.py && \
-    fix-permissions /etc/jupyter/  && \
-    fix-permissions "$(dirname $CONDA_DIR)" && \
-    fix-permissions "$(dirname $HOME)"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Update: 7.06.2021
@@ -153,8 +146,7 @@ RUN apt-get update --yes && \
 RUN update-alternatives --install /usr/bin/nano nano /bin/nano-tiny 10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Switch back to cms-jovyan to avoid accidental container runs as root
-USER ${NB_UID}
+
 # Dask extention (looks like it is not available in the image)
 RUN pip install --no-cache-dir \
   jupyterlab_github
@@ -227,11 +219,6 @@ COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
 # WE NEED to overwrite installed files!
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
 
-# Fix permissions on /etc/jupyter as root
-RUN fix-permissions /etc/jupyter/ && \
-    fix-permissions "$(dirname $CONDA_DIR)" && \
-    fix-permissions "$(dirname $HOME)"
-
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
@@ -241,8 +228,7 @@ COPY config.d  /etc/condor/config.d/
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it
 RUN groupadd -r condor && \
-    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
-    groupadd $NB_GID && usermod -g $NB_GID $NB_USER
+    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 # Patching coffea sources (broken xrootd-authz-plugin with xrootd > 5.2.0)
 COPY coffea_xrd_source.patch /opt/conda/lib/python3.8/site-packages/
@@ -278,7 +264,8 @@ RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 # Copy local files as late as possible to avoid cache busting
 COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 
-USER $NB_UID
+# Switch back to cms-jovyan to avoid accidental container runs as root
+USER ${NB_UID}
 WORKDIR $HOME
 #ENTRYPOINT ["tini", "-g", "--"]
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
