@@ -71,8 +71,8 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
     useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
     mkdir -p "${CONDA_DIR}" && \
-    chown "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
-    chown "${NB_USER}:${NB_GID}" "${HOME}" && \
+    chown -R "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
+    chown -R "${NB_USER}:${NB_GID}" "${HOME}" && \
     chmod g+w /etc/passwd && \
     fix-permissions "${HOME}" && \
     fix-permissions "${CONDA_DIR}"
@@ -101,9 +101,9 @@ RUN conda install --quiet --yes \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
     jupyter lab clean && \
-    rm -rf "/home/${NB_USER}/.cache/yarn"
-    #fix-permissions "${CONDA_DIR}" && \
-    #fix-permissions "/home/${NB_USER}"
+    rm -rf "/home/${NB_USER}/.cache/yarn" && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
 
 EXPOSE 8888
 
@@ -242,7 +242,7 @@ COPY config.d  /etc/condor/config.d/
 # it configured from kubernetes side and updated in docker container to match it
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
-    groupadd ${NB_GID} && usermod -g ${NB_GID} $NB_USER
+    groupadd $NB_GID && usermod -g $NB_GID $NB_USER
 
 # Patching coffea sources (broken xrootd-authz-plugin with xrootd > 5.2.0)
 COPY coffea_xrd_source.patch /opt/conda/lib/python3.8/site-packages/

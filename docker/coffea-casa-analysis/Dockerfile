@@ -65,7 +65,7 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
     mkdir -p "${CONDA_DIR}" && \
     mkdir -p /etc/cmsaf-secrets && \
-+   mkdir -p /var/lib/condor && \
+    mkdir -p /var/lib/condor && \
     chown "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
     chown "${NB_USER}:${NB_GID}" "${HOME}" && \
     chmod g+w /etc/passwd && \
@@ -132,7 +132,7 @@ COPY config.d  /etc/condor/config.d/
 # it configured from kubernetes side and updated in docker container to match it
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor  && \
-    groupadd $NB_GID && usermod -g 0 $NB_USER
+    groupadd $NB_GID && usermod -g $NB_GID $NB_USER
 
 # Patching coffea sources (broken xrootd-authz-plugin with xrootd > 5.2.0)
 COPY coffea_xrd_source.patch /opt/conda/lib/python3.8/site-packages/
