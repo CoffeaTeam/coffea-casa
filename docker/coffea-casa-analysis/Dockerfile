@@ -92,6 +92,7 @@ RUN conda install --yes --freeze-installed \
     mplhep \
     iminuit \
     cmake \
+    uproot==4.0.11 \
     && conda clean --all -f -y \
     && conda build purge-all
 
@@ -133,9 +134,9 @@ COPY config.d  /etc/condor/config.d/
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
-# Patching coffea sources (broken xrootd-authz-plugin with xrootd > 5.2.0)
-COPY coffea_xrd_source.patch /opt/conda/lib/python3.8/site-packages/
-RUN cd /opt/conda/lib/python3.8/site-packages/ && patch -p1 < coffea_xrd_source.patch
+# Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
+COPY uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
+RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
 
 # xcache setup
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
