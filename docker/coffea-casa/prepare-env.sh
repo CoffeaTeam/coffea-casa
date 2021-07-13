@@ -9,6 +9,13 @@ if [[ "$SERVICEX_HOST" ]]; then
 api_endpoints:
   - endpoint: $SERVICEX_HOST
     type: uproot
+  - endpoint: $SERVICEX_HOST
+    type: cms_run1_aod
+backend_types:
+  - type: uproot
+    return_data: root
+  - type: cms_run1_aod
+    return_data: root
     " > $HOME/.servicex
 fi
 
