@@ -11,6 +11,9 @@ dependencies:
     import-values:
       - child: rbac
         parent: rbac
+  - name: servicex
+    version: "1.0.8"
+    repository: 'https://ssl-hep.github.io/ssl-helm-charts/'
 maintainers:
   - name: Oksana Shadura
     email: oksana.shadura@cern.ch
