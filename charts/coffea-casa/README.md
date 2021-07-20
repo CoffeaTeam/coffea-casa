@@ -44,7 +44,8 @@ $ helm upgrade --wait --install \
     coffea-casa coffea-casa/coffea-casa \
     --namespace=coffea-casa \
     --values=secrets.yaml \
-    --values=values.yaml
+    --values=jhub-values.yaml
+    --values=servicex-values.yaml
 ```
 
 The output explains how to find the IPs for your JupyterHub.
