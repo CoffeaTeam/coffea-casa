@@ -2,9 +2,7 @@ hub:
   config:
     Authenticator:
       admin_users:
-      - clundstedt@unl.edu
-      - garhan.attebury@unl.edu
-      - oksana.shadura@cern.ch
+      - coffea-casa-dev@cern.ch
     GenericOAuthenticator:
       login_service: CMS SSO
       token_url: https://cms-auth.web.cern.ch/token
@@ -38,12 +36,12 @@ hub:
     OAUTH_CLIENT_ID:
       valueFrom:
         secretKeyRef:
-          name: jhub-cms-auth
+          name: coffea-casa-secrets
           key: client_id
     OAUTH_CLIENT_SECRET:
       valueFrom:
         secretKeyRef:
-          name: jhub-cms-auth
+          name: coffea-casa-secrets
           key: client_secret
     OAUTH_CALLBACK_URL: https://cmsaf-jh.unl.edu/hub/oauth_callback
     DASK_BASE_DOMAIN: coffea.casa
