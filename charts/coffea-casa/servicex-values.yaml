@@ -1,0 +1,114 @@
+# Default values for servicex.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Enable deployment of Minio Object Store with this chart - use this if you
+# want to have the option of delivering results as parquet files
+objectStore:
+    enabled: true
+    publicURL: coffea-casa-minio:9000
+
+# Enable deployment of a full postgres sql database. This is advisable for
+# bigger clusters where there will be several workers hitting the database
+# at the same time. If not, the service will use sqlite
+postgres:
+    enabled: true
+
+# Settings for the Flask App
+app:
+  pullPolicy: Always
+  replicas: 1
+  validateTransformerImage: true
+
+  # If user provides DID that lacks a schema, route the requests to this
+  # particular DID Finder
+  defaultDIDFinderScheme: rucio
+  allowedDIDSchemes:
+    - rucio
+
+  # Specify an email address for the first admin user
+  adminEmail: oshadura@cern.ch
+
+  # JWT remains valid for 6 hours
+  tokenExpires: false
+  authExpires: 21600
+
+  # RabbitMQ can take up to one minute to start up. Simplify app startup by waiting for it
+  rabbitmq:
+    retries: 12
+    retry_interval: 10 # seconds
+  
+  auth: false
+
+  ingress:
+    enabled: false
+
+# Settings for the DID Finder
+# TODO: move 'T2_US_Nebraska' somewhere higher level coffea-casa settings.
+didFinder:
+  rucio:
+    pullPolicy: Always
+    rucio_host: http://cms-rucio.cern.ch
+    auth_host: https://cms-rucio-auth.cern.ch
+    threads: 5
+    site: T2_US_Nebraska
+  CERNOpenData:
+    enabled: true
+    pullPolicy: Always
+
+# Settings for the preflight checker - this usually uses the same image as
+# the transformer
+preflight:
+  pullPolicy: Always
+
+# Code Generator service
+codeGen:
+  enabled: true
+  pullPolicy: Always
+
+# Pull policy for the worker pods - the image and version are specified as
+# part of the transform request
+transformer:
+  autoscaler:
+    enabled: true
+    cpuScaleThreshold: 30
+    minReplicas: 1
+    maxReplicas: 20
+  pullPolicy: Always
+  cpuLimit: 1
+
+# x509 secrets
+# TODO: move 'vomsOrg' somewhere higher level coffea-casa settings.
+x509Secrets:
+  pullPolicy: Always
+  vomsOrg: cms
+
+# Values for the RabbitMQ Chart
+rabbitmq:
+  persistence:
+    enabled: true
+    storageClass: rook-ceph-block
+  auth:
+    # FIXME: stupid bug in rabbitmq - 'auth.erlangCookie' must not be empty,
+    # please add '--set auth.erlangCookie=$RABBITMQ_ERLANG_COOKIE' to the command. See next:
+    # export RABBITMQ_ERLANG_COOKIE=$(kubectl get secret --namespace cmsaf-dev cmsaf-servicex-rabbitmq -o jsonpath="{.data.rabbitmq-erlang-cookie}" | base64 --decode)
+    erlangCookie: EQLVnQy6FVQyjhf3bGVXS6Ft6T2OSiYD
+
+# Values for the Postgresql Chart
+postgresql:
+  persistence:
+    enabled: true
+    storageClass: rook-ceph-block
+
+# Values for Minio Chart
+minio:
+  persistence:
+    enabled: true
+    storageClass: rook-ceph-block
+  ingress:
+    enabled: true
+
+###### Settings for Authenticating with the CERN Infrastructure #######
+# TODO: move 'gridAccount' somewhere higher level coffea-casa settings.
+gridAccount: clundst
+rbacEnabled: True
