@@ -7,14 +7,16 @@ kind: Role
 metadata:
   name: hub-traefik
   namespace: {{ .Release.Namespace }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: hub-traefik
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
 rules:
-- apiGroups:
-  - traefik.containo.us
+- apiGroups: ["traefik.containo.us"]
   resources:
   - ingressroutetcps
-  verbs:
-  - list
-  - patch
+  verbs: ["get", "list"]
 
 # Give the hub the role to manage ingressroutetcps for dask
 ---
@@ -23,6 +25,11 @@ kind: RoleBinding
 metadata:
   name: hub-traefik
   namespace: {{ .Release.Namespace }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: hub-traefik
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
