@@ -84,26 +84,23 @@ proxy:
   https:
     enabled: true
     hosts:
-      - cmsaf-jh.unl.edu
-      - coffea.casa
+      - << add here domain (e.g. coffea.casa) >>
     letsencrypt:
-      contactEmail: cms-support@cse.unl.edu
+      contactEmail: << add here email >>
   service:
     type: LoadBalancer
     nodePorts:
-      http:
       https:
-    loadBalancerIP: 129.93.183.32
-
+    loadBalancerIP: << add here load balancer IP >>
 
 singleuser:
   networkPolicy:
     enabled: false
   spec:
     securityContext:
-      runAsUser: 6440
-  uid: 6440
-  gid: 11265
+      runAsUser: << add here user UID of condor user >>
+  uid:  << add here user UID of condor user >>
+  gid:  << add here user GUID of condor user >>
   extraLabels:
     jhub_user: '{username}'
   lifecycleHooks:
@@ -121,16 +118,16 @@ singleuser:
       XCACHE_HOST: "red-xcache1.unl.edu"
   defaultUrl: "/lab"
   extraEnv:
-    SERVICEX_HOST: https://cmsaf-servicex.servicex.coffea.casa
+    SERVICEX_HOST: http://coffea-casa-servicex-app:8000
   profileList:
     - display_name: "Coffea Base Image"
-      description: "HATS2021 Coffea-casa image with coffea 0.7.2/dask/condor and cheese"
+      description: "HATS2021 Coffea-casa image with coffea 0.7.5/dask/condor and cheese"
       kubespawner_override:
-        image: coffeateam/coffea-casa:2021.05.06post13
+        image: coffeateam/coffea-casa:2021.07.13
         imagePullPolicy: Always
         securityContext:
-          runAsUser: 6440
-          runAsGroup: 11265
+          runAsUser: << add here user UID of condor user >>
+          runAsGroup: << add here user GUID of condor user >>
           allowPrivilegeEscalation: False
           RunAsNonRoot: true
       default: true
@@ -139,10 +136,10 @@ singleuser:
     volumeMounts:
     - mountPath: /etc/cmsaf-secrets
       name: cmsaf-secrets
-    image: coffeateam/coffea-casa-analysis:2021.05.06post13
+    image: coffeateam/coffea-casa-analysis:2021.07.13
     securityContext:
-      runAsUser: 6440
-      runAsGroup: 11265
+      runAsUser: << add here user UID of condor user >>
+      runAsGroup: << add here user UID of condor user >>
       runAsNonRoot: True
     resources:
       limits:

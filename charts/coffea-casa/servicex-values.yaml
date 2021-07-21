@@ -26,9 +26,6 @@ app:
   allowedDIDSchemes:
     - rucio
 
-  # Specify an email address for the first admin user
-  adminEmail: oshadura@cern.ch
-
   # JWT remains valid for 6 hours
   tokenExpires: false
   authExpires: 21600
