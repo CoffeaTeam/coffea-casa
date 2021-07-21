@@ -32,7 +32,6 @@ hub:
   extraEnv:
     OAUTH2_AUTHORIZE_URL: https://cms-auth.web.cern.ch/authorize
     OAUTH2_TOKEN_URL: https://cms-auth.web.cern.ch/token
-    OAUTH_CALLBACK_URL: https://cmsaf-jh.unl.edu/hub/oauth_callback
     OAUTH_CLIENT_ID:
       valueFrom:
         secretKeyRef:
@@ -44,9 +43,7 @@ hub:
           name: coffea-casa-secrets
           key: client_secret
     OAUTH_CALLBACK_URL: https://cmsaf-jh.unl.edu/hub/oauth_callback
-    DASK_BASE_DOMAIN: coffea.casa
-    OAUTH_CALLBACK_URL: https://cmsaf-jh.unl.edu/hub/oauth_callback
-    DASK_BASE_DOMAIN: coffea.casa
+    DASK_BASE_DOMAIN: coffea-opendata.casa
   extraVolumeMounts:
   - name: custom-templates
     mountPath: /etc/jupyterhub/custom
@@ -84,8 +81,7 @@ proxy:
   https:
     enabled: true
     hosts:
-      - cmsaf-jh.unl.edu
-      - coffea.casa
+      - coffea-opendata.casa
     letsencrypt:
       contactEmail: cms-support@cse.unl.edu
   service:
@@ -121,12 +117,12 @@ singleuser:
       XCACHE_HOST: "red-xcache1.unl.edu"
   defaultUrl: "/lab"
   extraEnv:
-    SERVICEX_HOST: https://cmsaf-servicex.servicex.coffea.casa
+    SERVICEX_HOST: http://coffea-casa-servicex-app:8000
   profileList:
     - display_name: "Coffea Base Image"
       description: "HATS2021 Coffea-casa image with coffea 0.7.2/dask/condor and cheese"
       kubespawner_override:
-        image: coffeateam/coffea-casa:2021.05.06post13
+        image: coffeateam/coffea-casa:2021.07.13
         imagePullPolicy: Always
         securityContext:
           runAsUser: 6440
@@ -139,7 +135,7 @@ singleuser:
     volumeMounts:
     - mountPath: /etc/cmsaf-secrets
       name: cmsaf-secrets
-    image: coffeateam/coffea-casa-analysis:2021.05.06post13
+    image: coffeateam/coffea-casa-analysis:2021.07.13
     securityContext:
       runAsUser: 6440
       runAsGroup: 11265
