@@ -29,6 +29,16 @@ hub:
       volumeMounts:
         - name: custom-templates
           mountPath: /etc/jupyterhub/custom
+  networkPolicy:
+    enabled: false
+  readinessProbe:
+    periodSeconds: 10
+  db:
+    pvc:
+      storageClassName: rook-ceph-block
+  image:
+    name: carljetter/k8s-hub
+    tag: '0.2.0'   
   extraEnv:
     OAUTH2_AUTHORIZE_URL: https://cms-auth.web.cern.ch/authorize
     OAUTH2_TOKEN_URL: https://cms-auth.web.cern.ch/token
