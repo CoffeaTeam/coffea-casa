@@ -13,7 +13,7 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.07.21"
+ARG TAG="2021.7.21post0"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
