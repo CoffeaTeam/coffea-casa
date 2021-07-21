@@ -29,8 +29,7 @@ jobs:
       - name: Publish Helm charts
         uses: stefanprodan/helm-gh-pages@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          charts_dir: "coffea-casa-charts"
+          token: ${{ secrets.GH_TOKEN }}
+          charts_dir: "charts"
           charts_url: https://coffeateam.github.io/coffea-casa/
           linting: "off"
-          chart_version: ${{ steps.get_version.outputs.VERSION }}
