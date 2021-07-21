@@ -12,8 +12,11 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
+# Tag
+ARG TAG="2021.07.13"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
+ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
 
@@ -28,10 +31,11 @@ ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
-# Configure ServiceX
+ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
-ARG BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
-ARG SERVICEX_TOKEN $SERVICEX_TOKEN
+ENV CERT_DIR $CERT_DIR
+ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
+ENV SERVICEX_TOKEN $SERVICEX_TOKEN
      
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
