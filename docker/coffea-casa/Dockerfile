@@ -1,6 +1,5 @@
 FROM coffeateam/coffea-dask:0.7.5-g09cdb89
 
-# Update: 6.01.2021
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
 # Fix DL4006
@@ -203,6 +202,7 @@ RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1b7 \
     cabinetry \
     pyyaml
 
+# FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 RUN pip install --ignore-installed --no-cache-dir \
@@ -222,13 +222,16 @@ RUN cd /tmp && \
     make install
 
 USER root
+# FIXME: too many files and a lot of hacks! (oshadura)
 # Dask setup - > dask.yml
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
 # WE NEED to overwrite installed files!
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
+RUN sed -i -e "s|latest|${TAG}|g" /etc/dask/jobqueue-coffea-casa.yaml && sed -i -e "s|latest|${TAG}|g" $HOME/.config/dask/jobqueue-coffea-casa.yaml
 
+# FIXME: too many files and a lot of UNL hacks! (oshadura)
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
@@ -240,6 +243,7 @@ COPY config.d  /etc/condor/config.d/
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
+# FIXME: xrootd/xrd-authz-plugin hack! (oshadura)
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
 COPY uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
 RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
