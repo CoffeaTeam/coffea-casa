@@ -47,6 +47,8 @@ in the same directory as the `secrets.yaml` file.
 
 kubeseal -o yaml -n coffea-casa --cert ~/kubeseal-cert/kubeseal.pem < coffea-casa/secrets.yaml > jhub-secrets.yaml
 
+kubectl create -f jhub-secrets.yaml
+
 ```
 
 * Run Helm command:
