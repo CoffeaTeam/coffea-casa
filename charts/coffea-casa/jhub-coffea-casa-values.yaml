@@ -55,25 +55,7 @@ jupyterhub:
             key: client_secret
       OAUTH_CALLBACK_URL: https://cmsaf-jh.unl.edu/hub/oauth_callback
       DASK_BASE_DOMAIN: coffea-opendata.casa
-    extraVolumeMounts:
-    - name: custom-templates
-      mountPath: /etc/jupyterhub/custom
-    - name: hub-config-d
-      mountPath: /usr/local/etc/jupyterhub/auth.py
-      subPath: auth.py
-    - name: hub-config-d
-      mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
-      subPath: secret_creation_hook.py
-    extraVolumes:
-    - name: custom-templates
-      emptyDir: {}
-    - name: hub-config-d
-      configMap:
-        name: hub-config-d
-    extraConfig:
-      templates: |
-        c.JupyterHub.template_paths = ['/etc/jupyterhub/custom/']
-    
+
   proxy:
     chp:
       livenessProbe:
