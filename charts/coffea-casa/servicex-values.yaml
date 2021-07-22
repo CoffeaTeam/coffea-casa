@@ -85,11 +85,6 @@ rabbitmq:
   persistence:
     enabled: true
     storageClass: rook-ceph-block
-  auth:
-    # FIXME: stupid bug in rabbitmq - 'auth.erlangCookie' must not be empty,
-    # please add '--set auth.erlangCookie=$RABBITMQ_ERLANG_COOKIE' to the command. See next:
-    # export RABBITMQ_ERLANG_COOKIE=$(kubectl get secret --namespace cmsaf-dev cmsaf-servicex-rabbitmq -o jsonpath="{.data.rabbitmq-erlang-cookie}" | base64 --decode)
-    erlangCookie: EQLVnQy6FVQyjhf3bGVXS6Ft6T2OSiYD
 
 # Values for the Postgresql Chart
 postgresql:
