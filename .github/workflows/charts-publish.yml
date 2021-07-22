@@ -33,3 +33,4 @@ jobs:
           charts_dir: "charts"
           charts_url: https://coffeateam.github.io/coffea-casa/
           linting: "off"
+          chart_version: ${{ steps.get_version.outputs.VERSION }}
