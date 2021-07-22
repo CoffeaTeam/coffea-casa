@@ -130,9 +130,9 @@ singleuser:
     SERVICEX_HOST: http://coffea-casa-servicex-app:8000
   profileList:
     - display_name: "Coffea Base Image"
-      description: "HATS2021 Coffea-casa image with coffea 0.7.2/dask/condor and cheese"
+      description: "Coffea-casa image with coffea 0.7.5/dask/condor and cheese"
       kubespawner_override:
-        image: coffeateam/coffea-casa:2021.07.13
+        image: coffeateam/coffea-casa:2021.07.22
         imagePullPolicy: Always
         securityContext:
           runAsUser: 6440
@@ -145,7 +145,7 @@ singleuser:
     volumeMounts:
     - mountPath: /etc/cmsaf-secrets
       name: cmsaf-secrets
-    image: coffeateam/coffea-casa-analysis:2021.07.13
+    image: coffeateam/coffea-casa-analysis:2021.07.22
     securityContext:
       runAsUser: 6440
       runAsGroup: 11265

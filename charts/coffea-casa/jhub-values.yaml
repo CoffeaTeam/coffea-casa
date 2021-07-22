@@ -123,7 +123,7 @@ singleuser:
     - display_name: "Coffea Base Image"
       description: "HATS2021 Coffea-casa image with coffea 0.7.5/dask/condor and cheese"
       kubespawner_override:
-        image: coffeateam/coffea-casa:2021.07.13
+        image: coffeateam/coffea-casa:2021.07.22
         imagePullPolicy: Always
         securityContext:
           runAsUser: << add here user UID of condor user >>
@@ -136,7 +136,7 @@ singleuser:
     volumeMounts:
     - mountPath: /etc/cmsaf-secrets
       name: cmsaf-secrets
-    image: coffeateam/coffea-casa-analysis:2021.07.13
+    image: coffeateam/coffea-casa-analysis:2021.07.22
     securityContext:
       runAsUser: << add here user UID of condor user >>
       runAsGroup: << add here user UID of condor user >>
