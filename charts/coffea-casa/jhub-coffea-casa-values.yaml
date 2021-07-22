@@ -99,7 +99,7 @@ proxy:
     nodePorts:
       http:
       https:
-    loadBalancerIP: 129.93.183.32
+    loadBalancerIP: 129.93.183.34
 
 
 singleuser:
