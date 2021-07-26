@@ -31,7 +31,6 @@ data:
   condor-token: <<condor-token>>
   client_id: <<CMS OIDC - OAUTH_CLIENT_ID>>
   client_secret: <<CMS OIDC - OAUTH_CLIENT_SECRET>>
-  erlangCookie: <<ServiceX Erlang Cookie>>
 ```
 
 ## Install Coffea-Casa
