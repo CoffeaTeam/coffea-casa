@@ -67,7 +67,7 @@ $ kubectl -n coffea-casa get service proxy-public
 ```
 
 
-## Configuration
+## Configuration (currently placeholder - TBD)
 
 The following table lists the configurable parameters of the Daskhub chart and their default values.
 
