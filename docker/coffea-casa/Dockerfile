@@ -12,7 +12,7 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.07.28"
+ARG TAG="2021.07.28-1"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
