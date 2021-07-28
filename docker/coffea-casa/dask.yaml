@@ -10,16 +10,16 @@ distributed:
 
     tls:
       ciphers: null   # Allowed ciphers, specified as an OpenSSL cipher string.
-      ca-file: "{CERT_DIR}/ca.pem"   # Path to a CA file, in pem format, optional
+      ca-file: "/etc/cmsaf-secrets/ca.pem"   # Path to a CA file, in pem format, optional
       scheduler:
-        cert: "{CERT_DIR}/hostcert.pem"    # Path to certificate file for scheduler.
-        key: "{CERT_DIR}/hostcert.pem"     # Path to key file for scheduler.
+        cert: "/etc/cmsaf-secrets/hostcert.pem"    # Path to certificate file for scheduler.
+        key: "/etc/cmsaf-secrets/hostcert.pem"     # Path to key file for scheduler.
       worker:
         key: null
         cert: null
       client:
-        key: "{CERT_DIR}/hostcert.pem"  # Path to certificate file for client.
-        cert: "{CERT_DIR}/hostcert.pem"  # Path to key file for client.
+        key: "/etc/cmsaf-secrets/hostcert.pem"  # Path to certificate file for client.
+        cert: "/etc/cmsaf-secrets/hostcert.pem"  # Path to key file for client.
 
   dashboard:
     link: "/user/{JUPYTERHUB_USER}/proxy/{port}/status"

@@ -15,7 +15,6 @@ ARG NB_GID="11265"
 ARG TAG="2021.07.28"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
-ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
 
@@ -32,7 +31,6 @@ ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
 ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
-ENV CERT_DIR $CERT_DIR
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV SERVICEX_TOKEN $SERVICEX_TOKEN
      
