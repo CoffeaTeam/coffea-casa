@@ -15,8 +15,14 @@ ARG NB_GID="11265"
 ARG TAG="2021.07.28-1"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
+ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
+# Condor settings
+ARG CONDOR_HOST="red-condor.unl.edu"
+ARG COLLECTOR_NAME="Nebraska T2"
+ARG UID_DOMAIN="unl.edu"
+ARG CONDOR_HOST="t3.unl.edu"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -33,6 +39,11 @@ ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV SERVICEX_TOKEN $SERVICEX_TOKEN
+ENV CERT_DIR $CERT_DIR
+ENV CONDOR_HOST $CONDOR_HOST
+ENV COLLECTOR_NAME $COLLECTOR_NAME
+ENV UID_DOMAIN $UID_DOMAIN
+ENV CONDOR_HOST $CONDOR_HOST
      
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
@@ -228,12 +239,18 @@ COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
 # WE NEED to overwrite installed files!
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
 RUN sed -i -e "s|latest|${TAG}|g" /etc/dask/jobqueue-coffea-casa.yaml && sed -i -e "s|latest|${TAG}|g" $HOME/.config/dask/jobqueue-coffea-casa.yaml
+RUN sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" /etc/dask/dask.yaml
+
 
 # FIXME: too many files and a lot of UNL hacks! (oshadura)
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
 COPY config.d  /etc/condor/config.d/
+RUN sed -i -e "s|CONDOR_HOST = red-condor.unl.edu|CONDOR_HOST = ${CONDOR_HOST}|g" /etc/condor/config.d/99-coffea-condor-master-config && \
+    sed -i -e "s|COLLECTOR_NAME = Nebraska T2|COLLECTOR_NAME = ${COLLECTOR_NAME}|g" /etc/condor/config.d/99-coffea-condor-master-config && \
+    sed -i -e "s|UID_DOMAIN = unl.edu|UID_DOMAIN = ${UID_DOMAIN}|g" /etc/condor/config.d/99-coffea-condor-master-config && \
+    sed -i -e "s|SCHEDD_HOST = t3.unl.edu|SCHEDD_HOST = ${SCHEDD_HOST}|g" /etc/condor/config.d/99-coffea-condor-master-config
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
