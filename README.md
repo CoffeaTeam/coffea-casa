@@ -39,14 +39,14 @@ Docker images used for Coffea-casa
 
 Latest ![DockerHub Images](https://hub.docker.com/orgs/coffeateam/repositories):
 
-| Image           | Description                                   |  Size | Pulls | Version | Layers |
+| Image           | Description                                   |  Size | Pulls | Version |
 |-----------------|-----------------------------------------------|--------------|-------------|-------------|
 | coffea-casa     | Dask scheduler image for coffea-casa hub            | ![](https://img.shields.io/docker/image-size/coffeateam/coffea-casa?sort=date) | ![](https://img.shields.io/docker/pulls/coffeateam/coffea-casa?sort=date) | ![](https://img.shields.io/docker/v/coffeateam/coffea-casa?sort=date))
 | coffea-casa-analysis | Dask worker image for coffea-casa hub    | ![](https://img.shields.io/docker/image-size/coffeateam/coffea-casa-analysis?sort=date) | ![](https://img.shields.io/docker/pulls/coffeateam/coffea-casa-analysis?sort=date) | ![](https://img.shields.io/docker/v/coffeateam/coffea-casa-analysis?sort=date)
 
 
 Helm charts, `coffea_casa` package and Docker image tags
-============
+-----------------
 
 This repository uses GitHub Actions to build images, run tests, and push charts, python package to PyPI and images to DockerHub (Docker images, charts and python package tags are syncronised with Coffea-casa releases).
 
@@ -64,9 +64,11 @@ How to tag
 
 A list of "must" steps to do before to tag:
 
-1. Change a `$TAG` value for `coffeateam/coffea-casa:x.x.x` and `coffeateam/coffea-casa-analysis:x.x.x`: see https://github.com/CoffeaTeam/coffea-casa/blob/master/docker/coffea-casa/Dockerfile and https://github.com/CoffeaTeam/coffea-casa/blob/master/docker/coffea-casa-analysis/Dockerfile
+1. Tag Docker images `coffeateam/coffea-casa:x.x.x` and `coffeateam/coffea-casa-analysis:x.x.x` changing `$TAG` value in https://github.com/CoffeaTeam/coffea-casa/blob/master/docker/coffea-casa/Dockerfile and https://github.com/CoffeaTeam/coffea-casa/blob/master/docker/coffea-casa-analysis/Dockerfile
 
-2. Change Helm Chart's tag in Charts.yaml file: `appVersion: 2021.07.28-1` (see https://github.com/CoffeaTeam/coffea-casa/blob/master/charts/coffea-casa/Chart.yaml)
+2. Tag Helm Chart's changing `$appVersion` value in Charts.yaml file in see https://github.com/CoffeaTeam/coffea-casa/blob/master/charts/coffea-casa/Chart.yaml
+
+3. Add new tag: https://github.com/CoffeaTeam/coffea-casa/releases
 
 
 Please note we are using ![date-based versioning](https://calver.org/) for Coffea-casa Docker images, Helm charts and Pypi module.
