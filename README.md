@@ -40,19 +40,36 @@ Docker images used for Coffea-casa
 Latest ![DockerHub Images](https://hub.docker.com/orgs/coffeateam/repositories):
 
 | Image           | Description                                   |  Size | Pulls | Version | Layers |
-|-----------------|-----------------------------------------------|--------------|-------------|-------------|-------------|
-| coffea-casa     | Dask scheduler image for coffea-casa hub            | ![](https://img.shields.io/docker/image-size/coffeateam/coffea-casa?sort=date) | ![](https://img.shields.io/docker/pulls/coffeateam/coffea-casa?sort=date) | ![](https://img.shields.io/docker/v/coffeateam/coffea-casa?sort=date) | ![](https://img.shields.io/microbadger/layers/coffeateam/coffea-casa)
-| coffea-casa-analysis | Dask worker image for coffea-casa hub    | ![](https://img.shields.io/docker/image-size/coffeateam/coffea-casa-analysis?sort=date) | ![](https://img.shields.io/docker/pulls/coffeateam/coffea-casa-analysis?sort=date) | ![](https://img.shields.io/docker/v/coffeateam/coffea-casa-analysis?sort=date) | ![](https://img.shields.io/microbadger/layers/coffeateam/coffea-casa-analysis)
+|-----------------|-----------------------------------------------|--------------|-------------|-------------|
+| coffea-casa     | Dask scheduler image for coffea-casa hub            | ![](https://img.shields.io/docker/image-size/coffeateam/coffea-casa?sort=date) | ![](https://img.shields.io/docker/pulls/coffeateam/coffea-casa?sort=date) | ![](https://img.shields.io/docker/v/coffeateam/coffea-casa?sort=date))
+| coffea-casa-analysis | Dask worker image for coffea-casa hub    | ![](https://img.shields.io/docker/image-size/coffeateam/coffea-casa-analysis?sort=date) | ![](https://img.shields.io/docker/pulls/coffeateam/coffea-casa-analysis?sort=date) | ![](https://img.shields.io/docker/v/coffeateam/coffea-casa-analysis?sort=date)
 
 
-Image tagging and "continuous building"
+Helm charts, `coffea_casa` package and Docker image tags
+============
+
+This repository uses GitHub Actions to build images, run tests, and push charts, python package to PyPI and images to DockerHub (Docker images, charts and python package tags are syncronised with Coffea-casa releases).
+
+1. Tags pushed to GitHub trigger Docker image published with corresponding tags on Dockerhub: `coffeateam/coffea-casa:x.x.x` and `coffeateam/coffea-casa-analysis:x.x.x`.
+Tags pushed to GitHub as well trigger Docker image published with corresponding tags on Openscience Harbor Registry: `hub.opensciencegrid.org/coffea-casa:x.x.x` and `hub.opensciencegrid.org/coffea-casa-analysis:x.x.x`. 
+The `latest` tag in both cases also corresponds to the most recent GitHub tag.
+
+2. Tags pushed to GitHub trigger Helm charts releases with corresponding Helm Chart tag and with charts published to https://coffeateam.github.io/coffea-casa.
+
+3. Tags pushed to GitHub will push `coffea_casa` python package to PyPI (same as a tag).
+
+
+How to tag
 -----------------
 
-This repository uses GitHub Actions to build images, run tests, and push images to DockerHub (Docker image tags are syncronised with Coffea-casa releases).
+A list of "must" steps to do before to tag:
 
-1. Tags pushed to GitHub represent "production" releases with corresponding tags on dockerhub `coffeateam/coffea-casa:x.x.x` and `coffeateam/coffea-casa-analysis:x.x.x`. The latest tag also corresponds to the most recent GitHub tag.
+1. Change a `$TAG` value for `coffeateam/coffea-casa:x.x.x` and `coffeateam/coffea-casa-analysis:x.x.x`: see https://github.com/CoffeaTeam/coffea-casa/blob/master/docker/coffea-casa/Dockerfile and https://github.com/CoffeaTeam/coffea-casa/blob/master/docker/coffea-casa-analysis/Dockerfile
 
-Please note we are using ![date-based versioning](https://calver.org/) for Coffea-casa Docker images and Pypi module.
+2. Change Helm Chart's tag in Charts.yaml file: `appVersion: 2021.07.28-1` (see https://github.com/CoffeaTeam/coffea-casa/blob/master/charts/coffea-casa/Chart.yaml)
+
+
+Please note we are using ![date-based versioning](https://calver.org/) for Coffea-casa Docker images, Helm charts and Pypi module.
 
 
 References
