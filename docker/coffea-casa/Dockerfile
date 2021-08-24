@@ -207,7 +207,7 @@ RUN conda install --yes --freeze-installed \
     cmake \
     uproot==4.0.11
 
-RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1.2b1 \
+RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1.1 \
     correctionlib \
     cabinetry \
     pyyaml
