@@ -104,9 +104,9 @@ RUN mkdir "/home/${NB_USER}/work" && \
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
     -c conda-forge \
-    'notebook=6.4.0' \
-    'jupyterhub=1.4.1' \
-    'jupyterlab=3.0.16' \
+    'notebook' \
+    'jupyterhub' \
+    'jupyterlab' \
     jupyterlab_widgets \
     jupyterlab-git \
     dask_labextension && \
