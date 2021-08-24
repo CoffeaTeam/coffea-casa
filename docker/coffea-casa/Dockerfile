@@ -18,6 +18,7 @@ ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
+ARG SERVICEX=""
 # Condor settings
 ARG CONDOR_HOST="red-condor.unl.edu"
 ARG COLLECTOR_NAME="Nebraska T2"
@@ -206,7 +207,7 @@ RUN conda install --yes --freeze-installed \
     cmake \
     uproot==4.0.11
 
-RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1b7 \
+RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1.2b1 \
     correctionlib \
     cabinetry \
     pyyaml
