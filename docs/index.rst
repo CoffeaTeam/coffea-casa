@@ -49,6 +49,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    cc_user.rst
    cc_packages.rst
    cc_metrics.rst
+   cc_condor.rst
    cc_issues.rst
 
 .. toctree::
