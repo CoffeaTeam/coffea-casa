@@ -2,7 +2,7 @@ Interfacing With HTCondor Workers
 =========
 Locating Workers
 -----
-Dask deploys workers through HTCondor. Information about these workers can be located through the terminal using the ``condor_q`` command. This will display information about all workers which have run on coffea-casa, but you can typically find your workers by approximating their starting time and date.
+Dask deploys workers through HTCondor. Information about these workers can be located through the terminal using the ``condor_q`` command. This will display information about all workers which have run on coffea-casa, but you can typically find your workers by approximating their starting time and date. For a more reliable method, you can run the command ``condor_q -af:h Owner JobStartDate JobId DaskSchedulerAddress | grep -E "(username|Owner)"`` where ``username`` is replaced by your coffea-casa username. This username is identical to the name in your terminal command line which follows ``cms-jovyan@jupyter`` (e.g. ``cms-jovyan@jupyter-matousadamec-40gmail-2ecom:~$`` has username matousadamec-40gmail-2ecom).
 
 Accessing Workers
 -----
