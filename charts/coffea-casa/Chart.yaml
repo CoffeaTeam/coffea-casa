@@ -2,7 +2,7 @@ apiVersion: v2
 name: coffea-casa
 icon: https://iris-hep.org/assets/logos/coffea-casa.png
 version: 0.0.1-set.by.chartpress
-appVersion: 2021.08.25
+appVersion: 2021.08.26
 description: Multi-user JupyterHub/Dask/Coffea deployment.
 dependencies:
   - name: jupyterhub
