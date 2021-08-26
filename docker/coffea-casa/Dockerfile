@@ -23,7 +23,7 @@ ARG SERVICEX=""
 ARG CONDOR_HOST="red-condor.unl.edu"
 ARG COLLECTOR_NAME="Nebraska T2"
 ARG UID_DOMAIN="unl.edu"
-ARG CONDOR_HOST="t3.unl.edu"
+ARG SCHEDD_HOST="t3.unl.edu"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -44,7 +44,7 @@ ENV CERT_DIR $CERT_DIR
 ENV CONDOR_HOST $CONDOR_HOST
 ENV COLLECTOR_NAME $COLLECTOR_NAME
 ENV UID_DOMAIN $UID_DOMAIN
-ENV CONDOR_HOST $CONDOR_HOST
+ENV SCHEDD_HOST $SCHEDD_HOST
      
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
