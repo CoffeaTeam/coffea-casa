@@ -204,8 +204,7 @@ RUN conda install --yes --freeze-installed \
     hist \
     mplhep \
     iminuit \
-    cmake \
-    uproot==4.0.11
+    cmake
 
 RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1.1 \
     correctionlib \
