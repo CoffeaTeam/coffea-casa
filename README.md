@@ -1,4 +1,4 @@
-Coffea-casa - A Prototype of an analysis facility for Columnar Object Framework For Effective Analysis
+Coffea-casa - A Prototype of an Analysis Facility for Columnar Object Framework For Effective Analysis
 =========================================================
 
 [![Actions Status][actions-badge]][actions-link]
