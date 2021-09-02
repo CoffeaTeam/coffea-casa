@@ -1,11 +1,11 @@
---- reading.py	2021-07-09 14:09:34.000000000 +0200
-+++ reading_patched.py	2021-07-09 14:09:31.000000000 +0200
-@@ -164,7 +164,7 @@
+--- reading.py	2021-09-02 12:23:09.000000000 +0200
++++ reading.py.original	2021-09-02 12:22:24.000000000 +0200
+@@ -178,7 +178,7 @@
+                 warnings.warn(message, FutureWarning)
  
- open.defaults = {
-     "file_handler": uproot.source.file.MemmapSource,
--    "xrootd_handler": uproot.source.xrootd.XRootDSource,
-+    "xrootd_handler": uproot.source.xrootd.MultithreadedXRootDSource,
-     "http_handler": uproot.source.http.HTTPSource,
-     "object_handler": uproot.source.object.ObjectSource,
-     "timeout": 30,
+             # The key should still be set, regardless of whether we see the warning.
+-            self["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
++            self["xrootd_handler"] = uproot.source.xrootd.XRootDSource
+ 
+         return dict.__getitem__(self, where)
+ 
