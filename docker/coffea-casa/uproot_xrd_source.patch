@@ -1,11 +1,11 @@
---- reading.py	2021-09-02 12:23:09.000000000 +0200
-+++ reading.py.original	2021-09-02 12:22:24.000000000 +0200
+--- reading.py	2021-09-02 12:24:25.000000000 +0200
++++ reading.py.patch	2021-09-06 13:08:09.000000000 +0200
 @@ -178,7 +178,7 @@
                  warnings.warn(message, FutureWarning)
  
              # The key should still be set, regardless of whether we see the warning.
--            self["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
-+            self["xrootd_handler"] = uproot.source.xrootd.XRootDSource
+-            self["xrootd_handler"] = uproot.source.xrootd.XRootDSource
++            self["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
  
          return dict.__getitem__(self, where)
  
