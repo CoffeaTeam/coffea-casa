@@ -12,7 +12,7 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.09.06"
+ARG TAG="2021.09.10"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -206,7 +206,8 @@ RUN conda install --yes --freeze-installed \
     iminuit \
     cmake
 
-RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1.1 \
+RUN pip install --no-cache-dir servicex-clients \
+    func_adl_servicex \
     correctionlib \
     cabinetry \
     pyyaml

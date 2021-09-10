@@ -7,19 +7,15 @@ if [[ "$SERVICEX_HOST" ]]; then
     echo "Tokens: generating ServiceX config file (available only from Jupyterhub notebook)"
     echo "
 api_endpoints:
-  - endpoint: $SERVICEX_HOST
+  - name: uproot
+    endpoint: $SERVICEX_HOST
     type: uproot
-  - endpoint: $SERVICEX_HOST
+  - name: cms_run1_aod
+    endpoint: $SERVICEX_HOST
     type: cms_run1_aod
-  - endpoint: $SERVICEX_HOST
+  - name: open_uproot
+    endpoint: $SERVICEX_HOST
     type: open_uproot
-backend_types:
-  - type: uproot
-    return_data: root
-  - type: cms_run1_aod
-    return_data: root
-  - type: open_uproot
-    return_data: root
     " > $HOME/.servicex
 fi
 
