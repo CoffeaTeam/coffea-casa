@@ -1,5 +1,14 @@
 Troubleshooting Common Issues
 =========
+In general, it is advised that you restart your coffea-casa server before doing further troubleshooting, so that you can ensure your instance is up-to-date. You can do this by going into the File menu, accessing the Hub Control Panel, and pressing the big red "Stop My Server" button.
+
+.. image:: _static/coffea-casa-server_stop.png
+   :alt: A demonstration of the "Stop My Server" button.
+   :width: 50%
+   :align: center
+
+After the server is shut down, you will get a series of linear prompts to start it back up again. If the problem persists, then it's time for a deeper investigation!
+
 Accessibility Issues
 -----
 **The coffea-casa server won't load, I get an error when trying to access the page, or I'm told there are certificate issues.**
