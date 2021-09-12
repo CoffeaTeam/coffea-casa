@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.5-g09cdb89
+FROM coffeateam/coffea-dask:0.7.7-fastjet-3.3.4.0rc9-ge1f2d1f
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -12,17 +12,18 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.07.28-1"
+ARG TAG="2021.09.10"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
+ARG SERVICEX=""
 # Condor settings
 ARG CONDOR_HOST="red-condor.unl.edu"
 ARG COLLECTOR_NAME="Nebraska T2"
 ARG UID_DOMAIN="unl.edu"
-ARG CONDOR_HOST="t3.unl.edu"
+ARG SCHEDD_HOST="t3.unl.edu"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -43,7 +44,7 @@ ENV CERT_DIR $CERT_DIR
 ENV CONDOR_HOST $CONDOR_HOST
 ENV COLLECTOR_NAME $COLLECTOR_NAME
 ENV UID_DOMAIN $UID_DOMAIN
-ENV CONDOR_HOST $CONDOR_HOST
+ENV SCHEDD_HOST $SCHEDD_HOST
      
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
@@ -103,9 +104,9 @@ RUN mkdir "/home/${NB_USER}/work" && \
 # files across image layers when the permissions change
 RUN conda install --quiet --yes \
     -c conda-forge \
-    'notebook=6.4.0' \
-    'jupyterhub=1.4.1' \
-    'jupyterlab=3.0.16' \
+    'notebook' \
+    'jupyterhub' \
+    'jupyterlab' \
     jupyterlab_widgets \
     jupyterlab-git \
     dask_labextension && \
@@ -203,10 +204,10 @@ RUN conda install --yes --freeze-installed \
     hist \
     mplhep \
     iminuit \
-    cmake \
-    uproot==4.0.11
+    cmake
 
-RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1b7 \
+RUN pip install --no-cache-dir servicex-clients \
+    func_adl_servicex \
     correctionlib \
     cabinetry \
     pyyaml
@@ -215,8 +216,8 @@ RUN pip install --no-cache-dir servicex-clients func_adl_servicex==1.1b7 \
 # Distributed: we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.06.2-coffea-casa#egg=distributed \
-    coffea_casa
+    git+git://github.com/oshadura/distributed.git@2021.09.0-coffea-casa#egg=distributed
+RUN pip install --no-cache-dir coffea_casa
 
 
 # ------- xrootd-authz-plugin -------------------------------
