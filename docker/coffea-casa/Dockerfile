@@ -247,7 +247,7 @@ COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
 RUN sed -i -e "s|latest|${TAG}|g" /etc/dask/jobqueue-coffea-casa.yaml && \
     sed -i -e "s|latest|${TAG}|g" $HOME/.config/dask/jobqueue-coffea-casa.yaml && \
     sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" /etc/dask/dask.yaml && \
-    sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}}|g" $HOME/.config/dask/labextension.yaml && \
+    sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $HOME/.config/dask/labextension.yaml && \
     sed -i -e "s|coffea_casa|${DASKLABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/labextension.yaml
 
 
