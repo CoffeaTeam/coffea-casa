@@ -106,7 +106,9 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --tls-key $FILE_KEY \
       --nthreads $CPUS \
       --memory-limit $MEMORY_MB_FORMATTED \
-      --nanny --death-timeout 60 \
+      --nanny \
+      --nanny-port 8001 \
+      --death-timeout 60 \
       --protocol tls \
       --listen-address tls://0.0.0.0:$CONTAINER_PORT \
       --contact-address tls://$HOST:$PORT"
