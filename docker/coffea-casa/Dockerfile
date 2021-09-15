@@ -12,7 +12,7 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.09.15post0"
+ARG TAG="2021.09.15post1"
 # Configure Labextention Dask Cluster factory
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
@@ -248,7 +248,7 @@ RUN sed -i -e "s|latest|${TAG}|g" /etc/dask/jobqueue-coffea-casa.yaml && \
     sed -i -e "s|latest|${TAG}|g" $HOME/.config/dask/jobqueue-coffea-casa.yaml && \
     sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" /etc/dask/dask.yaml && \
     sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $HOME/.config/dask/labextension.yaml && \
-    sed -i -e "s|coffea_casa|${DASKLABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/labextension.yaml
+    sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/labextension.yaml
 
 
 # FIXME: too many files and a lot of UNL hacks! (oshadura)
