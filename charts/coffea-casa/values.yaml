@@ -1,3 +1,6 @@
+servicex:
+  enabled: true
+
 jupyterhub: 
   hub:
     config:
