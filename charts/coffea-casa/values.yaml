@@ -1,5 +1,5 @@
 servicex:
-  enabled: true
+  enabled: false
 
 jupyterhub: 
   hub:
