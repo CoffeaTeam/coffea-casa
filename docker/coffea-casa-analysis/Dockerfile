@@ -132,11 +132,6 @@ USER root
 # Setup supervisord files
 COPY supervisord.conf  /etc/supervisor/
 
-# Add HTCondor configuration files
-COPY condor_config /etc/condor/
-# Copy configuration files (currently all, to be optimised)
-COPY config.d  /etc/condor/config.d/
-
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it
