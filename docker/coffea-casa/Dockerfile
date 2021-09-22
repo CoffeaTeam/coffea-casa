@@ -9,6 +9,8 @@ USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Jupyterhub
 ARG NB_USER="cms-jovyan"
+# Needed for ServiceX cache directory location
+ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
@@ -34,6 +36,7 @@ ARG GITHUB_ACTIONS="false"
 # Configure environment
 ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
+ENV NB_USER $NB_USER
 ENV NB_USER $NB_USER
 ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
@@ -169,10 +172,10 @@ RUN apt-get update --yes && \
 RUN update-alternatives --install /usr/bin/nano nano /bin/nano-tiny 10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# Dask extention (looks like it is not available in the image)
-RUN pip install --no-cache-dir \
-  jupyterlab_github
+RUN pip install --upgrade --no-cache-dir \
+  jupyterlab_github \
+  jupyter_client \
+  ipywidgets
 
 # Enable the serverextensions that do not use the conf.d approach and
 # build JupyterLab.
@@ -211,8 +214,7 @@ RUN conda install --yes --freeze-installed \
     iminuit \
     cmake
 
-RUN pip install --no-cache-dir servicex-clients \
-    func_adl_servicex \
+RUN pip install --no-cache-dir coffea[servicex] \
     correctionlib \
     cabinetry \
     pyyaml
