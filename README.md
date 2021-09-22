@@ -33,6 +33,7 @@ Analysis repositories using coffea-casa
 
 - ![Commissioning studies in the BTV POG based on (custom) nanoAOD samples](https://github.com/cms-btv-pog/BTVNanoCommissioning)
 - ![SUEP Coffea Dask - Repository for SUEP using fastjet with awkward input from PFnano nanoAOD samples](https://github.com/SUEPPhysics/SUEPCoffea_dask)
+- ![Tools for running the CMS Higgs to Two Photons Analysis on NanoAOD](https://github.com/lgray/hgg-coffea)
 
 
 Docker images used for Coffea-casa
