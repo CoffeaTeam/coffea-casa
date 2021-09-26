@@ -179,11 +179,8 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "docker_image": worker_image or dask.config.get(f"jobqueue.{cls.config_name}.worker-image")
             },
             {
-                "container_service_names": "dask",
+                "container_service_names": "dask,nanny",
                 "dask_container_port": DEFAULT_CONTAINER_PORT,
-            },
-            {
-                "container_service_names": "nanny",
                 "nanny_container_port": nanny_port,
             },
             {"transfer_input_files": files},
