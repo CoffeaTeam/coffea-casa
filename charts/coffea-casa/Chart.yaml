@@ -12,7 +12,7 @@ dependencies:
       - child: rbac
         parent: rbac
   - name: servicex
-    version: "1.0.8"
+    version: "1.0.16"
     repository: 'https://ssl-hep.github.io/ssl-helm-charts/'
     condition: servicex.enabled
 maintainers:
