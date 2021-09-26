@@ -85,7 +85,8 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       # We make sure that we use proper configuration (dask worker name, ports, number of CPUs,
       # memory requested for worker, hostname of scheduler), parcing HTCondor Job AD file
       PORT=`cat $_CONDOR_JOB_AD | grep HostPort | tr -d '"' | awk '{print $NF;}'`
-      CONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep ContainerPort | tr -d '"' | awk '{print $NF;}'`
+      NANNYCONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep nanny_ContainerPort | tr -d '"' | awk '{print $NF;}'`
+      CONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep dask_ContainerPort | tr -d '"' | awk '{print $NF;}'`
       HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
       NAME=`cat $_CONDOR_JOB_AD | grep "DaskWorkerName "  | tr -d '"' | awk '{print $NF;}'`
       CPUS=`cat $_CONDOR_JOB_AD | grep "DaskWorkerCores " | tr -d '"' | awk '{print $NF;}'`
@@ -107,11 +108,12 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --nthreads $CPUS \
       --memory-limit $MEMORY_MB_FORMATTED \
       --nanny \
-      --nanny-port 8001 \
+      --nanny-port $NANNYCONTAINER_PORT \
       --death-timeout 60 \
       --protocol tls \
       --listen-address tls://0.0.0.0:$CONTAINER_PORT \
-      --contact-address tls://$HOST:$PORT"
+      --contact-address tls://$HOST:$PORT
+      --nanny-contact-address tls://$HOST:$NANNYCONTAINER_PORT"
       # Debug print
       echo $HTCONDOR_COMAND 1>&2
       exec $HTCONDOR_COMAND
