@@ -1,5 +1,5 @@
 import base64
-import yaml
+import yaml, os
 
 from auth import generate_x509, generate_condor, generate_xcache, generate_servicex
 
@@ -21,16 +21,17 @@ servicex_issuer = 'cmsaf-jh.unl.edu'
 servicex_user_name = "cms-jovyan"
 
 external_dns = False
-dask_base_domain = os.environ.get('DASK_BASE_DOMAIN', 'coffea.example.edu')
+dask_base_domain = os.environ('DASK_BASE_DOMAIN')
 
 set_config_if_not_none(c.KubeSpawner, 'gid', 'singleuser.gid')
 
 
 # Detect if there are tokens for this user - if so, add them as volume mounts.
-c.KubeSpawner.environment["BEARER_TOKEN_FILE"] = "/etc/cmsaf-secrets/xcache_token"
-#c.KubeSpawner.environment["XCACHE_HOST"] = "red-xcache1.unl.edu"
-c.KubeSpawner.environment["XRD_PLUGINCONFDIR"] = "/opt/conda/etc/xrootd/client.plugins.d/"
-c.KubeSpawner.environment["LD_LIBRARY_PATH"] = "/opt/conda/lib/"
+c.KubeSpawner.environment["BEARER_TOKEN_FILE"] = os.environ["BEARER_TOKEN_FILE"]
+c.KubeSpawner.environment["XCACHE_HOST"] = os.environ["XCACHE_HOST"]
+c.KubeSpawner.environment["XRD_PLUGINCONFDIR"] = os.environ["XRD_PLUGINCONFDIR"]
+c.KubeSpawner.environment["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]
+# TODO: make mountPath and name parametrisable (cmsaf-secrets and /etc/cmsaf-secrets)
 c.KubeSpawner.volume_mounts.extend([{"name": "cmsaf-secrets", "mountPath": "/etc/cmsaf-secrets"}])
 c.KubeSpawner.volumes.extend([{"name": "cmsaf-secrets", "secret": {"secretName": "{username}-secrets"}}])
 

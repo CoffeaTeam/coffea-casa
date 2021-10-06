@@ -1,6 +1,9 @@
+---
+# Disable ServiceX as a dependency
 servicex:
   enabled: false
 
+# Jupyterhub settings
 jupyterhub: 
   hub:
     config:
@@ -84,7 +87,6 @@ jupyterhub:
         https:
       loadBalancerIP: 129.93.183.34
 
-
   singleuser:
     networkPolicy:
       enabled: false
@@ -108,9 +110,13 @@ jupyterhub:
       tag: 2021.6.0
       extraEnv:
         XCACHE_HOST: "red-xcache1.unl.edu"
+        XRD_PLUGINCONFDIR: "/opt/conda/etc/xrootd/client.plugins.d/"
+        XRD_PLUGIN: "/opt/conda/lib/libXrdClAuthzPlugin.so"
+        BEARER_TOKEN_FILE: "/etc/cmsaf-secrets/xcache_token"
+        SERVICEX_HOST: http://coffea-casa-servicex-app:8000
+        # TODO: to recheck if LD_LIBRARY_PATH is still needed
+        LD_LIBRARY_PATH: "/opt/conda/lib/"
     defaultUrl: "/lab"
-    extraEnv:
-      SERVICEX_HOST: http://coffea-casa-servicex-app:8000
     profileList:
       - display_name: "Coffea Base Image"
         description: "Coffea-casa image with coffea 0.7.5/dask/condor and cheese"
