@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-hub-config
+  labels:
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app: {{ .Release.Name }}
+data:
+  {{ if .Values.servicex.enabled.true }}
+  XCACHE_HOST = {{ .Values.servicex.host }}
+  {{ end }}
+  BEARER_TOKEN_FILE = "/etc/cmsaf-secrets/xcache_token"
+  XRD_PLUGINCONFDIR = "/opt/conda/etc/xrootd/client.plugins.d/"
+  XRD_PLUGIN = "/opt/conda/lib/libXrdClAuthzPlugin.so"
+  LD_LIBRARY_PATH = "/opt/conda/lib/"
+  {{ if .Values.servicex.enabled.true }}
+  SERVICEX_HOST = {{ .Values.servicex.host }}
+  {{ end }}
