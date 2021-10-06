@@ -8,13 +8,13 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     app: {{ .Release.Name }}
 data:
-  {{ if .Values.servicex.enabled.true }}
+  {{ if .Values.servicex.enabled }}
   XCACHE_HOST = {{ .Values.servicex.host }}
   {{ end }}
   BEARER_TOKEN_FILE = {{ .Values.tokens.bearer_token | default "/etc/cmsaf-secrets/xcache_token" | quote }}
   XRD_PLUGINCONFDIR = {{ .Values.tokens.xrdauthz_plugin_confdir | default "/opt/conda/etc/xrootd/client.plugins.d/" | quote }}
   XRD_PLUGIN = {{ .Values.tokens.xrdauthz_plugin | default "/opt/conda/lib/libXrdClAuthzPlugin.so" | quote }}
   LD_LIBRARY_PATH = {{ .Values.tokens.xrdauthz_ldlibrarypath | default "/opt/conda/lib/" | quote }}
-  {{ if .Values.servicex.enabled.true }}
+  {{ if .Values.servicex.enabled }}
   SERVICEX_HOST = {{ .Values.servicex.host }}
   {{ end }}
