@@ -16,6 +16,6 @@ log
 .tox
 
 # Charts
-**/charts
+**/charts/coffea-casa/charts
 **/Chart.lock
 
