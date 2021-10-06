@@ -1,5 +1,9 @@
 ---
-# Disable ServiceX as a dependency
+# Disable/enable RBAC
+rbac:
+  enabled: true
+
+# Disable/enable ServiceX as a dependency
 servicex:
   enabled: false
   host: "http://coffea-casa-servicex-app:8000"
@@ -7,6 +11,12 @@ servicex:
 xcache:
   enabled: true
   host: "red-xcache1.unl.edu"
+
+tokens:
+  bearer_token:
+  xrdauthz_plugin_confdir:
+  xrdauthz_plugin:
+  xrdauthz_ldlibrarypath:
 
 # Jupyterhub settings
 jupyterhub: 
