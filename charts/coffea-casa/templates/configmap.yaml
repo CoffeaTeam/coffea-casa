@@ -18,3 +18,11 @@ data:
   {{ if .Values.servicex.enabled }}
   SERVICEX_HOST = {{ .Values.servicex.host }}
   {{ end }}
+  {{ if .Values.dask.enabled }}
+  DASK_BASE_DOMAIN = {{ .Values.dask.dask_base_domain }}
+  {{ end }}
+  {{ if .Values.auth.enabled }}
+  OAUTH_CALLBACK_URL = {{ .Values.auth.oauth_callback_url }}
+  OAUTH2_AUTHORIZE_URL = {{ .Values.auth.oauth_authorize_url }}
+  OAUTH2_TOKEN_URL = {{ .Values.auth.oauth_token_url }}
+  {{ end }}

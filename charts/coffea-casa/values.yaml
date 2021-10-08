@@ -12,6 +12,16 @@ xcache:
   enabled: true
   host: "red-xcache1.unl.edu"
 
+dask:
+  enabled: true
+  dask_base_domain: coffea-opendata.casa
+
+auth:
+  enabled: true
+  oauth_callback_url: https://cms-auth.web.cern.ch/oauth_callback
+  oauth_authorize_url: https://cms-auth.web.cern.ch/authorize
+  oauth_token_url: https://cms-auth.web.cern.ch/token
+
 tokens:
   bearer_token:
   xrdauthz_plugin_confdir:
@@ -59,8 +69,16 @@ jupyterhub:
       name: carljetter/k8s-hub
       tag: '0.2.0'   
     extraEnv:
-      OAUTH2_AUTHORIZE_URL: https://cms-auth.web.cern.ch/authorize
-      OAUTH2_TOKEN_URL: https://cms-auth.web.cern.ch/token
+      OAUTH2_AUTHORIZE_URL:
+        valueFrom:
+          configMapKeyRef:
+            name: "{{.Release.Name}}-hub-config"
+            key: OAUTH2_AUTHORIZE_URL
+      OAUTH2_TOKEN_URL:
+        valueFrom:
+          configMapKeyRef:
+            name: "{{.Release.Name}}-hub-config"
+            key: OAUTH2_TOKEN_URL
       OAUTH_CLIENT_ID:
         valueFrom:
           secretKeyRef:
@@ -71,8 +89,11 @@ jupyterhub:
           secretKeyRef:
             name: coffea-casa-secrets
             key: client_secret
-      OAUTH_CALLBACK_URL: https://cmsaf-jh.unl.edu/hub/oauth_callback
-      DASK_BASE_DOMAIN: coffea-opendata.casa
+      DASK_BASE_DOMAIN:
+        valueFrom:
+          configMapKeyRef:
+            name: "{{.Release.Name}}-hub-config"
+            key: DASK_BASE_DOMAIN
 
   proxy:
     chp:
@@ -154,13 +175,25 @@ jupyterhub:
         - name: COFFEA_CASA_SIDECAR
           value: 'True'
         - name: XCACHE_HOST
-          value: 'red-xcache1.unl.edu'
-        - name: XRD_PLUGINCONFDIR
-          value: '/opt/conda/etc/xrootd/client.plugins.d/'
+          valueFrom:
+            configMapKeyRef:
+              name: "{{.Release.Name}}-hub-config"
+              key: XCACHE_HOST
         - name: XRD_PLUGIN
-          value: '/opt/conda/lib/libXrdClAuthzPlugin.so'
+          valueFrom:
+            configMapKeyRef:
+              name: "{{.Release.Name}}-hub-config"
+              key: XRD_PLUGIN
+        - name: XRD_PLUGINCONFDIR
+          valueFrom:
+            configMapKeyRef:
+              name: "{{.Release.Name}}-hub-config"
+              key: XRD_PLUGINCONFDIR
         - name: BEARER_TOKEN_FILE
-          value: '/etc/cmsaf-secrets/xcache_token'
+          valueFrom:
+            configMapKeyRef:
+              name: "{{.Release.Name}}-hub-config"
+              key: BEARER_TOKEN_FILE
         - name: WORKER_ID
           valueFrom:
             fieldRef:
