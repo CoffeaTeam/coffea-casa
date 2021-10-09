@@ -32,6 +32,7 @@ ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
 ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
+ENV CACHE_PREFIX $CACHE_PREFIX
 ENV CERT_DIR $CERT_DIR
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV SERVICEX_TOKEN $SERVICEX_TOKEN
@@ -94,6 +95,7 @@ RUN mkdir $HOME/work && \
 
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
+RUN conda install mamba -n base -c conda-forge --yes
 RUN mamba install --yes \
     -c conda-forge \
     htcondor \
