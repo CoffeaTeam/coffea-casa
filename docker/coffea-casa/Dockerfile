@@ -14,12 +14,15 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.05"
+ARG TAG="2021.10.09"
 # Configure Labextention Dask Cluster factory
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
+ARG CERT_DIR="/etc/cmsaf-secrets"
+# XCACHE settings for Servicex
+ARG CACHE_PREFIX="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
