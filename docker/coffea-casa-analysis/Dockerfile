@@ -164,13 +164,9 @@ RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
     && mamba clean -tipsy \
-    && jupyter lab clean \
-    && jlpm cache clean \
-    && npm cache clean --force \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && (find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf /opt/conda/pkgs
 
 # Prepare HTCondor spec. environment and execute dask-worker command
