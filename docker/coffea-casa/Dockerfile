@@ -47,6 +47,7 @@ ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
 ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
+ENV CACHE_PREFIX $CACHE_PREFIX
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV SERVICEX_TOKEN $SERVICEX_TOKEN
 ENV CERT_DIR $CERT_DIR
@@ -113,6 +114,7 @@ RUN mkdir "/home/${NB_USER}/work" && \
 # Correct permissions
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
+RUN conda install mamba -n base -c conda-forge --yes
 RUN mamba install --quiet --yes \
     -c conda-forge \
     'notebook' \
