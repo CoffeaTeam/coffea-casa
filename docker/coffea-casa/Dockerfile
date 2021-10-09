@@ -110,7 +110,7 @@ RUN mkdir "/home/${NB_USER}/work" && \
 # Correct permissions
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
-RUN conda install --quiet --yes \
+RUN mamba install --quiet --yes \
     -c conda-forge \
     'notebook' \
     'jupyterhub' \
@@ -118,7 +118,7 @@ RUN conda install --quiet --yes \
     jupyterlab_widgets \
     jupyterlab-git \
     dask_labextension && \
-    conda clean --all -f -y && \
+    mamba clean -tipsy && \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
     jupyter lab clean && \
@@ -202,7 +202,7 @@ RUN mkdir -p $HOME/.config/dask  && \
     mkdir -p /etc/condor/config.d
 
 USER $NB_UID
-RUN conda install --yes --freeze-installed \
+RUN mamba install --yes \
     -c conda-forge \
     conda-build \
     htcondor \
@@ -223,7 +223,7 @@ RUN pip install --no-cache-dir coffea[servicex] \
 # Distributed: we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.09.0-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.09.1-coffea-casa#egg=distributed
 RUN pip install --no-cache-dir coffea_casa
 
 
@@ -277,15 +277,15 @@ RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_sourc
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
-    && conda clean -tipsy \
+    && mamba clean -tipsy \
     && jupyter lab clean \
     && jlpm cache clean \
     && npm cache clean --force \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && conda clean --all -f -y \
-    && conda build purge-all
+    && (find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && rm -rf /opt/conda/pkgs
 
 # xcache setup
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"

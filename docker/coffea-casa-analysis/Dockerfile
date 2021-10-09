@@ -92,7 +92,7 @@ RUN mkdir $HOME/work && \
 
 # Dask dependencies and HTCondor
 # https://anaconda.org/conda-forge/htcondor
-RUN conda install --yes --freeze-installed \
+RUN mamba install --yes \
     -c conda-forge \
     htcondor \
     xgboost \
@@ -101,9 +101,7 @@ RUN conda install --yes --freeze-installed \
     hist \
     mplhep \
     iminuit \
-    cmake \
-    && conda clean --all -f -y \
-    && conda build purge-all
+    cmake
 
 #
 RUN pip install --no-cache-dir coffea[servicex] \
@@ -116,7 +114,7 @@ RUN pip install --no-cache-dir coffea[servicex] \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.09.0-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.09.1-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
@@ -161,13 +159,15 @@ RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
-    && conda clean -tipsy \
+    && mamba clean -tipsy \
+    && jupyter lab clean \
+    && jlpm cache clean \
+    && npm cache clean --force \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
-    && conda clean --all -f -y \
-    && conda build purge-all
+    && (find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && rm -rf /opt/conda/pkgs
 
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
