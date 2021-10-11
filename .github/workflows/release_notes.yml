@@ -1,0 +1,23 @@
+# This workflow will be triggered on tags pushes and it
+# will generate release notes using gren.
+
+name: Release notes
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release_notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup node/npm
+        uses: actions/setup-node@v1
+      - name: Install gren
+        run: npm install github-release-notes -g
+      - name: Generate release notes
+        env:
+          GREN_GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: gren release
