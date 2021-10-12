@@ -118,7 +118,7 @@ RUN pip install --no-cache-dir coffea[servicex] \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.09.1-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.09.0-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
