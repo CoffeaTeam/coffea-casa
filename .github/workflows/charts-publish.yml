@@ -14,27 +14,7 @@ on:
 defaults:
   run:
     shell: bash
-
-jobs:
-  build:
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-
-      - name: Publish Helm charts
-        uses: stefanprodan/helm-gh-pages@master
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          charts_dir: "charts"
-          charts_url: https://coffeateam.github.io/coffea-casa/
-          linting: "off"
-          chart_version: ${{ steps.get_version.outputs.VERSION }}
-
+    
 jobs:
   release:
     runs-on: ubuntu-latest
