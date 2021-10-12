@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.09post1"
+ARG TAG="coffeacasa_servicex_193"
 # Configure Labextention Dask Cluster factory
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
