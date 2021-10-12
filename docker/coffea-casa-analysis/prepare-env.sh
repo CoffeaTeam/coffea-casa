@@ -29,7 +29,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     # docs: Always set to true when GitHub Actions is running the workflow.
     # You can use this variable to differentiate when tests are being run locally or by GitHub Actions.
     while true; do
-      if grep dask_HostPort "$_CONDOR_JOB_AD"; then
+      if grep HostPort "$_CONDOR_JOB_AD"; then
         break
       fi
       sleep 1
@@ -84,8 +84,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   if [ ! -z "$_CONDOR_JOB_AD" ]; then
       # We make sure that we use proper configuration (dask worker name, ports, number of CPUs,
       # memory requested for worker, hostname of scheduler), parcing HTCondor Job AD file
-      PORT=`cat $_CONDOR_JOB_AD | grep dask_HostPort | tr -d '"' | awk '{print $NF;}'`
-      NANNYPORT=`cat $_CONDOR_JOB_AD | grep nanny_HostPort | tr -d '"' | awk '{print $NF;}'`
+      PORT=`cat $_CONDOR_JOB_AD | grep HostPort | tr -d '"' | awk '{print $NF;}'`
       NANNYCONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep nanny_ContainerPort | tr -d '"' | awk '{print $NF;}'`
       CONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep dask_ContainerPort | tr -d '"' | awk '{print $NF;}'`
       HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
@@ -114,7 +113,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --protocol tls \
       --listen-address tls://0.0.0.0:$CONTAINER_PORT \
       --contact-address tls://$HOST:$PORT \
-      --nanny-contact-address tls://$HOST:$NANNYPORT"
+      --nanny-contact-address tls://$HOST:$NANNYCONTAINER_PORT"
       # Debug print
       echo $HTCONDOR_COMAND 1>&2
       exec $HTCONDOR_COMAND
