@@ -9,7 +9,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="coffeacasa_servicex_193-1"
+ARG TAG="coffeacasa_servicex_193-2"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -118,7 +118,7 @@ RUN pip install --no-cache-dir coffea[servicex] \
 # preferable to pull proper dask and distributed versions via pip.
 # dask-jobqueue.git -> master has required fixes (no need to patch)
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.09.0-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.09.0-1-coffea-casa#egg=distributed
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
