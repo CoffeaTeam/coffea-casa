@@ -1,9 +1,10 @@
-#
+# Create a tag (on devel) or create release
 name: Deploy to PyPI
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - '*'
 
 jobs:
   deploy:
