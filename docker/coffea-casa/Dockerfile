@@ -228,7 +228,7 @@ RUN pip install --no-cache-dir coffea[servicex] \
 # Distributed: we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.09.1-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.09.0-coffea-casa#egg=distributed
 RUN pip install --no-cache-dir coffea_casa
 
 
