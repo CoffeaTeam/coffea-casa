@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="coffeacasa_servicex_193-1"
+ARG TAG="coffeacasa_servicex_193-2"
 # Configure Labextention Dask Cluster factory
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
@@ -228,7 +228,7 @@ RUN pip install --no-cache-dir coffea[servicex] \
 # Distributed: we need to install patched version of distributed version, it is will be
 # preferable to pull proper dask and distributed versions via pip.
 RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.09.0-coffea-casa#egg=distributed
+    git+git://github.com/oshadura/distributed.git@2021.09.0-1-coffea-casa#egg=distributed
 RUN pip install --no-cache-dir coffea_casa
 
 
