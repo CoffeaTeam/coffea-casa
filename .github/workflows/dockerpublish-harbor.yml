@@ -1,11 +1,9 @@
-# Re-tag staging SHA-tagged image with git tag and 'latest'
-# tags can be anything, but typically calver string (2020.06.10)
+# Create release only
 name: Openscience Harbor Registry Publish
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [created]
 
 env:
   GITHUB_SHA: ${{ github.sha }}

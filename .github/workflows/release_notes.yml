@@ -1,11 +1,10 @@
 # This workflow will be triggered on tags pushes and it
 # will generate release notes using gren.
-
+# Create release only
 name: Release notes
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [created]
 
 jobs:
   release_notes:

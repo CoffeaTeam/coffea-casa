@@ -4,12 +4,12 @@
 # This workflow package and publishes the Helm charts to Helm repository living
 # inside the gh-pages branch of this git repository.
 #
+# Create a tag (on devel) or create release
 name: Publish charts
 
 on:
   push:
     tags: ["*"]
-  workflow_dispatch:
 
 defaults:
   run:

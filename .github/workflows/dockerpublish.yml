@@ -1,5 +1,6 @@
 # Re-tag staging SHA-tagged image with git tag and 'latest'
 # tags can be anything, but typically calver string (2020.06.10)
+# Create a tag (on devel) or create release
 name: Docker Publish
 
 on:
