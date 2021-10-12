@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - master
+      - develop
 
 env:
   DOCKER_ORG: coffeateam
