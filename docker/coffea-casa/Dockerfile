@@ -15,18 +15,18 @@ ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
 ARG TAG="coffeacasa_servicex_193-4"
+# Secrets
+ARG CERT_DIR="/etc/cmsaf-secrets"
+ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 # Configure Labextention Dask Cluster factory
+ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
-ARG CERT_DIR="/etc/cmsaf-secrets"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
-ARG CERT_DIR="/etc/cmsaf-secrets"
-ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
 ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
-ARG SERVICEX=""
 # Condor settings
 ARG CONDOR_HOST="red-condor.unl.edu"
 ARG COLLECTOR_NAME="Nebraska T2"
@@ -40,17 +40,21 @@ ARG GITHUB_ACTIONS="false"
 ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
 ENV NB_USER $NB_USER
+ARG USER $NB_USER
 ENV USER $USER
 ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
 ENV TAG $TAG
+ENV CERT_DIR $CERT_DIR
+ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
+ENV LABEXTENTION_CLUSTER $LABEXTENTION_CLUSTER
+ENV LABEXTENTION_FACTORY_CLASS $LABEXTENTION_FACTORY_CLASS
+ENV LABEXTENTION_FACTORY_MODULE $LABEXTENTION_FACTORY_MODULE
 ENV XCACHE_HOST $XCACHE_HOST
 ENV CACHE_PREFIX $CACHE_PREFIX
-ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV SERVICEX_TOKEN $SERVICEX_TOKEN
-ENV CERT_DIR $CERT_DIR
 ENV CONDOR_HOST $CONDOR_HOST
 ENV COLLECTOR_NAME $COLLECTOR_NAME
 ENV UID_DOMAIN $UID_DOMAIN
@@ -194,7 +198,7 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
     rm -rf $HOME/.cache/yarn && \
     rm -rf $HOME/.node-gyp
 
-# TBD: Jupyter lab workspace setup
+# FIXME: Jupyter lab workspace setup
 #COPY jupyterlab-workspace.json $HOME/
 #RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
@@ -249,24 +253,14 @@ USER root
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
-# WE NEED to overwrite installed files!
+# We need to overwrite installed files! (see prepare-env.yaml)
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
-RUN sed -i -e "s|latest|${TAG}|g" /etc/dask/jobqueue-coffea-casa.yaml && \
-    sed -i -e "s|latest|${TAG}|g" $HOME/.config/dask/jobqueue-coffea-casa.yaml && \
-    sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" /etc/dask/dask.yaml && \
-    sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $HOME/.config/dask/labextension.yaml && \
-    sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/labextension.yaml
-
 
 # FIXME: too many files and a lot of UNL hacks! (oshadura)
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
-# Copy configuration files (currently all, to be optimised)
+# Copy configuration files (see prepare-env.yaml)
 COPY config.d  /etc/condor/config.d/
-RUN sed -i -e "s|CONDOR_HOST = red-condor.unl.edu|CONDOR_HOST = ${CONDOR_HOST}|g" /etc/condor/config.d/99-coffea-condor-master-config && \
-    sed -i -e "s|COLLECTOR_NAME = Nebraska T2|COLLECTOR_NAME = ${COLLECTOR_NAME}|g" /etc/condor/config.d/99-coffea-condor-master-config && \
-    sed -i -e "s|UID_DOMAIN = unl.edu|UID_DOMAIN = ${UID_DOMAIN}|g" /etc/condor/config.d/99-coffea-condor-master-config && \
-    sed -i -e "s|SCHEDD_HOST = t3.unl.edu|SCHEDD_HOST = ${SCHEDD_HOST}|g" /etc/condor/config.d/99-coffea-condor-master-config
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
