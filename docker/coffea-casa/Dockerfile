@@ -253,8 +253,6 @@ USER root
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
-# We need to overwrite installed files! (see prepare-env.yaml)
-COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /etc/dask/
 
 # FIXME: too many files and a lot of UNL hacks! (oshadura)
 # Add HTCondor configuration files
