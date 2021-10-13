@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="coffeacasa_servicex_193-5"
+ARG TAG="coffeacasa_servicex_193-6"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
@@ -204,10 +204,8 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
-RUN mkdir -p $HOME/.config/dask  && \
-    mkdir -p /etc/dask  && \
+RUN mkdir -p /etc/dask  && \
     mkdir -p /var/lib/condor && \
-    mkdir -p $HOME/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d
 
 USER $NB_UID
@@ -247,13 +245,16 @@ RUN cd /tmp && \
     make && \
     make install
 
-USER root
+USER ${NB_UID}
 # FIXME: too many files and a lot of hacks! (oshadura)
 # Dask setup - > dask.yml
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
+RUN mkdir -p $HOME/.config/dask  && \
+    mkdir -p $HOME/.condor/tokens.d
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
 
+USER root
 # FIXME: too many files and a lot of UNL hacks! (oshadura)
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
