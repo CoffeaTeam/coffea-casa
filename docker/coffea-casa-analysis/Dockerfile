@@ -4,8 +4,6 @@ USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Jupyterhub
 ARG NB_USER="cms-jovyan"
-# Needed for ServiceX cache directory location
-ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
@@ -25,7 +23,7 @@ ARG GITHUB_ACTIONS="false"
 ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
 ENV NB_USER $NB_USER
-ENV USER $USER
+ENV USER $NB_USER
 ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
