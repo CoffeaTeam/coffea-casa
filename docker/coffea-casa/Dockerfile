@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="coffeacasa_servicex_193-6"
+ARG TAG="coffeacasa_servicex_193-7"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
@@ -252,7 +252,7 @@ USER ${NB_UID}
 # Labextention setup - >labextension.yml
 RUN mkdir -p $HOME/.config/dask  && \
     mkdir -p $HOME/.condor/tokens.d
-COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml $HOME/.config/dask/
+COPY dask $HOME/.config/dask/
 
 USER root
 # FIXME: too many files and a lot of UNL hacks! (oshadura)
