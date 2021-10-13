@@ -14,9 +14,8 @@ api_endpoints:
 fi
 
 # Populating Dask configuration files
-sed -i -e "s|latest|${TAG}|g" /etc/dask/jobqueue-coffea-casa.yaml
 sed -i -e "s|latest|${TAG}|g" $HOME/.config/dask/jobqueue-coffea-casa.yaml
-sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" /etc/dask/dask.yaml
+sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $HOME/.config/dask/dask.yaml
 sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $HOME/.config/dask/labextension.yaml
 sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/labextension.yaml
 sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $HOME/.config/dask/labextension.yaml
