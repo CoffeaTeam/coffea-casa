@@ -20,21 +20,21 @@ fi
 # tls://$HOST_IP:8786
 if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   if [ "${GITHUB_ACTIONS:-}" == "true" ]; then
-    echo "CI mode, no need to test HostPort info..."
+    echo "CI mode, no need to test dask_HostPort info..."
   else
     # From chtc/dask-chtc: wait for the job ad to be updated with <service>_HostPort
     # This happens during the first update, usually a few seconds after the job starts
-    echo "Waiting for HostPort information..."
+    echo "Waiting for dask_HostPort information..."
     # Check if we are not in GH CI environment (otherwise image check will stuck forever)
     # docs: Always set to true when GitHub Actions is running the workflow.
     # You can use this variable to differentiate when tests are being run locally or by GitHub Actions.
     while true; do
-      if grep HostPort "$_CONDOR_JOB_AD"; then
+      if grep dask_HostPort "$_CONDOR_JOB_AD"; then
         break
       fi
       sleep 1
     done
-    echo "Got HostPort, proceeding..."
+    echo "Got dask_HostPort, proceeding..."
     echo
 
     if [ -z "$_CONDOR_JOB_IWD" ]; then
@@ -83,11 +83,11 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   # HTCondor port, hostname and external IP ("must" variables)
   if [ ! -z "$_CONDOR_JOB_AD" ]; then
       # We make sure that we use proper configuration (dask worker name, ports, number of CPUs,
-      # memory requested for worker, hostname of scheduler), parcing HTCondor Job AD file
-      PORT=`cat $_CONDOR_JOB_AD | grep HostPort | tr -d '"' | awk '{print $NF;}'`
+      # memory requested for worker, hostname of scheduler), parcing HTCondor Job AD file`
       # Nanny container port will be used later...
-      NANNYCONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep nanny_ContainerPort | tr -d '"' | awk '{print $NF;}'`
+      PORT=`cat $_CONDOR_JOB_AD | grep dask_HostPort | tr -d '"' | awk '{print $NF;}'`
       CONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep dask_ContainerPort | tr -d '"' | awk '{print $NF;}'`
+      NANNYCONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep nanny_ContainerPort | tr -d '"' | awk '{print $NF;}'`
       HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
       NAME=`cat $_CONDOR_JOB_AD | grep "DaskWorkerName "  | tr -d '"' | awk '{print $NF;}'`
       CPUS=`cat $_CONDOR_JOB_AD | grep "DaskWorkerCores " | tr -d '"' | awk '{print $NF;}'`
@@ -109,6 +109,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --nthreads $CPUS \
       --memory-limit $MEMORY_MB_FORMATTED \
       --nanny
+      --nanny-port $NANNYCONTAINER_PORT
       --death-timeout 60 \
       --protocol tls \
       --listen-address tls://0.0.0.0:$CONTAINER_PORT \
