@@ -3,8 +3,8 @@
 set -x
 
 # Overwrite existing dask configuration files and add configuration files for condor
-rm -rf $HOME/.config/dask; ln -s /opt/dask/dask-config $HOME/.config/dask
-ln -s /opt/condor $HOME/.config/condor
+rm -rf $HOME/.config/dask/; ln -s /opt/dask $HOME/.config/dask
+ln -s /opt/condor $HOME/.config/condor/config.d
 
 if [[ "$SERVICEX_HOST" ]]; then
     touch $HOME/.servicex
