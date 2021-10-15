@@ -205,6 +205,9 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p /etc/dask  && \
+    mkdir -p /opt/dask  && chmod 700 /opt/dask && \
+    mkdir -p /opt/condor  && chmod 700 /opt/condor && \
+    mkdir -p ${HOME}/.condor/tokens.d && \
     mkdir -p /var/lib/condor && \
     mkdir -p /etc/condor/config.d
 
@@ -250,16 +253,14 @@ USER ${NB_UID}
 # Dask setup - > dask.yml
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
-RUN mkdir -p $HOME/.config/dask  && \
-    mkdir -p $HOME/.condor/tokens.d
-COPY dask $HOME/.config/dask/
+COPY dask-config /opt/dask/
+# Copy HTCondor configuration files (see prepare-env.yaml)
+COPY config.d  /opt/condor/
 
 USER root
 # FIXME: too many files and a lot of UNL hacks! (oshadura)
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
-# Copy configuration files (see prepare-env.yaml)
-COPY config.d  /etc/condor/config.d/
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and

@@ -67,6 +67,7 @@ INCLUDE = $(RELEASE_DIR)/include/condor
 SBIN    = $(RELEASE_DIR)/sbin
 LIBEXEC = $(RELEASE_DIR)/libexec/condor
 SHARE   = $(RELEASE_DIR)/share/condor
+LOCAL_CONFIG_DIR = $(HOME)/.config/condor/config.d
 
 PROCD_ADDRESS = $(RUN)/procd_pipe
 

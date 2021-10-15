@@ -2,6 +2,10 @@
 
 set -x
 
+# Overwrite existing dask configuration files and mount 
+rm -rf $HOME/.config/dask; ln -s /opt/dask/dask-config $HOME/.config/dask
+mkdir -p $HOME/.config/condor; ln -s /opt/condor $HOME/.config/condor
+
 if [[ "$SERVICEX_HOST" ]]; then
     touch $HOME/.servicex
     echo "Tokens: generating ServiceX config file (available only from Jupyterhub notebook)"
@@ -21,10 +25,10 @@ sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/la
 sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $HOME/.config/dask/labextension.yaml
 
 # HTCondor scheduler settings
-sed -i -e "s|CONDOR_HOST = red-condor.unl.edu|CONDOR_HOST = ${CONDOR_HOST}|g" /etc/condor/config.d/99-coffea-condor-master-config
-sed -i -e "s|COLLECTOR_NAME = Nebraska T2|COLLECTOR_NAME = ${COLLECTOR_NAME}|g" /etc/condor/config.d/99-coffea-condor-master-config
-sed -i -e "s|UID_DOMAIN = unl.edu|UID_DOMAIN = ${UID_DOMAIN}|g" /etc/condor/config.d/99-coffea-condor-master-config
-sed -i -e "s|SCHEDD_HOST = t3.unl.edu|SCHEDD_HOST = ${SCHEDD_HOST}|g" /etc/condor/config.d/99-coffea-condor-master-config
+sed -i -e "s|CONDOR_HOST = red-condor.unl.edu|CONDOR_HOST = ${CONDOR_HOST}|g" $HOME/.config/condor/config.d/99-coffea-condor-master-config
+sed -i -e "s|COLLECTOR_NAME = Nebraska T2|COLLECTOR_NAME = ${COLLECTOR_NAME}|g" $HOME/.config/condor/config.d/99-coffea-condor-master-config
+sed -i -e "s|UID_DOMAIN = unl.edu|UID_DOMAIN = ${UID_DOMAIN}|g" $HOME/.config/condor/config.d/99-coffea-condor-master-config
+sed -i -e "s|SCHEDD_HOST = t3.unl.edu|SCHEDD_HOST = ${SCHEDD_HOST}|g" $HOME/.config/condor/config.d/99-coffea-condor-master-config
 
 # Check environment
 if [ -e "$HOME/environment.yml" ]; then
