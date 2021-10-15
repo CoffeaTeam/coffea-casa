@@ -3,8 +3,7 @@
 set -x
 
 # Overwrite existing dask configuration files and add configuration files for condor
-rm -rf $HOME/.config/dask/; ln -s /opt/dask $HOME/.config/dask
-ln -s /opt/condor $HOME/.config/condor/config.d
+rm -rf $HOME/.config/dask; ln -s /opt/dask $HOME/.config/dask
 
 if [[ "$SERVICEX_HOST" ]]; then
     touch $HOME/.servicex
@@ -24,11 +23,11 @@ sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $HOME/.config/da
 sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/labextension.yaml
 sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $HOME/.config/dask/labextension.yaml
 
-# HTCondor scheduler settings
-sed -i -e "s|CONDOR_HOST = red-condor.unl.edu|CONDOR_HOST = ${CONDOR_HOST}|g" $HOME/.config/condor/config.d/99-coffea-condor-master-config
-sed -i -e "s|COLLECTOR_NAME = Nebraska T2|COLLECTOR_NAME = ${COLLECTOR_NAME}|g" $HOME/.config/condor/config.d/99-coffea-condor-master-config
-sed -i -e "s|UID_DOMAIN = unl.edu|UID_DOMAIN = ${UID_DOMAIN}|g" $HOME/.config/condor/config.d/99-coffea-condor-master-config
-sed -i -e "s|SCHEDD_HOST = t3.unl.edu|SCHEDD_HOST = ${SCHEDD_HOST}|g" $HOME/.config/condor/config.d/99-coffea-condor-master-config
+# HTCondor scheduler setting
+echo "CONDOR_HOST = ${CONDOR_HOST}" >> $HOME/.condor/config/schedd
+echo "COLLECTOR_NAME = ${COLLECTOR_NAME}" >> $HOME/.condor/config/schedd
+echo "UID_DOMAIN = ${UID_DOMAIN}" >> $HOME/.condor/config/schedd
+echo "SCHEDD_HOST = ${SCHEDD_HOST}" >> $HOME/.condor/config/schedd
 
 # Check environment
 if [ -e "$HOME/environment.yml" ]; then
