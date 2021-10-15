@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="coffeacasa_servicex_193-9"
+ARG TAG="coffeacasa_servicex_193-10"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
@@ -205,8 +205,8 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p /etc/dask  && \
-    mkdir -p /opt/dask  && chmod 700 /opt/dask && \
-    mkdir -p /opt/condor  && chmod 700 /opt/condor && \
+    mkdir -p /opt/dask  && chown -R "${NB_USER}:${NB_GID}" /opt/dask && \
+    mkdir -p /opt/condor && chown -R "${NB_USER}:${NB_GID}" /opt/condor && \
     mkdir -p ${HOME}/.condor/tokens.d && \
     mkdir -p /var/lib/condor && \
     mkdir -p /etc/condor/config.d
