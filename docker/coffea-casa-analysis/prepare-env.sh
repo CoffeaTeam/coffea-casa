@@ -96,6 +96,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       # Nanny container port will be used later...
       PORT=`cat $_CONDOR_JOB_AD | grep dask_HostPort | tr -d '"' | awk '{print $NF;}'`
       CONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep dask_ContainerPort | tr -d '"' | awk '{print $NF;}'`
+      NANNY_PORT=`cat $_CONDOR_JOB_AD | grep nanny_HostPort | tr -d '"' | awk '{print $NF;}'`
       NANNYCONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep nanny_ContainerPort | tr -d '"' | awk '{print $NF;}'`
       HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
       NAME=`cat $_CONDOR_JOB_AD | grep "DaskWorkerName "  | tr -d '"' | awk '{print $NF;}'`
@@ -117,8 +118,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --tls-key $FILE_KEY \
       --nthreads $CPUS \
       --memory-limit $MEMORY_MB_FORMATTED \
-      --nanny
-      --nanny-port $NANNYCONTAINER_PORT
+      --nanny --nanny-port $NANNY_PORT \
       --death-timeout 60 \
       --protocol tls \
       --listen-address tls://0.0.0.0:$CONTAINER_PORT \
