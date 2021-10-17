@@ -4,6 +4,8 @@ START=FALSE
 
 DAEMON_LIST = MASTER
 
-LOCAL_CONFIG_DIR = $(HOME)/.condor/config
+# Using writable directory here, $HOME in this case is not writtable
+# FIXME: make LOCAL_CONFIG_DIR configurable
+LOCAL_CONFIG_DIR = /opt/condor/config.d
 
 

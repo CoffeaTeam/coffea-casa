@@ -2,9 +2,6 @@
 
 set -x
 
-# Overwrite existing dask configuration files and add configuration files for condor
-rm -rf $HOME/.config/dask; ln -s /opt/dask $HOME/.config/dask
-
 if [[ "$SERVICEX_HOST" ]]; then
     touch $HOME/.servicex
     echo "Tokens: generating ServiceX config file (available only from Jupyterhub notebook)"
@@ -23,11 +20,11 @@ sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $HOME/.config/da
 sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/labextension.yaml
 sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $HOME/.config/dask/labextension.yaml
 
-# HTCondor scheduler setting
-echo "CONDOR_HOST = ${CONDOR_HOST}" >> $HOME/.condor/config/schedd
-echo "COLLECTOR_NAME = ${COLLECTOR_NAME}" >> $HOME/.condor/config/schedd
-echo "UID_DOMAIN = ${UID_DOMAIN}" >> $HOME/.condor/config/schedd
-echo "SCHEDD_HOST = ${SCHEDD_HOST}" >> $HOME/.condor/config/schedd
+# HTCondor scheduler settings
+echo "CONDOR_HOST = ${CONDOR_HOST}" >> /opt/condor/config.d/schedd
+echo "COLLECTOR_NAME = ${COLLECTOR_NAME}" >> /opt/condor/config.d/schedd
+echo "UID_DOMAIN = ${UID_DOMAIN}" >> /opt/condor/config.d/schedd
+echo "SCHEDD_HOST = ${SCHEDD_HOST}" >> /opt/condor/config.d/schedd
 
 # Check environment
 if [ -e "$HOME/environment.yml" ]; then

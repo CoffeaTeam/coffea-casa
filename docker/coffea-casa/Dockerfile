@@ -14,10 +14,10 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="coffeacasa_servicex_193-12"
+ARG TAG="coffeacasa_servicex_193-13"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
-ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
+ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
 # Configure Labextention Dask Cluster factory
 ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
@@ -26,7 +26,7 @@ ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
-ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
+ARG SERVICEX_TOKEN=$CERT_DIR"/.servicex"
 # Condor settings
 ARG CONDOR_HOST="red-condor.unl.edu"
 ARG COLLECTOR_NAME="Nebraska T2"
@@ -205,8 +205,8 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p /opt/dask  && chown -R "${NB_USER}:${NB_GID}" /opt/dask && \
+    mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
     mkdir -p ${HOME}/.condor/tokens.d && \
-    mkdir -p ${HOME}/.condor/config  && \
     mkdir -p /var/lib/condor && \
     mkdir -p /etc/condor/config.d
 
@@ -254,7 +254,7 @@ USER ${NB_UID}
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /opt/dask/
 # Copy HTCondor configuration files (see prepare-env.yaml)
-COPY config.d  /opt/condor/
+COPY config.d  /opt/condor/config.d/
 
 USER root
 # FIXME: too many files and a lot of UNL hacks! (oshadura)
