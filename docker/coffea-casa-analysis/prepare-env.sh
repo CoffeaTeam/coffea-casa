@@ -37,6 +37,15 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     echo "Got dask_HostPort, proceeding..."
     echo
 
+    while true; do
+      if grep nanny_HostPort "$_CONDOR_JOB_AD"; then
+        break
+      fi
+      sleep 1
+    done
+    echo "Got nanny_HostPort, proceeding..."
+    echo
+
     if [ -z "$_CONDOR_JOB_IWD" ]; then
       echo "Error: something is wrong, $_CONDOR_JOB_IWD (path to the initial working directory the job was born with) was not defined!"
       exit 1
