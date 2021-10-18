@@ -148,7 +148,7 @@ RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
     patch -p2 < 0003-Activate-patch.patch && \
-    patch -p1 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
+    patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
     # && patch -p2 < 0005-Add-patch-from-John-Thiltges.patch
 
 # xcache setup
