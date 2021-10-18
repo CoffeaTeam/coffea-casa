@@ -11,7 +11,7 @@ from distributed.security import Security
 DEFAULT_SCHEDULER_PORT = 8786
 DEFAULT_DASHBOARD_PORT = 8787
 DEFAULT_CONTAINER_PORT = 8786
-DEFAULT_NANNY_PORT = 8001
+#DEFAULT_NANNY_PORT = 8001
 
 # Security settings for Dask scheduler
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
@@ -63,7 +63,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                  scheduler_options=None,
                  scheduler_port=DEFAULT_SCHEDULER_PORT,
                  dashboard_port=DEFAULT_DASHBOARD_PORT,
-                 nanny_port=DEFAULT_NANNY_PORT,
+                 #nanny_port=DEFAULT_NANNY_PORT,
                  **job_kwargs):
         """
         Parameters
@@ -80,7 +80,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         container_port:
             Defaults to 8786.
         nanny_port:
-            Defaults to 8081.
+            Defaults to 8001.
         disk:
             Total amount of disk per job (defaults to 5 GiB).
         cores:
@@ -110,7 +110,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             worker_image=worker_image,
             scheduler_port=scheduler_port,
             dashboard_port=dashboard_port,
-            nanny_port=nanny_port,
+            #nanny_port=nanny_port,
         )
         # Instantiate args and parameters from parent abstract class security=security
         super().__init__(**job_kwargs)
@@ -124,7 +124,8 @@ class CoffeaCasaCluster(HTCondorCluster):
                            scheduler_options=None,
                            scheduler_port=DEFAULT_SCHEDULER_PORT,
                            dashboard_port=DEFAULT_DASHBOARD_PORT,
-                           nanny_port=DEFAULT_NANNY_PORT):
+                           #nanny_port=DEFAULT_NANNY_PORT
+                           ):
         job_config = job_kwargs.copy()
         input_files = []
         if PIP_REQUIREMENTS.is_file():
@@ -179,9 +180,11 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "docker_image": worker_image or dask.config.get(f"jobqueue.{cls.config_name}.worker-image")
             },
             {
-                "container_service_names": "dask,nanny",
+                #"container_service_names": "dask,nanny",
+                #"dask_container_port": DEFAULT_CONTAINER_PORT,
+                #"nanny_container_port": nanny_port,
+                "container_service_names": "dask",
                 "dask_container_port": DEFAULT_CONTAINER_PORT,
-                "nanny_container_port": nanny_port,
             },
             {"transfer_input_files": files},
             {"encrypt_input_files": files},
