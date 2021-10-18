@@ -1,0 +1,86 @@
+From 4d4d394b35e6720a132b4d8456c70d1b95a7fff2 Mon Sep 17 00:00:00 2001
+From: Oksana Shadura <ksu.shadura@gmail.com>
+Date: Fri, 24 Sep 2021 18:29:35 +0200
+Subject: [PATCH] Add patch from John Thiltges
+
+---
+ distributed/cli/dask_worker.py | 10 ++++++++++
+ distributed/worker.py          |  6 +++++-
+ 2 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/distributed/cli/dask_worker.py b/distributed/cli/dask_worker.py
+index 1f00a928..af5b636d 100755
+--- a/distributed/cli/dask_worker.py
++++ b/distributed/cli/dask_worker.py
+@@ -70,6 +70,14 @@ pem_file_option_type = click.Path(exists=True, resolve_path=True)
+     "ports like <first-port>:<last-port>. For example, --nanny-port=3000:3026 "
+     "will use ports 3000, 3001, ..., 3025, 3026.",
+ )
++@click.option(
++    "--nanny-contact-address",
++    type=str,
++    default=None,
++    help="The address the nanny advertises to the scheduler for "
++    "communication with it."
++    "Example: tcp://127.0.0.1:3000",
++)
+ @click.option(
+     "--bokeh-port", type=int, default=None, help="Deprecated.  See --dashboard-address"
+ )
+@@ -248,6 +256,7 @@ def main(
+     listen_address,
+     contact_address,
+     nanny_port,
++    nanny_contact_address,
+     nthreads,
+     nprocs,
+     nanny,
+@@ -415,6 +424,7 @@ def main(
+             resources=resources,
+             security=sec,
+             contact_address=contact_address,
++            nanny_contact_address=nanny_contact_address,
+             host=host,
+             port=port,
+             dashboard=dashboard,
+diff --git a/distributed/worker.py b/distributed/worker.py
+index 7066771a..c0b0ea46 100644
+--- a/distributed/worker.py
++++ b/distributed/worker.py
+@@ -418,6 +418,7 @@ class Worker(ServerNode):
+         dashboard=False,
+         http_prefix="/",
+         nanny=None,
++        nanny_contact_address=None,
+         plugins=(),
+         low_level_profiler=dask.config.get("distributed.worker.profile.low-level"),
+         validate=None,
+@@ -432,6 +433,7 @@ class Worker(ServerNode):
+         self.has_what = defaultdict(set)
+         self.pending_data_per_worker = defaultdict(deque)
+         self.nanny = nanny
++        self.nanny_contact_address = nanny_contact_address
+         self._lock = threading.Lock()
+ 
+         self.data_needed = deque()  # TODO: replace with heap?
+@@ -912,6 +914,8 @@ class Worker(ServerNode):
+         start = time()
+         if self.contact_address is None:
+             self.contact_address = self.address
++        if self.nanny_contact_address is None:
++            self.nanny_contact_address = self.nanny
+         logger.info("-" * 49)
+         while True:
+             try:
+@@ -941,7 +945,7 @@ class Worker(ServerNode):
+                         memory_limit=self.memory_limit,
+                         local_directory=self.local_directory,
+                         services=self.service_ports,
+-                        nanny=self.nanny,
++                        nanny=self.nanny_contact_address,
+                         pid=os.getpid(),
+                         versions=get_versions(),
+                         metrics=await self.get_metrics(),
+-- 
+2.33.0
+

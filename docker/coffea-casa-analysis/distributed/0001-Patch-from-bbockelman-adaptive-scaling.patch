@@ -1,0 +1,26 @@
+From c12639ee5b403f06927593526d519f60ebe54cc0 Mon Sep 17 00:00:00 2001
+From: Oksana Shadura <oksana.shadura@cern.ch>
+Date: Tue, 25 Aug 2020 16:06:51 +0200
+Subject: [PATCH] Patch from bbockelman (adaptive scaling)
+
+---
+ distributed/deploy/spec.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/distributed/deploy/spec.py b/distributed/deploy/spec.py
+index c7646032..06d2ad1b 100644
+--- a/distributed/deploy/spec.py
++++ b/distributed/deploy/spec.py
+@@ -337,7 +337,8 @@ class SpecCluster(Cluster):
+             to_close = set(self.workers) - set(self.worker_spec)
+             if to_close:
+                 if self.scheduler.status == Status.running:
+-                    await self.scheduler_comm.retire_workers(workers=list(to_close))
++                    worker_names = ["htcondor--%s--" % self.workers[idx].job_id for idx in to_close]
++                    await self.scheduler_comm.retire_workers(names=worker_names)
+                 tasks = [
+                     asyncio.create_task(self.workers[w].close())
+                     for w in to_close
+-- 
+2.33.0
+

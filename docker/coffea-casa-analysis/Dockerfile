@@ -7,7 +7,7 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.18dev0"
+ARG TAG="2021.10.18dev2"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -112,12 +112,6 @@ RUN pip install --no-cache-dir coffea[servicex] \
     correctionlib \
     cabinetry
 
-# Since we need to install patched version of distributed version, it is will be
-# preferable to pull proper dask and distributed versions via pip.
-# dask-jobqueue.git -> master has required fixes (no need to patch)
-RUN pip install --ignore-installed --no-cache-dir \
-    git+git://github.com/oshadura/distributed.git@2021.09.1-1-coffea-casa#egg=distributed
-
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
     git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
@@ -146,6 +140,16 @@ RUN groupadd -r condor && \
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
 COPY uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
 RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+
+# FIXME: merge PRs open in distributed.git (oshadura)
+# Distributed: we need to install patched version of distributed version
+COPY distributed /opt/conda/lib/python3.8/site-packages/distributed
+RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
+    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
+    patch -p2 < 0003-Activate-patch.patch && \
+    patch -p1 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
+    # && patch -p2 < 0005-Add-patch-from-John-Thiltges.patch
 
 # xcache setup
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
