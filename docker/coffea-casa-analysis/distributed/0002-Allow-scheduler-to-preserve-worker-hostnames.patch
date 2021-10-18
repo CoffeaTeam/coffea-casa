@@ -1,0 +1,86 @@
+From 12a4cf4500f86ba286bdd380e7e44aaf4cf969c3 Mon Sep 17 00:00:00 2001
+From: Oksana Shadura <ksu.shadura@gmail.com>
+Date: Tue, 16 Mar 2021 16:09:25 +0100
+Subject: [PATCH] Allow scheduler to preserve worker hostnames
+
+---
+ distributed/distributed-schema.yaml | 9 +++++++++
+ distributed/distributed.yaml        | 1 +
+ distributed/scheduler.py            | 8 +++++---
+ 3 files changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/distributed/distributed-schema.yaml b/distributed/distributed-schema.yaml
+index f5b7b73a..054ee49e 100644
+--- a/distributed/distributed-schema.yaml
++++ b/distributed/distributed-schema.yaml
+@@ -140,6 +140,15 @@ properties:
+ 
+               See https://docs.dask.org/en/latest/setup/custom-startup.html for more information
+ 
++          resolve-worker-hostname:
++            type: boolean
++            description: |
++              Whether the scheduler should resolve the worker hostname when joining.
++              If true, the worker's contact string is resolved to an IP address when it connects
++              (and the IP address is used to identify the worker internally).  Otherwise, the
++              resolution is only done when a socket is connected.  Disabling hostname resolution
++              may be advantageous when using TLS security.
++              
+           unknown-task-duration:
+             type: string
+             description: |
+diff --git a/distributed/distributed.yaml b/distributed/distributed.yaml
+index 6949fdd5..fde14180 100644
+--- a/distributed/distributed.yaml
++++ b/distributed/distributed.yaml
+@@ -25,6 +25,7 @@ distributed:
+     pickle: True            # Is the scheduler allowed to deserialize arbitrary bytestrings
+     preload: []             # Run custom modules with Scheduler
+     preload-argv: []        # See https://docs.dask.org/en/latest/setup/custom-startup.html
++    resolve-worker-hostname: True # Whether or not the worker hostname is resolved to an IP address at connection time
+     unknown-task-duration: 500ms  # Default duration for all tasks with unknown durations ("15m", "2h")
+     default-task-durations:  # How long we expect function names to run ("1h", "1s") (helps for long tasks)
+       rechunk-split: 1us
+diff --git a/distributed/scheduler.py b/distributed/scheduler.py
+index 706e85c3..1cef4148 100644
+--- a/distributed/scheduler.py
++++ b/distributed/scheduler.py
+@@ -163,6 +163,8 @@ DEFAULT_DATA_SIZE = declare(
+     Py_ssize_t, parse_bytes(dask.config.get("distributed.scheduler.default-data-size"))
+ )
+ 
++RESOLVE_WORKER_HOSTNAME = dask.config.get("distributed.scheduler.resolve-worker-hostname")
++
+ DEFAULT_EXTENSIONS = [
+     LockExtension,
+     MultiLockExtension,
+@@ -4056,7 +4058,7 @@ class Scheduler(SchedulerState, ServerNode):
+         comm=None,
+         *,
+         address,
+-        resolve_address: bool = True,
++        resolve_address=RESOLVE_WORKER_HOSTNAME,
+         now: float = None,
+         resources: dict = None,
+         host_info: dict = None,
+@@ -4161,7 +4163,7 @@ class Scheduler(SchedulerState, ServerNode):
+         keys=(),
+         nthreads=None,
+         name=None,
+-        resolve_address=True,
++        resolve_address=RESOLVE_WORKER_HOSTNAME,
+         nbytes=None,
+         types=None,
+         now=None,
+@@ -7186,7 +7188,7 @@ class Scheduler(SchedulerState, ServerNode):
+                 parent._resources[resource] = dr = dict()
+             del dr[worker]
+ 
+-    def coerce_address(self, addr, resolve=True):
++    def coerce_address(self, addr, resolve=RESOLVE_WORKER_HOSTNAME):
+         """
+         Coerce possible input addresses to canonical form.
+         *resolve* can be disabled for testing with fake hostnames.
+-- 
+2.33.0
+

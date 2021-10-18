@@ -37,14 +37,14 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     echo "Got dask_HostPort, proceeding..."
     echo
 
-    while true; do
-      if grep nanny_HostPort "$_CONDOR_JOB_AD"; then
-        break
-      fi
-      sleep 1
-    done
-    echo "Got nanny_HostPort, proceeding..."
-    echo
+    #while true; do
+    #  if grep nanny_HostPort "$_CONDOR_JOB_AD"; then
+    #    break
+    #  fi
+    #  sleep 1
+    #done
+    #echo "Got nanny_HostPort, proceeding..."
+    #echo
 
     if [ -z "$_CONDOR_JOB_IWD" ]; then
       echo "Error: something is wrong, $_CONDOR_JOB_IWD (path to the initial working directory the job was born with) was not defined!"
@@ -96,8 +96,9 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       # Nanny container port will be used later...
       PORT=`cat $_CONDOR_JOB_AD | grep dask_HostPort | tr -d '"' | awk '{print $NF;}'`
       CONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep dask_ContainerPort | tr -d '"' | awk '{print $NF;}'`
-      NANNY_PORT=`cat $_CONDOR_JOB_AD | grep nanny_HostPort | tr -d '"' | awk '{print $NF;}'`
-      NANNYCONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep nanny_ContainerPort | tr -d '"' | awk '{print $NF;}'`
+      #FIXME:
+      #NANNY_PORT=`cat $_CONDOR_JOB_AD | grep nanny_HostPort | tr -d '"' | awk '{print $NF;}'`
+      #NANNYCONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep nanny_ContainerPort | tr -d '"' | awk '{print $NF;}'`
       HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
       NAME=`cat $_CONDOR_JOB_AD | grep "DaskWorkerName "  | tr -d '"' | awk '{print $NF;}'`
       CPUS=`cat $_CONDOR_JOB_AD | grep "DaskWorkerCores " | tr -d '"' | awk '{print $NF;}'`
