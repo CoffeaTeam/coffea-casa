@@ -122,7 +122,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --death-timeout 60 \
       --protocol tls \
       --listen-address tls://0.0.0.0:$CONTAINER_PORT \
-      --contact-address tls://$HOST:$PORT \
+      --contact-address tls://$HOST:$PORT"
       # Debug print
       echo $HTCONDOR_COMAND 1>&2
       exec $HTCONDOR_COMAND
