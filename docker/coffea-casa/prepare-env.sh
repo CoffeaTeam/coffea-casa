@@ -13,6 +13,8 @@ api_endpoints:
     " > $HOME/.servicex
 fi
 
+rm -rf $HOME/.config/dask; ln -s /opt/dask $HOME/.config/dask
+
 # Populating Dask configuration files
 sed -i -e "s|latest|${TAG}|g" $HOME/.config/dask/jobqueue-coffea-casa.yaml
 sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $HOME/.config/dask/dask.yaml
