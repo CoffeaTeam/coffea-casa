@@ -19,6 +19,7 @@ ARG TAG="2021.10.19dev2"
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
 # Configure Labextention Dask Cluster factory
+ARG DASK_ROOT_CONFIG="/opt/dask"
 ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
@@ -204,7 +205,7 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
-RUN mkdir -p /opt/dask  && chown -R "${NB_USER}:${NB_GID}" /opt/dask && \
+RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
     mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
     mkdir -p ${HOME}/.condor/tokens.d && \
     mkdir -p /var/lib/condor && \

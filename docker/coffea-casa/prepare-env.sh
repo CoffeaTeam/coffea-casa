@@ -13,14 +13,12 @@ api_endpoints:
     " > $HOME/.servicex
 fi
 
-rm -rf $HOME/.config/dask; ln -s /opt/dask $HOME/.config/dask
-
 # Populating Dask configuration files
-sed -i -e "s|latest|${TAG}|g" $HOME/.config/dask/jobqueue-coffea-casa.yaml
-sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $HOME/.config/dask/dask.yaml
-sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $HOME/.config/dask/labextension.yaml
-sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $HOME/.config/dask/labextension.yaml
-sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $HOME/.config/dask/labextension.yaml
+sed -i -e "s|latest|${TAG}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
+sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $DASK_ROOT_CONFIG/dask.yaml
+sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $DASK_ROOT_CONFIG/labextension.yaml
+sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $DASK_ROOT_CONFIG/labextension.yaml
+sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $DASK_ROOT_CONFIG/labextension.yaml
 
 # HTCondor scheduler settings
 echo "CONDOR_HOST = ${CONDOR_HOST}" >> /opt/condor/config.d/schedd
