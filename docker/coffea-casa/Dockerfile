@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.24"
+ARG TAG="2021.10.24post0"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -228,7 +228,7 @@ RUN pip install --no-cache-dir coffea[servicex] \
     correctionlib \
     cabinetry \
     pyyaml \
-    coffea_casa==2021.10.19dev0
+    coffea_casa
 
 
 # ------- xrootd-authz-plugin -------------------------------
@@ -247,7 +247,7 @@ USER ${NB_UID}
 # Dask setup - > dask.yml
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
-COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml /opt/dask/
+COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}
 # Copy HTCondor configuration files (see prepare-env.yaml)
 COPY config.d  /opt/condor/config.d/
 
@@ -291,6 +291,8 @@ RUN rm -rf /tmp/* \
     && (find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf /opt/conda/pkgs
 
+# Fix permissions for Dask files
+RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
 # xcache setup
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
