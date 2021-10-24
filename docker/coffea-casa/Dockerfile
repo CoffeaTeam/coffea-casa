@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.8-fastjet-3.3.4.0rc9-gac79f80
+FROM coffeateam/coffea-dask:0.7.8-fastjet-3.3.4.0rc9-g7921522
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.19dev3"
+ARG TAG="2021.10.24"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
