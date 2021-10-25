@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.24post0"
+ARG TAG="2021.10.25"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -247,7 +247,7 @@ USER ${NB_UID}
 # Dask setup - > dask.yml
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
-COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}
+COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
 # Copy HTCondor configuration files (see prepare-env.yaml)
 COPY config.d  /opt/condor/config.d/
 
