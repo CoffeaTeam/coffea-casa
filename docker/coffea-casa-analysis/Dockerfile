@@ -7,14 +7,14 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.27"
+ARG TAG="2021.10.27post0"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
-ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets/xcache_token"
-ARG SERVICEX_TOKEN="/etc/cmsaf-secrets/.servicex"
+ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
+ARG SERVICEX_TOKEN=$CERT_DIR"/.servicex"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
