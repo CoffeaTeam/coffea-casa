@@ -64,7 +64,7 @@ jupyterhub==1.4.2
     #   jupyterhub-nativeauthenticator
     #   nullauthenticator
     #   oauthenticator
-jupyterhub-firstuseauthenticator==0.14.1
+jupyterhub-firstuseauthenticator==1.0.0
     # via -r requirements.in
 jupyterhub-hmacauthenticator==1.0
     # via -r requirements.in
@@ -163,8 +163,6 @@ rsa==4.7.2
     # via google-auth
 ruamel.yaml==0.17.9
     # via jupyter-telemetry
-ruamel.yaml.clib==0.2.2
-    # via ruamel.yaml
 six==1.16.0
     # via
     #   bcrypt
