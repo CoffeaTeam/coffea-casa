@@ -14,7 +14,6 @@ ARG CERT_DIR="/etc/cmsaf-secrets"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
-ARG SERVICEX_TOKEN=$CERT_DIR"/.servicex"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -33,7 +32,6 @@ ENV XCACHE_HOST $XCACHE_HOST
 ENV CACHE_PREFIX $CACHE_PREFIX
 ENV CERT_DIR $CERT_DIR
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
-ENV SERVICEX_TOKEN $SERVICEX_TOKEN
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
@@ -75,7 +73,7 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
     useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
     mkdir -p "${CONDA_DIR}" && \
-    mkdir -p /etc/cmsaf-secrets && \
+    mkdir -p "${CERT_DIR}" && \
     mkdir -p /var/lib/condor && \
     chown -R "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
     chown -R "${NB_USER}:${NB_GID}" "${HOME}" && \

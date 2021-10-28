@@ -13,11 +13,7 @@ if [ "$EXTRA_PIP_PACKAGES" ]; then
 fi
 
 # If there is defined COFFEA_CASA_SIDECAR env variable (inside hub values.yml),
-# then we use this container as a sidecar for JHUB with command:
-# dask-worker tls://localhost:8786 --tls-ca-file /etc/cmsaf-secrets/ca.pem \
-# --tls-cert /etc/cmsaf-secrets/hostcert.pem --tls-key /etc/cmsaf-secrets/hostcert.pem \
-# --listen-address tls://0.0.0.0:8788 --name kubernetes-worker --contact-address \
-# tls://$HOST_IP:8786
+# then we use this container as a sidecar for notebook.
 if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   if [ "${GITHUB_ACTIONS:-}" == "true" ]; then
     echo "CI mode, no need to test dask_HostPort info..."
