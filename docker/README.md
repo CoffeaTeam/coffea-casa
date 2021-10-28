@@ -54,7 +54,7 @@ See below full table of arguments for Scheduler and Worker image:
 |`DASK_ROOT_CONFIG`| Dask configuration file directory | `/opt/dask` |
 
 
-#### Coffea-casa Scheduler image
+#### Custom Coffea-casa Scheduler image
 
 ***Important note:*** please check that TAG values are the same for scheduler and worker image (as well Docker image tags!)
 
@@ -83,7 +83,7 @@ Other build arguments, which are optional to be changed:
 --build-arg LABEXTENTION_FACTORY_MODULE="coffea_casa"
 ```
 
-####  Dask Worker image
+####  Custom Coffea-casa Dask Worker image
 
 ***Important note:*** please check that TAG values are the same for scheduler and worker image (as well Docker image tags!)
 ```
