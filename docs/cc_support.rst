@@ -16,3 +16,7 @@ Conversation happens in the following places:
 
 .. important::
     Coffea-casa at Nebraska technical support through `GitHub Discussions. <https://github.com/CoffeaTeam/coffea-casa/discussions/categories/unl-tech-support>`_
+
+Tech Support
+-------------
+`Here <https://github.com/CoffeaTeam/coffea-casa/discussions/categories/unl-tech-support>`_ is the link to tech support.
