@@ -61,8 +61,8 @@ See below full table of arguments for Scheduler and Worker image:
 ```
 docker build 
 --build-arg NB_USER="atlas-jovyan"
---build-arg ARG NB_UID="6440"
---build-arg ARG NB_GID="11265" \
+--build-arg NB_UID="6440"
+--build-arg NB_GID="11265" \
 --build-arg TAG="2021.10.28"
 --build-arg XCACHE_HOST="red-xcache1.unl.edu"
 --build-arg CACHE_PREFIX="red-xcache1.unl.edu"
@@ -89,8 +89,8 @@ Other build arguments, which are optional to be changed:
 ```
 docker build 
 --build-arg NB_USER="atlas-jovyan"
---build-arg ARG NB_UID="6440"
---build-arg ARG NB_GID="11265" \
+--build-arg NB_UID="6440"
+--build-arg NB_GID="11265" \
 --build-arg TAG="2021.10.28"
 --build-arg XCACHE_HOST="red-xcache1.unl.edu"
 --build-arg CACHE_PREFIX="red-xcache1.unl.edu"
