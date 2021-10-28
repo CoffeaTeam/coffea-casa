@@ -14,7 +14,7 @@ ARG USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.27post0"
+ARG TAG="2021.10.28"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -232,9 +232,6 @@ RUN pip install --no-cache-dir coffea[servicex] \
     servicex-databinder \
     pyyaml \
     coffea_casa
-
-# FIXME: remove me after https://github.com/ssl-hep/ServiceX_frontend/pull/208 merged
-RUN pip install pyarrow==5.0
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \

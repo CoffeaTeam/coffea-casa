@@ -7,7 +7,7 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.27post0"
+ARG TAG="2021.10.28"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -112,9 +112,6 @@ RUN pip install --no-cache-dir coffea[servicex] \
     correctionlib \
     func_adl_uproot \
     cabinetry
-
-# FIXME: remove me after https://github.com/ssl-hep/ServiceX_frontend/pull/208 merged
-RUN pip install pyarrow==5.0
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
