@@ -12,7 +12,7 @@ ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
-ARG TAG="2021.10.28"
+ARG TAG="2021.10.28post0"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -224,7 +224,6 @@ RUN pip install --no-cache-dir coffea[servicex] \
     correctionlib \
     cabinetry \
     func_adl_uproot \
-    servicex-databinder \
     pyyaml \
     coffea_casa
 
