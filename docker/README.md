@@ -40,6 +40,7 @@ See below full table of arguments for Scheduler and Worker image:
 |`NB_UID`| User UID | `6440` |
 |`NB_GID`| User GID | `11265` |
 |`TAG`| Tag used to sync image for worker configured in Coffea_casa Dask Jobqueue extention | `2021.10.28` |
+|`WORKER_IMAGE`| Image name used to sync image for worker configured in Coffea_casa Dask Jobqueue extention | `coffeateam/coffea-casa-analysis` |
 |`XCACHE_HOST`| XCache host used for custom Xrootd plugin | `red-xcache1.unl.edu` |
 |`CACHE_PREFIX`| XCache prefix used for ServiceX | `red-xcache1.unl.edu` |
 |`LABEXTENTION_CLUSTER`| Name of default cluster configured in Coffea_casa Dask Jobqueue extention | `UNL HTCondor Cluster` |
@@ -60,17 +61,18 @@ See below full table of arguments for Scheduler and Worker image:
 
 ```
 docker build 
---build-arg NB_USER="atlas-jovyan"
---build-arg NB_UID="6440"
+--build-arg NB_USER="atlas-jovyan" \
+--build-arg NB_UID="6440" \
 --build-arg NB_GID="11265" \
---build-arg TAG="2021.10.28"
---build-arg XCACHE_HOST="red-xcache1.unl.edu"
---build-arg CACHE_PREFIX="red-xcache1.unl.edu"
---build-arg LABEXTENTION_CLUSTER="X HTCondor Cluster"
---build-arg CONDOR_HOST="red-condor.unl.edu"
---build-arg COLLECTOR_NAME="Nebraska T2"
---build-arg UID_DOMAIN="unl.edu"
---build-arg SCHEDD_HOST="t3.unl.edu"
+--build-arg TAG="2021.10.28" \
+--build-arg WORKER_IMAGE="coffeateam/coffea-casa-analysis" \
+--build-arg XCACHE_HOST="red-xcache1.unl.edu" \
+--build-arg CACHE_PREFIX="red-xcache1.unl.edu" \
+--build-arg LABEXTENTION_CLUSTER="X HTCondor Cluster" \
+--build-arg CONDOR_HOST="red-condor.unl.edu" \
+--build-arg COLLECTOR_NAME="Nebraska T2" \
+--build-arg UID_DOMAIN="unl.edu" \
+--build-arg SCHEDD_HOST="t3.unl.edu" \
  -t coffeateam/coffea-casa:$TAG coffea-casa
 ```
 
@@ -88,12 +90,12 @@ Other build arguments, which are optional to be changed:
 ***Important note:*** please check that TAG values are the same for scheduler and worker image (as well Docker image tags!)
 ```
 docker build 
---build-arg NB_USER="atlas-jovyan"
---build-arg NB_UID="6440"
+--build-arg NB_USER="atlas-jovyan" \
+--build-arg NB_UID="6440" \
 --build-arg NB_GID="11265" \
---build-arg TAG="2021.10.28"
---build-arg XCACHE_HOST="red-xcache1.unl.edu"
---build-arg CACHE_PREFIX="red-xcache1.unl.edu"
+--build-arg TAG="2021.10.28" \
+--build-arg XCACHE_HOST="red-xcache1.unl.edu" \
+--build-arg CACHE_PREFIX="red-xcache1.unl.edu" \
  -t coffeateam/coffea-casa-analysis:$TAG coffea-casa-analysis
 ```
 

@@ -14,6 +14,7 @@ api_endpoints:
 fi
 
 # Populating Dask configuration files
+sed -i -e "s|coffeateam/coffea-casa-analysis|${WORKER_IMAGE}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
 sed -i -e "s|latest|${TAG}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
 sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $DASK_ROOT_CONFIG/dask.yaml
 sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $DASK_ROOT_CONFIG/labextension.yaml
