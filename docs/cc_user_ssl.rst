@@ -1,4 +1,4 @@
-First Steps at Coffea-Casa
+First Steps at Coffea-Casa Analysis Facility @ UChicago
 ==========================
 Prerequisites
 -------------
