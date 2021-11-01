@@ -20,8 +20,8 @@ Access
    :align: center
 
 .. important::
-   **Remeber that to access this instance you need to register before: push "Register for access" 
-   (we have alailable the limited resources and can't provide access everythone under CILogon).**
+   **Remember that to access this instance you need to register: click "Register for access".
+   (We have limited resources available and can't provide access to everyone under CILogon).**
 
 Opendata CILogon Authentication Instance
 ---------------------------------
@@ -60,14 +60,14 @@ If you see the next window, it means that registration request was sent succesfu
 .. important::
    **After this staep please wait when you will get approved by administrator!**
 
-After you had been approved, you will receive an email, where you will need simply to click a link:
+After your request is approved, you will receive an email, where you will need simply to click a link:
 
 .. image:: _static/cc-email.png
    :alt:  Example of email you should receive after registration.
    :width: 50%
    :align: center
 
-Voila! Now you can start directly use Opendata Coffea-Casa. Click here to "Authorized Users Only: Sign in with OAuth 2.0":
+Voila! Now you can login to Opendata Coffea-Casa. Click on "Authorized Users Only: Sign in with OAuth 2.0":
 
 .. image:: _static/cc-enter.png
    :alt:  Start directly use Opendata Coffea-Casa: click here to "Authorized Users Only: Sign in with OAuth 2.0".
@@ -86,7 +86,7 @@ For high efficient analysis using *coffea* package, powered with *Dask* and *HTC
     :align: center
 
 
-After you will be forwarded to your personal Jupyterhub instance running at Analysis Facility @ T2 Nebraska:
+Then you will be forwarded to your personal Jupyterhub instance running at Analysis Facility @ T2 Nebraska:
 
 .. image:: _static/coffea-casa-start.png
    :alt: Jupyterhub instance together with Dask Labextention powered cluster available at Opendata Coffea-casa Analysis Facility @ T2 Nebraska
@@ -104,7 +104,7 @@ By default, the Coffea-casa Dask cluster should provide you with a scheduler and
    :width: 50%
    :align: center
 
-As soon as you will start your computations, you will notice that available resources at the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska can easily autoscale depending on available resources in the HTCondor pool at Nebraska Tier 2.
+As soon as you start your computations, you will notice that available resources at the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska can easily autoscale depending on available resources in the HTCondor pool at Nebraska Tier 2.
 
 
 .. image:: _static/coffea-casa-labext.png
@@ -261,4 +261,3 @@ As a result you should see next plot:
    :alt: Final plot that you should see at the end of example
    :width: 50%
    :align: center
-   
