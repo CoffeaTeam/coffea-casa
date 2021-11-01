@@ -1,4 +1,4 @@
-First Steps at CMS Coffea-Casa @ UNL
+First Steps at Opendata Coffea-Casa @ UNL
 ==========================
 Prerequisites
 -------------
@@ -12,29 +12,65 @@ Access
 ------
 
 .. important::
-   Please use `https://coffea.casa <https://coffea.casa>`_ as an access point to the CMS Coffea-Casa Analysis Facility @ T2 Nebraska.
+   Please use `https://coffea-opendata.casa <https://coffea-opendata.casa>`_ as an access point to the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska.
 
-.. image:: _static/coffea-casa-enter.png
-   :alt: Access to Coffea-casa Analysis Facility @ T2 Nebraska
+.. image:: _static/cc-login.png
+   :alt: Access to Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
+.. important::
+   **Remeber that to access this instance you need to register before: push "Register for access" 
+   (we have alailable the limited resources and can't provide access everythone under CILogon).**
 
-CMS AuthZ Authentication Instance
+Opendata CILogon Authentication Instance
 ---------------------------------
 
-Currently Coffea-Casa Analysis Facility @ T2 Nebraska support any member of CMS VO organisation.
+Currently Opendata Coffea-Casa support any CILogon. Select your identity provider:
 
-To access it please sign in or sign up using ``Apply for an account``.
 
-.. image:: _static/coffea-casa-authz.png
-   :alt: CMS Authz authentification to Coffea-casa Analysis Facility @ T2 Nebraska
+.. image:: _static/cc-cilogon.png
+   :alt: Select your identity provider CILogon Authz authentification to Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
+For accessing Opendata Coffea-Casa, we are offering a self-signup registration with approval.
 
-.. image:: _static/coffea-casa-authz-approval.png
-   :alt: Approval required for CMS Authz authentification to Coffea-casa Analysis Facility @ T2 Nebraska
+.. image:: _static/cc-reg1.png
+   :alt: We offer self-signup option with approval.
+   :width: 50%
+   :align: center
+
+Click to proceed to next stage:
+
+.. image:: _static/cc-reg2.png
+   :alt: Check information in registration form (it should be prefilled)
+   :width: 50%
+   :align: center
+
+Click to proceed to next stage:
+
+.. image:: _static/cc-request.png
+   :alt: Request for approval was send (and red window should ne be here :-))
+   :width: 50%
+   :align: center
+
+If you see next window, it means registration was send succesfully!
+
+.. important::
+   **After this staep please wait when you will get approved by administrator!**
+
+After you had been approved, you will receive an email where you will need to click a link:
+
+.. image:: _static/cc-email.png
+   :alt:  Example of email you should receive after registration.
+   :width: 50%
+   :align: center
+
+Voila! Now you can start directly use Opendata Coffea-Casa. Click here to "Access":
+
+.. image:: _static/cc-enter.png
+   :alt:  Start directly use Opendata Coffea-Casa: click here to "Access".
    :width: 50%
    :align: center
 
@@ -53,26 +89,26 @@ For high efficient analysis using *coffea* package, powered with *Dask* and *HTC
 After you will be forwarded to your personal Jupyterhub instance running at Analysis Facility @ T2 Nebraska:
 
 .. image:: _static/coffea-casa-start.png
-   :alt: Jupyterhub instance together with Dask Labextention powered cluster available at Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Jupyterhub instance together with Dask Labextention powered cluster available at Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 100%
    :align: center
 
 
-Cluster Resources in Coffea-Casa Analysis Facility @ T2 Nebraska
+Cluster Resources in Opendata Coffea-Casa Analysis Facility @ T2 Nebraska
 ----------------------------------------------------------------
 
 By default, the Coffea-casa Dask cluster should provide you with a scheduler and workers, which you can see by clicking on the colored Dask icon in the left sidebar.
 
 .. image:: _static/coffea-casa-startr.png
-   :alt: Default Dask Labextention powered cluster available Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Default Dask Labextention powered cluster available Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
-As soon as you will start your computations, you will notice that available resources at the Coffea-Casa Analysis Facility @ T2 Nebraska can easily autoscale depending on available resources in the HTCondor pool at Nebraska Tier 2.
+As soon as you will start your computations, you will notice that available resources at the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska can easily autoscale depending on available resources in the HTCondor pool at Nebraska Tier 2.
 
 
 .. image:: _static/coffea-casa-labext.png
-   :alt: Autoscaling with Dask Labextention powered cluster available at Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Autoscaling with Dask Labextention powered cluster available at Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
    
@@ -105,19 +141,19 @@ This behaves exactly like the *New Launcher* option above.
 Using Git
 ---------
 
-Cloning a repository in the Coffea-casa Analysis Facility @ T2 Nebraska is simple, though it can be a little confusing because it is spread across two tabs in the sidebar: the *File Browser* and the *Git* tabs.
+Cloning a repository in the Opendata Coffea-casa Analysis Facility @ T2 Nebraska is simple, though it can be a little confusing because it is spread across two tabs in the sidebar: the *File Browser* and the *Git* tabs.
 
 In order to clone a repository, first go to the Git tab. It should look like this:
 
 .. image:: _static/git.png
-   :alt: The Git tab at Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: The Git tab at Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
 Simply click the appropriate button (initialize a repository, or clone a repository) and you'll be hooked up to GitHub. This should then take you to the *File Browser* tab, which is where you can see all of the repositories you have cloned in your JupyterLab instance. The File Browser should look like this:
 
 .. image:: _static/browser.png
-   :alt: The File Browser tab at Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: The File Browser tab at Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
@@ -126,7 +162,7 @@ If you wish to change repositories, simply click the folder button to enter the 
 If you wish to commit, push, or pull from the repository you currently have active in the File Browser, then you can return to the Git tab. It should change to look like this, so long as you have a repository open in the File Browser:
 
 .. image:: _static/git2.png
-   :alt: The Git tab at Coffea-casa Analysis Facility @ T2 Nebraska, after a repository is activated
+   :alt: The Git tab at Opendata Coffea-casa Analysis Facility @ T2 Nebraska, after a repository is activated
    :width: 50%
    :align: center
 
@@ -226,21 +262,3 @@ As a result you should see next plot:
    :width: 50%
    :align: center
    
-Important Note for CMS Data
----------------------------
-
-.. important::
-   Above, we used a public data file to run through our example. If your analysis makes use of CMS data, or data which is otherwise certificate-protected, you will run into authentication errors.
-   The Coffea-Casa Analysis Facility @ T2 Nebraska comes equipped with xcache tokens that permit you to access this data, but you will need to edit the path you're using to access the root file by changing the redirector portion to ``xcache``. For example:
-
-Example:
-
-.. code-block:: bash
-
-   root://xrootd.unl.edu//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root
-
-becomes:
-
-.. code-block:: bash
-
-root://xcache//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root

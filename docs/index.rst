@@ -7,12 +7,12 @@ Welcome to the Coffea-Casa Project!
 ==============================================================================================================
 
 
-**Coffea-casa** is a prototype of a U.S. CMS analysis facility that provides services for “low latency columnar analysis,” enabling rapid processing of data in a column-wise fashion.
+**Coffea-casa** is a prototype of an analysis facility that provides services for “low latency columnar analysis,” enabling rapid processing of data in a column-wise fashion.
 
 Coffea-casa Analysis Facility (AF) services, based on *Dask* and *Jupyter Notebook* technologies, aim to dramatically lower time for analysis and provide an easily-scalable and user-friendly computational environment that will simplify, facilitate, and accelerate the delivery of HEP results.
 
 .. image:: _static/coffea-casa-draft.png
-   :alt: Prototype of Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Prototype of Coffea-casa Analysis Facility
    :width: 100%
    :align: center
 
@@ -20,7 +20,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 
 
 .. image:: _static/coffea-casa-resources.png
-   :alt: Resources allocated for each user at Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Resources allocated for each user at Coffea-casa Analysis Facility
    :width: 100%
    :align: center
 
@@ -47,6 +47,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :caption: How To Use Coffea-casa
 
    cc_user.rst
+   cc_user_opendata.rst
    cc_user_ssl.rst
    cc_packages.rst
    cc_metrics.rst
