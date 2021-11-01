@@ -26,7 +26,7 @@ Access
 Opendata CILogon Authentication Instance
 ---------------------------------
 
-Currently Opendata Coffea-Casa support any CILogon. Select your identity provider:
+Currently Opendata Coffea-Casa support any CILogon identity provider. Select your identity provider:
 
 
 .. image:: _static/cc-cilogon.png
@@ -34,33 +34,33 @@ Currently Opendata Coffea-Casa support any CILogon. Select your identity provide
    :width: 50%
    :align: center
 
-For accessing Opendata Coffea-Casa, we are offering a self-signup registration with approval.
+For accessing Opendata Coffea-Casa, we are offering a self-signup registration form with approval.
 
 .. image:: _static/cc-reg1.png
-   :alt: We offer self-signup option with approval.
+   :alt: Check a self-signup option with approval.
    :width: 50%
    :align: center
 
 Click to proceed to next stage:
 
 .. image:: _static/cc-reg2.png
-   :alt: Check information in registration form (it should be prefilled)
+   :alt: Check an information in the registration form (form should be already prefilled).
    :width: 50%
    :align: center
 
-Click to proceed to next stage:
+Click to proceed to the next stage:
 
 .. image:: _static/cc-request.png
-   :alt: Request for approval was send (and red window should ne be here :-))
+   :alt: Request for approval was send (and this red window should not be here, sorry :-))
    :width: 50%
    :align: center
 
-If you see next window, it means registration was send succesfully!
+If you see the next window, it means that registration request was sent succesfully!
 
 .. important::
    **After this staep please wait when you will get approved by administrator!**
 
-After you had been approved, you will receive an email where you will need to click a link:
+After you had been approved, you will receive an email, where you will need simply to click a link:
 
 .. image:: _static/cc-email.png
    :alt:  Example of email you should receive after registration.
