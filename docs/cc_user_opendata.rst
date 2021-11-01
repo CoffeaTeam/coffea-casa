@@ -67,10 +67,10 @@ After you had been approved, you will receive an email where you will need to cl
    :width: 50%
    :align: center
 
-Voila! Now you can start directly use Opendata Coffea-Casa. Click here to "Access":
+Voila! Now you can start directly use Opendata Coffea-Casa. Click here to "Authorized Users Only: Sign in with OAuth 2.0":
 
 .. image:: _static/cc-enter.png
-   :alt:  Start directly use Opendata Coffea-Casa: click here to "Access".
+   :alt:  Start directly use Opendata Coffea-Casa: click here to "Authorized Users Only: Sign in with OAuth 2.0".
    :width: 50%
    :align: center
 
