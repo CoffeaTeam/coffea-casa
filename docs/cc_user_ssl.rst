@@ -136,15 +136,15 @@ ServiceX
 --------
 
 When dealing with very large datasets it is often better to do initial data filtering, augmentation using `ServiceX <https://iris-hep.org/projects/servicex>`_.
-ServiceX transformation produce output as Awkward Arrays that can then be used in a regular Coffea processing.
+ServiceX transformation produces output as an Awkward Array. The array can then be used in a regular Coffea processing.
 Here a scheme explaining the workflow:
 
 .. image:: _static/servicex-coffea-workflow.png
    :alt: ServiceX and Coffea-Casa workflow schema.
-   :width: 50%
+   :width: 80%
    :align: center
 
-There are two different UC AF deployed ServiceX instance. The only difference between them is the type of input data they are capable of processing.
+There are two different, UC AF deployed ServiceX instances. The only difference between them is the type of input data they are capable of processing.
 `Uproot <https://uproot-atlas.servicex.af.uchicago.edu/>`_ processes any kind of "flat" ROOT files, while `xAOD <https://xaod.servicex.af.uchicago.edu/>`_ processes only Rucio registered xAOD files.
 
 To use them one has to register and get approved. 
@@ -152,14 +152,14 @@ Sign in will lead you to a Globus registration page, where you may choose to use
 
 .. image:: _static/servicex-registration.png
    :alt: ServiceX registration.
-   :width: 50%
+   :width: 80%
    :align: center
 
 Once approved, you will be able to see status of your requests in the dashboard:
 
 .. image:: _static/servicex-dashboard.png
    :alt: ServiceX dashboard.
-   :width: 50%
+   :width: 80%
    :align: center
 
 For your code to be able to authenticate your requests, you need to download a servicex.yaml file, that should be placed in your working directory.
@@ -167,10 +167,10 @@ The file is downloaded from your profile page:
 
 .. image:: _static/servicex-profile.png
    :alt: ServiceX profile.
-   :width: 50%
+   :width: 80%
    :align: center
 
-For an example analysis using ServiceX and Coffea look `here <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analyses/HZZ/CoffeaHZZAnalysisWithServiceX.ipynb>`_
+For an example analysis using ServiceX and Coffea look `here. <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/workshops/agctools2021/HZZ_analysis_pipeline/HZZ_analysis_pipeline.ipynb>`_
 
 Example
 -------
