@@ -20,6 +20,7 @@ oauthenticator
 # Authenticator optional dependencies
 mwoauth
 pyjwt
+pymacaroons
 
 ## Kubernetes spawner
 jupyterhub-kubespawner
