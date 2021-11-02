@@ -23,9 +23,9 @@ Access
 ATLAS AuthZ Authentication Instance
 ---------------------------------
 
-Currently Coffea-Casa Analysis Facility @ UChicago support any member of ATLAS VO organisation.
+Currently Coffea-Casa Analysis Facility @ UChicago support can any member of ATLAS.
 
-To access it please sign in or sign up using ``Apply for an account``.
+Sign in with your ATLAS CERN credential:
 
 .. image:: _static/atlas-auth.web.cern.ch_login.png
    :alt: ATLAS Authz authentification to Coffea-casa Analysis Facility @ UChicago
@@ -170,8 +170,10 @@ The file is downloaded from your profile page:
    :width: 80%
    :align: center
 
-For an example analysis using ServiceX and Coffea look `here. <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/workshops/agctools2021/HZZ_analysis_pipeline/HZZ_analysis_pipeline.ipynb>`_
+For an example analysis using ServiceX and Coffea look `here. <https://github.com/iris-hep/analysis-grand-challenge/blob/main/workshops/agctools2021/HZZ_analysis_pipeline/HZZ_analysis_pipeline.ipynb>`_
 
-Example
+More Examples
 -------
-coming soon...
+Columnar data analysis with DAOD_PHYSLITE `here. <https://github.com/nikoladze/agc-tools-workshop-2021-physlite>`_
+
+
