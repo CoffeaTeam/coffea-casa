@@ -243,4 +243,4 @@ becomes:
 
 .. code-block:: bash
 
-root://xcache//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root
+   root://xcache//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root
