@@ -144,16 +144,18 @@ Here a scheme explaining the workflow:
    :align: center
 
 There are two different UC AF deployed ServiceX instance. The only difference between them is the type of input data they are capable of processing.
-`Uproot <https://uproot-atlas.servicex.af.uchicago.edu/>` processes any kind of "flat" ROOT files, while `xAOD <https://xaod.servicex.af.uchicago.edu/>` processes only Rucio registered xAOD files.
+`Uproot <https://uproot-atlas.servicex.af.uchicago.edu/>_` processes any kind of "flat" ROOT files, while `xAOD <https://xaod.servicex.af.uchicago.edu/>_` processes only Rucio registered xAOD files.
 
 To use them one has to register and get approved. 
 Sign in will lead you to a Globus registration page, where you may choose to use account connected to your institution:
+
 .. image:: _static/servicex-registration.png
    :alt: ServiceX registration.
    :width: 50%
    :align: center
 
 Once approved, you will be able to see status of your requests in the dashboard:
+
 .. image:: _static/servicex-dashboard.png
    :alt: ServiceX dashboard.
    :width: 50%
@@ -161,6 +163,7 @@ Once approved, you will be able to see status of your requests in the dashboard:
 
 For your code to be able to authenticate your requests, you need to download a servicex.yaml file, that should be placed in your working directory.
 The file is downloaded from your profile page:
+
 .. image:: _static/servicex-profile.png
    :alt: ServiceX profile.
    :width: 50%
