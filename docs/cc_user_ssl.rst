@@ -23,7 +23,7 @@ Access
 ATLAS AuthZ Authentication Instance
 ---------------------------------
 
-Currently Coffea-Casa Analysis Facility @ UChicago support can any member of ATLAS.
+Currently Coffea-Casa Analysis Facility @ UChicago can support any member of ATLAS.
 
 Sign in with your ATLAS CERN credential:
 
