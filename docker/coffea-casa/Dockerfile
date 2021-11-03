@@ -221,8 +221,7 @@ RUN mamba install --yes \
     mplhep \
     iminuit \
     cmake \
-    scikit-hep-testdata \
-    root
+    scikit-hep-testdata
 
 RUN pip install --no-cache-dir coffea[servicex] \
     correctionlib \
