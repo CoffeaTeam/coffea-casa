@@ -13,7 +13,7 @@ ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Tag
 ARG WORKER_IMAGE="coffeateam/coffea-casa-analysis"
-ARG TAG="2021.10.29"
+ARG TAG="2021.11.03"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -220,12 +220,16 @@ RUN mamba install --yes \
     hist \
     mplhep \
     iminuit \
-    cmake
+    cmake \
+    scikit-hep-testdata \
+    root
 
 RUN pip install --no-cache-dir coffea[servicex] \
     correctionlib \
     cabinetry \
     func_adl_uproot \
+    tcut_to_qastle \
+    servicex-databinder \
     pyyaml \
     coffea_casa
 
