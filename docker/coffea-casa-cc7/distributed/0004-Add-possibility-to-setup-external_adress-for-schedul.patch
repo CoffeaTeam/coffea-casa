@@ -1,0 +1,45 @@
+From 78c0fce12332b32a1bb3d3683190161f2584fd20 Mon Sep 17 00:00:00 2001
+From: Oksana Shadura <ksu.shadura@gmail.com>
+Date: Tue, 16 Mar 2021 16:19:21 +0100
+Subject: [PATCH] Add possibility to setup external_adress for scheduler
+
+---
+ distributed/deploy/spec.py | 2 +-
+ distributed/scheduler.py   | 3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/distributed/deploy/spec.py b/distributed/deploy/spec.py
+index 06d2ad1b..d9d95087 100644
+--- a/distributed/deploy/spec.py
++++ b/distributed/deploy/spec.py
+@@ -362,7 +362,7 @@ class SpecCluster(Cluster):
+                     opts["name"] = name
+                 if isinstance(cls, str):
+                     cls = import_term(cls)
+-                worker = cls(self.scheduler.address, **opts)
++                worker = cls(getattr(self.scheduler, "external_address", None) or self.scheduler.address, **opts)
+                 self._created.add(worker)
+                 workers.append(worker)
+             if workers:
+diff --git a/distributed/scheduler.py b/distributed/scheduler.py
+index 1cef4148..9b24177f 100644
+--- a/distributed/scheduler.py
++++ b/distributed/scheduler.py
+@@ -3525,11 +3525,14 @@ class Scheduler(SchedulerState, ServerNode):
+         preload=None,
+         preload_argv=(),
+         plugins=(),
++        external_address=None,
+         **kwargs,
+     ):
+         self._setup_logging(logger)
+ 
+         # Attributes
++        if external_address:
++            self.external_address = external_address
+         if allowed_failures is None:
+             allowed_failures = dask.config.get("distributed.scheduler.allowed-failures")
+         self.allowed_failures = allowed_failures
+-- 
+2.33.0
+
