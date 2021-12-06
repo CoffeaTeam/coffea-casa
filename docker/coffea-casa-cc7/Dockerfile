@@ -201,6 +201,7 @@ RUN mamba install --yes \
     -c conda-forge \
     conda-build \
     htcondor \
+    oidc-agent \
     xgboost \
     pyhf \
     vector \

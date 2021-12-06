@@ -108,6 +108,7 @@ RUN mkdir $HOME/work && \
 RUN mamba install --yes \
     -c conda-forge \
     htcondor \
+    oidc-agent \
     xgboost \
     pyhf \
     vector \
