@@ -19,7 +19,7 @@ ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
 ARG GITHUB_ACTIONS="false"
 
 # Configure environment
-ENV CONDA_DIR /opt/conda
+ENV CONDA_DIR /usr/local
 ENV SHELL /bin/bash
 ENV NB_USER $NB_USER
 ENV USER $NB_USER

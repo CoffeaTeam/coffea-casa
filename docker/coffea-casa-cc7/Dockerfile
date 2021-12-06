@@ -36,7 +36,7 @@ ARG SCHEDD_HOST="t3.unl.edu"
 ARG GITHUB_ACTIONS="false"
 
 # Configure environment
-ENV CONDA_DIR /opt/conda
+ENV CONDA_DIR /usr/local
 ENV SHELL /bin/bash
 ENV NB_USER $NB_USER
 ENV USER $NB_USER
