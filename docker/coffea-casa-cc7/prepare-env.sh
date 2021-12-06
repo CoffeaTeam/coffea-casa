@@ -2,6 +2,20 @@
 
 set -x
 
+# Configure oidc-agent for token management
+#echo "eval \`oidc-keychain\`" >> ~/.bashrc
+#eval `oidc-keychain`
+#oidc-gen coffea-casa --issuer $IAM_SERVER \
+#               --client-id $IAM_CLIENT_ID \ # https://cms-auth.web.cern.ch/
+#               --client-secret $IAM_CLIENT_SECRET \
+#               --rt $REFRESH_TOKEN \
+#               --confirm-yes \
+#               --scope "openid profile email wlcg wlcg.groups" \
+#               --redirect-uri  http://localhost:8843 \
+#               --pw-cmd "echo \"DUMMY PWD\""
+
+#while true; do oidc-token coffea-casa --time 1200 > /tmp/token; sleep 600; done &
+
 if [[ "$SERVICEX_HOST" ]]; then
     touch $HOME/.servicex
     echo "Tokens: generating ServiceX config file (available only from Jupyterhub notebook)"
