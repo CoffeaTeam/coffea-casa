@@ -26,7 +26,7 @@ ENV USER $NB_USER
 ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
-ENV PATH "/opt/conda/bin/:$PATH"
+ENV PATH "${CONDA_DIR}/bin/:$PATH"
 ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
 ENV CACHE_PREFIX $CACHE_PREFIX
@@ -130,7 +130,7 @@ RUN cd /tmp && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
     make && \
     make install
 
@@ -150,13 +150,13 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
-COPY uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
-RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+COPY uproot_xrd_source.patch ${CONDA_DIR}/lib/python3.8/site-packages/uproot
+RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY distributed /opt/conda/lib/python3.8/site-packages/distributed
-RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
+COPY distributed ${CONDA_DIR}/lib/python3.8/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
     patch -p2 < 0003-Activate-patch.patch && \
@@ -164,24 +164,24 @@ RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
     # && patch -p2 < 0005-Add-patch-from-John-Thiltges.patch
 
 # xcache setup
-ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
-ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
-ENV PATH="/opt/conda/bin/:$PATH"
+ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+ENV PATH="${CONDA_DIR}/bin/:$PATH"
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
-RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
+RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
     && mamba clean -tipsy \
-    && find /opt/conda/ -type f,l -name '*.a' -delete \
-    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
-    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && rm -rf /opt/conda/pkgs
+    && find ${CONDA_DIR} -type f,l -name '*.a' -delete \
+    && find ${CONDA_DIR} -type f,l -name '*.pyc' -delete \
+    && find ${CONDA_DIR}/ -type f,l -name '*.js.map' -delete \
+    && rm -rf ${CONDA_DIR}/pkgs
 
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
