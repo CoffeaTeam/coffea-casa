@@ -1,0 +1,25 @@
+jobqueue:
+  coffea-casa:
+
+    # Dask worker options, taken from https://github.com/dask/dask-jobqueue/tree/master/dask_jobqueue
+    cores: 2                 # Total number of cores per job
+    memory: "6 GiB"                # Total amount of memory per job
+    processes: null                # Number of Python processes per jobs
+    worker-image: "coffeateam/coffea-casa-analysis:latest"
+
+    # Comunication settings
+    interface: null             # Network interface to use like eth0 or ib0
+    death-timeout: 60           # Number of seconds to wait if a worker can not find a scheduler
+    local-directory: null       # Location of fast local storage like /scratch or $TMPDIR
+    extra: []
+
+    # HTCondor Resource Manager options
+    disk: "5 GiB"          # Amount of disk per worker job
+    env-extra: []
+    job-extra: {}               # Extra submit attributes
+    log-directory: null
+    shebang: "#!/usr/bin/env condor_submit -spool"
+
+    # Scheduler options
+    scheduler-options: {}
+    name: dask-worker

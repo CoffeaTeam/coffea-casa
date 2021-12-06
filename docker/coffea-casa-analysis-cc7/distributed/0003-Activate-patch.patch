@@ -1,0 +1,25 @@
+From d4db869f3c3f32327fb329c01361825f885ec218 Mon Sep 17 00:00:00 2001
+From: Oksana Shadura <ksu.shadura@gmail.com>
+Date: Tue, 16 Mar 2021 16:10:18 +0100
+Subject: [PATCH] Activate patch
+
+---
+ distributed/distributed.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/distributed/distributed.yaml b/distributed/distributed.yaml
+index fde14180..a470a14a 100644
+--- a/distributed/distributed.yaml
++++ b/distributed/distributed.yaml
+@@ -25,7 +25,7 @@ distributed:
+     pickle: True            # Is the scheduler allowed to deserialize arbitrary bytestrings
+     preload: []             # Run custom modules with Scheduler
+     preload-argv: []        # See https://docs.dask.org/en/latest/setup/custom-startup.html
+-    resolve-worker-hostname: True # Whether or not the worker hostname is resolved to an IP address at connection time
++    resolve-worker-hostname: False # Whether or not the worker hostname is resolved to an IP address at connection time
+     unknown-task-duration: 500ms  # Default duration for all tasks with unknown durations ("15m", "2h")
+     default-task-durations:  # How long we expect function names to run ("1h", "1s") (helps for long tasks)
+       rechunk-split: 1us
+-- 
+2.33.0
+
