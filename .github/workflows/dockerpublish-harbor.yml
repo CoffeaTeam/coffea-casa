@@ -15,7 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [coffea-casa, coffea-casa-analysis]
+        IMAGE: [coffea-casa,
+                coffea-casa-analysis,
+                coffea-casa-cc7,
+                coffea-casa-analysis-cc7]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 
