@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask-cc7:v0.7.10-fastjet-3.3.4.0rc9-g229e924
+FROM coffeateam/coffea-dask-cc7:0.7.10-fastjet-3.3.4.0rc9-g229e924
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
