@@ -19,22 +19,22 @@ ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
 ARG GITHUB_ACTIONS="false"
 
 # Configure environment
-ENV CONDA_DIR /opt/conda \
-    SHELL /bin/bash \
-    NB_USER $NB_USER \
-    USER $NB_USER \
-    NB_UID $NB_UID \
-    NB_GID $NB_GID \
-    HOME /home/$NB_USER \
-    PATH "/opt/conda/bin/:$PATH" \
-    TAG $TAG \
-    XCACHE_HOST $XCACHE_HOST \
-    CACHE_PREFIX $CACHE_PREFIX \
-    CERT_DIR $CERT_DIR \
-    BEARER_TOKEN_FILE $BEARER_TOKEN_FILE \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8
+ENV CONDA_DIR /opt/conda
+ENV SHELL /bin/bash
+ENV NB_USER $NB_USER
+ENV USER $NB_USER
+ENV NB_UID $NB_UID
+ENV NB_GID $NB_GID
+ENV HOME /home/$NB_USER
+ENV PATH "/opt/conda/bin/:$PATH"
+ENV TAG $TAG
+ENV XCACHE_HOST $XCACHE_HOST
+ENV CACHE_PREFIX $CACHE_PREFIX
+ENV CERT_DIR $CERT_DIR
+ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
