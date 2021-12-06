@@ -126,14 +126,14 @@ RUN pip install --no-cache-dir coffea[servicex] \
     cabinetry
 
 # ------- xrootd-authz-plugin -------------------------------
-RUN cd /tmp && \
-    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-    cd xrdcl-authz-plugin && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
-    make && \
-    make install
+#RUN cd /tmp && \
+#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+#    cd xrdcl-authz-plugin && \
+#    mkdir build && \
+#    cd  build && \
+#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+#    make && \
+#    make install
 
 USER root
 # Setup supervisord files
@@ -165,9 +165,9 @@ RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/distributed && \
     # && patch -p2 < 0005-Add-patch-from-John-Thiltges.patch
 
 # xcache setup
-ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+#ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+#ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"
 
 # FIXME: we have a wrong path, let's make a link.

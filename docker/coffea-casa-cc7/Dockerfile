@@ -221,15 +221,15 @@ RUN pip install --no-cache-dir coffea[servicex] \
     coffea_casa
 
 # ------- xrootd-authz-plugin -------------------------------
-RUN cd /tmp && \
-    # ------- xrdcl-authz-plugin -------------------------------
-    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-    cd xrdcl-authz-plugin && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
-    make && \
-    make install
+#RUN cd /tmp && \
+#    # ------- xrdcl-authz-plugin -------------------------------
+#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+#    cd xrdcl-authz-plugin && \
+#    mkdir build && \
+#    cd  build && \
+#   cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+#    make && \
+#    make install
 
 USER ${NB_UID}
 # FIXME: too many files and a lot of hacks! (oshadura)
@@ -283,9 +283,9 @@ RUN rm -rf /tmp/* \
 # Fix permissions for Dask files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
 # xcache setup
-ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+#ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+#ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"
 
 # FIXME: we have a wrong path, let's make a link.
