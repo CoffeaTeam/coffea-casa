@@ -273,9 +273,9 @@ RUN rm -rf /tmp/* \
     && jupyter lab clean \
     && jlpm cache clean \
     && npm cache clean --force \
-    && find ${CONDA_DIR} -type f,l -name '*.a' -delete \
-    && find ${CONDA_DIR} -type f,l -name '*.pyc' -delete \
-    && find ${CONDA_DIR} -type f,l -name '*.js.map' -delete \
+    && find ${CONDA_DIR} -type f -name '*.a' -delete \
+    && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
+    && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
     && (find ${CONDA_DIR}/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 

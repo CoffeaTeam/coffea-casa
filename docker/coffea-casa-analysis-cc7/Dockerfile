@@ -178,9 +178,9 @@ RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
     && mamba clean -tipsy \
-    && find ${CONDA_DIR} -type f,l -name '*.a' -delete \
-    && find ${CONDA_DIR} -type f,l -name '*.pyc' -delete \
-    && find ${CONDA_DIR}/ -type f,l -name '*.js.map' -delete \
+    && find ${CONDA_DIR} -type f -name '*.a' -delete \
+    && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
+    && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
     && rm -rf ${CONDA_DIR}/pkgs
 
 # Prepare HTCondor spec. environment and execute dask-worker command
