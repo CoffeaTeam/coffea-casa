@@ -43,7 +43,7 @@ ENV USER $NB_USER
 ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
-ENV PATH "/opt/conda/bin/:$PATH"
+ENV PATH "${CONDA_DIR}/bin/:$PATH"
 ENV WORKER_IMAGE $WORKER_IMAGE
 ENV TAG $TAG
 ENV CERT_DIR $CERT_DIR
@@ -226,7 +226,7 @@ RUN cd /tmp && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
     make && \
     make install
 
@@ -253,13 +253,13 @@ RUN groupadd -r condor && \
 
 # FIXME: xrootd/xrd-authz-plugin hack! (oshadura)
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
-COPY uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
-RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+COPY uproot_xrd_source.patch ${CONDA_DIR}/lib/python3.8/site-packages/uproot
+RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY distributed /opt/conda/lib/python3.8/site-packages/distributed
-RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
+COPY distributed ${CONDA_DIR}/lib/python3.8/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
     patch -p2 < 0003-Activate-patch.patch && \
@@ -273,24 +273,24 @@ RUN rm -rf /tmp/* \
     && jupyter lab clean \
     && jlpm cache clean \
     && npm cache clean --force \
-    && find /opt/conda/ -type f,l -name '*.a' -delete \
-    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
-    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && (find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
-    && rm -rf /opt/conda/pkgs
+    && find ${CONDA_DIR} -type f,l -name '*.a' -delete \
+    && find ${CONDA_DIR} -type f,l -name '*.pyc' -delete \
+    && find ${CONDA_DIR} -type f,l -name '*.js.map' -delete \
+    && (find ${CONDA_DIR}/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && rm -rf ${CONDA_DIR}/pkgs
 
 # Fix permissions for Dask files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
 # xcache setup
-ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
-ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
-ENV PATH="/opt/conda/bin/:$PATH"
+ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+ENV PATH="${CONDA_DIR}/bin/:$PATH"
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
-RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
+RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
