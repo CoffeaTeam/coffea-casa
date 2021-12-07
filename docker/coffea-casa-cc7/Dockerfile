@@ -99,6 +99,7 @@ RUN yum -y install https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-
     libXext \
     libSM \
     libXrender \
+    xdg-utils \
     nc \
     openssh-clients \
     tzdata \
