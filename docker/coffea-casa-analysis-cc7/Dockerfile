@@ -38,7 +38,8 @@ ENV LANGUAGE en_US.UTF-8
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
-RUN yum -y update \
+RUN yum -y install https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.9-1.x86_64.rpm  \
+ && yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install \
     wget \
