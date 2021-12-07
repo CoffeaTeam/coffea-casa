@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.10-fastjet-3.3.4.0rc9-g229e924
+FROM coffeateam/coffea-dask:0.7.11-fastjet-3.3.4.0rc9-ga05a1f8
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
