@@ -2,13 +2,13 @@
 name: Openscience Harbor Registry Publish
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - '*'
 
 env:
   GITHUB_SHA: ${{ github.sha }}
   GITHUB_REF: ${{ github.ref }}
-
 
 jobs:
   matrix-build:
