@@ -3,6 +3,8 @@ name: PullRequest
 
 on:
   pull_request:
+    paths:
+      - 'charts/coffea-casa/docker/**'
     branches:
       - master
       - develop
@@ -17,10 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [coffea-casa,
-                coffea-casa-analysis,
-                coffea-casa-cc7,
-                coffea-casa-analysis-cc7]
+        IMAGE: ["k8s-hub-coffea-casa"]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
     steps:
@@ -28,12 +27,9 @@ jobs:
       uses: actions/checkout@v2
     - name: Build Image
       run: |
-        cd docker/${{ matrix.IMAGE }}
+        cd charts/coffea-casa/docker/${{ matrix.IMAGE }}
         docker build --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t  ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR .
-    - name: Export Full Conda Environment
-      run: |
-        docker run -e GITHUB_ACTIONS=$GITHUB_ACTIONS ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR conda list --export
-
+        
     # FIXME: add some tests
     #- name: Test Image
     #  run: |
