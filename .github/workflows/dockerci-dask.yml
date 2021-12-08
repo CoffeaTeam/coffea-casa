@@ -1,0 +1,42 @@
+# Only test building images
+name: PullRequest
+
+on:
+  pull_request:
+    paths:
+      - 'docker/**'
+    branches:
+      - master
+      - develop
+
+env:
+  DOCKER_ORG: coffeateam
+  GITHUB_SHA: ${{ github.sha }}
+  GITHUB_REF: ${{ github.ref }}
+
+jobs:
+  matrix-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        IMAGE: [coffea-casa,
+                coffea-casa-analysis,
+                coffea-casa-cc7,
+                coffea-casa-analysis-cc7]
+    name: ${{ matrix.IMAGE }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+    - name: Build Image
+      run: |
+        cd docker/${{ matrix.IMAGE }}
+        docker build --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t  ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR .
+    - name: Export Full Conda Environment
+      run: |
+        docker run -e GITHUB_ACTIONS=$GITHUB_ACTIONS ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR conda list --export
+
+    # FIXME: add some tests
+    #- name: Test Image
+    #  run: |
+    #    docker run -u 1000 -w /srv/test -v $PWD:/srv/test ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR ./run_tests.sh ${{ matrix.IMAGE }}
