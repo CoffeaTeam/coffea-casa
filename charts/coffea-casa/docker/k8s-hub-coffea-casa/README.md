@@ -2,6 +2,7 @@
 
 This image needs to be rebuild only if you change a version of zero-to-jupyterhub helm chart as a part of coffea-casa Helm chart dependencies.
 
+
 > Currently we are using 0.11.1 version, please update only when is updated jupyterhub version in dependencies of Charts.yaml
 
 
