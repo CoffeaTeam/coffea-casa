@@ -1,7 +1,8 @@
+## Coffea-casa Docker images: UNL-specific and custom
 
-# Coffea-casa Docker UNL specific images
+## Coffea-casa Docker UNL specific images
 
-## Coffea-casa Dask Scheduler image
+### Coffea-casa Dask Scheduler image
 
 To build and test locally (with UNL specific settings):
 
@@ -13,7 +14,7 @@ docker build -t coffeateam/coffea-casa:latest coffea-casa
 docker run -it --rm coffeateam/coffea-casa:latest /bin/bash
 ```
 
-## Coffea-casa Dask Worker
+### Coffea-casa Dask Worker
 
 To build and test locally (with UNL specific settings):
 
@@ -25,7 +26,7 @@ docker build -t coffeateam/coffea-casa-analysis:latest coffea-casa-analysis
 docker run -it --rm coffeateam/coffea-casa-analysis:latest /bin/bash
 ```
 
-## Coffea-casa Dask Scheduler CC7 image
+### Coffea-casa Dask Scheduler CC7 image
 
 To build and test locally (with UNL specific settings):
 
@@ -37,7 +38,7 @@ docker build -t coffeateam/coffea-casa-cc7:latest coffea-casa
 docker run -it --rm coffeateam/coffea-casa-cc7:latest /bin/bash
 ```
 
-## Coffea-casa Dask Worker CC7
+### Coffea-casa Dask Worker CC7
 
 To build and test locally (with UNL specific settings):
 
