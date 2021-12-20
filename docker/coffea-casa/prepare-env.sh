@@ -21,41 +21,11 @@ sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $DASK_ROOT_CONFI
 sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $DASK_ROOT_CONFIG/labextension.yaml
 sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $DASK_ROOT_CONFIG/labextension.yaml
 
-# FIXME: do we need take in account TLS ans certificates?
-if [ "${LABEXTENTION_FACTORY_CLASS:-}" == "KubeCluster" ]; then
-  echo "
-kubernetes:
-  count:
-    max: 40
-  worker-template:
-    metadata:
-    spec:
-      nodeSelector:
-        dask-worker: True
-      restartPolicy: Never
-      containers:
-      - args:
-          - dask-worker
-          - --nthreads
-          - '2'
-          - --memory-limit
-          - 7GB
-          - --death-timeout
-          - '60'
-          - --nanny
-        image: coffeateam/coffea-casa-analysis:${TAG}
-        name: dask-worker
-        resources:
-          limits:
-            cpu: "1.75"
-            memory: 7G
-          requests:
-            cpu: 1
-            memory: 7G
-        volumeMounts:
-        - mountPath: ${CERT_DIR}
-          name: cmsaf-secrets
-  " >> $DASK_ROOT_CONFIG/dask.yaml
+if [ "${LABEXTENTION_FACTORY_CLASS:-}" == "LocalCluster" ]; then
+  # FIXME: for now no need to have cartificates
+  sed -i -e "s|require-encryption: True|require-encryption: False|g" $DASK_ROOT_CONFIG/dask.yaml
+  ## echo "
+  ## >> $DASK_ROOT_CONFIG/dask.yaml
 fi
 
 # HTCondor scheduler settings
