@@ -314,7 +314,6 @@ COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}
 WORKDIR $HOME
-#ENTRYPOINT ["tini", "-g", "--"]
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
 
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
