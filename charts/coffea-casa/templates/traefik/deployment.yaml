@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "coffea-casa.traefikName" . }}
+spec:
+  replicas: {{ .Values.traefik.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "coffea-casa.traefikName" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "coffea-casa.traefikName" . }}
+    spec:
+      serviceAccountName: {{ .Values.rbac.traefik.serviceAccountName }}
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: traefik
+          image: {{ .Values.traefik.image.name }}:{{ .Values.traefik.image.tag }}
+      ports:
+        - name: traefik
+          containerPort: 9000
+          hostPort: 9000
+        - name: web
+          containerPort: 80
+          hostPort: 80
+        - name: websecure
+          containerPort: 443
+          hostPort: 443
+        - name: dask
+          containerPort: {{ .Values.traefik.service.port.daskscheduler }}
+          hostPort: {{ .Values.traefik.service.port.daskscheduler }}
+        - name: daskworker
+          containerPort: {{ .Values.traefik.service.port.daskworker }}
+          hostPort: {{ .Values.traefik.service.port.daskworker }}
+     args:
+    # Specify that we want to use Traefik as an Ingress Controller.
+    - --providers.kubernetesingress
+    - --providers.kubernetesingress.namespaces={{ .Release.Namespace }}
+    - --providers.kubernetesingress.ingressendpoint.publishedservice={{ .Release.Namespace }}/traefik
+    - --providers.kubernetescrd
+    - --providers.kubernetescrd.namespaces={{ .Release.Namespace }}
+            # Define two entrypoint ports, and setup a redirect from HTTP to HTTPS.
+    - --entryPoints.web.address=:80
+    - --entryPoints.websecure.address=:443
+    - --entrypoints.web.http.redirections.entryPoint.to=websecure
+    - --entrypoints.web.http.redirections.entryPoint.scheme=https
+
+    # Any Ingress attached to this Entrypoint will have TLS termination by default.
+    - --entrypoints.websecure.http.tls
+
+    # Define dask and daskworker entry points
+    - --entryPoints.dask.address=:{{ .Values.traefik.service.port.daskscheduler }}/tcp
+    - --entryPoints.daskworker.address=:{{ .Values.traefik.service.port.daskworker }}/tcp
+
+    # Enable debug logging. Useful to work out why something might not be
+    # working. Fetch logs of the pod.
+    - --log.level=debug
+
+    # Let's Encrypt Configurtion.
+    - --certificatesresolvers.default.acme.email=oksana.shadura@cern.ch
+    - --certificatesresolvers.default.acme.storage=acme.json
+    - --certificatesresolvers.default.acme.tlschallenge
+    # Use the staging ACME server. Uncomment this while testing to prevent
+    # hitting rate limits in production.
+    - --certificatesresolvers.default.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+    {{- if .Values.traefik.dashboard }}
+    - "--api.dashboard=true"
+    - "--api.insecure=true"
+    {{- end }}
+    {{- range .Values.traefik.additionalArguments }}
+    - {{ . | quote }}
+    {{- end }}

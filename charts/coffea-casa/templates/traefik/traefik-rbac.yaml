@@ -1,0 +1,67 @@
+---
+{{- if .Values.rbac.enabled -}}
+{{- if not .Values.rbac.traefik.serviceAccountName -}}
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: {{ include "coffea-casa.traefikName" . }}
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "coffea-casa.traefikName" . }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+    - extensions
+    resources:
+    - ingresses/status
+    verbs:
+    - update
+  - apiGroups:
+      - traefik.containo.us
+    resources:
+      - middlewares
+      - ingressroutes
+      - traefikservices
+      - ingressroutetcps
+      - ingressrouteudps
+      - tlsoptions
+      - tlsstores
+    verbs:
+      - get
+      - list
+      - watch
+
+# Give the hub the role to manage ingressroutetcps for dask
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "coffea-casa.traefikName" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "coffea-casa.traefikName" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "coffea-casa.traefikName" . }}
+{{- end }}
+{{- end }}
