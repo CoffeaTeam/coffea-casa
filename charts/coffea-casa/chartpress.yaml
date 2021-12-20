@@ -1,0 +1,20 @@
+---
+# This is the configuration for chartpress, a CLI for Helm chart management.
+#
+# chartpress can be used to:
+# - Build images
+# - Update Chart.yaml (version) and values.yaml (image tags)
+# - Package and publish Helm charts to a GitHub based Helm chart repository
+#
+# Currently, this project is configured to use the skaffold CLI to build images
+# and update the image tags in values.yaml, but chartpress is still used to
+# publish the Helm chart to the gh-pages branch of dask/helm-chart.
+#
+# For more information about chartpress, see the projects README.md file:
+# https://github.com/jupyterhub/chartpress
+#
+charts:
+  - name: coffea-casa
+    repo:
+      git: coffeateam/coffea-casa
+      published: xxxx
