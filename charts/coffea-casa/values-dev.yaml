@@ -2,11 +2,48 @@
 # Disable/enable RBAC
 rbac:
   enabled: true
+  traefik:
+      serviceAccountName: traefik
+
+# traefik nested config relates to the traefik Pod and Traefik running within it
+# that is acting as a proxy for traffic towards the gateway or user created
+# DaskCluster resources.
+traefik:
+  enabled: true
+  service:
+    type: LoadBalancer
+    port: 
+      daskshduler: 8786
+      daskworker: 8788
+  # Number of instances of the proxy to run
+  replicas: 1
+
+  # Any annotations to add to the proxy pods
+  annotations: {}
+
+  # Resource requests/limits for the proxy pods
+  resources: {}
+
+  # The image to use for the proxy pod
+  image:
+    name: traefik
+    tag: "v2.3.7"
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+
+  # Any additional arguments to forward to traefik
+  additionalArguments: []
+
+  # The proxy log level
+  loglevel: WARN
+
+  # Whether to expose the dashboard on port 9000 (enable for debugging only!)
+  dashboard: false
 
 # Disable/enable ServiceX as a dependency
 servicex:
   enabled: false
-  host: "http://coffea-casa-servicex-app:8000"
+  #host: "http://coffea-casa-servicex-app:8000"
 
 # Jupyterhub settings
 jupyterhub: 
@@ -14,17 +51,13 @@ jupyterhub:
     config:
       Authenticator:
         admin_users:
-        - coffea-casa-dev@cern.ch
-      GenericOAuthenticator:
-        login_service: CMS SSO
-        token_url: https://cms-auth.web.cern.ch/token
-        userdata_method: GET
-        userdata_params:
-          state: state
-        userdata_url: https://cms-auth.web.cern.ch/userinfo
-        username_key: email
-      JupyterHub:
-        authenticator_class: oauthenticator.generic.GenericOAuthenticator
+        - test
+      allowed_users:
+        - test
+    DummyAuthenticator:
+      password: Test_Test_Test
+    JupyterHub:
+      authenticator_class: dummy
     initContainers:
       - name: git-clone-templates
         image: alpine/git
@@ -46,12 +79,12 @@ jupyterhub:
       pvc:
         storageClassName: standard
     image:
-      name: carljetter/k8s-hub
-      tag: '0.2.0'   
+      name: hub.opensciencegrid.org/coffea-casa/k8s-hub-coffea-casa
+      tag: 0.11.1 
     extraEnv:
       DASK_BASE_DOMAIN: localhost
       CONDOR_ENABLED: 'True'
-      SERVICEX_ENABLED: 'True'
+      SERVICEX_ENABLED: 'False'
   proxy:
     chp:
       livenessProbe:
@@ -104,9 +137,9 @@ jupyterhub:
     defaultUrl: "/lab"
     profileList:
       - display_name: "Coffea Base Image"
-        description: "Coffea-casa image with coffea 0.7.5/dask/condor and cheese"
+        description: "Coffea-casa build with coffea 0.7.11/dask 2021.11.2/condor and cheese"
         kubespawner_override:
-          image: coffeateam/coffea-casa:2021.07.22
+          image: hub.opensciencegrid.org/coffea-casa/coffea-casa-analysis:2021.12.10
           imagePullPolicy: Always
           securityContext:
             runAsUser: 6440
@@ -119,7 +152,7 @@ jupyterhub:
       volumeMounts:
       - mountPath: /etc/cmsaf-secrets
         name: cmsaf-secrets
-      image: coffeateam/coffea-casa-analysis:2021.07.22
+      image: hub.opensciencegrid.org/coffea-casa/coffea-casa-analysis:2021.12.10
       securityContext:
         runAsUser: 6440
         runAsGroup: 11265
