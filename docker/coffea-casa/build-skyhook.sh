@@ -1,7 +1,6 @@
 #!/bin/bash
 # Inspired by https://github.com/apache/arrow/blob/master/python/examples/minimal_build/build_venv.sh
-
-set -eux
+set -e
 
 WORKDIR=/tmp
 LIBRARY_INSTALL_DIR=$WORKDIR/local-libs
