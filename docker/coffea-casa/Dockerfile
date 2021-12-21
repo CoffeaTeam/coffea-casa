@@ -74,7 +74,7 @@ RUN apt-get update --yes && \
     net-tools \
     gdb \
     gcc build-essential \
-    librados2 rados-objclass-dev python3-rados librados-dev && \
+    librados2 rados-objclass-dev python3-rados librados-dev libssl-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
