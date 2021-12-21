@@ -209,7 +209,8 @@ RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT
     mkdir -p /var/lib/condor && \
     mkdir -p /etc/condor/config.d
 
-USER $NB_UID
+USER ${NB_UID}
+
 RUN mamba install --yes \
     -c conda-forge \
     conda-build \
@@ -243,7 +244,15 @@ RUN cd /tmp && \
     make && \
     make install
 
-USER ${NB_UID}
+COPY build-skyhook.sh /tmp/
+
+RUN cd /tmp && \
+    git clone \
+        --branch arrow-master \
+        --depth=1 \
+        https://github.com/uccross/arrow && \
+        ./build-skyhook.sh
+
 # FIXME: too many files and a lot of hacks! (oshadura)
 # Dask setup - > dask.yml
 # Coffea_casa - > jobqueue-coffea-casa.yaml
