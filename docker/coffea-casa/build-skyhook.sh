@@ -5,7 +5,7 @@ set -e
 WORKDIR=/tmp
 LIBRARY_INSTALL_DIR=$WORKDIR/local-libs
 CPP_BUILD_DIR=$WORKDIR/arrow-cpp-build
-ARROW_ROOT=$WORKDIR/arrow
+ARROW_ROOT=$WORKDIR/skyhookdm-arrow
 export ARROW_HOME=$WORKDIR/dist
 export LD_LIBRARY_PATH=$ARROW_HOME/lib:$LD_LIBRARY_PATH
 
