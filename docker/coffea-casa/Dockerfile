@@ -74,7 +74,7 @@ RUN apt-get update --yes && \
     net-tools \
     gdb \
     gcc build-essential \
-    rados-objclass-dev python3-rados librados-dev && \
+    librados2 rados-objclass-dev python3-rados librados-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
@@ -249,9 +249,9 @@ COPY build-skyhook.sh /tmp/
 
 RUN cd /tmp && \
     git clone \
-        --branch arrow-master \
+        --branch arrow-master-build \
         --depth=1 \
-        https://github.com/uccross/arrow && \
+        https://github.com/oshadura/skyhookdm-arrow && \
         ./build-skyhook.sh
 
 # FIXME: too many files and a lot of hacks! (oshadura)
