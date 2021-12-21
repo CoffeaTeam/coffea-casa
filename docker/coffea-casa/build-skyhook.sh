@@ -1,11 +1,23 @@
 #!/bin/bash
+# Inspired by https://github.com/apache/arrow/blob/master/python/examples/minimal_build/build_venv.sh
+
 set -eux
 
-cd arrow/cpp
+WORKDIR=/tmp
+LIBRARY_INSTALL_DIR=$WORKDIR/local-libs
+CPP_BUILD_DIR=$WORKDIR/arrow-cpp-build
+ARROW_ROOT=$WORKDIR/arrow
+export ARROW_HOME=$WORKDIR/dist
+export LD_LIBRARY_PATH=$ARROW_HOME/lib:$LD_LIBRARY_PATH
 
-mkdir -p release
-cd release
+pip install -r $ARROW_ROOT/python/requirements-build.txt \
+     -r $ARROW_ROOT/python/requirements-test.txt
+
+mkdir -p $CPP_BUILD_DIR
+pushd $CPP_BUILD_DIR
+
 cmake \
+        -DCMAKE_INSTALL_PREFIX=$ARROW_HOME \
         -DARROW_SKYHOOK=ON \
         -DARROW_PARQUET=ON \
         -DARROW_WITH_SNAPPY=ON \
@@ -14,18 +26,15 @@ cmake \
         -DARROW_DATASET=ON \
         -DARROW_PYTHON=ON \
         -DARROW_CSV=ON \
-        ..
+         $ARROW_ROOT/cpp
 
 make -j4 install
 
-cd arrow/python
+popd
 
-pip install --upgrade setuptools==57.0.0 wheel
-pip install -r requirements-build.txt -r requirements-test.txt
+pushd $ARROW_ROOT/python
+rm -rf build/
 
-export WORKDIR=${WORKDIR:-$HOME}
-export ARROW_HOME=$WORKDIR/dist
-export LD_LIBRARY_PATH=$ARROW_HOME/lib
 export PYARROW_WITH_DATASET=1
 export PYARROW_WITH_PARQUET=1
 export PYARROW_WITH_RADOS=1
