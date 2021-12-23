@@ -36,11 +36,10 @@ rm -rf build/
 
 export PYARROW_WITH_DATASET=1
 export PYARROW_WITH_PARQUET=1
-export PYARROW_WITH_RADOS=1
+export PYARROW_WITH_SKYHOOK=1
 
 python setup.py build_ext --inplace --bundle-arrow-cpp bdist_wheel
 pip install dist/*.whl
-cp -r dist/*.whl /
 
 python -c "import pyarrow"
 python -c "import pyarrow.dataset"
