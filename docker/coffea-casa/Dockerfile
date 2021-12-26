@@ -268,6 +268,10 @@ USER root
 COPY condor_config /etc/condor/
 COPY config.d  /etc/condor/config.d/
 
+# Skyhook setup: Ceph configuration and Keyring
+COPY ceph.conf /etc/ceph/ceph.conf
+COPY client.admin.keyring /etc/ceph/keyring
+
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it

@@ -13,6 +13,11 @@ api_endpoints:
     " > $HOME/.servicex
 fi
 
+if [[ "SKYHOOK_ENABLED" ]]; then
+  # Check status of Ceph (with generated Ceph configuration and Keyring)
+  ceph -s
+fi
+
 # Populating Dask configuration files
 sed -i -e "s|coffeateam/coffea-casa-analysis|${WORKER_IMAGE}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
 sed -i -e "s|latest|${TAG}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
