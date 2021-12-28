@@ -261,7 +261,7 @@ RUN cd /tmp && \
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
 # Skyhook setup: Ceph configuration and Keyring
-COPY ceph.conf keyring /etc/ceph/
+COPY ceph.conf keyring $HOME/.ceph/
 # Copy HTCondor configuration files (see prepare-env.yaml)
 COPY config.d  /opt/condor/config.d/
 
