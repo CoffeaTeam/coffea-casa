@@ -1,7 +1,6 @@
 [client.admin]
-key = $(SKYHOOK_CEPH_KEYRING)
 caps mds = "allow *"
 caps mon = "allow *"
 caps osd = "allow *"
 caps mgr = "allow *"
-
+key = <SKYHOOK_CEPH_KEYRING>

@@ -27,8 +27,8 @@ sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $DASK_ROOT_CONFIG/lab
 sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $DASK_ROOT_CONFIG/labextension.yaml
 
 # Hacks: looks like Ceph configs are not happy to parse env variables
-sed -i -e "s|$(SKYHOOK_CEPH_UUIDGEN)|${SKYHOOK_CEPH_UUIDGEN}|g" /etc/ceph/ceph.conf
-sed -i -e "s|$(SKYHOOK_CEPH_KEYRING)|${SKYHOOK_CEPH_KEYRING}|g" /etc/ceph/keyring
+sed -i -e "s|<SKYHOOK_CEPH_UUIDGEN>|${SKYHOOK_CEPH_UUIDGEN}|g" /etc/ceph/ceph.conf
+sed -i -e "s|<SKYHOOK_CEPH_KEYRING>|${SKYHOOK_CEPH_KEYRING}|g" /etc/ceph/keyring
 
 if [ "${LABEXTENTION_FACTORY_CLASS:-}" == "LocalCluster" ]; then
   # FIXME: for now no need to have cartificates
