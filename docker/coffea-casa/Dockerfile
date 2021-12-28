@@ -205,7 +205,7 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
-    mkdir -p /etc/ceph  && chown -R "${NB_USER}:${NB_GID}" /etc/ceph && \
+    mkdir -p $HOME/.ceph  && chown -R "${NB_USER}:${NB_GID}" $HOME/.ceph && \
     mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
     mkdir -p ${HOME}/.condor/tokens.d && \
     mkdir -p /var/lib/condor && \
@@ -306,7 +306,7 @@ RUN rm -rf /tmp/* \
     && rm -rf /opt/conda/pkgs
 
 # Fix permissions for Dask/Ceph config files
-RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml /etc/ceph/keyring /etc/ceph/ceph.conf
+RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml $HOME/.ceph/keyring $HOME/.ceph/ceph.conf
 # xcache setup
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
