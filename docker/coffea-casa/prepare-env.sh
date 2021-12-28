@@ -13,12 +13,7 @@ api_endpoints:
     " > $HOME/.servicex
 fi
 
-if [[ "SKYHOOK_ENABLED" ]]; then
-  # Check status of Ceph (with generated Ceph configuration and Keyring)
-  ceph -s
-fi
-
-# Populating Dask configuration files
+# Populating Dask configuration files (Dask is always enabled in the Helm charts)
 sed -i -e "s|coffeateam/coffea-casa-analysis|${WORKER_IMAGE}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
 sed -i -e "s|latest|${TAG}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
 sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $DASK_ROOT_CONFIG/dask.yaml
@@ -26,9 +21,13 @@ sed -i -e "s|CoffeaCasaCluster|${LABEXTENTION_FACTORY_CLASS}|g" $DASK_ROOT_CONFI
 sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $DASK_ROOT_CONFIG/labextension.yaml
 sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $DASK_ROOT_CONFIG/labextension.yaml
 
-# Hacks: looks like Ceph configs are not happy to parse env variables
-sed -i -e "s|<SKYHOOK_CEPH_UUIDGEN>|${SKYHOOK_CEPH_UUIDGEN}|g" /etc/ceph/ceph.conf
-sed -i -e "s|<SKYHOOK_CEPH_KEYRING>|${SKYHOOK_CEPH_KEYRING}|g" /etc/ceph/keyring
+# Both SKYHOOK_CEPH_KEYRING and SKYHOOK_CEPH_UUIDGEN are defined in Helm chart (not in a Docker image)
+if [[ "$SKYHOOK_ENABLED" && "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" ]]; then
+  sed -i -e "s|<SKYHOOK_CEPH_UUIDGEN>|${SKYHOOK_CEPH_UUIDGEN}|g" $CEPH_CONF/ceph.conf
+  sed -i -e "s|<SKYHOOK_CEPH_KEYRING>|${SKYHOOK_CEPH_KEYRING}|g" $CEPH_CONF/keyring
+  # Testing ceph status
+  ceph -s
+fi
 
 if [ "${LABEXTENTION_FACTORY_CLASS:-}" == "LocalCluster" ]; then
   # FIXME: for now no need to have cartificates

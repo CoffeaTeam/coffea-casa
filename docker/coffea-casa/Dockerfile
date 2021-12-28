@@ -22,6 +22,8 @@ ARG DASK_ROOT_CONFIG="/opt/dask"
 ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
+# Skyhook
+ARG CEPH_CONF="/opt/ceph"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 # XCACHE settings for Servicex
@@ -49,6 +51,7 @@ ENV TAG $TAG
 ENV CERT_DIR $CERT_DIR
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV DASK_ROOT_CONFIG $DASK_ROOT_CONFIG
+ENV CEPH_CONF $CEPH_CONF
 ENV LABEXTENTION_CLUSTER $LABEXTENTION_CLUSTER
 ENV LABEXTENTION_FACTORY_CLASS $LABEXTENTION_FACTORY_CLASS
 ENV LABEXTENTION_FACTORY_MODULE $LABEXTENTION_FACTORY_MODULE
@@ -205,6 +208,7 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
+    mkdir -p ${CEPH_CONF}  && chown -R "${NB_USER}:${NB_GID}" ${CEPH_CONF} && \
     mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
     mkdir -p ${HOME}/.condor/tokens.d && \
     mkdir -p /var/lib/condor && \
@@ -259,6 +263,8 @@ RUN cd /tmp && \
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
+# Skyhook setup: Ceph configuration and Keyring
+COPY ceph.conf keyring ${CEPH_CONF}/
 # Copy HTCondor configuration files (see prepare-env.yaml)
 COPY config.d  /opt/condor/config.d/
 
@@ -267,10 +273,6 @@ USER root
 # Add HTCondor configuration files
 COPY condor_config /etc/condor/
 COPY config.d  /etc/condor/config.d/
-
-# Skyhook setup: Ceph configuration and Keyring
-COPY ceph.conf /etc/ceph/ceph.conf
-COPY client.admin.keyring /etc/ceph/keyring
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
@@ -306,8 +308,8 @@ RUN rm -rf /tmp/* \
     && (find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf /opt/conda/pkgs
 
-# Fix permissions for Dask files
-RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
+# Fix permissions for Dask/Ceph config files
+RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml ${CEPH_CONF}/keyring ${CEPH_CONF}/ceph.conf
 # xcache setup
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
