@@ -32,4 +32,4 @@ jobs:
           fi
 
       - name: Run chart-testing (lint)
-        run: ct lint  --config .github/ct.yaml
+        run: ct lint --check-version-increment=false
