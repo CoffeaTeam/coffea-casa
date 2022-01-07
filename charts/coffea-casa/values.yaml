@@ -2,6 +2,37 @@
 # Disable/enable RBAC
 rbac:
   enabled: true
+  traefik:
+    serviceAccountName: traefik
+
+# traefik nested config relates to the traefik Pod and Traefik running within it
+# that is acting as a proxy for traffic towards the gateway or user created
+# DaskCluster resources.
+traefik:
+  enabled: true
+  service:
+    type: LoadBalancer
+    port:
+      daskscheduler: 8786
+      daskworker: 8788   
+  # Number of instances of the proxy to run
+  replicas: 1
+  # Any annotations to add to the proxy pods
+  annotations: {}
+  # Resource requests/limits for the proxy pods
+  resources: {}
+  # The image to use for the proxy pod
+  image:
+    name: traefik
+    tag: "v2.3.7"
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  # Any additional arguments to forward to traefik
+  additionalArguments: []
+  # The proxy log level
+  loglevel: WARN
+  # Whether to expose the dashboard on port 9000 (enable for debugging only!)
+  dashboard: false
 
 # Disable/enable ServiceX as a dependency
 servicex:
@@ -70,30 +101,10 @@ jupyterhub:
       tag: '0.2.0'   
     extraEnv:
       OAUTH2_AUTHORIZE_URL:
-        valueFrom:
-          configMapKeyRef:
-            name: "{{.Release.Name}}-hub-config"
-            key: OAUTH2_AUTHORIZE_URL
       OAUTH2_TOKEN_URL:
-        valueFrom:
-          configMapKeyRef:
-            name: "{{.Release.Name}}-hub-config"
-            key: OAUTH2_TOKEN_URL
       OAUTH_CLIENT_ID:
-        valueFrom:
-          secretKeyRef:
-            name: coffea-casa-secrets
-            key: client_id
       OAUTH_CLIENT_SECRET:
-        valueFrom:
-          secretKeyRef:
-            name: coffea-casa-secrets
-            key: client_secret
       DASK_BASE_DOMAIN:
-        valueFrom:
-          configMapKeyRef:
-            name: "{{.Release.Name}}-hub-config"
-            key: DASK_BASE_DOMAIN
 
   proxy:
     chp:
@@ -175,29 +186,15 @@ jupyterhub:
         - name: COFFEA_CASA_SIDECAR
           value: 'True'
         - name: XCACHE_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: "{{.Release.Name}}-hub-config"
-              key: XCACHE_HOST
+          value:
         - name: XRD_PLUGIN
-          valueFrom:
-            configMapKeyRef:
-              name: "{{.Release.Name}}-hub-config"
-              key: XRD_PLUGIN
+          value:
         - name: XRD_PLUGINCONFDIR
-          valueFrom:
-            configMapKeyRef:
-              name: "{{.Release.Name}}-hub-config"
-              key: XRD_PLUGINCONFDIR
+          value:
         - name: BEARER_TOKEN_FILE
-          valueFrom:
-            configMapKeyRef:
-              name: "{{.Release.Name}}-hub-config"
-              key: BEARER_TOKEN_FILE
+          value:
         - name: WORKER_ID
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.uid
+          value:
       command: ["/bin/bash", "-c", "cd /home/cms-jovyan; supervisord --nodaemon -c /etc/supervisor/supervisord.conf"]
 
   scheduling:

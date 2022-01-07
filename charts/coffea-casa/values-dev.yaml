@@ -3,7 +3,7 @@
 rbac:
   enabled: true
   traefik:
-      serviceAccountName: traefik
+    serviceAccountName: traefik
 
 # traefik nested config relates to the traefik Pod and Traefik running within it
 # that is acting as a proxy for traffic towards the gateway or user created
@@ -12,31 +12,25 @@ traefik:
   enabled: true
   service:
     type: LoadBalancer
-    port: 
-      daskshduler: 8786
-      daskworker: 8788
+    port:
+      daskscheduler: 8786
+      daskworker: 8788   
   # Number of instances of the proxy to run
   replicas: 1
-
   # Any annotations to add to the proxy pods
   annotations: {}
-
   # Resource requests/limits for the proxy pods
   resources: {}
-
   # The image to use for the proxy pod
   image:
     name: traefik
     tag: "v2.3.7"
     pullPolicy: IfNotPresent
   imagePullSecrets: []
-
   # Any additional arguments to forward to traefik
   additionalArguments: []
-
   # The proxy log level
   loglevel: WARN
-
   # Whether to expose the dashboard on port 9000 (enable for debugging only!)
   dashboard: false
 
