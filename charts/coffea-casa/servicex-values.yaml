@@ -34,7 +34,7 @@ app:
   rabbitmq:
     retries: 12
     retry_interval: 10 # seconds
-  
+
   auth: false
 
   ingress:

@@ -24,8 +24,8 @@ spec:
       port: 8788
       targetPort: 8788
       name: daskworker
-    {{- if .Values.traefik.dashboard }}
+    {{- if .Values.traefik.dashboard}}
     - name: traefik
       targetPort: 9000
       port: 9000
-    {{- end }}
+    {{- end}}
