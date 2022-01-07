@@ -68,4 +68,4 @@ spec:
             {{- end }}
             {{- range .Values.traefik.additionalArguments }}
             - {{ . | quote }}
-            {{- end }}  
+            {{- end }}

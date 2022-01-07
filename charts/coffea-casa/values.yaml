@@ -14,7 +14,7 @@ traefik:
     type: LoadBalancer
     port:
       daskscheduler: 8786
-      daskworker: 8788   
+      daskworker: 8788
   # Number of instances of the proxy to run
   replicas: 1
   # Any annotations to add to the proxy pods
@@ -60,7 +60,7 @@ tokens:
   xrdauthz_ldlibrarypath:
 
 # Jupyterhub settings
-jupyterhub: 
+jupyterhub:
   hub:
     config:
       Authenticator:
@@ -98,7 +98,7 @@ jupyterhub:
         storageClassName: rook-ceph-block
     image:
       name: carljetter/k8s-hub
-      tag: '0.2.0'   
+      tag: '0.2.0'
     extraEnv:
       OAUTH2_AUTHORIZE_URL:
       OAUTH2_TOKEN_URL:

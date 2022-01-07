@@ -14,7 +14,7 @@ traefik:
     type: LoadBalancer
     port:
       daskscheduler: 8786
-      daskworker: 8788   
+      daskworker: 8788
   # Number of instances of the proxy to run
   replicas: 1
   # Any annotations to add to the proxy pods
@@ -40,7 +40,7 @@ servicex:
   #host: "http://coffea-casa-servicex-app:8000"
 
 # Jupyterhub settings
-jupyterhub: 
+jupyterhub:
   hub:
     config:
       Authenticator:
@@ -74,7 +74,7 @@ jupyterhub:
         storageClassName: standard
     image:
       name: hub.opensciencegrid.org/coffea-casa/k8s-hub-coffea-casa
-      tag: 0.11.1 
+      tag: 0.11.1
     extraEnv:
       DASK_BASE_DOMAIN: localhost
       CONDOR_ENABLED: 'True'
