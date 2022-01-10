@@ -170,6 +170,11 @@ RUN rm -rf /tmp/* \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
     && rm -rf /opt/conda/pkgs
 
+# Mkdir CVMFS mount directory.  Mount done upstream in configs. Harmless
+# if not utilized, crucial if CVMFS is desired
+RUN mkdir /cvmfs
+
+
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
 # nor and execute dask-worker command

@@ -305,6 +305,11 @@ ENV PATH="${CONDA_DIR}/bin/:$PATH"
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 
+# Mkdir CVMFS mount directory.  Mount done upstream in configs. Harmless
+# if not utilized, crucial if CVMFS is desired
+RUN mkdir /cvmfs
+
+
 ADD prepare-env.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
