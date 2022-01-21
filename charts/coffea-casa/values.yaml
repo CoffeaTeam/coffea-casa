@@ -13,8 +13,8 @@ traefik:
   enabled: True
   service:
     type: LoadBalancer
-    #type: ClusterIP
-    #type: NodePort
+    # type: ClusterIP
+    # type: NodePort
     port:
       daskscheduler: 8786
       daskworker: 8788
@@ -44,7 +44,7 @@ traefik:
 # Disable/enable ServiceX as a dependency
 servicex:
   enabled: false
-  #host: "http://coffea-casa-servicex-app:8000"
+  # host: "http://coffea-casa-servicex-app:8000"
 
 # Jupyterhub settings
 jupyterhub:
@@ -110,12 +110,12 @@ jupyterhub:
         contactEmail: local@jovyan.org
         acmeServer: https://pebble.coffea-casa/dir
     service:
-      #type: LoadBalancer
+      # type: LoadBalancer
       type: NodePort
       nodePorts:
         http: 30080
         https: 30443
-      #loadBalancerIP: 127.0.0.1
+      # loadBalancerIP: 127.0.0.1
     traefik:
       extraVolumes:
         - name: pebble-root-cert
