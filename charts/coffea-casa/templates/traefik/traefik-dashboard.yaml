@@ -16,3 +16,4 @@ spec:
     - name: api@internal
       kind: TraefikService
 {{- end }}
+---
