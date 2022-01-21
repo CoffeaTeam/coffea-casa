@@ -8,11 +8,11 @@ spec:
   selector:
     app: {{include "coffea-casa.traefikName" .}}
   ports:
-    - name: TCP
+    - protocol: TCP
       targetPort: 80
       port: 80
       name: http
-    - name: TCP
+    - protocol: TCP
       targetPort: 443
       port: 443
       name: https
@@ -24,8 +24,10 @@ spec:
       port: 8788
       targetPort: 8788
       name: daskworker
-    {{- if .Values.traefik.dashboard}}
-    - name: traefik
+{{- if .Values.traefik.dashboard}}
+    - protocol: TCP
       targetPort: 9000
       port: 9000
-    {{- end}}
+      name: traefik
+{{- end}}
+---

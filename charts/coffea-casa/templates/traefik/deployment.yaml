@@ -13,7 +13,13 @@ spec:
       labels:
         app: {{include "coffea-casa.traefikName" .}}
     spec:
-      serviceAccountName: {{.Values.rbac.traefik.serviceAccountName}}
+      {{- if .Values.rbac.enabled }}
+      {{- if .Values.rbac.traefik.serviceAccountName }}
+      serviceAccountName: {{ .Values.rbac.traefik.serviceAccountName }}
+      {{- else }}
+      serviceAccountName: {{ include "coffea-casa.traefikName" . }}
+      {{- end }}
+      {{- end }}
       terminationGracePeriodSeconds: 60
       containers:
         - name: traefik
@@ -45,16 +51,11 @@ spec:
             # Define two entrypoint ports, and setup a redirect from HTTP to HTTPS.
             - --entryPoints.web.address=:80
             - --entryPoints.websecure.address=:443
-            - --entrypoints.web.http.redirections.entryPoint.to=websecure
-            - --entrypoints.web.http.redirections.entryPoint.scheme=https
+            ####
+            #- --entrypoints.web.http.redirections.entryPoint.to=websecure
+            #- --entrypoints.web.http.redirections.entryPoint.scheme=https
             # Any Ingress attached to this Entrypoint will have TLS termination by default.
             - --entrypoints.websecure.http.tls
-            # Define dask and daskworker entry points
-            - --entryPoints.dask.address=:{{.Values.traefik.service.port.daskscheduler}}/tcp
-            - --entryPoints.daskworker.address=:{{.Values.traefik.service.port.daskworker}}/tcp
-            # Enable debug logging. Useful to work out why something might not be
-            # working. Fetch logs of the pod.
-            - --log.level=debug
             # Let's Encrypt Configurtion.
             - --certificatesresolvers.default.acme.email=oksana.shadura@cern.ch
             - --certificatesresolvers.default.acme.storage=acme.json
@@ -62,6 +63,12 @@ spec:
             # Use the staging ACME server. Uncomment this while testing to prevent
             # hitting rate limits in production.
             - --certificatesresolvers.default.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+            # Define dask and daskworker entry points
+            - --entryPoints.dask.address=:{{.Values.traefik.service.port.daskscheduler}}/tcp
+            - --entryPoints.daskworker.address=:{{.Values.traefik.service.port.daskworker}}/tcp
+            # Enable debug logging. Useful to work out why something might not be
+            # working. Fetch logs of the pod.
+            - --log.level=debug
             {{- if .Values.traefik.dashboard }}
             - "--api.dashboard=true"
             - "--api.insecure=true"

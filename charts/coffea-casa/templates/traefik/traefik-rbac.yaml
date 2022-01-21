@@ -65,3 +65,4 @@ subjects:
   name: {{ include "coffea-casa.traefikName" . }}
 {{- end }}
 {{- end }}
+---
