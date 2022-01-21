@@ -1,20 +1,27 @@
 ---
 # Disable/enable RBAC
 rbac:
-  enabled: true
+  enabled: True
+  # Only if it exists
   traefik:
-    serviceAccountName: traefik
+    serviceAccountName: null
 
 # traefik nested config relates to the traefik Pod and Traefik running within it
 # that is acting as a proxy for traffic towards the gateway or user created
 # DaskCluster resources.
 traefik:
-  enabled: true
+  enabled: True
   service:
     type: LoadBalancer
+    #type: ClusterIP
+    #type: NodePort
     port:
       daskscheduler: 8786
       daskworker: 8788
+  # Settings for nodeSelector, affinity, and tolerations for the traefik pods
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
   # Number of instances of the proxy to run
   replicas: 1
   # Any annotations to add to the proxy pods
@@ -32,32 +39,12 @@ traefik:
   # The proxy log level
   loglevel: WARN
   # Whether to expose the dashboard on port 9000 (enable for debugging only!)
-  dashboard: false
+  dashboard: False
 
 # Disable/enable ServiceX as a dependency
 servicex:
   enabled: false
-  host: "http://coffea-casa-servicex-app:8000"
-
-xcache:
-  enabled: true
-  host: "red-xcache1.unl.edu"
-
-dask:
-  enabled: true
-  dask_base_domain: coffea-opendata.casa
-
-auth:
-  enabled: true
-  oauth_callback_url: https://cms-auth.web.cern.ch/oauth_callback
-  oauth_authorize_url: https://cms-auth.web.cern.ch/authorize
-  oauth_token_url: https://cms-auth.web.cern.ch/token
-
-tokens:
-  bearer_token:
-  xrdauthz_plugin_confdir:
-  xrdauthz_plugin:
-  xrdauthz_ldlibrarypath:
+  #host: "http://coffea-casa-servicex-app:8000"
 
 # Jupyterhub settings
 jupyterhub:
@@ -65,17 +52,13 @@ jupyterhub:
     config:
       Authenticator:
         admin_users:
-        - coffea-casa-dev@cern.ch
-      GenericOAuthenticator:
-        login_service: CMS SSO
-        token_url: https://cms-auth.web.cern.ch/token
-        userdata_method: GET
-        userdata_params:
-          state: state
-        userdata_url: https://cms-auth.web.cern.ch/userinfo
-        username_key: email
-      JupyterHub:
-        authenticator_class: oauthenticator.generic.GenericOAuthenticator
+        - test
+      allowed_users:
+        - test
+    DummyAuthenticator:
+      password: Test_Test_Test
+    JupyterHub:
+      authenticator_class: dummy
     initContainers:
       - name: git-clone-templates
         image: alpine/git
@@ -95,17 +78,14 @@ jupyterhub:
       periodSeconds: 10
     db:
       pvc:
-        storageClassName: rook-ceph-block
+        storageClassName: standard
     image:
-      name: carljetter/k8s-hub
-      tag: '0.2.0'
+      name: hub.opensciencegrid.org/coffea-casa/k8s-hub-coffea-casa
+      tag: 0.11.1
     extraEnv:
-      OAUTH2_AUTHORIZE_URL:
-      OAUTH2_TOKEN_URL:
-      OAUTH_CLIENT_ID:
-      OAUTH_CLIENT_SECRET:
-      DASK_BASE_DOMAIN:
-
+      DASK_BASE_DOMAIN: kubernetes.docker.internal
+      CONDOR_ENABLED: 'True'
+      SERVICEX_ENABLED: 'False'
   proxy:
     chp:
       livenessProbe:
@@ -123,17 +103,30 @@ jupyterhub:
             fieldPath: metadata.namespace
     https:
       enabled: true
+      type: letsencrypt
       hosts:
-        - coffea-opendata.casa
+        - local.jovyan.org
       letsencrypt:
-        contactEmail: cms-support@cse.unl.edu
+        contactEmail: local@jovyan.org
+        acmeServer: https://pebble.coffea-casa/dir
     service:
-      type: LoadBalancer
+      #type: LoadBalancer
+      type: NodePort
       nodePorts:
-        http:
-        https:
-      loadBalancerIP: 129.93.183.34
-
+        http: 30080
+        https: 30443
+      #loadBalancerIP: 127.0.0.1
+    traefik:
+      extraVolumes:
+        - name: pebble-root-cert
+          configMap:
+            name: pebble
+      extraVolumeMounts:
+        - name: pebble-root-cert
+          subPath: root-cert.pem
+          mountPath: /etc/pebble/root-cert.pem
+      extraEnv:
+        LEGO_CA_CERTIFICATES: /etc/pebble/root-cert.pem
   singleuser:
     networkPolicy:
       enabled: false
@@ -151,16 +144,16 @@ jupyterhub:
     storage:
       homeMountPath: /home/cms-jovyan/
       dynamic:
-        storageClass: rook-ceph-block
+        storageClass: standard
     image:
       name: daskdev/dask-notebook
       tag: 2021.6.0
     defaultUrl: "/lab"
     profileList:
       - display_name: "Coffea Base Image"
-        description: "Coffea-casa image with coffea 0.7.5/dask/condor and cheese"
+        description: "Coffea-casa build with coffea 0.7.11/dask 2021.11.2/condor and cheese"
         kubespawner_override:
-          image: coffeateam/coffea-casa:2021.07.22
+          image: hub.opensciencegrid.org/coffea-casa/coffea-casa-analysis:2021.12.10
           imagePullPolicy: Always
           securityContext:
             runAsUser: 6440
@@ -173,7 +166,7 @@ jupyterhub:
       volumeMounts:
       - mountPath: /etc/cmsaf-secrets
         name: cmsaf-secrets
-      image: coffeateam/coffea-casa-analysis:2021.07.22
+      image: hub.opensciencegrid.org/coffea-casa/coffea-casa-analysis:2021.12.10
       securityContext:
         runAsUser: 6440
         runAsGroup: 11265
@@ -186,17 +179,22 @@ jupyterhub:
         - name: COFFEA_CASA_SIDECAR
           value: 'True'
         - name: XCACHE_HOST
-          value:
+          value: "red-xcache1.unl.edu"
         - name: XRD_PLUGIN
-          value:
+          value: "/opt/conda/lib/libXrdClAuthzPlugin.so"
         - name: XRD_PLUGINCONFDIR
-          value:
+          value: "/opt/conda/etc/xrootd/client.plugins.d/"
         - name: BEARER_TOKEN_FILE
-          value:
+          value: "/etc/cmsaf-secrets/xcache_token"
         - name: WORKER_ID
-          value:
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
       command: ["/bin/bash", "-c", "cd /home/cms-jovyan; supervisord --nodaemon -c /etc/supervisor/supervisord.conf"]
 
   scheduling:
     userScheduler:
       enabled: false
+
+  debug:
+    enabled: true
