@@ -1,0 +1,6 @@
+# ref: https://github.com/jupyterhub/chartpress
+#
+chartpress>=1.1.0
+
+# pytest run tests 
+pytest>=3.7.1
