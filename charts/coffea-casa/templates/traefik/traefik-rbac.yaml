@@ -1,4 +1,5 @@
 ---
+{{- if .Values.traefik.enabled }}
 {{- if .Values.rbac.enabled -}}
 {{- if not .Values.rbac.traefik.serviceAccountName -}}
 kind: ServiceAccount
@@ -70,5 +71,6 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "coffea-casa.traefikName" . }}
     namespace: "{{ .Release.Namespace }}"
+{{- end }}
 {{- end }}
 {{- end }}

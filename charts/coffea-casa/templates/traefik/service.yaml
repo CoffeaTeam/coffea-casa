@@ -1,4 +1,5 @@
 ---
+{{- if .Values.traefik.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -29,5 +30,6 @@ spec:
       targetPort: 9000
       port: 9000
       name: traefik
+{{- end}}
 {{- end}}
 ---
