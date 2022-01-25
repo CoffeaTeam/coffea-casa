@@ -10,7 +10,7 @@ rbac:
 # that is acting as a proxy for traffic towards the gateway or user created
 # DaskCluster resources.
 traefik:
-  enabled: True
+  enabled: False
   service:
     type: LoadBalancer
     # type: ClusterIP
@@ -88,12 +88,16 @@ jupyterhub:
       SERVICEX_ENABLED: 'False'
   proxy:
     chp:
-      livenessProbe:
-        initialDelaySeconds: 30
-      readinessProbe:
-        periodSeconds: 10
+      resources:
+        requests:
+          memory: 0
+          cpu: 0
+      # livenessProbe:
+      #  initialDelaySeconds: 30
+      # readinessProbe:
+      #  periodSeconds: 10
       networkPolicy:
-        enabled: false
+        egress: [] # overrides allowance of 0.0.0.0/0
     extraEnv:
       # explicit notation (the "name" field takes precedence)
       CHP_NAMESPACE:
@@ -102,7 +106,9 @@ jupyterhub:
           fieldRef:
             fieldPath: metadata.namespace
     https:
-      enabled: true
+      enabled: false
+      # For local builds we are trying without https.
+      # enabled: true
       type: letsencrypt
       hosts:
         - local.jovyan.org
