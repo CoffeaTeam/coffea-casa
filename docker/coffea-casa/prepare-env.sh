@@ -22,7 +22,7 @@ sed -i -e "s|coffea_casa|${LABEXTENTION_FACTORY_MODULE}|g" $DASK_ROOT_CONFIG/lab
 sed -i -e "s|UNL HTCondor Cluster|${LABEXTENTION_CLUSTER}|g" $DASK_ROOT_CONFIG/labextension.yaml
 
 # Both SKYHOOK_CEPH_KEYRING and SKYHOOK_CEPH_UUIDGEN are defined in Helm chart (not in a Docker image)
-if [[ "$SKYHOOK_ENABLED" && "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" ]]; then
+if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" ]]; then
   sed -i -e "s|%(SKYHOOK_CEPH_UUIDGEN)|${SKYHOOK_CEPH_UUIDGEN}|g" $HOME/.ceph/ceph.conf
   sed -i -e "s|%(SKYHOOK_CEPH_KEYRING)|${SKYHOOK_CEPH_KEYRING}|g" $HOME/.ceph/keyring
   # Testing ceph status
