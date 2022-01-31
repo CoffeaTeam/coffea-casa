@@ -11,6 +11,7 @@ ARG TAG="2021.12.06"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
+ARG CEPH_CONF="/opt/ceph"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -29,6 +30,7 @@ ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
 ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
+ENV CEPH_CONF $CEPH_CONF
 ENV CACHE_PREFIX $CACHE_PREFIX
 ENV CERT_DIR $CERT_DIR
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
@@ -86,6 +88,7 @@ WORKDIR $HOME
 # Setup work directory for backward-compatibility
 RUN mkdir $HOME/work && \
     mkdir -p $HOME/.local && \
+    mkdir -p ${CEPH_CONF} && chown -R "${NB_USER}:${NB_GID}" ${CEPH_CONF} && \
     mkdir -p $HOME/.condor/tokens.d && \
     fix-permissions $HOME
 
@@ -120,6 +123,9 @@ RUN cd /tmp && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=/opt/conda && \
     make && \
     make install
+
+# Skyhook setup: Ceph configuration and Keyring
+COPY ceph.conf keyring ${CEPH_CONF}/
 
 USER root
 # Setup supervisord files
