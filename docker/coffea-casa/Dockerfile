@@ -22,6 +22,8 @@ ARG DASK_ROOT_CONFIG="/opt/dask"
 ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
+# Try to see if CEPH_CONF works (https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/1.2.3/html/ceph_configuration_guide/configuration_file_structure)
+ARG CEPH_CONF="/opt/ceph"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 # XCACHE settings for Servicex
@@ -52,6 +54,7 @@ ENV DASK_ROOT_CONFIG $DASK_ROOT_CONFIG
 ENV LABEXTENTION_CLUSTER $LABEXTENTION_CLUSTER
 ENV LABEXTENTION_FACTORY_CLASS $LABEXTENTION_FACTORY_CLASS
 ENV LABEXTENTION_FACTORY_MODULE $LABEXTENTION_FACTORY_MODULE
+ENV CEPH_CONF $CEPH_CONF
 ENV XCACHE_HOST $XCACHE_HOST
 ENV CACHE_PREFIX $CACHE_PREFIX
 ENV CONDOR_HOST $CONDOR_HOST
@@ -205,7 +208,7 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
-    mkdir -p $HOME/.ceph  && chown -R "${NB_USER}:${NB_GID}" $HOME/.ceph && \
+    mkdir -p ${CEPH_CONF} && chown -R "${NB_USER}:${NB_GID}" ${CEPH_CONF} && \
     mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
     mkdir -p ${HOME}/.condor/tokens.d && \
     mkdir -p /var/lib/condor && \
@@ -261,7 +264,7 @@ RUN cd /tmp && \
 # Labextention setup - >labextension.yml
 COPY dask.yaml labextension.yaml jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
 # Skyhook setup: Ceph configuration and Keyring
-COPY ceph.conf keyring $HOME/.ceph/
+COPY ceph.conf keyring ${CEPH_CONF}/
 # Copy HTCondor configuration files (see prepare-env.yaml)
 COPY config.d  /opt/condor/config.d/
 
@@ -306,7 +309,7 @@ RUN rm -rf /tmp/* \
     && rm -rf /opt/conda/pkgs
 
 # Fix permissions for Dask/Ceph config files
-RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml $HOME/.ceph/keyring $HOME/.ceph/ceph.conf
+RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml ${CEPH_CONF}/keyring ${CEPH_CONF}/ceph.conf
 # xcache setup
 ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
