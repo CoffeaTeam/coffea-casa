@@ -242,12 +242,13 @@ Then we bundle everything up to run our job, making use of the Dask executor. To
 
 .. code-block:: python
 
-    output = processor.run_uproot_job(fileset=fileset,
-                      treename="Events",
-                      processor_instance=Processor(),
-                      executor=processor.dask_executor,
-                      executor_args={'client': client, 'nano': True},
-                      chunksize=250000)
+    executor = processor.DaskExecutor(client=client)
+    run = processor.Runner(executor=executor,
+                            schema=schemas.NanoAODSchema,
+                            savemetrics=True
+                          )
+
+    output, metrics = run(fileset, "Events", processor_instance=Processor())
 
 The final step is to generates a 1D histogram from the data output to the 'MET' key. fill_opts are optional arguments to fill the graph (default is a line).
 
