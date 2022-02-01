@@ -73,7 +73,7 @@ ENV LANGUAGE en_US.UTF-8
      
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
-RUN yum -y install hhttps://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm   \
+RUN yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm \
  && yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install \
