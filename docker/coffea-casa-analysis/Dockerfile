@@ -11,7 +11,8 @@ ARG TAG="2021.12.06"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
-ARG CEPH_CONF="/opt/ceph"
+ARG CEPH_DIR="/opt/ceph"
+ARG CEPH_CONF=$CERT_DIR"/ceph.conf"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -30,6 +31,7 @@ ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
 ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
+ENV CEPH_DIR $CEPH_DIR
 ENV CEPH_CONF $CEPH_CONF
 ENV CACHE_PREFIX $CACHE_PREFIX
 ENV CERT_DIR $CERT_DIR
@@ -76,11 +78,11 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
     mkdir -p "${CONDA_DIR}" && \
     mkdir -p "${CERT_DIR}" && \
-    mkdir -p ${CEPH_CONF} && \
+    mkdir -p ${CEPH_DIR} && \
     mkdir -p /var/lib/condor && \
     chown -R "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
     chown -R "${NB_USER}:${NB_GID}" "${HOME}" && \
-    chown -R "${NB_USER}:${NB_GID}" ${CEPH_CONF} && \
+    chown -R "${NB_USER}:${NB_GID}" ${CEPH_DIR} && \
     chmod g+w /etc/passwd && \
     fix-permissions "${HOME}" && \
     fix-permissions "${CONDA_DIR}"
@@ -126,7 +128,7 @@ RUN cd /tmp && \
     make install
 
 # Skyhook setup: Ceph configuration and Keyring
-COPY ceph.conf keyring ${CEPH_CONF}/
+COPY ceph.conf keyring ${CEPH_DIR}/
 
 USER root
 # Setup supervisord files
