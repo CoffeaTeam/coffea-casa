@@ -31,7 +31,7 @@ ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
 # Condor settings
 ARG CONDOR_HOST="red-condor.unl.edu"
-ARG COLLECTOR=_NAME="Nebraska T2"
+ARG COLLECTOR_NAME="Nebraska T2"
 ARG UID_DOMAIN="unl.edu"
 ARG SCHEDD_HOST="t3.unl.edu"
 
