@@ -76,9 +76,11 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
     mkdir -p "${CONDA_DIR}" && \
     mkdir -p "${CERT_DIR}" && \
+    mkdir -p ${CEPH_CONF} && \
     mkdir -p /var/lib/condor && \
     chown -R "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
     chown -R "${NB_USER}:${NB_GID}" "${HOME}" && \
+    chown -R "${NB_USER}:${NB_GID}" ${CEPH_CONF} && \
     chmod g+w /etc/passwd && \
     fix-permissions "${HOME}" && \
     fix-permissions "${CONDA_DIR}"
@@ -88,7 +90,6 @@ WORKDIR $HOME
 # Setup work directory for backward-compatibility
 RUN mkdir $HOME/work && \
     mkdir -p $HOME/.local && \
-    mkdir -p ${CEPH_CONF} && chown -R "${NB_USER}:${NB_GID}" ${CEPH_CONF} && \
     mkdir -p $HOME/.condor/tokens.d && \
     fix-permissions $HOME
 
