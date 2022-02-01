@@ -132,13 +132,31 @@ If you wish to commit, push, or pull from the repository you currently have acti
 
 The buttons in the top right allow for pulling and pushing respectively. When you have edited files in a directory, they will show up under the *Changed* category, at which point you can hit the **+** to add them to a commit (at which point they will show up under *Staged*). Filling out the box at the bottom of the sidebar will file your commit, and prepare it for you to push.
 
+Using XCache
+-------
+When we use CMS data, we generally require certificates or we will be faced with authentication errors. Coffea-casa handles the issue of certificates internally through xcache tokens so that its users do not explicitly have to import their certificates, though this dynamic requires adjustiment of the redirector portion of the path to the root file requested. 
+
+Let's say we wish to request the file:
+
+.. code-block:: bash
+
+    root://cmsxrootd.fnal.gov//store/data/Run2018A/DoubleMuon/NANOAOD/02Apr2020-v1/30000/0555868D-6B32-D249-9ED1-6B9A6AABDAF7.root
+
+Then we would replace the ``cmsxrootd.fnal.gov`` redirector with the ``xcache`` redirector:
+
+.. code-block:: bash
+
+    root://xcache//store/data/Run2018A/DoubleMuon/NANOAOD/02Apr2020-v1/30000/0555868D-6B32-D249-9ED1-6B9A6AABDAF7.root
+    
+Now, we will be able to access our data.
+
+In addition to handling authentication, XCache will cache files so that they are able to be pulled more quickly in subsequent runs of the analysis. It should be expected, then, that the first analysis run with a new coffea-casa file will run slower than ones which follow afterwards.
+
 Example
 -------
-In this example (which corresponds to `ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example1.ipynb>`_), we'll try to run a simple analysis example on the Coffea-Casa Analysis Facility. We will use the ``coffea_casa`` wrapper library, which allows use of pre-configured settings for HTCondor configuration and Dask scheduler/worker images.
+Now we will try to run a short example, using CMS data, which corresponds to plotting the `dimuon Z-peak <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/zpeak_example.ipynb>`_. We use dimuon data which consists of ~3 million events at ~2.7 GB which belongs to the ``/DoubleMuon/Run2018A-02Apr2020-v1/NANOAOD`` dataset.
 
-Our goal in this `toy` analysis is to plot the missing transverse energy (*MET*) of all events from a sample dataset; this data was converted from 2012 CMS Open Data (17 GB, 54 million events), and is available in public EOS (root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root).
-
-First, we need to import the ``coffea`` libraries used in this example:
+We import some common coffea libraries used in this example:
 
 .. code-block:: python
 
@@ -152,46 +170,42 @@ To select the aforementioned data in a coffea-friendly syntax, we employ a dicti
 
 .. code-block:: python
 
-    fileset = {'SingleMu' : ["root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root"]}
+    fileset = {'DoubleMu' : ['root://xcache//store/data/Run2018A/DoubleMuon/NANOAOD/02Apr2020-v1/30000/0555868D-6B32-D249-9ED1-6B9A6AABDAF7.root',
+                            'root://xcache//store/data/Run2018A/DoubleMuon/NANOAOD/02Apr2020-v1/30000/07796DC0-9F65-F940-AAD1-FE82262B4B03.root',
+                            'root://xcache//store/data/Run2018A/DoubleMuon/NANOAOD/02Apr2020-v1/30000/09BED5A5-E6CC-AC4E-9344-B60B3A186CFA.root']}
 
 Coffea provides the coffea.processor module, where users may write their analysis code without worrying about the details of efficient parallelization, assuming that the parallelization is a trivial map-reduce operation (e.g., filling histograms and adding them together).
 
 .. code-block:: python
 
-    # This program plots an event-level variable (in this case, MET, but switching it is as easy as a dict-key change). It also demonstrates an easy use of the book-keeping cutflow tool, to keep track of the number of events processed.
-    # The processor class bundles our data analysis together while giving us some helpful tools.  It also leaves looping and chunks to the framework instead of us.
     class Processor(processor.ProcessorABC):
-      def __init__(self):
-          # Bins and categories for the histogram are defined here. For format, see https://coffeateam.github.io/coffea/stubs/coffea.hist.hist_tools.Hist.html && https://coffeateam.github.io/coffea/stubs/coffea.hist.hist_tools.Bin.html
-          dataset_axis = hist.Cat("dataset", "")
-          MET_axis = hist.Bin("MET", "MET [GeV]", 50, 0, 100)
-
-          # The accumulator keeps our data chunks together for histogramming. It also gives us cutflow, which can be used to keep track of data.
-          self._accumulator = processor.dict_accumulator({
-              'MET': hist.Hist("Counts", dataset_axis, MET_axis),
-              'cutflow': processor.defaultdict_accumulator(int)
-              })
-
-      @property
-      def accumulator(self):
+    def __init__(self):
+        dataset_axis = hist.Cat("dataset", "Dataset")
+        dimu_mass_axis = hist.Bin("dimu_mass", "$\mu\mu$ Mass [GeV]", 50, 20, 120)
+        
+        self._accumulator = processor.dict_accumulator({
+            'dimu_mass': hist.Hist("Counts", dataset_axis, dimu_mass_axis),
+        })
+    
+    @property
+    def accumulator(self):
         return self._accumulator
-
-      def process(self, events):
+    
+    def process(self, events):
         output = self.accumulator.identity()
-
-        # This is where we do our actual analysis. The dataset has columns similar to the TTree's; events.columns can tell you them, or events.[object].columns for deeper depth.
+        
         dataset = events.metadata["dataset"]
-        MET = events.MET.pt
-
-        # We can define a new key for cutflow (in this case 'all events'). Then we can put values into it. We need += because it's per-chunk (demonstrated below)
-        output['cutflow']['all events'] += MET.size
-        output['cutflow']['number of chunks'] += 1
-
-        # This fills our histogram once our data is collected. The hist key ('MET=') will be defined in the bin in __init__.
-        output['MET'].fill(dataset=dataset, MET=MET.flatten())
+        
+        mu = events.Muon
+        # Select events with 2 muons whose charges cancel out (Zs are charge-neutral).
+        dimu_neutral = mu[(ak.num(mu) == 2) & (ak.sum(mu.charge, axis=1) == 0)]
+        # Add together muon pair p4's, find dimuon mass.
+        dimu_mass = (dimu_neutral[:, 0] + dimu_neutral[:, 1]).mass
+        # Plot dimuon mass.
+        output['dimu_mass'].fill(dataset=dataset, dimu_mass=dimu_mass)
         return output
 
-      def postprocess(self, accumulator):
+    def postprocess(self, accumulator):
         return accumulator
 
 
@@ -217,30 +231,11 @@ The final step is to generates a 1D histogram from the data output to the 'MET' 
 
 .. code-block:: python
 
-    hist.plot1d(output['MET'], overlay='dataset', fill_opts={'edgecolor': (0,0,0,0.3), 'alpha': 0.8})
+    hist.plot1d(output['dimu_mass'], overlay='dataset', fill_opts={'edgecolor': (0,0,0,0.3), 'alpha': 0.8})
 
 As a result you should see next plot:
 
-.. image:: _static/example1-plot.png
+.. image:: _static/examplezpeak-plot.png
    :alt: Final plot that you should see at the end of example
    :width: 50%
    :align: center
-   
-Important Note for CMS Data
----------------------------
-
-.. important::
-   Above, we used a public data file to run through our example. If your analysis makes use of CMS data, or data which is otherwise certificate-protected, you will run into authentication errors.
-   The Coffea-Casa Analysis Facility @ T2 Nebraska comes equipped with xcache tokens that permit you to access this data, but you will need to edit the path you're using to access the root file by changing the redirector portion to ``xcache``. For example:
-
-Example:
-
-.. code-block:: bash
-
-   root://xrootd.unl.edu//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root
-
-becomes:
-
-.. code-block:: bash
-
-   root://xcache//eos/cms/store/mc/RunIIAutumn18NanoAODv7/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21_ext2-v1/260000/47DA174D-9F5A-F745-B2AA-B9F66CDADB1A.root
