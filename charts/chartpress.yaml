@@ -1,0 +1,43 @@
+charts:
+  - name: coffea-casa
+    imagePrefix: jupyterhub/k8s-
+    repo:
+      git: jupyterhub/helm-chart
+      published: https://jupyterhub.github.io/helm-chart
+    resetTag: local
+    resetVersion: 0.2.0
+    images:
+      coffea-casa:
+        # We will not use the default build contextPath, and must therefore
+        # specify the dockerfilePath explicitly.
+        dockerfilePath: ../docker/coffea-casa/Dockerfile
+        # Context to send to docker build for use by the Dockerfile. We pass the
+        # root folder in order to allow the image to access and build the python
+        # package.
+        contextPath: ..
+        # To avoid chartpress to react to changes in documentation and other
+        # things, we ask it to not trigger on changes to the contextPath, which
+        # means we manually should add paths rebuild should be triggered on
+        rebuildOnContextPathChanges: false
+        # We manually specify the paths which chartpress should monitor for
+        # changes that should trigger a rebuild of this image.
+        paths:
+          - ../docker/coffea-casa/Dockerfile
+        valuesPath: image
+      coffea-casa-analysis:
+        # We will not use the default build contextPath, and must therefore
+        # specify the dockerfilePath explicitly.
+        dockerfilePath: ../docker/coffea-casa-analysis/Dockerfile
+        # Context to send to docker build for use by the Dockerfile. We pass the
+        # root folder in order to allow the image to access and build the python
+        # package.
+        contextPath: ..
+        # To avoid chartpress to react to changes in documentation and other
+        # things, we ask it to not trigger on changes to the contextPath, which
+        # means we manually should add paths rebuild should be triggered on
+        rebuildOnContextPathChanges: false
+        # We manually specify the paths which chartpress should monitor for
+        # changes that should trigger a rebuild of this image.
+        paths:
+          - ../docker/coffea-casa-analysis/Dockerfile
+        valuesPath: image
