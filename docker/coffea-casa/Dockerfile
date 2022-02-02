@@ -24,7 +24,7 @@ ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
 # Try to see if CEPH_CONF works (https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/1.2.3/html/ceph_configuration_guide/configuration_file_structure)
 ARG CEPH_DIR="/opt/ceph"
-ARG CEPH_CONF=$CERT_DIR"/ceph.conf"
+ARG CEPH_CONF=$CEPH_DIR"/ceph.conf"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 # XCACHE settings for Servicex

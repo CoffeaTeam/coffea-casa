@@ -12,7 +12,7 @@ ARG TAG="2021.12.06"
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG CEPH_DIR="/opt/ceph"
-ARG CEPH_CONF=$CERT_DIR"/ceph.conf"
+ARG CEPH_CONF=$CEPH_DIR"/ceph.conf"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
