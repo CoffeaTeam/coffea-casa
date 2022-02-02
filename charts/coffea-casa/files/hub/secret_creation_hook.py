@@ -1,5 +1,6 @@
 import base64
-import yaml, os
+import yaml
+import distutils.util, os
 
 from auth import generate_x509, generate_condor, generate_xcache, generate_servicex
 
@@ -21,17 +22,18 @@ servicex_issuer = 'cmsaf-jh.unl.edu'
 servicex_user_name = "cms-jovyan"
 
 external_dns = False
-dask_base_domain = os.environ('DASK_BASE_DOMAIN')
+dask_base_domain = os.environ.get('DASK_BASE_DOMAIN', 'coffea.example.edu')
+condor_settings = bool(distutils.util.strtobool(os.environ.get('CONDOR_ENABLED', 'True')))
+servicex_settings = bool(distutils.util.strtobool(os.environ.get('SERVICEX_ENABLED', 'True')))
 
 set_config_if_not_none(c.KubeSpawner, 'gid', 'singleuser.gid')
 
 
 # Detect if there are tokens for this user - if so, add them as volume mounts.
-c.KubeSpawner.environment["BEARER_TOKEN_FILE"] = os.environ["BEARER_TOKEN_FILE"]
-c.KubeSpawner.environment["XCACHE_HOST"] = os.environ["XCACHE_HOST"]
-c.KubeSpawner.environment["XRD_PLUGINCONFDIR"] = os.environ["XRD_PLUGINCONFDIR"]
-c.KubeSpawner.environment["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]
-# TODO: make mountPath and name parametrisable (cmsaf-secrets and /etc/cmsaf-secrets)
+c.KubeSpawner.environment["BEARER_TOKEN_FILE"] = "/etc/cmsaf-secrets/xcache_token"
+#c.KubeSpawner.environment["XCACHE_HOST"] = "red-xcache1.unl.edu"
+c.KubeSpawner.environment["XRD_PLUGINCONFDIR"] = "/opt/conda/etc/xrootd/client.plugins.d/"
+c.KubeSpawner.environment["LD_LIBRARY_PATH"] = "/opt/conda/lib/"
 c.KubeSpawner.volume_mounts.extend([{"name": "cmsaf-secrets", "mountPath": "/etc/cmsaf-secrets"}])
 c.KubeSpawner.volumes.extend([{"name": "cmsaf-secrets", "secret": {"secretName": "{username}-secrets"}}])
 
@@ -53,11 +55,15 @@ def secret_creation_hook(spawner, pod):
 
     # Create a service to serve the Dask scheduler to the outside world
     label = "jhub_user=%s" % euser
+    # Limitation on length of metadata.name is 63 symbols: https://www.rfc-editor.org/rfc/rfc1123
+    limit = 63
     services = api.list_namespaced_service(K8S_NAMESPACE, label_selector=label)
     if not services.items:
         body = client.V1Service()
         body.metadata = client.V1ObjectMeta()
         body.metadata.name = '%s-dask-service' % euser
+        if len(body.metadata.name) > limit:
+            body.metadata.name = body.metadata.name[:limit]
         body.metadata.labels = {}
         body.metadata.labels['jhub_user'] = euser
         body.spec = client.V1ServiceSpec()
@@ -155,19 +161,25 @@ def secret_creation_hook(spawner, pod):
         return pod
 
     ca_key_bytes, ca_cert_bytes, server_bytes, user_bytes = generate_x509()
-
-    condor_token = generate_condor(api, K8S_NAMESPACE, condor_secret_name, issuer, condor_user, kid)
     xcache_token = generate_xcache(api, K8S_NAMESPACE, xcache_secret_name, xcache_location_name, xcache_user_name)
-    servicex_token = generate_servicex(api, K8S_NAMESPACE, servicex_secret_name, servicex_issuer, servicex_user)
+
+    if condor_settings is True:
+        condor_token = generate_condor(api, K8S_NAMESPACE, condor_secret_name, issuer, condor_user, kid)
+    if servicex_settings is True:
+        servicex_token = generate_servicex(api, K8S_NAMESPACE, servicex_secret_name, servicex_issuer, servicex_user)
     body = client.V1Secret()
     body.data = {}
+    # 'must' to be generated secrets:
     body.data["xcache_token"] = base64.b64encode(xcache_token.encode('ascii')).decode('ascii')
-    body.data["condor_token"] = base64.b64encode((condor_token + "\n").encode('ascii')).decode('ascii')
-    body.data[".servicex"] = base64.b64encode(servicex_token.encode('ascii')).decode('ascii')
     body.data["ca.key"] = base64.b64encode(ca_key_bytes).decode('ascii')
     body.data["ca.pem"] = base64.b64encode(ca_cert_bytes).decode('ascii')
     body.data["hostcert.pem"] = base64.b64encode(server_bytes).decode('ascii')
     body.data["usercert.pem"] = base64.b64encode(user_bytes).decode('ascii')
+    # optional secrets and configuration files:
+    if condor_settings is True:
+        body.data["condor_token"] = base64.b64encode((condor_token + "\n").encode('ascii')).decode('ascii')
+    if servicex_settings is True:
+        body.data[".servicex"] = base64.b64encode(servicex_token.encode('ascii')).decode('ascii')
     body.metadata = client.V1ObjectMeta()
     body.metadata.name = '%s-secrets' % euser
     body.metadata.labels = {}
