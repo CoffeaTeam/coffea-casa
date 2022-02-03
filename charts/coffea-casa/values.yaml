@@ -46,6 +46,16 @@ servicex:
   enabled: false
   # host: "http://coffea-casa-servicex-app:8000"
 
+xcache:
+  enabled: True
+  xcache_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+
+htcondor:
+  enabled: False
+
+oidc_auth:
+  enabled: False
+ 
 # Jupyterhub settings
 jupyterhub:
   hub:
