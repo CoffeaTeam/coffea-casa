@@ -94,7 +94,7 @@ jupyterhub:
       tag: 0.11.1
     extraEnv:
       DASK_BASE_DOMAIN: kubernetes.docker.internal
-      CONDOR_ENABLED: 'True'
+      CONDOR_ENABLED: 'False'
       SERVICEX_ENABLED: 'False'
   proxy:
     chp:
