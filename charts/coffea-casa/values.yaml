@@ -172,7 +172,7 @@ jupyterhub:
       - display_name: "Coffea Base Image"
         description: "Coffea-casa build with coffea 0.7.11/dask 2021.11.2/condor and cheese"
         kubespawner_override:
-          image: hub.opensciencegrid.org/coffea-casa/coffea-casa:develop
+          image: hub.opensciencegrid.org/coffea-casa/coffea-casa:development
           imagePullPolicy: Always
           securityContext:
             runAsUser: 6440
