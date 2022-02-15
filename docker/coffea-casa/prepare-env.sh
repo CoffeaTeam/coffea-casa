@@ -30,10 +30,13 @@ if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" ]]; then
 fi
 
 if [ "${LABEXTENTION_FACTORY_CLASS:-}" == "LocalCluster" ]; then
-  # FIXME: for now no need to have cartificates
-  sed -i -e "s|require-encryption: True|require-encryption: False|g" $DASK_ROOT_CONFIG/dask.yaml
-  ## echo "
-  ## >> $DASK_ROOT_CONFIG/dask.yaml
+  # Used for testing purposes, CI and local development.
+  echo "
+distributed:
+  version: 2
+  dashboard:
+    link: "/user/{JUPYTERHUB_USER}/proxy/{port}/status"
+  " > $DASK_ROOT_CONFIG/dask.yaml
 fi
 
 # HTCondor scheduler settings
