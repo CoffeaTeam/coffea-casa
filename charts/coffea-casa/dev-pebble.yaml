@@ -6,5 +6,5 @@
 coredns:
   corefileSegment: |-
     template ANY ANY local.jovyan.org {
-      answer "{{ .Name }} 60 IN CNAME proxy-public.{$PEBBLE_NAMESPACE}.svc.cluster.local"
+      answer "{{ .Name }} 60 IN CNAME proxy-public.coffea-casa.svc.cluster.local"
     }

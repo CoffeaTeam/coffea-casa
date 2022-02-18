@@ -58,7 +58,7 @@ spec:
             # Any Ingress attached to this Entrypoint will have TLS termination by default.
             - --entrypoints.websecure.http.tls
             # Let's Encrypt Configurtion.
-            - --certificatesresolvers.default.acme.email=oksana.shadura@cern.ch
+            - --certificatesresolvers.default.acme.email=local@jovyan.org
             - --certificatesresolvers.default.acme.storage=acme.json
             - --certificatesresolvers.default.acme.tlschallenge
             # Use the staging ACME server. Uncomment this while testing to prevent
