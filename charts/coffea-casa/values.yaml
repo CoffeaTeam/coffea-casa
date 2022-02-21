@@ -178,8 +178,8 @@ jupyterhub:
           \ cheese"
         kubespawner_override:
           image: hub.opensciencegrid.org/coffea-casa/coffea-casa:2022.2.1-n001.h0f14623
-          #tag: "set-by-chartpress"
-          #imagePullPolicy: Always
+          # tag: "set-by-chartpress"
+          # imagePullPolicy: Always
           securityContext:
             runAsUser: 6440
             runAsGroup: 11265
