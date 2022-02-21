@@ -93,7 +93,7 @@ jobs:
       - name: Install and run chartpress
         run: |
           pip3 install -r charts/requirements.txt
-          chartpress
+          chartpress --skip-build
 
       - name: "Install local chart"
         run: |
