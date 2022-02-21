@@ -89,6 +89,10 @@ jupyterhub:
       enabled: false
     readinessProbe:
       periodSeconds: 10
+    services:
+      test:
+        admin: true
+        apiToken: pytest-admin-test
     db:
       pvc:
         storageClassName: standard
@@ -110,7 +114,7 @@ jupyterhub:
       # readinessProbe:
       #  periodSeconds: 10
       networkPolicy:
-        egress: [] # overrides allowance of 0.0.0.0/0
+        enabled: false
     extraEnv:
       # explicit notation (the "name" field takes precedence)
       CHP_NAMESPACE:
