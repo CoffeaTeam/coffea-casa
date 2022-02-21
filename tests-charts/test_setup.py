@@ -1,10 +1,5 @@
 import os
-import requests
-import textwrap
-import uuid
-
 from urllib.parse import urlparse
-
 import pytest
 import yaml
 
