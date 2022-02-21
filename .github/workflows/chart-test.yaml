@@ -98,7 +98,7 @@ jobs:
       - name: "Install local chart"
         run: |
           helm dependency build charts/coffea-casa
-          helm upgrade --install coffea-casa charts/coffea-casa -n coffea-casa -f charts/coffea-casa/values.yaml
+          helm upgrade --install coffea-casa charts/coffea-casa -n coffea-casa --create-namespace -f charts/coffea-casa/values.yaml
               ${{ matrix.local-chart-extra-args }}
 
       - name: "Await local chart"
