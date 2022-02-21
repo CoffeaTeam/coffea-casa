@@ -98,7 +98,7 @@ jupyterhub:
         storageClassName: standard
     image:
       name: hub.opensciencegrid.org/coffea-casa/k8s-hub-coffea-casa
-      tag: "2022.2.1-n001.h0f14623"
+      tag: "2022.2.1"
     extraEnv:
       DASK_BASE_DOMAIN: kubernetes.docker.internal
       CONDOR_ENABLED: 'False'
@@ -177,7 +177,7 @@ jupyterhub:
         description: "Coffea-casa build with coffea 0.7.11/dask 2021.11.2/condor and\
           \ cheese"
         kubespawner_override:
-          image: hub.opensciencegrid.org/coffea-casa/coffea-casa:2022.2.1-n001.h0f14623
+          image: hub.opensciencegrid.org/coffea-casa/coffea-casa:2022.2.1
           #tag: "set-by-chartpress"
           #imagePullPolicy: Always
           securityContext:
