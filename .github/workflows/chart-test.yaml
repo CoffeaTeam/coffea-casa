@@ -1,0 +1,113 @@
+# This is a GitHub workflow defining a set of jobs with a set of steps.
+# ref: https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions
+#
+name: Test chart
+
+# Trigger the workflow's on all PRs and pushes so that other contributors can
+# run tests in their own forks. Avoid triggering these tests on changes to
+# documentation only changes.
+on:
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "docs-image/**"
+      - "**.md"
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "docs-image/**"
+      - "**.md"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # k3s-version: https://github.com/rancher/k3s/tags
+        # k3s-channel: https://update.k3s.io/v1-release/channels
+        include:
+          - k3s-channel: v1.23
+            test: install
+            debuggable: debuggable
+          - k3s-channel: v1.22
+            test: install
+          - k3s-channel: v1.21
+            test: install
+          - k3s-channel: v1.20
+            test: install
+          - k3s-channel: v1.19
+            test: install
+          - k3s-channel: v1.18 # also test prePuller.hook
+            test: install
+            local-chart-extra-args: >-
+              --set prePuller.hook.enabled=true
+              --set prePuller.hook.pullOnlyOnChanges=true
+          - k3s-channel: v1.17 # also test hub.existingSecret
+            test: install
+            local-chart-extra-args: >-
+              --set hub.existingSecret=test-hub-existing-secret
+              --set proxy.secretToken=aaaa1111
+              --set hub.cookieSecret=bbbb2222
+              --set hub.config.CryptKeeper.keys[0]=cccc3333
+            create-k8s-test-resources: true
+  
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # chartpress requires git history to set chart version and image tags
+          # correctly
+          fetch-depth: 0
+
+      # Starts a k8s cluster with NetworkPolicy enforcement and installs both
+      # kubectl and helm
+      #
+      # ref: https://github.com/jupyterhub/action-k3s-helm/
+      - uses: jupyterhub/action-k3s-helm@v1
+        with:
+          k3s-channel: ${{ matrix.k3s-channel }}
+          metrics-enabled: false
+          traefik-enabled: false
+          docker-enabled: true
+
+      # NOTE: actions/setup-python@v2 make use of a cache within the GitHub base
+      #       environment and setup in a fraction of a second.
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+      # Install a local ACME server to fill the role of Let's Encrypt (LE). We
+      # do this as the HTTP challenge sent out by an ACME server must be able to
+      # reach the ACME client in our autohttps pod.
+      - name: Install local ACME server
+        run: |
+          helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values charts/coffea-casa/dev-pebble.yaml
+
+      # Build our images if needed and update values.yaml with the tags
+      - name: Install and run chartpress
+        run: |
+          pip3 install -r charts/requirements.txt
+          chartpress
+
+      - name: "Install local chart"
+        run: |
+          helm upgrade --install coffea-casa -n coffea-casa -f charts/coffea-casa/values.yaml coffea-casa --cleanup-on-fail
+              ${{ matrix.local-chart-extra-args }}
+
+      - name: "Await local chart"
+        uses: jupyterhub/action-k8s-await-workloads@v1
+        with:
+          timeout: 150
+          max-restarts: 1
+
+      - name: Run tests
+        run: |
+          . ./ci/common
+          # If you have problems with the tests add '--capture=no' to show stdout
+          pytest --verbose --maxfail=2 --color=yes ./tests-charts
