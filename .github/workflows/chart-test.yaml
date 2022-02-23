@@ -38,25 +38,6 @@ jobs:
             debuggable: debuggable
           - k3s-channel: v1.22
             test: install
-          - k3s-channel: v1.21
-            test: install
-          - k3s-channel: v1.20
-            test: install
-          - k3s-channel: v1.19
-            test: install
-          - k3s-channel: v1.18 # also test prePuller.hook
-            test: install
-            local-chart-extra-args: >-
-              --set prePuller.hook.enabled=true
-              --set prePuller.hook.pullOnlyOnChanges=true
-          - k3s-channel: v1.17 # also test hub.existingSecret
-            test: install
-            local-chart-extra-args: >-
-              --set hub.existingSecret=test-hub-existing-secret
-              --set proxy.secretToken=aaaa1111
-              --set hub.cookieSecret=bbbb2222
-              --set hub.config.CryptKeeper.keys[0]=cccc3333
-            create-k8s-test-resources: true
   
     steps:
       - uses: actions/checkout@v2
@@ -107,6 +88,19 @@ jobs:
           timeout: 150
           max-restarts: 1
 
+      - name: Await local chart cert acquisition
+        run: |
+          . ./.github/ci/common
+          await_autohttps_tls_cert_acquisition
+
       - name: Run tests
         run: |
           pytest --verbose --maxfail=2 --color=yes ./tests-charts
+
+     # ref: https://github.com/jupyterhub/action-k8s-namespace-report
+      - name: Kubernetes namespace report
+        uses: jupyterhub/action-k8s-namespace-report@v1
+        if: always()
+        with:
+          important-workloads: deploy/hub deploy/proxy
+
