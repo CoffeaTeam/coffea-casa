@@ -163,7 +163,7 @@ jupyterhub:
       postStart:
         exec:
           command: ['bash', '-c', 'mkdir -p /home/cms-jovyan/.condor/tokens.d/ ']
-          #&& cp -f /etc/cmsaf-secrets/condor_token /home/cms-jovyan/.condor/tokens.d/condor_token ']
+          # && cp -f /etc/cmsaf-secrets/condor_token /home/cms-jovyan/.condor/tokens.d/condor_token ']
     storage:
       homeMountPath: /home/cms-jovyan/
       dynamic:
