@@ -77,4 +77,4 @@ jobs:
         python -m pip list
     - name: Test with pytest
       run: |
-        coverage run -m pytest
+        coverage run -m pytest ./tests
