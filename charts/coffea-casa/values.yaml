@@ -129,7 +129,7 @@ jupyterhub:
         - local.jovyan.org
       letsencrypt:
         contactEmail: local@jovyan.org
-        acmeServer: https://pebble.coffea-casa/dir
+        acmeServer: https://pebble.default/dir
     secretToken: pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
     service:
       # type: LoadBalancer
