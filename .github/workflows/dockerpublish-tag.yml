@@ -19,10 +19,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [coffea-casa,
-                coffea-casa-analysis,
-                coffea-casa-cc7,
-                coffea-casa-analysis-cc7]
+        IMAGE: [cc-base-ubuntu,
+                cc-base-centos7,
+                cc-analysis-ubuntu,
+                cc-analysis-centos7
+                cc-centos7,
+                cc-ubuntu,
+                cc-skyhook-ubuntu,
+                cc-skyhook-centos7]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 
@@ -38,7 +42,7 @@ jobs:
     - name: Build image
       run: |
         cd docker/${{ matrix.IMAGE }}
-        docker build -t ${DOCKER_ORG}/${{ matrix.IMAGE }}:release .
+        docker build -t ${DOCKER_ORG}/${{ matrix.IMAGE }}:release -f Dockerfile.${{ matrix.IMAGE }} .
 
     - name: Log into registry
       run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
