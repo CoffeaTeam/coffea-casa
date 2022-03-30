@@ -1,0 +1,9 @@
+distributed:
+  version: 2
+  
+  dashboard:
+    link: "/user/{JUPYTERHUB_USER}/proxy/{port}/status"
+
+  admin:
+    tick:
+      limit: 5s # time allowed before triggering a warning

@@ -1,0 +1,15 @@
+distributed:
+  comm:
+    require-encryption: True # Whether to require encryption on non-local comms
+    tls:
+      ciphers: null   # Allowed ciphers, specified as an OpenSSL cipher string.
+      ca-file: "/etc/cmsaf-secrets/ca.pem"   # Path to a CA file, in pem format, optional
+      scheduler:
+        cert: "/etc/cmsaf-secrets/hostcert.pem"    # Path to certificate file for scheduler.
+        key: "/etc/cmsaf-secrets/hostcert.pem"     # Path to key file for scheduler.
+      worker:
+        key: null
+        cert: null
+      client:
+        key: "/etc/cmsaf-secrets/hostcert.pem"  # Path to certificate file for client.
+        cert: "/etc/cmsaf-secrets/hostcert.pem"  # Path to key file for client.

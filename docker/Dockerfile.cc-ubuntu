@@ -1,0 +1,121 @@
+ARG TAG="2022.03.30"
+FROM coffeateam/cc-base-ubuntu:${TAG}
+
+# https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
+
+# Fix DL4006
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+USER root
+LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
+# Jupyterhub
+ARG NB_USER="cms-jovyan"
+ARG NB_UID="6440"
+ARG NB_GID="11265"
+# Tag
+ARG WORKER_IMAGE="coffeateam/cc-analysis-ubuntu"
+# Secrets
+ARG CERT_DIR="/etc/cmsaf-secrets"
+ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
+# Configure Labextention Dask Cluster factory
+ARG DASK_ROOT_CONFIG="/opt/dask"
+ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
+ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
+ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
+# XCACHE
+ARG XCACHE_HOST="red-xcache1.unl.edu"
+# XCACHE settings for Servicex
+ARG CACHE_PREFIX="red-xcache1.unl.edu"
+# Condor settings
+ARG CONDOR_HOST="red-condor.unl.edu"
+ARG COLLECTOR_NAME="Nebraska T2"
+ARG UID_DOMAIN="unl.edu"
+ARG SCHEDD_HOST="t3.unl.edu"
+
+# Hack for GH Actions
+ARG GITHUB_ACTIONS="false"
+
+# Configure environment
+ENV CONDA_DIR /opt/conda
+ENV SHELL /bin/bash
+ENV NB_USER $NB_USER
+ENV USER $NB_USER
+ENV NB_UID $NB_UID
+ENV NB_GID $NB_GID
+ENV HOME /home/$NB_USER
+ENV PATH "/opt/conda/bin/:$PATH"
+ENV WORKER_IMAGE $WORKER_IMAGE
+ENV TAG $TAG
+ENV CERT_DIR $CERT_DIR
+ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
+ENV DASK_ROOT_CONFIG $DASK_ROOT_CONFIG
+ENV LABEXTENTION_CLUSTER $LABEXTENTION_CLUSTER
+ENV LABEXTENTION_FACTORY_CLASS $LABEXTENTION_FACTORY_CLASS
+ENV LABEXTENTION_FACTORY_MODULE $LABEXTENTION_FACTORY_MODULE
+ENV XCACHE_HOST $XCACHE_HOST
+ENV CACHE_PREFIX $CACHE_PREFIX
+ENV CONDOR_HOST $CONDOR_HOST
+ENV COLLECTOR_NAME $COLLECTOR_NAME
+ENV UID_DOMAIN $UID_DOMAIN
+ENV SCHEDD_HOST $SCHEDD_HOST
+     
+RUN pip install --no-cache-dir \
+    coffea_casa
+
+# ------- xrootd-authz-plugin -------------------------------
+RUN cd /tmp && \
+    # ------- xrdcl-authz-plugin -------------------------------
+    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+    cd xrdcl-authz-plugin && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+    make && \
+    make install
+
+USER ${NB_UID}
+# Coffea_casa - > jobqueue-coffea-casa.yaml
+COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
+
+# Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
+COPY uproot_xrd_source.patch ${CONDA_DIR}/lib/python3.8/site-packages/uproot
+RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+
+# Distributed: we need to install patched version of distributed version
+COPY distributed ${CONDA_DIR}/lib/python3.8/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/distributed && \
+    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
+    patch -p2 < 0003-Activate-patch.patch && \
+    patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
+    # && patch -p2 < 0005-Add-patch-from-John-Thiltges.patch
+
+# Cleanup
+RUN rm -rf /tmp/* \
+    && rm -rf $HOME/.cache/.pip/* \
+    && mamba clean -tipsy \
+    && jupyter lab clean \
+    && jlpm cache clean \
+    && npm cache clean --force \
+    && find ${CONDA_DIR} -type f -name '*.a' -delete \
+    && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
+    && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
+    && (find ${CONDA_DIR}/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && rm -rf ${CONDA_DIR}/pkgs
+
+# xcache setup
+ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+
+ADD prepare-env-cc.sh /usr/local/bin/
+RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+
+# Switch back to cms-jovyan to avoid accidental container runs as root
+USER ${NB_UID}
+WORKDIR $HOME
+ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
+
+# Extra packages to be installed (apt, pip, conda) and commands to be executed
+# Use bash login shell for entrypoint in order
+# to automatically source user's .bashrc
+CMD ["start-notebook.sh"]
