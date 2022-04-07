@@ -1,3 +1,4 @@
+ARG TAG="2022.03.30"
 FROM coffeateam/coffea-dask:0.7.12-fastjet-3.3.4.0rc9-g0aa0af3
 
 USER root
@@ -6,13 +7,9 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
-# Tag
-ARG TAG="2022.03.30"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
-ARG CEPH_DIR="/opt/ceph"
-ARG CEPH_CONF=$CEPH_DIR"/ceph.conf"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -31,8 +28,6 @@ ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
 ENV TAG $TAG
 ENV XCACHE_HOST $XCACHE_HOST
-ENV CEPH_DIR $CEPH_DIR
-ENV CEPH_CONF $CEPH_CONF
 ENV CACHE_PREFIX $CACHE_PREFIX
 ENV CERT_DIR $CERT_DIR
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
@@ -61,7 +56,7 @@ ENV LC_ALL=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
 
 # Copy a script that we will use to correct permissions after running certain commands
-COPY fix-permissions /usr/local/bin/fix-permissions
+COPY jupyterhub/fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
 # Enable prompt color in the skeleton .bashrc before creating the default NB_USER
@@ -78,11 +73,9 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
     mkdir -p "${CONDA_DIR}" && \
     mkdir -p "${CERT_DIR}" && \
-    mkdir -p ${CEPH_DIR} && \
     mkdir -p /var/lib/condor && \
     chown -R "${NB_USER}:${NB_GID}" "${CONDA_DIR}" && \
     chown -R "${NB_USER}:${NB_GID}" "${HOME}" && \
-    chown -R "${NB_USER}:${NB_GID}" ${CEPH_DIR} && \
     chmod g+w /etc/passwd && \
     fix-permissions "${HOME}" && \
     fix-permissions "${CONDA_DIR}"
@@ -127,12 +120,9 @@ RUN cd /tmp && \
     make && \
     make install
 
-# Skyhook setup: Ceph configuration and Keyring
-COPY ceph.conf keyring ${CEPH_DIR}/
-
 USER root
 # Setup supervisord files
-COPY supervisord.conf  /etc/supervisor/
+COPY k8s-worker/supervisord.conf  /etc/supervisor/
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
@@ -141,12 +131,12 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
-COPY uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
+COPY uproot/uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
 RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY distributed /opt/conda/lib/python3.8/site-packages/distributed
+COPY dask/distributed /opt/conda/lib/python3.8/site-packages/distributed
 RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
@@ -182,7 +172,7 @@ RUN mkdir /cvmfs
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
 # nor and execute dask-worker command
-ADD prepare-env-analysis.sh /usr/local/bin/
+ADD prepare-env/prepare-env-cc-analysis.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 USER $NB_USER

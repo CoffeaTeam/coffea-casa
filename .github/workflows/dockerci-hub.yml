@@ -7,6 +7,7 @@ on:
       - 'charts/coffea-casa/docker/**'
     branches:
       - master
+      - develop
 
 env:
   DOCKER_ORG: coffeateam
