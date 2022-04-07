@@ -19,10 +19,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [cc-analysis-ubuntu,
-                cc-analysis-centos7,
+        IMAGE: [cc-base-centos7,
+                cc-base-ubuntu,
                 cc-centos7,
                 cc-ubuntu,
+                cc-analysis-ubuntu,
+                cc-analysis-centos7,
                 cc-skyhook-ubuntu,
                 cc-skyhook-centos7]
     name: ${{ matrix.IMAGE }}
@@ -30,42 +32,46 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
-    - name: Build base cc7 image
-      uses: docker/build-push-action@v2
-      with:
-        context: ./docker
-        file: ./docker/Dockerfile.cc-base-cc7
-        push: false
-        load: true
-        platforms: linux/amd64
-        tags: coffeateam/cc-base-cc7:PR
-    - name: Build base ubuntu image
-      uses: docker/build-push-action@v2
-      with:
-        context: ./docker
-        file: ./docker/Dockerfile.cc-base-ubuntu
-        push: false
-        load: true
-        platforms: linux/amd64
-        tags: coffeateam/cc-base-ubuntu:PR
-    - name: Build and push
-      uses: docker/build-push-action@v2
-      with:
-        context: ./docker
-        file: ./docker/Dockerfile.${{ matrix.IMAGE }}
-        tags: ${{ matrix.IMAGE }}:PR
-        platforms: linux/amd64
-        build-args: |
-            GITHUB_ACTIONS=$GITHUB_ACTIONS
-    - name: Build all other images
-      uses: docker/build-push-action@v2
-      with:
-        context: ./docker
-        file: ./docker/Dockerfile.${{ matrix.IMAGE }}
-        platforms: linux/amd64
-        tags: ${{ matrix.IMAGE }}:PR
-        build-args: |
-            python=${{ matrix.python }}
+    #- name: Build base cc7 image
+    #  uses: docker/build-push-action@v2
+    #  with:
+    #    context: ./docker
+    #    file: ./docker/Dockerfile.cc-base-cc7
+    #    push: false
+    #    load: true
+    #    platforms: linux/amd64
+    #    tags: coffeateam/cc-base-cc7:PR
+    #- name: Build base ubuntu image
+    #  uses: docker/build-push-action@v2
+    #  with:
+    #    context: ./docker
+    #    file: ./docker/Dockerfile.cc-base-ubuntu
+    #    push: false
+    #    load: true
+    #    platforms: linux/amd64
+    #    tags: coffeateam/cc-base-ubuntu:PR
+    #- name: Build and push
+    #  uses: docker/build-push-action@v2
+    #  with:
+    #    context: ./docker
+    #    file: ./docker/Dockerfile.${{ matrix.IMAGE }}
+    #    tags: ${{ matrix.IMAGE }}:PR
+    #    platforms: linux/amd64
+    #    build-args: |
+    #        GITHUB_ACTIONS=$GITHUB_ACTIONS
+    #- name: Build all other images
+    #  uses: docker/build-push-action@v2
+    #  with:
+    #    context: ./docker
+    #    file: ./docker/Dockerfile.${{ matrix.IMAGE }}
+    #    platforms: linux/amd64
+    #    tags: ${{ matrix.IMAGE }}:PR
+    #    build-args: |
+    #        python=${{ matrix.python }}
+    - name: Build Image
+      run: |
+        cd docker
+        docker build --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t  ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR -f Dockerfile.${{ matrix.IMAGE }} .
     - name: Export Full Conda Environment
       run: |
         docker run -e GITHUB_ACTIONS=$GITHUB_ACTIONS ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR conda list --export

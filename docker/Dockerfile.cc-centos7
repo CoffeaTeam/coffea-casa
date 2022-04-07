@@ -1,5 +1,6 @@
-ARG TAG="2022.03.30"
-FROM coffeateam/cc-base-cc7:${TAG}
+ARG TAG="latest"
+ARG NAME="coffeateam/cc-base-centos7"
+FROM ${NAME}:${TAG}
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -8,10 +9,6 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
-# Jupyterhub
-ARG NB_USER="cms-jovyan"
-ARG NB_UID="6440"
-ARG NB_GID="11265"
 # Tag
 ARG WORKER_IMAGE="coffeateam/cc-analysis-centos7"
 # Secrets
@@ -26,11 +23,6 @@ ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
 ARG XCACHE_HOST="red-xcache1.unl.edu"
 # XCACHE settings for Servicex
 ARG CACHE_PREFIX="red-xcache1.unl.edu"
-# Condor settings
-ARG CONDOR_HOST="red-condor.unl.edu"
-ARG COLLECTOR_NAME="Nebraska T2"
-ARG UID_DOMAIN="unl.edu"
-ARG SCHEDD_HOST="t3.unl.edu"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -52,16 +44,13 @@ ENV DASK_ROOT_CONFIG $DASK_ROOT_CONFIG
 ENV LABEXTENTION_CLUSTER $LABEXTENTION_CLUSTER
 ENV LABEXTENTION_FACTORY_CLASS $LABEXTENTION_FACTORY_CLASS
 ENV LABEXTENTION_FACTORY_MODULE $LABEXTENTION_FACTORY_MODULE
-ENV REFRESH_TOKEN $REFRESH_TOKEN
 ENV XCACHE_HOST $XCACHE_HOST
 ENV CACHE_PREFIX $CACHE_PREFIX
-ENV CONDOR_HOST $CONDOR_HOST
-ENV COLLECTOR_NAME $COLLECTOR_NAME
-ENV UID_DOMAIN $UID_DOMAIN
-ENV SCHEDD_HOST $SCHEDD_HOST
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
+
+USER ${NB_UID}
 
 RUN pip install --no-cache-dir \
     coffea_casa
@@ -77,16 +66,15 @@ RUN cd /tmp && \
     make && \
     make install
 
-USER ${NB_UID}
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
 
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
-COPY uproot_xrd_source.patch ${CONDA_DIR}/lib/python3.8/site-packages/uproot
+COPY uproot/uproot_xrd_source.patch ${CONDA_DIR}/lib/python3.8/site-packages/uproot
 RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
 
 # Distributed: we need to install patched version of distributed version
-COPY distributed ${CONDA_DIR}/lib/python3.8/site-packages/distributed
+COPY dask/distributed ${CONDA_DIR}/lib/python3.8/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
@@ -111,7 +99,9 @@ RUN rm -rf /tmp/* \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 
-ADD prepare-env-cc.sh /usr/local/bin/
+USER root
+
+ADD prepare-env/prepare-env-cc.sh /usr/local/bin/
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Switch back to cms-jovyan to avoid accidental container runs as root

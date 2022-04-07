@@ -1,3 +1,4 @@
+ARG TAG="2022.03.30"
 FROM coffeateam/coffea-dask-cc7:0.7.12-fastjet-3.3.4.0rc9-g0aa0af3
 
 USER root
@@ -72,7 +73,7 @@ RUN yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-g
     && yum clean all && rm -rf /var/cache/yum
 
 # Copy a script that we will use to correct permissions after running certain commands
-COPY fix-permissions /usr/local/bin/fix-permissions
+COPY jupyterhub/fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
 # Enable prompt color in the skeleton .bashrc before creating the default NB_USER
@@ -139,12 +140,12 @@ RUN pip install --no-cache-dir coffea[servicex] \
 
 USER root
 # Setup supervisord files
-COPY supervisord.conf  /etc/supervisor/
+COPY k8s-worker/supervisord.conf  /etc/supervisor/
 
 # Add HTCondor configuration files
-COPY condor_config /etc/condor/
+COPY condor/condor_config /etc/condor/
 # Copy configuration files (currently all, to be optimised)
-COPY config.d  /etc/condor/config.d/
+COPY condor/config.d  /etc/condor/config.d/
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
@@ -153,12 +154,12 @@ RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
-COPY uproot_xrd_source.patch ${CONDA_DIR}/lib/python3.8/site-packages/uproot
+COPY uproot/uproot_xrd_source.patch ${CONDA_DIR}/lib/python3.8/site-packages/uproot
 RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY distributed ${CONDA_DIR}/lib/python3.8/site-packages/distributed
+COPY dask/distributed ${CONDA_DIR}/lib/python3.8/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
@@ -190,11 +191,10 @@ RUN rm -rf /tmp/* \
 # if not utilized, crucial if CVMFS is desired
 RUN mkdir /cvmfs
 
-
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
 # nor and execute dask-worker command
-ADD prepare-env-analysis.sh /usr/local/bin/
+ADD prepare-env/prepare-env-cc-analysis.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 USER $NB_USER

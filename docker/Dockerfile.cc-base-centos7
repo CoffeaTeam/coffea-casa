@@ -208,6 +208,7 @@ RUN pip install --no-cache-dir \
     func_adl_uproot \
     tcut_to_qastle \
     servicex-databinder \
+    funcx \
     pyyaml
 
 USER ${NB_UID}
@@ -258,7 +259,7 @@ RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 RUN mkdir /cvmfs
 
 # prepare-env.sh script
-COPY prepare-env-base.sh /usr/local/bin/prepare-env.sh
+COPY prepare-env/prepare-env-cc-base.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
