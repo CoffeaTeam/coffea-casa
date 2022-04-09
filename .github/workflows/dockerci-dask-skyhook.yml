@@ -34,42 +34,6 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
-    #- name: Build base cc7 image
-    #  uses: docker/build-push-action@v2
-    #  with:
-    #    context: ./docker
-    #    file: ./docker/Dockerfile.cc-base-cc7
-    #    push: false
-    #    load: true
-    #    platforms: linux/amd64
-    #    tags: coffeateam/cc-base-cc7:PR
-    #- name: Build base ubuntu image
-    #  uses: docker/build-push-action@v2
-    #  with:
-    #    context: ./docker
-    #    file: ./docker/Dockerfile.cc-base-ubuntu
-    #    push: false
-    #    load: true
-    #    platforms: linux/amd64
-    #    tags: coffeateam/cc-base-ubuntu:PR
-    #- name: Build and push
-    #  uses: docker/build-push-action@v2
-    #  with:
-    #    context: ./docker
-    #    file: ./docker/Dockerfile.${{ matrix.IMAGE }}
-    #    tags: ${{ matrix.IMAGE }}:PR
-    #    platforms: linux/amd64
-    #    build-args: |
-    #        GITHUB_ACTIONS=$GITHUB_ACTIONS
-    #- name: Build all other images
-    #  uses: docker/build-push-action@v2
-    #  with:
-    #    context: ./docker
-    #    file: ./docker/Dockerfile.${{ matrix.IMAGE }}
-    #    platforms: linux/amd64
-    #    tags: ${{ matrix.IMAGE }}:PR
-    #    build-args: |
-    #        python=${{ matrix.python }}
     - name: Build Image
       run: |
         cd docker
