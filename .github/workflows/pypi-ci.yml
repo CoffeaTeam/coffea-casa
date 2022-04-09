@@ -2,9 +2,13 @@ name: CI/CD
 
 on:
   push:
+    paths:
+      - './coffea_casa/*'
     branches:
       - master
   pull_request:
+    paths:
+      - './coffea_casa/*'
     branches:
       - master
       - develop
