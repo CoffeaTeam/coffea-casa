@@ -3,12 +3,12 @@ name: PullRequest-Base
 on:
   pull_request:
     paths:
-      - './docker/condor/*'
-      - './docker/dask/*'
-      - './docker/jupyterhub/*'
-      - './docker/prepare-env/prepare-env/prepare-env-cc-base.sh'
-      - './docker/Dockerfile.cc-base-centos7'
-      - './docker/Dockerfile.cc-base-ubuntu'
+      - 'docker/condor/**'
+      - 'docker/dask/**'
+      - 'docker/jupyterhub/**'
+      - 'docker/prepare-env/prepare-env/prepare-env-cc-base.sh'
+      - 'docker/Dockerfile.cc-base-centos7'
+      - 'docker/Dockerfile.cc-base-ubuntu'
     branches:
       - master
       - develop

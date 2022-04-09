@@ -4,12 +4,12 @@ name: Openscience Harbor Registry CD - Skyhook images
 on:
   push:
     paths:
-      - './docker/skyhook/**/*'
-      - './docker/ceph/**/*'
-      - './docker/Dockerfile.cc-analysis-ubuntu-skyhook'
-      - './docker/Dockerfile.cc-analysis-centos7-skyhook'
-      - './docker/Dockerfile.cc-ubuntu-skyhook'
-      - './docker/Dockerfile.cc-centos7-skyhook'
+      - 'docker/skyhook/**'
+      - 'docker/ceph/**'
+      - 'docker/Dockerfile.cc-analysis-ubuntu-skyhook'
+      - 'docker/Dockerfile.cc-analysis-centos7-skyhook'
+      - 'docker/Dockerfile.cc-ubuntu-skyhook'
+      - 'docker/Dockerfile.cc-centos7-skyhook'
     branches:
       - master
 

@@ -3,13 +3,13 @@ name: PullRequest-cc-analysis
 on:
   pull_request:
     paths:
-      - './docker/prepare-env/prepare-env-cc-analysis.sh'
-      - './docker/jupyterhub/**/*'
-      - './docker/dask/**/*'
-      - './docker/uproot/**/*'
-      - './docker/k8s-worker/**/*'
-      - './docker/Dockerfile.cc-analysis-centos7'
-      - './docker/Dockerfile.cc-analysis-ubuntu'
+      - 'docker/prepare-env/prepare-env-cc-analysis.sh'
+      - 'docker/jupyterhub/**'
+      - 'docker/dask/**'
+      - 'docker/uproot/**'
+      - 'docker/k8s-worker/**'
+      - 'docker/Dockerfile.cc-analysis-centos7'
+      - 'docker/Dockerfile.cc-analysis-ubuntu'
     branches:
       - master
       - develop
