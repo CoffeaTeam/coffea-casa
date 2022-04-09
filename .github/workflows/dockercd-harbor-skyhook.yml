@@ -1,10 +1,18 @@
-
-name: Openscience Harbor Registry Publish (Tag)
+# Create release only
+name: Openscience Harbor Registry CD - Skyhook images
 
 on:
   push:
-    tags:
-      - '*'
+    paths:
+      - './skyhook/*'
+      - './ceph/*'
+      - './prepare-env/*'
+      - './docker/Dockerfile.cc-analysis-ubuntu-skyhook'
+      - './docker/Dockerfile.cc-analysis-centos7-skyhook'
+      - './docker/Dockerfile.cc-ubuntu-skyhook'
+      - './docker/Dockerfile.cc-centos7-skyhook'
+    branches:
+      - master
 
 env:
   GITHUB_SHA: ${{ github.sha }}
@@ -15,12 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [cc-base-ubuntu,
-                cc-base-centos7,
-                cc-analysis-ubuntu,
-                cc-analysis-centos7
-                cc-centos7,
-                cc-ubuntu,
+        IMAGE: [
                 cc-analysis-ubuntu-skyhook,
                 cc-analysis-centos7-skyhook,
                 cc-ubuntu-skyhook,
@@ -43,9 +46,8 @@ jobs:
           password: ${{ secrets.HARBOR_PASSWORD }}
       - name: Build Container Image
         run: |
-          cd docker/${{ matrix.IMAGE }}
-          docker build -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:$TAG -f Dockerfile.${{ matrix.IMAGE }} .
+          cd docker
+          docker build --build-arg TAG="development" -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:development  -f Dockerfile.${{ matrix.IMAGE }} .
       - name: Push to Openscience Harbor Registry
         run: |
-          docker push hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest
-          docker push hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:$TAG
+          docker push hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:development

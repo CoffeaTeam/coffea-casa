@@ -1,12 +1,10 @@
-# Create release only
-name: Openscience Harbor Registry CD - Dask images
+
+name: Openscience Harbor Registry Publish (Tag)
 
 on:
   push:
-    paths:
-      - 'docker/**'
-    branches:
-      - master
+    tags:
+      - '*'
 
 env:
   GITHUB_SHA: ${{ github.sha }}
@@ -17,14 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [cc-base-ubuntu,
-                cc-base-centos7,
-                cc-analysis-ubuntu,
-                cc-analysis-centos7
-                cc-centos7,
-                cc-ubuntu,
-                cc-skyhook-ubuntu,
-                cc-skyhook-centos7]
+        IMAGE: ["k8s-hub-coffea-casa"]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 
@@ -43,8 +34,9 @@ jobs:
           password: ${{ secrets.HARBOR_PASSWORD }}
       - name: Build Container Image
         run: |
-          cd docker
-          docker build --build-arg TAG="development" -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:development  -f Dockerfile.${{ matrix.IMAGE }} .
+          cd charts/coffea-casa/docker/${{ matrix.IMAGE }}
+          docker build -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:$TAG -f Dockerfile.${{ matrix.IMAGE }} .
       - name: Push to Openscience Harbor Registry
         run: |
-          docker push hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:development
+          docker push hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest
+          docker push hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:$TAG

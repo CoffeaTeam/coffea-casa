@@ -1,14 +1,15 @@
 # Only test building images
-name: PullRequest-Base
+name: PullRequest-cc-analysis
 on:
   pull_request:
     paths:
-      - './condor/*'
-      - './dask/*'
+      - './prepare-env/prepare-env-cc-analysis.sh'
       - './jupyterhub/*'
-      - './prepare-env/prepare-env/prepare-env-cc-base.sh'
-      - './docker/Dockerfile.cc-base-centos7'
-      - './docker/Dockerfile.cc-base-ubuntu'
+      - './dask/*'
+      - './uproot/*'
+      - './k8s-worker/*'
+      - './docker/Dockerfile.cc-analysis-centos7'
+      - './docker/Dockerfile.cc-analysis-ubuntu'
     branches:
       - master
       - develop
@@ -21,8 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [cc-base-ubuntu,
-                cc-base-centos7]
+        IMAGE: [cc-analysis-centos7,
+                cc-analysis-ubuntu]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
     steps:

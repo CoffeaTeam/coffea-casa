@@ -19,16 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [cc-base-ubuntu,
-                cc-base-centos7,
-                cc-analysis-ubuntu,
-                cc-analysis-centos7
-                cc-centos7,
-                cc-ubuntu,
-                cc-analysis-ubuntu-skyhook,
-                cc-analysis-centos7-skyhook,
-                cc-ubuntu-skyhook,
-                cc-centos7-skyhook]
+        IMAGE: ["k8s-hub-coffea-casa"]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 
@@ -43,7 +34,7 @@ jobs:
 
     - name: Build image
       run: |
-        cd docker/${{ matrix.IMAGE }}
+        cd charts/coffea-casa/docker/${{ matrix.IMAGE }}
         docker build -t ${DOCKER_ORG}/${{ matrix.IMAGE }}:release -f Dockerfile.${{ matrix.IMAGE }} .
 
     - name: Log into registry
