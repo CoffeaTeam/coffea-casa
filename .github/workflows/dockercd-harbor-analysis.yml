@@ -4,11 +4,11 @@ name: Openscience Harbor Registry CD - Analisys
 on:
   push:
     paths:
-      - './prepare-env/prepare-env-cc-analysis.sh'
-      - './jupyterhub/*'
-      - './dask/*'
-      - './uproot/*'
-      - './k8s-worker/*'
+      - './docker/prepare-env/prepare-env-cc-analysis.sh'
+      - './docker/jupyterhub/*'
+      - './docker/dask/*'
+      - './docker/uproot/*'
+      - './docker/k8s-worker/*'
       - './docker/Dockerfile.cc-analysis-centos7'
       - './docker/Dockerfile.cc-analysis-ubuntu'
     branches:

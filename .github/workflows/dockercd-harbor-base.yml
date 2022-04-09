@@ -4,10 +4,10 @@ name: Openscience Harbor Registry CD - Base
 on:
   push:
     paths:
-      - './condor/*'
-      - './dask/*'
-      - './jupyterhub/*'
-      - './prepare-env/prepare-env/prepare-env-cc-base.sh'
+      - './docker/condor/*'
+      - './docker/dask/*'
+      - './docker/jupyterhub/*'
+      - './docker/prepare-env/prepare-env/prepare-env-cc-base.sh'
       - './docker/Dockerfile.cc-base-centos7'
       - './docker/Dockerfile.cc-base-ubuntu'
     branches:

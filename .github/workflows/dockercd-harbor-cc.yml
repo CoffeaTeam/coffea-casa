@@ -4,9 +4,9 @@ name: Openscience Harbor Registry CD - Coffea-casa
 on:
   push:
     paths:
-      - './prepare-env/prepare-env-cc.sh'
-      - './dask/*'
-      - './uproot/*'
+      - './docker/prepare-env/prepare-env-cc.sh'
+      - './docker/dask/*'
+      - './docker/uproot/*'
       - './docker/Dockerfile.cc-centos7'
       - './docker/Dockerfile.cc-ubuntu'
     branches:
