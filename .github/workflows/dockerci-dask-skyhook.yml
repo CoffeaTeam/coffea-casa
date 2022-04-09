@@ -1,10 +1,16 @@
 # Only test building images
-name: PullRequest-All
+name: PullRequest-Skyhook
 
 on:
   pull_request:
     paths:
-      - 'docker/**'
+      - './skyhook/*'
+      - './ceph/*'
+      - './prepare-env/*'
+      - './docker/Dockerfile.cc-analysis-ubuntu-skyhook'
+      - './docker/Dockerfile.cc-analysis-centos7-skyhook'
+      - './docker/Dockerfile.cc-ubuntu-skyhook'
+      - './docker/Dockerfile.cc-centos7-skyhook'
     branches:
       - master
       - develop
@@ -19,14 +25,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [cc-base-centos7,
-                cc-base-ubuntu,
-                cc-centos7,
-                cc-ubuntu,
-                cc-analysis-ubuntu,
-                cc-analysis-centos7,
-                cc-skyhook-ubuntu,
-                cc-skyhook-centos7]
+        IMAGE: [
+                cc-analysis-ubuntu-skyhook,
+                cc-analysis-centos7-skyhook,
+                cc-ubuntu-skyhook,
+                cc-centos7-skyhook]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
     steps:
