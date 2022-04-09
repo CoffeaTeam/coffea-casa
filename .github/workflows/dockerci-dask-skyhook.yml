@@ -4,8 +4,8 @@ name: PullRequest-Skyhook
 on:
   pull_request:
     paths:
-      - './docker/skyhook/*'
-      - './docker/ceph/*'
+      - './docker/skyhook/**/*'
+      - './docker/ceph/**/*'
       - './docker/Dockerfile.cc-analysis-ubuntu-skyhook'
       - './docker/Dockerfile.cc-analysis-centos7-skyhook'
       - './docker/Dockerfile.cc-ubuntu-skyhook'

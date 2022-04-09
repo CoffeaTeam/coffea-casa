@@ -5,8 +5,8 @@ on:
   pull_request:
     paths:
       - './docker/prepare-env/prepare-env-cc.sh'
-      - './docker/dask/*'
-      - './docker/uproot/*'
+      - './docker/dask/**/*'
+      - './docker/uproot/**/*'
       - './docker/docker/Dockerfile.cc-centos7'
       - './docker/docker/Dockerfile.cc-ubuntu'
     branches:
