@@ -6,26 +6,6 @@
 version: 2
 updates:
   - package-ecosystem: "docker"
-    directory: "/docker/coffea-casa"
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: "docker"
-    directory: "/docker/coffea-casa-analysis"
-    schedule:
-      interval: "daily"
-    
-  - package-ecosystem: "docker"
-    directory: "/docker/coffea-casa-cc7"
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: "docker"
-    directory: "/docker/coffea-casa-analysis-cc7"
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: "docker"
-    directory: "/chart/coffea-casa/docker/k8s-hub-coffea-casa"
+    directory: "/docker/"
     schedule:
       interval: "daily"
