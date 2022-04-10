@@ -1,5 +1,5 @@
 # Only test building images
-name: PullRequest-cc-analysis
+name: PullRequest-cc-analysis cc7
 on:
   pull_request:
     paths:

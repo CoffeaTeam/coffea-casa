@@ -1,5 +1,5 @@
 # Only test building images
-name: PullRequest-Skyhook
+name: PullRequest-Skyhook cc7
 
 on:
   pull_request:

@@ -1,5 +1,5 @@
 # Only test building images
-name: PullRequest-Base
+name: PullRequest-Base cc7
 on:
   pull_request:
     paths:

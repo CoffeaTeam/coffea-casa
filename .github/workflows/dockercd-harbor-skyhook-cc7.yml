@@ -1,5 +1,5 @@
 # Create release only
-name: Openscience Harbor Registry CD - Skyhook images
+name: Openscience Harbor Registry CD - Skyhook images cc7
 
 on:
   push:
