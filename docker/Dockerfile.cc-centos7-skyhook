@@ -1,5 +1,5 @@
 ARG TAG="latest"
-ARG NAME="ccoffea-casa/cc-centos7"
+ARG NAME="coffea-casa/cc-centos7"
 ARG HUB="hub.opensciencegrid.org/"
 FROM ${HUB}${NAME}:${TAG}
 
