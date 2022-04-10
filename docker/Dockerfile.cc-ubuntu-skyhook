@@ -1,6 +1,7 @@
 ARG TAG="latest"
-ARG NAME="coffeateam/cc-ubuntu"
-FROM ${NAME}:${TAG}
+ARG NAME="coffea-casa/cc-ubuntu"
+ARG HUB="hub.opensciencegrid.org/"
+FROM ${HUB}${NAME}:${TAG}
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 

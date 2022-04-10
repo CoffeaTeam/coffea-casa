@@ -1,6 +1,7 @@
 ARG TAG="latest"
-ARG NAME="coffeateam/cc-centos7"
-FROM ${NAME}:${TAG}
+ARG NAME="ccoffea-casa/cc-centos7"
+ARG HUB="hub.opensciencegrid.org/"
+FROM ${HUB}${NAME}:${TAG}
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
