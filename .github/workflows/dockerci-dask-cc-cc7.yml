@@ -7,7 +7,7 @@ on:
       - 'docker/prepare-env/prepare-env-cc.sh'
       - 'docker/dask/**'
       - 'docker/uproot/**'
-      - 'docker/docker/Dockerfile.cc-ubuntu'
+      - 'docker/docker/Dockerfile.cc-centos7'
     branches:
       - master
       - develop
@@ -22,8 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [
-                cc-ubuntu
+        IMAGE: [cc-centos7,
                 ]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest

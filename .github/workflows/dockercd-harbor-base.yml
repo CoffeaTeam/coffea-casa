@@ -8,7 +8,6 @@ on:
       - 'docker/dask/**'
       - 'docker/jupyterhub/**'
       - 'docker/prepare-env/prepare-env/prepare-env-cc-base.sh'
-      - 'docker/Dockerfile.cc-base-centos7'
       - 'docker/Dockerfile.cc-base-ubuntu'
     branches:
       - master
@@ -22,8 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [cc-base-ubuntu,
-                cc-base-centos7]
+        IMAGE: [cc-base-ubuntu]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 

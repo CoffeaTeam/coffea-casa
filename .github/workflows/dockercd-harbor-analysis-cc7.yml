@@ -1,13 +1,15 @@
 # Create release only
-name: Openscience Harbor Registry CD - Coffea-casa
+name: Openscience Harbor Registry CD - Analisys
 
 on:
   push:
     paths:
-      - 'docker/prepare-env/prepare-env-cc.sh'
+      - 'docker/prepare-env/prepare-env-cc-analysis.sh'
+      - 'docker/jupyterhub/**'
       - 'docker/dask/**'
       - 'docker/uproot/**'
-      - 'docker/Dockerfile.cc-ubuntu'
+      - 'docker/k8s-worker/**'
+      - 'docker/Dockerfile.cc-analysis-centos7'
     branches:
       - master
 
@@ -20,9 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-         IMAGE: [
-                cc-ubuntu
-                ]
+        IMAGE: [cc-analysis-centos7]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 

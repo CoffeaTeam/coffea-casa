@@ -1,30 +1,27 @@
 # Only test building images
-name: PullRequest-CC
-
+name: PullRequest-cc-analysis
 on:
   pull_request:
     paths:
-      - 'docker/prepare-env/prepare-env-cc.sh'
+      - 'docker/prepare-env/prepare-env-cc-analysis.sh'
+      - 'docker/jupyterhub/**'
       - 'docker/dask/**'
       - 'docker/uproot/**'
-      - 'docker/docker/Dockerfile.cc-ubuntu'
+      - 'docker/k8s-worker/**'
+      - 'docker/Dockerfile.cc-analysis-centos7'
     branches:
       - master
       - develop
-
 env:
   DOCKER_ORG: coffeateam
   GITHUB_SHA: ${{ github.sha }}
   GITHUB_REF: ${{ github.ref }}
-
 jobs:
   matrix-build:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [
-                cc-ubuntu
-                ]
+        IMAGE: [cc-analysis-centos7]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
     steps:

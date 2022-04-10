@@ -1,30 +1,27 @@
 # Only test building images
-name: PullRequest-CC
-
+name: PullRequest-Base
 on:
   pull_request:
     paths:
-      - 'docker/prepare-env/prepare-env-cc.sh'
+      - 'docker/condor/**'
       - 'docker/dask/**'
-      - 'docker/uproot/**'
-      - 'docker/docker/Dockerfile.cc-ubuntu'
+      - 'docker/jupyterhub/**'
+      - 'docker/prepare-env/prepare-env/prepare-env-cc-base.sh'
+      - 'docker/Dockerfile.cc-base-centos7'
     branches:
       - master
       - develop
-
 env:
   DOCKER_ORG: coffeateam
   GITHUB_SHA: ${{ github.sha }}
   GITHUB_REF: ${{ github.ref }}
-
 jobs:
   matrix-build:
     strategy:
       fail-fast: false
       matrix:
         IMAGE: [
-                cc-ubuntu
-                ]
+                cc-base-centos7]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +30,7 @@ jobs:
     - name: Build Image
       run: |
         cd docker
-        docker build --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t  ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR -f Dockerfile.${{ matrix.IMAGE }} .
+        docker build --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR -f Dockerfile.${{ matrix.IMAGE }} .
     - name: Export Full Conda Environment
       run: |
         docker run -e GITHUB_ACTIONS=$GITHUB_ACTIONS ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR conda list --export

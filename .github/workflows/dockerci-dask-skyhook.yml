@@ -7,9 +7,7 @@ on:
       - 'docker/skyhook/**'
       - 'docker/ceph/**'
       - 'docker/Dockerfile.cc-analysis-ubuntu-skyhook'
-      - 'docker/Dockerfile.cc-analysis-centos7-skyhook'
       - 'docker/Dockerfile.cc-ubuntu-skyhook'
-      - 'docker/Dockerfile.cc-centos7-skyhook'
     branches:
       - master
       - develop
@@ -26,9 +24,7 @@ jobs:
       matrix:
         IMAGE: [
                 cc-analysis-ubuntu-skyhook,
-                cc-analysis-centos7-skyhook,
-                cc-ubuntu-skyhook,
-                cc-centos7-skyhook]
+                cc-ubuntu-skyhook,]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
     steps:

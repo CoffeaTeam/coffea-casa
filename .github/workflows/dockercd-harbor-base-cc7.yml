@@ -1,13 +1,14 @@
 # Create release only
-name: Openscience Harbor Registry CD - Coffea-casa
+name: Openscience Harbor Registry CD - Base
 
 on:
   push:
     paths:
-      - 'docker/prepare-env/prepare-env-cc.sh'
+      - 'docker/condor/**'
       - 'docker/dask/**'
-      - 'docker/uproot/**'
-      - 'docker/Dockerfile.cc-ubuntu'
+      - 'docker/jupyterhub/**'
+      - 'docker/prepare-env/prepare-env/prepare-env-cc-base.sh'
+      - 'docker/Dockerfile.cc-base-centos7'
     branches:
       - master
 
@@ -20,9 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-         IMAGE: [
-                cc-ubuntu
-                ]
+        IMAGE: [cc-base-centos7]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 

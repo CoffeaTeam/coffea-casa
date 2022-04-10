@@ -1,13 +1,13 @@
 # Create release only
-name: Openscience Harbor Registry CD - Coffea-casa
+name: Openscience Harbor Registry CD - Skyhook images
 
 on:
   push:
     paths:
-      - 'docker/prepare-env/prepare-env-cc.sh'
-      - 'docker/dask/**'
-      - 'docker/uproot/**'
-      - 'docker/Dockerfile.cc-ubuntu'
+      - 'docker/skyhook/**'
+      - 'docker/ceph/**'
+      - 'docker/Dockerfile.cc-analysis-centos7-skyhook'
+      - 'docker/Dockerfile.cc-centos7-skyhook'
     branches:
       - master
 
@@ -20,9 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-         IMAGE: [
-                cc-ubuntu
-                ]
+        IMAGE: [
+                cc-analysis-centos7-skyhook,
+                cc-centos7-skyhook]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 

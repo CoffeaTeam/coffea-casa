@@ -9,7 +9,6 @@ on:
       - 'docker/dask/**'
       - 'docker/uproot/**'
       - 'docker/k8s-worker/**'
-      - 'docker/Dockerfile.cc-analysis-centos7'
       - 'docker/Dockerfile.cc-analysis-ubuntu'
     branches:
       - master
@@ -23,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: [cc-analysis-centos7,
+        IMAGE: [
                 cc-analysis-ubuntu]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
