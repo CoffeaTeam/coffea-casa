@@ -41,9 +41,6 @@ USER root
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
     && mamba clean -tipsy \
-    && jupyter lab clean \
-    && jlpm cache clean \
-    && npm cache clean --force \
     && find ${CONDA_DIR} -type f -name '*.a' -delete \
     && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
