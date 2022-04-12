@@ -11,7 +11,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
-ARG WORKER_IMAGE="hub.opensciencegrid.org/coffeateam/cc-analysis-ubuntu"
+ARG WORKER_IMAGE="hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
