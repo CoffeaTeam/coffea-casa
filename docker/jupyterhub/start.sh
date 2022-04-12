@@ -146,7 +146,7 @@ else
     fi
 
     # FIXME
--   #source /usr/local/bin/prepare-env.sh
+    #source /usr/local/bin/prepare-env.sh
     # Execute the command
     run-hooks /usr/local/bin/before-notebook.d
     echo "Executing the command:" "${cmd[@]}"
