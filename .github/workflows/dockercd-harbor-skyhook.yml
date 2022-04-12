@@ -1,7 +1,12 @@
 # Create release only
-name: Openscience Harbor Registry CD - Skyhook images
+name: CD-Skyhook
 
 on:
+  workflow_run:
+    workflows: ["CD-Base","CD-Analysis"]
+    branches: [master]
+    types: 
+      - completed
   push:
     paths:
       - 'docker/skyhook/**'

@@ -1,7 +1,12 @@
 # Create release only
-name: Openscience Harbor Registry CD - Coffea-casa cc7
+name: "CD-Analysis-cc7"
 
 on:
+  workflow_run:
+    workflows: ["CD-Base-cc7"]
+    branches: [master]
+    types: 
+      - completed
   push:
     paths:
       - 'docker/prepare-env/prepare-env-cc.sh'

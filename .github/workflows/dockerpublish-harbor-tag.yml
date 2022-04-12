@@ -16,15 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         IMAGE: [cc-base-ubuntu,
-                cc-base-centos7,
+                #cc-base-centos7,
                 cc-analysis-ubuntu,
-                cc-analysis-centos7
-                cc-centos7,
+                #cc-analysis-centos7,
+                #cc-centos7,
                 cc-ubuntu,
                 cc-analysis-ubuntu-skyhook,
-                cc-analysis-centos7-skyhook,
+                #cc-analysis-centos7-skyhook,
                 cc-ubuntu-skyhook,
-                cc-centos7-skyhook]
+                #cc-centos7-skyhook
+                ]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 

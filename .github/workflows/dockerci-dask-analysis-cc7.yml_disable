@@ -1,6 +1,11 @@
 # Only test building images
-name: PullRequest-cc-analysis cc7
+name: PullRequest-Analysis-cc7
 on:
+  workflow_run:
+    workflows: ["PullRequest-Base-cc7"]
+    branches: [main]
+    types: 
+      - completed
   pull_request:
     paths:
       - 'docker/prepare-env/prepare-env-cc-analysis.sh'

@@ -1,5 +1,5 @@
 # Create release only
-name: Openscience Harbor Registry CD - Analisys
+name: "CD-Analysis"
 
 on:
   push:

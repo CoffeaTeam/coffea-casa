@@ -1,5 +1,5 @@
 # Create release only
-name: Openscience Harbor Registry CD - Base cc7
+name: "CD-Base-cc7"
 
 on:
   push:
