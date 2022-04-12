@@ -226,7 +226,7 @@ RUN pip install --no-cache-dir \
 
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
-COPY dask/dask.yaml ${DASK_ROOT_CONFIG}/
+COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
 # Copy HTCondor configuration files (see prepare-env.yaml)
 COPY condor/config.d  /opt/condor/config.d/
 
