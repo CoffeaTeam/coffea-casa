@@ -14,16 +14,12 @@ api_endpoints:
 fi
 
 # Populating Dask configuration files
-sed -i -e "s|coffeateam/coffea-casa-analysis|${WORKER_IMAGE}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
+sed -i -e "s|hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu|${WORKER_IMAGE}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
 sed -i -e "s|latest|${TAG}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
-sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $DASK_ROOT_CONFIG/dask.yaml
+sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $DASK_ROOT_CONFIG/dask_tls.yaml
 sed -i -e "s|LocalCluster|${LABEXTENTION_FACTORY_CLASS}|g" $DASK_ROOT_CONFIG/labextension.yaml
 sed -i -e "s|dask.distributed|${LABEXTENTION_FACTORY_MODULE}|g" $DASK_ROOT_CONFIG/labextension.yaml
 sed -i -e "s|Local Cluster|${LABEXTENTION_CLUSTER}|g" $DASK_ROOT_CONFIG/labextension.yaml
-
-if [ "${LABEXTENTION_FACTORY_CLASS:-}" == "LocalCluster" ]; then
-  sed -i -e "s|require-encryption: True|require-encryption: False|g" $DASK_ROOT_CONFIG/dask.yaml
-fi
 
 # HTCondor scheduler settings
 echo "CONDOR_HOST = ${CONDOR_HOST}" >> /opt/condor/config.d/schedd
