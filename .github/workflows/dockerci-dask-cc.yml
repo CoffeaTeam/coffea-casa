@@ -2,11 +2,6 @@
 name: PullRequest-CC
 
 on:
-  workflow_run:
-    workflows: ["PullRequest-Base"]
-    branches: [master]
-    types: 
-      - completed
   pull_request:
     paths:
       - 'docker/prepare-env/prepare-env-cc.sh'

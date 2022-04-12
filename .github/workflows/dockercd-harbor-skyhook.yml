@@ -3,7 +3,7 @@ name: CD-Skyhook
 
 on:
   workflow_run:
-    workflows: ["CD-Base","CD-Analysis"]
+    workflows: ["CD-CC","CD-Analysis"]
     branches: [master]
     types: 
       - completed

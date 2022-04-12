@@ -1,5 +1,5 @@
 # Create release only
-name: "CD-Analysis"
+name: "CD-CC"
 
 on:
   workflow_run:

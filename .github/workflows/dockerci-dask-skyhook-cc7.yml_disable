@@ -2,11 +2,6 @@
 name: PullRequest-Skyhook cc7
 
 on:
-  workflow_run:
-    workflows: ["PullRequest-Base","PullRequest-Analysis"]
-    branches: [master]
-    types: 
-      - completed
   pull_request:
     paths:
       - 'docker/skyhook/**'
