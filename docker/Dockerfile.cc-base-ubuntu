@@ -13,6 +13,7 @@ ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Configure Labextention Dask Cluster factory
 ARG DASK_ROOT_CONFIG="/opt/dask"
+# Labextention
 ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"

@@ -15,7 +15,7 @@ fi
 
 # Populating Dask configuration files
 sed -i -e "s|hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu|${WORKER_IMAGE}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
-sed -i -e "s|latest|${TAG}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
+sed -i -e "s|development|${TAG}|g" $DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml
 sed -i -e "s|/etc/cmsaf-secrets|${CERT_DIR}|g" $DASK_ROOT_CONFIG/dask_tls.yaml
 sed -i -e "s|LocalCluster|${LABEXTENTION_FACTORY_CLASS}|g" $DASK_ROOT_CONFIG/labextension.yaml
 sed -i -e "s|dask.distributed|${LABEXTENTION_FACTORY_MODULE}|g" $DASK_ROOT_CONFIG/labextension.yaml

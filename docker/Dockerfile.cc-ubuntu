@@ -1,7 +1,8 @@
 ARG TAG="development"
-ARG NAME="coffea-casa/cc-base-ubuntu"
-ARG HUB="hub.opensciencegrid.org/"
-FROM ${HUB}${NAME}:${TAG}
+ARG PROJECT="coffea-casa"
+ARG HUB="hub.opensciencegrid.org"
+ARG NAME="${PROJECT}/cc-base-ubuntu"
+FROM ${HUB}/${NAME}:${TAG}
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -11,7 +12,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
-ARG WORKER_IMAGE="hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu"
+ARG WORKER_IMAGE="${HUB}/${PROJECT}/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
@@ -34,14 +35,6 @@ ARG CACHE_PREFIX="red-xcache1.unl.edu"
 ARG GITHUB_ACTIONS="false"
 
 # Configure environment
-ENV CONDA_DIR=/opt/conda
-ENV SHELL=/bin/bash
-ENV NB_USER $NB_USER
-ENV USER=$NB_USER
-ENV NB_UID=$NB_UID
-ENV NB_GID=$NB_GID
-ENV HOME=/home/$NB_USER
-ENV PATH="/opt/conda/bin/:$PATH"
 ENV CERT_DIR=$CERT_DIR
 ENV TAG $TAG
 ENV BEARER_TOKEN_FILE=$BEARER_TOKEN_FILE
