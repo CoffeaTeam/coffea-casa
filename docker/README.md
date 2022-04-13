@@ -1,41 +1,37 @@
 ## Coffea-casa Docker images: UNL-specific and custom
 
-## Coffea-casa Docker UNL specific images
 
-### Coffea-casa Dask Scheduler image
+## Coffea-casa Dask Base Scheduler image (without UNL specific settings)
+
+To build and test locally:
+
+```
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:latest  -f Dockerfile.cc-base-ubuntu
+```
+
+## Coffea-casa Dask Scheduler (with UNL specific settings)
+
+To build and test locally (with UNL specific settings, and only after was built Dask Base Scheduler image):
+
+```
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-ubuntu:latest  -f Dockerfile.cc-base-ubuntu
+```
+
+
+## Coffea-casa Dask Base Scheduler CC7 image (without UNL specific settings)
 
 To build and test locally (with UNL specific settings):
 
 ```
-docker build -t coffeateam/coffea-casa:latest coffea-casa
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-base-centos7:latest  -f Dockerfile.cc-base-centos7
 ```
 
-```
-docker run -it --rm coffeateam/coffea-casa:latest /bin/bash
-```
+## Coffea-casa Dask Scheduler (with UNL specific settings)
 
-### Coffea-casa Dask Worker
-
-To build and test locally (with UNL specific settings):
+To build and test locally (with UNL specific settings and only after was built Dask Base Scheduler CC7 image):
 
 ```
-docker build -t coffeateam/coffea-casa-analysis:latest coffea-casa-analysis
-```
-
-```
-docker run -it --rm coffeateam/coffea-casa-analysis:latest /bin/bash
-```
-
-### Coffea-casa Dask Scheduler CC7 image
-
-To build and test locally (with UNL specific settings):
-
-```
-docker build -t coffeateam/coffea-casa-cc7:latest coffea-casa
-```
-
-```
-docker run -it --rm coffeateam/coffea-casa-cc7:latest /bin/bash
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-centos7:latest -f Dockerfile.cc-centos7
 ```
 
 ### Coffea-casa Dask Worker CC7
@@ -43,11 +39,31 @@ docker run -it --rm coffeateam/coffea-casa-cc7:latest /bin/bash
 To build and test locally (with UNL specific settings):
 
 ```
-docker build -t coffeateam/coffea-casa-analysis-cc7:latest coffea-casa-analysis
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-centos7-skyhook:latest -f Dockerfile.cc-analysis-centos7-skyhook
 ```
 
+### Coffea-casa Dask Worker Ubuntu
+
+To build and test locally (with UNL specific settings):
+
 ```
-docker run -it --rm coffeateam/coffea-casa-analysis-cc7:latest /bin/bash
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:latest -f Dockerfile.cc-analysis-ubuntu-skyhook
+```
+
+### Coffea-casa Dask Worker CC7 (with Skyhook)
+
+To build and test locally (with UNL specific settings and only after was built Dask Worker CC7 image):
+
+```
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-centos7-skyhook:latest -f Dockerfile.cc-analysis-centos7-skyhook
+```
+
+### Coffea-casa Dask Worker Ubuntu (with Skyhook)
+
+To build and test locally (with UNL specific settings and only after was built Dask Worker CC7 image):
+
+```
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:latest -f Dockerfile.cc-analysis-ubuntu-skyhook
 ```
 
 ## How to build images for different cluster
@@ -61,7 +77,7 @@ See below full table of arguments for Scheduler and Worker image:
 
 | Parameter                | Description             | Default        |
 | ------------------------ | ----------------------- | -------------- |
-| `NB_USER` | User for Jupyter notebook (as well for HTCondor) | `cms-jovyan` |
+|`NB_USER` | User for Jupyter notebook (as well for HTCondor) | `cms-jovyan` |
 |`NB_UID`| User UID | `6440` |
 |`NB_GID`| User GID | `11265` |
 |`TAG`| Tag used to sync image for worker configured in Coffea_casa Dask Jobqueue extention | `2021.10.28` |
