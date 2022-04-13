@@ -1,6 +1,7 @@
+ARG TAG="latest"
 ARG NAME="coffea-casa/cc-analysis-ubuntu"
-ARG HUB="hub.opensciencegrid.org"
-FROM ${HUB}/${NAME}
+ARG HUB="hub.opensciencegrid.org/"
+FROM ${HUB}${NAME}:${TAG}
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"

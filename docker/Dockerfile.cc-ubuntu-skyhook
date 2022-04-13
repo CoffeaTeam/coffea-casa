@@ -1,6 +1,7 @@
+ARG TAG="development"
 ARG NAME="coffea-casa/cc-ubuntu"
-ARG HUB="hub.opensciencegrid.org"
-FROM ${HUB}/${NAME}
+ARG HUB="hub.opensciencegrid.org/"
+FROM ${HUB}${NAME}:${TAG}
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -9,7 +10,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
-ARG TAG="2022.04.13"
+# Worker image
 ARG WORKER_IMAGE="hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook"
 # Try to see if CEPH_CONF works (https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/1.2.3/html/ceph_configuration_guide/configuration_file_structure)
 ARG CEPH_DIR="/opt/ceph"
@@ -20,7 +21,6 @@ ARG GITHUB_ACTIONS="false"
 
 ENV CEPH_DIR $CEPH_DIR
 ENV CEPH_CONF $CEPH_CONF
-ENV TAG=${TAG}
 
 USER root
 RUN apt-get update --yes && \
