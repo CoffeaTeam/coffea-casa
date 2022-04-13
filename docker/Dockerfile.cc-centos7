@@ -1,7 +1,7 @@
-ARG TAG="development"
+
 ARG NAME="coffea-casa/cc-base-centos7"
-ARG HUB="hub.opensciencegrid.org/"
-FROM ${HUB}${NAME}:${TAG}
+ARG HUB="hub.opensciencegrid.org"
+FROM ${HUB}/${NAME}
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -11,6 +11,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
+ARG TAG="2022.04.13"
 ARG WORKER_IMAGE="hub.opensciencegrid.org/coffea-casa/cc-analysis-centos7"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"

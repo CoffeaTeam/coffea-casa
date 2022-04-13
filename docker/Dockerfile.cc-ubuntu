@@ -1,7 +1,6 @@
-ARG TAG="development"
 ARG NAME="coffea-casa/cc-base-ubuntu"
-ARG HUB="hub.opensciencegrid.org/"
-FROM ${HUB}${NAME}:${TAG}
+ARG HUB="hub.opensciencegrid.org"
+FROM ${HUB}/${NAME}
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -11,6 +10,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
+ARG TAG="2022.04.13"
 ARG WORKER_IMAGE="hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -46,6 +46,7 @@ ENV CERT_DIR=$CERT_DIR
 ENV BEARER_TOKEN_FILE=$BEARER_TOKEN_FILE
 ENV DASK_ROOT_CONFIG=$DASK_ROOT_CONFIG
 ENV WORKER_IMAGE=$WORKER_IMAGE
+ENV TAG=${TAG}
 ENV LABEXTENTION_CLUSTER=$LABEXTENTION_CLUSTER
 ENV LABEXTENTION_FACTORY_CLASS=$LABEXTENTION_FACTORY_CLASS
 ENV LABEXTENTION_FACTORY_MODULE=$LABEXTENTION_FACTORY_MODULE
