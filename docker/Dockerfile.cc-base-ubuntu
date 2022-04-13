@@ -228,13 +228,14 @@ RUN pip install --no-cache-dir \
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
 COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
-# Copy HTCondor configuration files (see prepare-env.yaml)
-COPY condor/config.d  /opt/condor/config.d/
+# Copy HTCondor configuration file that will be edited after: schedular settings and etc.
+COPY condor/config.d/schedd  /opt/condor/config.d/
+
 
 USER root
-# FIXME: too many files and a lot of UNL hacks! (oshadura)
-# Add HTCondor configuration files
+# Add HTCondor configuration files that not needed to be edited
 COPY condor/condor_config /etc/condor/
+COPY condor/config.d/9-coffea-condor-master-config  /etc/condor/config.d/
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
