@@ -1,4 +1,4 @@
-ARG TAG="latest"
+ARG TAG="development"
 ARG NAME="coffea-casa/cc-centos7"
 ARG HUB="hub.opensciencegrid.org/"
 FROM ${HUB}${NAME}:${TAG}
