@@ -231,8 +231,8 @@ COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
 # Add HTCondor configuration files that not needed to be edited
-COPY condor_config /etc/condor/
-COPY config.d  /etc/condor/config.d/
+COPY condor/condor_config /etc/condor/
+COPY condor/config.d  /etc/condor/config.d/
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
