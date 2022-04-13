@@ -17,6 +17,7 @@ ARG GITHUB_ACTIONS="false"
 # Configure environment
 ENV CEPH_DIR $CEPH_DIR
 ENV CEPH_CONF $CEPH_CONF
+ENV TAG $TAG
 
 USER root
 RUN yum -y update \
