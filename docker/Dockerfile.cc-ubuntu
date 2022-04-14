@@ -34,9 +34,11 @@ ARG CACHE_PREFIX="red-xcache1.unl.edu"
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
 
+ARG WORKER_TAG="development"
+
 # Configure environment
 ENV CERT_DIR=$CERT_DIR
-ENV TAG=$TAG
+ENV TAG=$WORKER_TAG
 ENV BEARER_TOKEN_FILE=$BEARER_TOKEN_FILE
 ENV DASK_ROOT_CONFIG=$DASK_ROOT_CONFIG
 ENV WORKER_IMAGE=$WORKER_IMAGE
@@ -102,12 +104,12 @@ ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 
 ADD prepare-env/prepare-env-cc.sh /usr/local/bin/
-RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+RUN chmod ugo+x /usr/local/bin/prepare-env-cc.sh
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}
 WORKDIR $HOME
-ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
+ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env-cc.sh"]
 
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
 # Use bash login shell for entrypoint in order
