@@ -28,7 +28,7 @@ jobs:
     - name: Build Image
       run: |
         cd charts/coffea-casa/docker/${{ matrix.IMAGE }}
-        docker build --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t  ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR .
+        docker build --build-arg TAG="development" --build-arg HUB="hub.opensciencegrid.org" --build-arg PROJECT="coffea-casa" --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t  ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR .
         
     # FIXME: add some tests
     #- name: Test Image

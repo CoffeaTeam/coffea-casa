@@ -30,7 +30,7 @@ jobs:
     - name: Build Image
       run: |
         cd docker
-        docker build --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR -f Dockerfile.${{ matrix.IMAGE }} .
+        docker build --build-arg TAG="development" --build-arg HUB="hub.opensciencegrid.org" --build-arg PROJECT="coffea-casa" --build-arg GITHUB_ACTIONS=$GITHUB_ACTIONS -t ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR -f Dockerfile.${{ matrix.IMAGE }} .
     - name: Export Full Conda Environment
       run: |
         docker run -e GITHUB_ACTIONS=$GITHUB_ACTIONS ${DOCKER_ORG}/${{ matrix.IMAGE }}:PR conda list --export
