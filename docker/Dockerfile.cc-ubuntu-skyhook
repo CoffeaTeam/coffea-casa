@@ -11,6 +11,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
+# Tag
+ARG TAG
+ARG PROJECT
+ARG HUB
 # Worker image
 ARG WORKER_IMAGE="${HUB}/${PROJECT}/cc-analysis-ubuntu"
 # Try to see if CEPH_CONF works (https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/1.2.3/html/ceph_configuration_guide/configuration_file_structure)
@@ -20,9 +24,10 @@ ARG CEPH_CONF=$CEPH_DIR"/ceph.conf"
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
 
-ENV CEPH_DIR $CEPH_DIR
-ENV CEPH_CONF $CEPH_CONF
-ENV TAG $TAG
+ENV CEPH_DIR=$CEPH_DIR
+ENV CEPH_CONF=$CEPH_CONF
+ENV TAG=$TAG
+ENV WORKER_IMAGE=$WORKER_IMAGE
 
 USER root
 RUN apt-get update --yes && \

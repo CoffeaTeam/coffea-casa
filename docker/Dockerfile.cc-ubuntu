@@ -4,6 +4,7 @@ ARG HUB="hub.opensciencegrid.org"
 ARG NAME="${PROJECT}/cc-base-ubuntu"
 FROM ${HUB}/${NAME}:${TAG}
 
+
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
 # Fix DL4006
@@ -12,6 +13,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
+ARG TAG
+ARG PROJECT
+ARG HUB
 ARG WORKER_IMAGE="${HUB}/${PROJECT}/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -34,14 +38,12 @@ ARG CACHE_PREFIX="red-xcache1.unl.edu"
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
 
-ARG WORKER_TAG="development"
-
 # Configure environment
 ENV CERT_DIR=$CERT_DIR
-ENV TAG=$WORKER_TAG
+ENV TAG=$TAG
+ENV WORKER_IMAGE=$WORKER_IMAGE
 ENV BEARER_TOKEN_FILE=$BEARER_TOKEN_FILE
 ENV DASK_ROOT_CONFIG=$DASK_ROOT_CONFIG
-ENV WORKER_IMAGE=$WORKER_IMAGE
 ENV LABEXTENTION_CLUSTER=$LABEXTENTION_CLUSTER
 ENV LABEXTENTION_FACTORY_CLASS=$LABEXTENTION_FACTORY_CLASS
 ENV LABEXTENTION_FACTORY_MODULE=$LABEXTENTION_FACTORY_MODULE
