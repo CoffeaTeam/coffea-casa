@@ -2,12 +2,12 @@
 
 set -x
 
-if [[ "$SERVICEX_HOST" ]]; then
+if [[ "$SERVICEX_HOST" ]] && [[ "$SERVICEX_TYPE" ]]; then
     touch $HOME/.servicex
     echo "Tokens: generating ServiceX config file (available only from Jupyterhub notebook)"
     echo "
 api_endpoints:
-  - name: uproot
+  - name: $SERVICEX_TYPE
     endpoint: $SERVICEX_HOST
     type: $SERVICEX_TYPE
     " > $HOME/.servicex
