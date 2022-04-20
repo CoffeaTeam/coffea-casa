@@ -2,13 +2,8 @@
 name: Deploy to PyPI
 
 on:
-  push:
-    tags:
-      - '*'
-    paths:
-      - 'coffea_casa/*'
-    branches:
-      - master
+  release:
+    types: [created]
 
 jobs:
   deploy:
