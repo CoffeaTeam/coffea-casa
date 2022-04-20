@@ -105,13 +105,14 @@ RUN rm -rf /tmp/* \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 
-ADD prepare-env/prepare-env-cc.sh /usr/local/bin/
-RUN chmod ugo+x /usr/local/bin/prepare-env-cc.sh
+# FIXME: add better layering for preparation of env
+ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
+RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}
 WORKDIR $HOME
-ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env-cc.sh"]
+ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
 
 # Extra packages to be installed (apt, pip, conda) and commands to be executed
 # Use bash login shell for entrypoint in order

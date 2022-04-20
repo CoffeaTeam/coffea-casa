@@ -70,4 +70,5 @@ if [ "$EXTRA_PIP_PACKAGES" ]; then
 fi
 
 # Run extra commands
-exec "/usr/local/bin/prepare-env.sh" "$@"
+#exec "/usr/local/bin/prepare-env.sh" "$@"
+exec "$@"
