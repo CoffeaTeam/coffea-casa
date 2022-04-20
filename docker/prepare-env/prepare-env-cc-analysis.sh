@@ -12,6 +12,19 @@ if [ "$EXTRA_PIP_PACKAGES" ]; then
     /opt/conda/bin/pip install $EXTRA_PIP_PACKAGES
 fi
 
+  # FIXME: in case of sidecar dask worker is available
+  if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" && "$SKYHOOK_CLUSTER_ADDR" && "$SKYHOOK_PUBLIC_ADDR" && "$SKYHOOK_MON_HOST" ]]; then
+  sed -i -e "s|%(SKYHOOK_CEPH_UUIDGEN)|${SKYHOOK_CEPH_UUIDGEN}|g" $CEPH_DIR/ceph.conf
+  sed -i -e "s|%(SKYHOOK_CEPH_KEYRING)|${SKYHOOK_CEPH_KEYRING}|g" $CEPH_DIR/keyring
+  sed -i -e "s|%(SKYHOOK_MON_HOST)|${SKYHOOK_MON_HOST}|g" $CEPH_DIR/ceph.conf
+  sed -i -e "s|%(SKYHOOK_PUBLIC_ADDR)|${SKYHOOK_PUBLIC_ADDR}|g" $CEPH_DIR/ceph.conf
+  sed -i -e "s|%(SKYHOOK_CLUSTER_ADDR)|${SKYHOOK_CLUSTER_ADDR}|g" $CEPH_DIR/ceph.conf
+  # Testing ceph status
+  ceph -s
+else
+  echo "Skyhook was not configured. Please add next env values: SKYHOOK_CEPH_KEYRING SKYHOOK_CEPH_UUIDGEN SKYHOOK_CLUSTER_ADDR SKYHOOK_PUBLIC_ADDR SKYHOOK_MON_HOST in helm charts."
+fi
+
 # If there is defined COFFEA_CASA_SIDECAR env variable (inside hub values.yml),
 # then we use this container as a sidecar for notebook.
 if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
@@ -55,6 +68,14 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   # Bearer token (overwrite value preconfigured for k8s)
   if [[ -f "$_CONDOR_JOB_IWD/xcache_token" ]]; then
       export BEARER_TOKEN_FILE="$_CONDOR_JOB_IWD/xcache_token"
+  fi
+
+  if [[ -f "$_CONDOR_JOB_IWD/ceph.conf" ]]; then
+      cp $_CONDOR_JOB_IWD/ceph.conf ${CEPH_DIR}
+  fi
+
+  if [[ -f "$_CONDOR_JOB_IWD/keyring" ]]; then
+      cp $_CONDOR_JOB_IWD/keyring ${CEPH_DIR}
   fi
   
   if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
