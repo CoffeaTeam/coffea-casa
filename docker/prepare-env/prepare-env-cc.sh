@@ -27,6 +27,14 @@ echo "COLLECTOR_NAME = ${COLLECTOR_NAME}" >> /opt/condor/config.d/schedd
 echo "UID_DOMAIN = ${UID_DOMAIN}" >> /opt/condor/config.d/schedd
 echo "SCHEDD_HOST = ${SCHEDD_HOST}" >> /opt/condor/config.d/schedd
 
+# Both SKYHOOK_CEPH_KEYRING and SKYHOOK_CEPH_UUIDGEN are defined in Helm chart (not in a Docker image)
+if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" ]]; then
+  sed -i -e "s|%(SKYHOOK_CEPH_UUIDGEN)|${SKYHOOK_CEPH_UUIDGEN}|g" $CEPH_DIR/ceph.conf
+  sed -i -e "s|%(SKYHOOK_CEPH_KEYRING)|${SKYHOOK_CEPH_KEYRING}|g" $CEPH_DIR/keyring
+  # Testing ceph status
+  ceph -s
+fi
+
 # Configure oidc-agent for token management
 #echo "eval \`oidc-keychain\`" >> ~/.bashrc
 #eval `oidc-keychain`
