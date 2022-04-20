@@ -5,6 +5,10 @@ on:
   push:
     tags:
       - '*'
+    paths:
+      - 'coffea_casa/*'
+    branches:
+      - master
 
 jobs:
   deploy:
