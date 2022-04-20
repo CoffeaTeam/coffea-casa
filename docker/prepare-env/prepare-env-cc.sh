@@ -27,12 +27,17 @@ echo "COLLECTOR_NAME = ${COLLECTOR_NAME}" >> /opt/condor/config.d/schedd
 echo "UID_DOMAIN = ${UID_DOMAIN}" >> /opt/condor/config.d/schedd
 echo "SCHEDD_HOST = ${SCHEDD_HOST}" >> /opt/condor/config.d/schedd
 
-# Both SKYHOOK_CEPH_KEYRING and SKYHOOK_CEPH_UUIDGEN are defined in Helm chart (not in a Docker image)
-if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" ]]; then
+# Values should be defined in Helm chart (not in a Docker image)
+if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" && "$SKYHOOK_CLUSTER_ADDR" && "$SKYHOOK_PUBLIC_ADDR" && "$SKYHOOK_MON_HOST" ]]; then
   sed -i -e "s|%(SKYHOOK_CEPH_UUIDGEN)|${SKYHOOK_CEPH_UUIDGEN}|g" $CEPH_DIR/ceph.conf
   sed -i -e "s|%(SKYHOOK_CEPH_KEYRING)|${SKYHOOK_CEPH_KEYRING}|g" $CEPH_DIR/keyring
+  sed -i -e "s|%(SKYHOOK_MON_HOST)|${SKYHOOK_MON_HOST}|g" $CEPH_DIR/ceph.conf
+  sed -i -e "s|%(SKYHOOK_PUBLIC_ADDR)|${SKYHOOK_PUBLIC_ADDR}|g" $CEPH_DIR/ceph.conf
+  sed -i -e "s|%(SKYHOOK_CLUSTER_ADDR)|${SKYHOOK_CLUSTER_ADDR}|g" $CEPH_DIR/ceph.conf
   # Testing ceph status
   ceph -s
+else
+  echo "Skyhook was not configured. Please add next env values: SKYHOOK_CEPH_KEYRING SKYHOOK_CEPH_UUIDGEN SKYHOOK_CLUSTER_ADDR SKYHOOK_PUBLIC_ADDR SKYHOOK_MON_HOST in helm charts."
 fi
 
 # Configure oidc-agent for token management
