@@ -105,7 +105,9 @@ RUN pip install --no-cache-dir coffea[servicex] \
     # for running/restarting Dask worker in sidecar container
     supervisor \
     correctionlib \
-    func_adl_uproot \
+    func-adl-servicex==2.0.0 \
+    servicex==2.5.0 \
+    func-adl-uproot \
     cabinetry
 
 # ------- xrootd-authz-plugin -------------------------------
