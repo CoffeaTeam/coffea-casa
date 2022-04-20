@@ -15,6 +15,7 @@ DEFAULT_CONTAINER_PORT = 8786
 
 # Security settings for Dask scheduler
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
+# CEPH (Skyhook)
 CEPH_DIR = Path("/opt/ceph")
 CEPH_CONF = CEPH_DIR / "ceph.conf"
 KEYRING_CONF =  CEPH_DIR / "keyring"
