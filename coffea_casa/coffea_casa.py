@@ -15,6 +15,9 @@ DEFAULT_CONTAINER_PORT = 8786
 
 # Security settings for Dask scheduler
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
+CEPH_DIR = Path("/opt/ceph")
+CEPH_CONF = CEPH_DIR / "ceph.conf"
+KEYRING_CONF =  CEPH_DIR / "keyring"
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
 HOME_DIR = Path.home()
@@ -128,6 +131,8 @@ class CoffeaCasaCluster(HTCondorCluster):
                            ):
         job_config = job_kwargs.copy()
         input_files = []
+        if CEPH_CONF.is_file() and KEYRING_CONF.is_file():
+            input_files += [CEPH_CONF, KEYRING_CONF]
         if PIP_REQUIREMENTS.is_file():
             input_files += [PIP_REQUIREMENTS]
         if CONDA_ENV.is_file():
