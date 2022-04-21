@@ -21,6 +21,11 @@ sed -i -e "s|LocalCluster|${LABEXTENTION_FACTORY_CLASS}|g" $DASK_ROOT_CONFIG/lab
 sed -i -e "s|dask.distributed|${LABEXTENTION_FACTORY_MODULE}|g" $DASK_ROOT_CONFIG/labextension.yaml
 sed -i -e "s|Local Cluster|${LABEXTENTION_CLUSTER}|g" $DASK_ROOT_CONFIG/labextension.yaml
 
+if [ "${LABEXTENTION_FACTORY_CLASS:-}" == "LocalCluster" ]; then
+  # FIXME: for now no need to have cartificates
+  sed -i -e "s|require-encryption: True|require-encryption: False|g" $DASK_ROOT_CONFIG/dask_tls.yaml
+fi
+
 # HTCondor scheduler settings
 echo "CONDOR_HOST = ${CONDOR_HOST}" >> /opt/condor/config.d/schedd
 echo "COLLECTOR_NAME = ${COLLECTOR_NAME}" >> /opt/condor/config.d/schedd
