@@ -34,6 +34,7 @@ RUN mkdir -p ${CEPH_DIR} && chown -R "${NB_USER}:${NB_GID}" ${CEPH_DIR}
 
 USER ${NB_UID}
 COPY skyhook/build-skyhook.sh /tmp/
+COPY skyhook/.coffea.toml $HOME/
 
 RUN cd /tmp && \
     git clone \

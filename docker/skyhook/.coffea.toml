@@ -1,0 +1,3 @@
+[skyhook]
+ceph_config_path = "/opt/ceph/ceph.conf"
+ceph_data_pool = "cephfs-data0"
