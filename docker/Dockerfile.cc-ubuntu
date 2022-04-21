@@ -57,7 +57,7 @@ ENV CACHE_PREFIX=$CACHE_PREFIX
 USER ${NB_USER}
      
 RUN pip install --no-cache-dir \
-    coffea_casa
+    coffea_casa -U
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
