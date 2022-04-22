@@ -10,7 +10,6 @@ from dask.utils import tmpfile
 
 logger = logging.getLogger(__name__)
 
-
 class DistributedEnvironmentPlugin(NannyPlugin):
     """A NannyPlugin to upload a local pip installable package to workers.
     Parameters
@@ -90,9 +89,11 @@ class DistributedEnvironmentPlugin(NannyPlugin):
 
         # Now try to pip install the package
         package_path = os.path.join(nanny.local_directory,self.package)
-        logger.info("Installing the package: %s",self.package)
+        logger.info("Installing the package: %s",self.package);
         proc = subprocess.Popen(
-            [sys.executable, "-m", "pip", "install"] + self.pip_options + [package_path],
+            [sys.executable, "-m", "pip", "install"]
+            + self.pip_options
+            + [package_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -102,7 +103,7 @@ class DistributedEnvironmentPlugin(NannyPlugin):
         if returncode:
             logger.error("Pip install failed with '%s'",stderr.decode().strip())
             return
-
+        
         # Cleanup the zip file
         logger.info("Cleaning up temporary directory: %s",fn)
         os.remove(fn)
@@ -114,7 +115,7 @@ class DistributedEnvironmentPlugin(NannyPlugin):
             logger.info(f"Removing: {fname}")
             path = os.path.join(nanny.local_directory,fname)
             os.remove(path)
-        logger.info("Uninstalling the package: %s",self.package)
+        logger.info("Uninstalling the package: %s",self.package);
         proc = subprocess.Popen(
             [sys.executable, "-m", "pip", "uninstall", self.package],
             stdout=subprocess.PIPE,
@@ -122,9 +123,3 @@ class DistributedEnvironmentPlugin(NannyPlugin):
         )
         stdout, stderr = proc.communicate()
         returncode = proc.wait()
-
-        if returncode:
-            logger.error("Pip uninstall failed with '%s'",stderr.decode().strip())
-            return
-
-        return
