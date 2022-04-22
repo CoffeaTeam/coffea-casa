@@ -1,7 +1,12 @@
 
-name: Openscience Harbor Registry Publish (Tag)
+name: CD-cc-skyhook-ubuntu-tag
 
 on:
+  workflow_run:
+    workflows: ["CD-cc-analysis-ubuntu-tag","CD-cc-ubuntu-tag"]
+    #branches: [master]
+    types: 
+      - completed
   push:
     tags:
       - '*'
@@ -15,7 +20,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE: ["k8s-hub-coffea-casa"]
+        IMAGE: [
+                cc-analysis-ubuntu-skyhook,
+                cc-ubuntu-skyhook,
+                ]
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
 
@@ -34,8 +42,8 @@ jobs:
           password: ${{ secrets.HARBOR_PASSWORD }}
       - name: Build Container Image
         run: |
-          cd charts/coffea-casa/docker/${{ matrix.IMAGE }}
-          docker build  -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:$TAG  .
+          cd docker/${{ matrix.IMAGE }}
+          docker build --build-arg TAG="development" --build-arg HUB="hub.opensciencegrid.org" --build-arg PROJECT="coffea-casa" -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:$TAG -f Dockerfile.${{ matrix.IMAGE }} .
       - name: Push to Openscience Harbor Registry
         run: |
           docker push hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest
