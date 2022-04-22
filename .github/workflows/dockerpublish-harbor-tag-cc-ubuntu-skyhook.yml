@@ -43,7 +43,7 @@ jobs:
       - name: Build Container Image
         run: |
           cd docker/
-          docker build --build-arg TAG="development" --build-arg HUB="hub.opensciencegrid.org" --build-arg PROJECT="coffea-casa" -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:$TAG -f Dockerfile.${{ matrix.IMAGE }} .
+          docker build --build-arg TAG=$TAG --build-arg HUB="hub.opensciencegrid.org" --build-arg PROJECT="coffea-casa" -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest -t hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:$TAG -f Dockerfile.${{ matrix.IMAGE }} .
       - name: Push to Openscience Harbor Registry
         run: |
           docker push hub.opensciencegrid.org/coffea-casa/${{ matrix.IMAGE }}:latest
