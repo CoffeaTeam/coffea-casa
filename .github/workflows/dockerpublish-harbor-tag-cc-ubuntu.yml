@@ -2,14 +2,16 @@
 name: CD-cc-ubuntu-tag
 
 on:
+  release:
+    types: [created]
   workflow_run:
     workflows: ["CD-cc-base-ubuntu-tag"]
     #branches: [master]
     types: 
       - completed
-  #push:
-  #  tags:
-  #    - '*'
+  push:
+    tags:
+      - '*'
 
 env:
   GITHUB_SHA: ${{ github.sha }}

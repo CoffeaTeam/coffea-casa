@@ -2,9 +2,8 @@
 name: CD-cc-base-ubuntu-tag
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [created]
 
 env:
   GITHUB_SHA: ${{ github.sha }}

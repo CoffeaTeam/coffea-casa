@@ -2,14 +2,13 @@
 name: CD-cc-skyhook-ubuntu-tag
 
 on:
+  release:
+    types: [created]
   workflow_run:
     workflows: ["CD-cc-analysis-ubuntu-tag","CD-cc-ubuntu-tag"]
     #branches: [master]
     types: 
       - completed
-  #push:
-  #  tags:
-  #    - '*'
 
 env:
   GITHUB_SHA: ${{ github.sha }}
