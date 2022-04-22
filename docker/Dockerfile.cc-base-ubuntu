@@ -218,12 +218,11 @@ RUN pip install --no-cache-dir \
     func-adl-servicex==2.0.0 \
     servicex==2.5.0 \
     func_adl_uproot \
-    # both packages depends on the older version of servicex
-    #tcut_to_qastle \
+    # Packages depends on the older version of servicex
     #servicex-databinder \
     correctionlib \
     cabinetry \
-    funcx \
+    funcx==0.3.9 \
     pyyaml
 
 USER ${NB_UID}
