@@ -215,14 +215,16 @@ RUN mamba install --yes \
 RUN pip install --no-cache-dir \
     aiostream \
     tenacity \
-    func-adl-servicex==2.0.0 \
-    servicex==2.5.0 \
+    func-adl-servicex \
+    servicex \
+    #func-adl-servicex==2.0.0 \
+    #servicex==2.5.0 \
     func_adl_uproot \
     # Packages depends on the older version of servicex
-    #servicex-databinder \
+    servicex-databinder \
     correctionlib \
     cabinetry \
-    funcx==0.3.9 \
+    #funcx==0.3.9 \
     pyyaml
 
 USER ${NB_UID}
