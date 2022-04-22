@@ -101,12 +101,11 @@ RUN mamba install --yes \
     cmake
 
 #
-RUN pip install --no-cache-dir coffea[servicex] \
-    # for running/restarting Dask worker in sidecar container
+RUN pip install --no-cache-dir \
     supervisor \
     correctionlib \
-    func-adl-servicex==2.0.0 \
-    servicex==2.5.0 \
+    func-adl-servicex \
+    servicex \
     func-adl-uproot \
     cabinetry
 
