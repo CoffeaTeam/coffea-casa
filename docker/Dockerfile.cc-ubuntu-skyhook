@@ -53,8 +53,8 @@ COPY ceph/ceph.conf ceph/keyring ${CEPH_DIR}/
 
 USER root
 #
-RUN echo "CEPH_DATA_POOL="cephfs-data0" \
-CEPH_CONFIG_PATH=${CEPH_CONF}" >> /etc/enviroment
+RUN echo "CEPH_DATA_POOL="cephfs-data0"" >> /etc/enviroment
+RUN echo "CEPH_CONFIG_PATH=${CEPH_CONF}" >> /etc/enviroment
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
