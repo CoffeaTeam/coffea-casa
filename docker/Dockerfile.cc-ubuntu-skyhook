@@ -71,6 +71,10 @@ RUN rm -rf /tmp/* \
 # Fix permissions for Dask/Ceph config files
 RUN chown -R "${NB_USER}:${NB_GID}" ${CEPH_DIR}/keyring ${CEPH_DIR}/ceph.conf
 
+# FIXME: done for AGC workshop
+ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
+RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}
 WORKDIR $HOME
