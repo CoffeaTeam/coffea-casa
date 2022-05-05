@@ -3,19 +3,16 @@ name: CI/CD
 on:
   push:
     paths:
-      - './coffea_casa/*'
+      - 'coffea_casa/**'
     branches:
       - master
   pull_request:
     paths:
-      - './coffea_casa/*'
+      - 'coffea_casa/**'
     branches:
       - master
       - develop
-  # Run daily at 0:01 UTC
-  schedule:
-    - cron:  '1 0 * * *'
-
+      
 jobs:
   linter:
 
