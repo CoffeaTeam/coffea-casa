@@ -18,7 +18,7 @@ SECRETS_DIR = Path("/etc/cmsaf-secrets")
 # CEPH (Skyhook)
 CEPH_DIR = Path("/opt/ceph")
 CEPH_CONF = CEPH_DIR / "ceph.conf"
-KEYRING_CONF =  CEPH_DIR / "keyring"
+KEYRING_CONF = CEPH_DIR / "keyring"
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
 HOME_DIR = Path.home()
