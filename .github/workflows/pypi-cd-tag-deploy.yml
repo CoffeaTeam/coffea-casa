@@ -4,6 +4,11 @@ name: Deploy to PyPI
 on:
   release:
     types: [created]
+  push:
+    paths:
+      - 'coffea_casa/**'
+    branches:
+      - master
 
 jobs:
   deploy:
