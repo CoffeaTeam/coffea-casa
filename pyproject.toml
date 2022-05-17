@@ -35,3 +35,14 @@ show_error_codes = true
 show_error_context = true
 no_implicit_optional = true
 ignore_missing_imports = true
+
+# pyproject.toml
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "tests",
+]
+addopts = "--strict-config --strict-markers -ra"
+log_cli_level = "INFO"
+xfail_strict = true
+filterwarnings = ['error']
