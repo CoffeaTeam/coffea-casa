@@ -42,18 +42,18 @@ Sign in with your ATLAS CERN credential:
 Docker Image Selection
 ----------------------
 
-For high efficient analysis using *coffea* package, powered with *Dask* and *HTCondor* please select:
+The default image is preloaded with *coffea*, *Dask*, and *HTCondor* and you should select it:
 
-.. image:: _static/coffea.af.uchicago.edu_hub_spawn.png
+.. image:: _static/coffea-casa-image.png
     :alt:  Coffea Casa analysis image available at Coffea-casa Analysis Facility @ UChicago
     :width: 50%
     :align: center
 
 
-After you will be forwarded to your personal Jupyterhub instance running at Analysis Facility @ UChicago:
+This will forward you to your own personal Jupyterhub instance running at Analysis Facility @ UChicago:
 
-.. image:: _static/coffea.af.uchicago.edu_user_fengping.hu.png
-   :alt: Jupyterhub instance together with Dask Labextention powered cluster available at Coffea-casa Analysis Facility @ UChicago
+.. image:: _static/coffea-casa-start.png
+   :alt: Jupyterhub instance together with Dask Labextention powered cluster available at Opendata Coffea-casa Analysis Facility @ UChicago
    :width: 100%
    :align: center
 
