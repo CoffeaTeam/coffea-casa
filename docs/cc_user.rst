@@ -233,7 +233,7 @@ The final step is to generates a 1D histogram from the data output to the 'MET' 
 
     hist.plot1d(output['dimu_mass'], overlay='dataset', fill_opts={'edgecolor': (0,0,0,0.3), 'alpha': 0.8})
 
-As a result you should see next plot:
+As a result you should see the following plot:
 
 .. image:: _static/examplezpeak-plot.png
    :alt: Final plot that you should see at the end of example
