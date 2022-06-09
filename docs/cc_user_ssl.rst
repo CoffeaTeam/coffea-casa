@@ -135,35 +135,32 @@ The buttons in the top right allow for pulling and pushing respectively. When yo
 ServiceX
 --------
 
-When dealing with very large datasets it is often better to do initial data filtering, augmentation using `ServiceX <https://iris-hep.org/projects/servicex>`_.
-ServiceX transformation produces output as an Awkward Array. The array can then be used in a regular Coffea processing.
-Here a scheme explaining the workflow:
+When dealing with very large datasets it is often better to do initial data filtering and augmentation using `ServiceX <https://iris-hep.org/projects/servicex>`_.
+ServiceX transformations produce their output as an Awkward Array. The array can then be used in a regular Coffea processor. Here is a schema explaining the workflow:
 
 .. image:: _static/servicex-coffea-workflow.png
    :alt: ServiceX and Coffea-Casa workflow schema.
    :width: 80%
    :align: center
 
-There are two different, UC AF deployed ServiceX instances. The only difference between them is the type of input data they are capable of processing.
+There are two different UC AF-deployed ServiceX instances. The only difference between them is the type of input data they are capable of processing.
 `Uproot <https://uproot-atlas.servicex.af.uchicago.edu/>`_ processes any kind of "flat" ROOT files, while `xAOD <https://xaod.servicex.af.uchicago.edu/>`_ processes only Rucio registered xAOD files.
 
-To use them one has to register and get approved. 
-Sign in will lead you to a Globus registration page, where you may choose to use account connected to your institution:
+To use them one has to register and get approved. Sign in will lead you to a Globus registration page where you may choose to use an account connected to your institution:
 
 .. image:: _static/servicex-registration.png
    :alt: ServiceX registration.
    :width: 80%
    :align: center
 
-Once approved, you will be able to see status of your requests in the dashboard:
+Once approved, you will be able to see the status of your requests in the dashboard:
 
 .. image:: _static/servicex-dashboard.png
    :alt: ServiceX dashboard.
    :width: 80%
    :align: center
 
-For your code to be able to authenticate your requests, you need to download a servicex.yaml file, that should be placed in your working directory.
-The file is downloaded from your profile page:
+For your code to be able to authenticate your requests you need to download a servicex.yaml file, which should be placed in your working directory. The file is downloaded from your profile page:
 
 .. image:: _static/servicex-profile.png
    :alt: ServiceX profile.
