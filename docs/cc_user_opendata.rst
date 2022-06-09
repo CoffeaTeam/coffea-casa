@@ -104,7 +104,7 @@ By default, the Coffea-casa Dask cluster should provide you with a scheduler and
    :width: 50%
    :align: center
 
-As soon as you start your computations, you will notice that available resources at the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska can easily autoscale depending on available resources in the HTCondor pool at Nebraska Tier 2.
+As soon as you start your computations, you will notice that available resources at the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska autoscale depending on the resources available in the HTCondor pool at Nebraska Tier 2.
 
 
 .. image:: _static/coffea-casa-labext.png

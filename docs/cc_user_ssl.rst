@@ -68,7 +68,7 @@ By default, the Coffea-casa Dask cluster should provide you with a scheduler and
    :width: 50%
    :align: center
 
-As soon as you will start your computations, you will notice that available resources at the Coffea-Casa Analysis Facility @ UChicago can easily autoscale depending on available resources in the HTCondor pool at AF UChicago.
+As soon as you start your computations, you will notice that available resources at the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska autoscale depending on the resources available in the HTCondor pool at AF UChicago.
 
 
 .. image:: _static/coffea.af.uchicago.edu_user_clusters.scale.png
