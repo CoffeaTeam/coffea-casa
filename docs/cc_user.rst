@@ -64,15 +64,15 @@ Cluster Resources in Coffea-Casa Analysis Facility @ T2 Nebraska
 By default, the Coffea-casa Dask cluster should provide you with a scheduler and workers, which you can see by clicking on the colored Dask icon in the left sidebar.
 
 .. image:: _static/coffea-casa-startr.png
-   :alt: Default Dask Labextention powered cluster available Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Default Dask Labextention powered cluster available Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
-As soon as you will start your computations, you will notice that available resources at the Coffea-Casa Analysis Facility @ T2 Nebraska can easily autoscale depending on available resources in the HTCondor pool at Nebraska Tier 2.
+As soon as you start your computations, you will notice that available resources at the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska autoscale depending on the resources available in the HTCondor pool at Nebraska Tier 2.
 
 
 .. image:: _static/coffea-casa-labext.png
-   :alt: Autoscaling with Dask Labextention powered cluster available at Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Autoscaling with Dask Labextention powered cluster available at Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
    
