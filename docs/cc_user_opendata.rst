@@ -179,10 +179,11 @@ First, we need to import the ``coffea`` libraries used in this example:
 .. code-block:: python
 
     import numpy as np
-    from coffea import hist
-    from coffea.analysis_objects import JaggedCandidateArray
-    import coffea.processor as processor
     %matplotlib inline
+    from coffea import hist
+    import coffea.processor as processor
+    import awkward as ak
+    from coffea.nanoevents import schemas
     
 To select the aforementioned data in a coffea-friendly syntax, we employ a dictionary of datasets, where each dataset (key) corresponds to a list of files (values):
 
@@ -195,40 +196,41 @@ Coffea provides the coffea.processor module, where users may write their analysi
 .. code-block:: python
 
     # This program plots an event-level variable (in this case, MET, but switching it is as easy as a dict-key change). It also demonstrates an easy use of the book-keeping cutflow tool, to keep track of the number of events processed.
+
     # The processor class bundles our data analysis together while giving us some helpful tools.  It also leaves looping and chunks to the framework instead of us.
     class Processor(processor.ProcessorABC):
-      def __init__(self):
-          # Bins and categories for the histogram are defined here. For format, see https://coffeateam.github.io/coffea/stubs/coffea.hist.hist_tools.Hist.html && https://coffeateam.github.io/coffea/stubs/coffea.hist.hist_tools.Bin.html
-          dataset_axis = hist.Cat("dataset", "")
-          MET_axis = hist.Bin("MET", "MET [GeV]", 50, 0, 100)
+        def __init__(self):
+            # Bins and categories for the histogram are defined here. For format, see https://coffeateam.github.io/coffea/stubs/coffea.hist.hist_tools.Hist.html && https://coffeateam.github.io/coffea/stubs/coffea.hist.hist_tools.Bin.html
+            dataset_axis = hist.Cat("dataset", "")
+            MET_axis = hist.Bin("MET", "MET [GeV]", 50, 0, 100)
+        
+            # The accumulator keeps our data chunks together for histogramming. It also gives us cutflow, which can be used to keep track of data.
+            self._accumulator = processor.dict_accumulator({
+                'MET': hist.Hist("Counts", dataset_axis, MET_axis),
+                'cutflow': processor.defaultdict_accumulator(int)
+            })
+    
+        @property
+        def accumulator(self):
+            return self._accumulator
+    
+        def process(self, events):
+            output = self.accumulator.identity()
+        
+            # This is where we do our actual analysis. The dataset has columns similar to the TTree's; events.columns can tell you them, or events.[object].columns for deeper depth.
+            dataset = events.metadata["dataset"]
+            MET = events.MET.pt
+        
+            # We can define a new key for cutflow (in this case 'all events'). Then we can put values into it. We need += because it's per-chunk (demonstrated below)
+            output['cutflow']['all events'] += ak.size(MET)
+            output['cutflow']['number of chunks'] += 1
+        
+            # This fills our histogram once our data is collected. The hist key ('MET=') will be defined in the bin in __init__.
+            output['MET'].fill(dataset=dataset, MET=MET)
+            return output
 
-          # The accumulator keeps our data chunks together for histogramming. It also gives us cutflow, which can be used to keep track of data.
-          self._accumulator = processor.dict_accumulator({
-              'MET': hist.Hist("Counts", dataset_axis, MET_axis),
-              'cutflow': processor.defaultdict_accumulator(int)
-              })
-
-      @property
-      def accumulator(self):
-        return self._accumulator
-
-      def process(self, events):
-        output = self.accumulator.identity()
-
-        # This is where we do our actual analysis. The dataset has columns similar to the TTree's; events.columns can tell you them, or events.[object].columns for deeper depth.
-        dataset = events.metadata["dataset"]
-        MET = events.MET.pt
-
-        # We can define a new key for cutflow (in this case 'all events'). Then we can put values into it. We need += because it's per-chunk (demonstrated below)
-        output['cutflow']['all events'] += MET.size
-        output['cutflow']['number of chunks'] += 1
-
-        # This fills our histogram once our data is collected. The hist key ('MET=') will be defined in the bin in __init__.
-        output['MET'].fill(dataset=dataset, MET=MET.flatten())
-        return output
-
-      def postprocess(self, accumulator):
-        return accumulator
+        def postprocess(self, accumulator):
+            return accumulator
 
 
 With our data in our fileset variable and our processor ready to go, we simply need to connect to the Dask Labextention-powered cluster available within the Coffea-Casa Analysis Facility @ T2 Nebraska. This can be done by dragging the scheduler into the notebook, or by manually typing the following:
@@ -238,7 +240,7 @@ With our data in our fileset variable and our processor ready to go, we simply n
     from dask.distributed import Client
     client = Client("tls://localhost:8786")
 
-Then we bundle everything up to run our job, making use of the Dask executor. To do this, we must point to a client within executor_args.
+Then we bundle everything up to run our job, making use of the Dask executor. We must point it to our client as defined above. In the Runner, we specify that we want to make use of the NanoAODSchema (as our input file is a NanoAOD).
 
 .. code-block:: python
 
