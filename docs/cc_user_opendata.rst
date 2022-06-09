@@ -26,48 +26,48 @@ Access
 Opendata CILogon Authentication Instance
 ---------------------------------
 
-Currently Opendata Coffea-Casa support any CILogon identity provider. Select your identity provider:
+Currently Opendata Coffea-Casa supports any CILogon identity provider. Select your identity provider:
 
 
 .. image:: _static/cc-cilogon.png
-   :alt: Select your identity provider CILogon Authz authentification to Opendata Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Select your identity provider for CILogon Authz authentification to access Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
 For accessing Opendata Coffea-Casa, we are offering a self-signup registration form with approval.
 
 .. image:: _static/cc-reg1.png
-   :alt: Check a self-signup option with approval.
+   :alt: Fill out the registration form for access to Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
 
-Click to proceed to next stage:
+Click to proceed to the next stage:
 
 .. image:: _static/cc-reg2.png
-   :alt: Check an information in the registration form (form should be already prefilled).
+   :alt: Check the information in the registration form is correct (form should already be prefilled).
    :width: 50%
    :align: center
 
 Click to proceed to the next stage:
 
 .. image:: _static/cc-request.png
-   :alt: Request for approval was send (and this red window should not be here, sorry :-))
+   :alt: Request for approval was sent.
    :width: 50%
    :align: center
 
-If you see the next window, it means that registration request was sent succesfully!
+If you see the next window, it means that the registration request was sent succesfully!
 
 .. important::
-   **After this staep please wait when you will get approved by administrator!**
+   **After this step please wait until you get approved by an administrator!**
 
-After your request is approved, you will receive an email, where you will need simply to click a link:
+After your request is approved, you will receive an email, where you will simply need to click a link:
 
 .. image:: _static/cc-email.png
    :alt:  Example of email you should receive after registration.
    :width: 50%
    :align: center
 
-Voila! Now you can login to Opendata Coffea-Casa. Click on "Authorized Users Only: Sign in with OAuth 2.0":
+Voila! Now you can login to Opendata Coffea-Casa. Click on "Authorized Users Only: Sign in with OAuth 2.0" to do so:
 
 .. image:: _static/cc-enter.png
    :alt:  Start directly use Opendata Coffea-Casa: click here to "Authorized Users Only: Sign in with OAuth 2.0".
