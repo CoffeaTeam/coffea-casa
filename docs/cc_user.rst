@@ -42,7 +42,7 @@ To access it please sign in or sign up using ``Apply for an account``.
 Docker Image Selection
 ----------------------
 
-For high efficient analysis using *coffea* package, powered with *Dask* and *HTCondor* please select:
+The default image is preloaded with *coffea*, *Dask*, and *HTCondor* and you should select it:
 
 .. image:: _static/coffea-casa-image.png
     :alt:  Coffea Casa analysis image available at Coffea-casa Analysis Facility @ T2 Nebraska
@@ -50,10 +50,10 @@ For high efficient analysis using *coffea* package, powered with *Dask* and *HTC
     :align: center
 
 
-After you will be forwarded to your personal Jupyterhub instance running at Analysis Facility @ T2 Nebraska:
+This will forward you to your own personal Jupyterhub instance running at Analysis Facility @ T2 Nebraska:
 
 .. image:: _static/coffea-casa-start.png
-   :alt: Jupyterhub instance together with Dask Labextention powered cluster available at Coffea-casa Analysis Facility @ T2 Nebraska
+   :alt: Jupyterhub instance together with Dask Labextention powered cluster available at Opendata Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 100%
    :align: center
 
