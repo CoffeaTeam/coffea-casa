@@ -282,6 +282,38 @@ Coffea provides the coffea.processor module, where users may write their analysi
 
         def postprocess(self, accumulator):
             return accumulator
+            
+With our data in our fileset variable and our processor ready to go, we simply need to connect to the Dask Labextention-powered cluster available within the Coffea-Casa Analysis Facility @ T2 Nebraska. This can be done by dragging the scheduler into the notebook, or by manually typing the following:
+
+.. code-block:: python
+
+    from dask.distributed import Client
+    client = Client("tls://localhost:8786")
+
+Then we bundle everything up to run our job, making use of the Dask executor. We must point it to our client as defined above. In the Runner, we specify that we want to make use of the NanoAODSchema (as our input file is a NanoAOD).
+
+.. code-block:: python
+
+    executor = processor.DaskExecutor(client=client)
+    run = processor.Runner(executor=executor,
+                            schema=schemas.NanoAODSchema,
+                            savemetrics=True
+                          )
+
+    output, metrics = run(fileset, "Events", processor_instance=Processor())
+
+The final step is to generates a 1D histogram from the data output to the 'MET' key. fill_opts are optional arguments to fill the graph (default is a line).
+
+.. code-block:: python
+
+    hist.plot1d(output['MET'], overlay='dataset', fill_opts={'edgecolor': (0,0,0,0.3), 'alpha': 0.8})
+
+As a result you should see the following plot:
+
+.. image:: _static/example1-plot.png
+   :alt: Final plot that you should see at the end of example
+   :width: 50%
+   :align: center
 
 CMS Example
 -------
