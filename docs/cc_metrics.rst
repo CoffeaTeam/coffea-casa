@@ -2,26 +2,25 @@ Performance Metrics on Coffea-Casa
 =========
 Available Features
 -----
-At some point you will probably want to measure the performance of your analysis on coffea-casa. Luckily, both Dask and coffea come equipped with the capabilities to give you more information about different aspects of your run. These include, broadly:
+At some point you will probably want to measure the performance of your analysis on coffea-casa. Luckily, both Dask and coffea come equipped with the capabilities to give you more information about different aspects of your analysis run. These include, broadly:
 
-    - ``run_uproot_job`` has a savemetrics arg that gives basic info about an analysis run
-    - the Dask dashboard includes a variety of info, and can be used interactively as your analysis runs
+    - ``run_uproot_job`` has a savemetrics arg which can provide basic info such as the number of entries and the process time
+    - the Dask dashboard includes a variety of info, and can be used interactively while your analysis is running
     - the Dask performance report is a snapshot of the Dask dashboard that can be saved for later review
 
 Coffea Metrics
 -----
-The simplest metrics that can be obtained stem from coffea. They include the number of bytes read, the names of all columns, the number of entries, the processing time (summed across all cores), and the number of chunks. These can be accessed by adding the ``savemetrics: True`` argument to your ``run_uproot_job``'s ``executor_args``. For example:
+The simplest metrics that can be obtained stem from coffea. They include the number of bytes read, the names of all columns, the number of entries, the processing time (summed across all cores), and the number of chunks. These can be accessed by adding the ``savemetrics: True`` argument to your ``Runner`` function. For example:
 
 .. code-block:: python
 
-    output = processor.run_uproot_job(fileset,
-                                     treename='Events',
-                                     processor_instance=Processor(),
-                                     executor=processor.dask_executor,
-                                     executor_args={"schema": NanoAODSchema, 'client': client, 'savemetrics': True},
-                                     chunksize = chunksize)
+    run = processor.Runner(executor=executor,
+                            schema=schemas.NanoAODSchema,
+                            savemetrics=True)
+                            
+    output, metrics = run(fileset, "Events", processor_instance=Processor())
                                      
-It should be noted that the introduction of this argument changes the format of your ``output`` by converting it into a tuple. Within this tuple, ``output[0]`` will contain everything that ``output`` did without ``savemetrics`` on, while ``output[1]`` will contain the metrics.
+It should be noted that the introduction of this argument changes the format of your ``output`` by converting it into a tuple. Within this tuple, ``output[0]`` will contain everything that ``output`` did without ``savemetrics`` on, while ``output[1]`` will contain the metrics. You can retrieve the "standard" behavior by taking the output of ``run()`` as two variables, as we did above, because Python automatically parse
 
 Dask Interactive Dashboard
 -----
@@ -66,14 +65,8 @@ It should be noted that the information presented here is somewhat more limited.
 .. code-block:: python
 
     from dask.distributed import performance_report
-    fname = unique("dask-report.html")
-    with performance_report(filename=fname):
-        output = processor.run_uproot_job(fileset,
-                                         treename='Events',
-                                         processor_instance=Processor(),
-                                         executor=processor.dask_executor,
-                                         executor_args={"schema": NanoAODSchema, 'client': client},
-                                         chunksize = chunksize)
+    with performance_report(filename="dask-report.html"):
+        output = run(fileset, "Events", processor_instance=Processor())
                     
 The file will be saved in the working directory, unless you specify a direct path along with the file name.
 
