@@ -48,6 +48,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 
    cc_user.rst
    cc_user_ssl.rst
+   cc_examples.ipynb
    cc_packages.rst
    cc_metrics.rst
    cc_condor.rst
@@ -58,17 +59,17 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :hidden:
    :caption: Gallery of Coffea-casa Examples
 
-   Coffea-Casa Template <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/coffea-casa-template.ipynb>
-   ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example1.ipynb>
-   ADL Benchmark 2 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example2.ipynb>
-   ADL Benchmark 3 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example3.ipynb>
-   ADL Benchmark 4 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example4.ipynb>
-   ADL Benchmark 5 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example5.ipynb>
-   ADL Benchmark 6 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example6.ipynb>
-   ADL Benchmark 7 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example7.ipynb>
-   ADL Benchmark 8 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example8.ipynb>
-   Single Top-Higgs Production (tHq) Analysis <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analyses/thq/analysis-casa.ipynb>
-   Single Top-Higgs Production (tHq) Analysis Tutorial <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/analyses/thq/analysis_tutorial.ipynb>
+   gallery/coffea-casa-template.ipynb
+   gallery/example1.ipynb
+   gallery/example2.ipynb
+   gallery/example3.ipynb
+   gallery/example4.ipynb
+   gallery/example5.ipynb
+   gallery/example6.ipynb
+   gallery/example7.ipynb
+   gallery/example8.ipynb
+   gallery/analysis_tutorial.ipynb
+   gallery/analysis-casa.ipynb
 
 
 .. toctree::
