@@ -345,34 +345,34 @@ Coffea provides the coffea.processor module, where users may write their analysi
 .. code-block:: python
 
     class Processor(processor.ProcessorABC):
-    def __init__(self):
-        dataset_axis = hist.Cat("dataset", "Dataset")
-        dimu_mass_axis = hist.Bin("dimu_mass", "$\mu\mu$ Mass [GeV]", 50, 20, 120)
+        def __init__(self):
+            dataset_axis = hist.Cat("dataset", "Dataset")
+            dimu_mass_axis = hist.Bin("dimu_mass", "$\mu\mu$ Mass [GeV]", 50, 20, 120)
         
-        self._accumulator = processor.dict_accumulator({
-            'dimu_mass': hist.Hist("Counts", dataset_axis, dimu_mass_axis),
-        })
+            self._accumulator = processor.dict_accumulator({
+                'dimu_mass': hist.Hist("Counts", dataset_axis, dimu_mass_axis),
+            })
     
-    @property
-    def accumulator(self):
-        return self._accumulator
+        @property
+        def accumulator(self):
+            return self._accumulator
     
-    def process(self, events):
-        output = self.accumulator.identity()
+        def process(self, events):
+            output = self.accumulator.identity()
         
-        dataset = events.metadata["dataset"]
+            dataset = events.metadata["dataset"]
         
-        mu = events.Muon
-        # Select events with 2 muons whose charges cancel out (Zs are charge-neutral).
-        dimu_neutral = mu[(ak.num(mu) == 2) & (ak.sum(mu.charge, axis=1) == 0)]
-        # Add together muon pair p4's, find dimuon mass.
-        dimu_mass = (dimu_neutral[:, 0] + dimu_neutral[:, 1]).mass
-        # Plot dimuon mass.
-        output['dimu_mass'].fill(dataset=dataset, dimu_mass=dimu_mass)
-        return output
+            mu = events.Muon
+            # Select events with 2 muons whose charges cancel out (Zs are charge-neutral).
+            dimu_neutral = mu[(ak.num(mu) == 2) & (ak.sum(mu.charge, axis=1) == 0)]
+            # Add together muon pair p4's, find dimuon mass.
+            dimu_mass = (dimu_neutral[:, 0] + dimu_neutral[:, 1]).mass
+            # Plot dimuon mass.
+            output['dimu_mass'].fill(dataset=dataset, dimu_mass=dimu_mass)
+            return output
 
-    def postprocess(self, accumulator):
-        return accumulator
+        def postprocess(self, accumulator):
+            return accumulator
 
 
 With our data in our fileset variable and our processor ready to go, we simply need to connect to the Dask Labextention-powered cluster available within the Coffea-Casa Analysis Facility @ T2 Nebraska. This can be done by dragging the scheduler into the notebook, or by manually typing the following:
