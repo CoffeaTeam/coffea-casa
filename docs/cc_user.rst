@@ -1,4 +1,4 @@
-First Steps at CMS Coffea-Casa @ UNL
+First Steps at Coffea-Casa @ UNL
 ==========================
 Prerequisites
 -------------
@@ -10,20 +10,85 @@ If you aren't familiar with any of these tools, please click on the links above 
 
 Access
 ------
+There are two access points to the Coffea-casa AF @ T2 Nebraska. The site at `https://coffea-opendata.casa <https://coffea-opendata.casa>`_ is for Opendata and can be accessed through any CILogon identity provider, though it will not be able to process any files that require authentication. 
 
+.. image:: _static/cc-login.png
+   :alt: Access to Opendata Coffea-casa Analysis Facility @ T2 Nebraska
+   :width: 50%
+   :align: center
+   
 .. important::
-   Please use `https://coffea.casa <https://coffea.casa>`_ as an access point to the CMS Coffea-Casa Analysis Facility @ T2 Nebraska.
+   **Remember that to access this instance you need to register: click "Register for access".
+   (We have limited resources available and can't provide access to everyone under CILogon).**
+
+The other at `https://coffea.casa <https://coffea.casa>`_ is for CMS data and can be accessed through the CMS AuthZ instance; this site is capable of handling all CMS files and uses tokens for authentication.
 
 .. image:: _static/coffea-casa-enter.png
    :alt: Access to Coffea-casa Analysis Facility @ T2 Nebraska
    :width: 50%
    :align: center
+   
+See the appropriate section below if you need help going through the registration process for either access point.
 
+Opendata CILogon Authentication Instance
+`````````````````````````````````````````
+.. important::
+   This section applies only to the Opendata Coffea-Casa instance.
+
+Currently Opendata Coffea-Casa supports any CILogon identity provider. Select your identity provider:
+
+
+.. image:: _static/cc-cilogon.png
+   :alt: Select your identity provider for CILogon Authz authentification to access Opendata Coffea-casa Analysis Facility @ T2 Nebraska
+   :width: 50%
+   :align: center
+
+For accessing Opendata Coffea-Casa, we are offering a self-signup registration form with approval.
+
+.. image:: _static/cc-reg1.png
+   :alt: Fill out the registration form for access to Opendata Coffea-casa Analysis Facility @ T2 Nebraska
+   :width: 50%
+   :align: center
+
+Click to proceed to the next stage:
+
+.. image:: _static/cc-reg2.png
+   :alt: Check the information in the registration form is correct (form should already be prefilled).
+   :width: 50%
+   :align: center
+
+Click to proceed to the next stage:
+
+.. image:: _static/cc-request.png
+   :alt: Request for approval was sent.
+   :width: 50%
+   :align: center
+
+If you see the next window, it means that the registration request was sent succesfully!
+
+.. important::
+   **After this step please wait until you get approved by an administrator!**
+
+After your request is approved, you will receive an email, where you will simply need to click a link:
+
+.. image:: _static/cc-email.png
+   :alt:  Example of email you should receive after registration.
+   :width: 50%
+   :align: center
+
+Voila! Now you can login to Opendata Coffea-Casa. Click on "Authorized Users Only: Sign in with OAuth 2.0" to do so:
+
+.. image:: _static/cc-enter.png
+   :alt:  Start directly use Opendata Coffea-Casa: click here to "Authorized Users Only: Sign in with OAuth 2.0".
+   :width: 50%
+   :align: center
 
 CMS AuthZ Authentication Instance
----------------------------------
-
-Currently Coffea-Casa Analysis Facility @ T2 Nebraska support any member of CMS VO organisation.
+```````````````````````````````````
+.. important::
+   This section applies only to the CMS Coffea-Casa instance.
+   
+Currently Coffea-Casa Analysis Facility @ T2 Nebraska supports any member of CMS VO organisation.
 
 To access it please sign in or sign up using ``Apply for an account``.
 
@@ -60,7 +125,6 @@ This will forward you to your own personal Jupyterhub instance running at Analys
 
 Cluster Resources in Coffea-Casa Analysis Facility @ T2 Nebraska
 ----------------------------------------------------------------
-
 By default, the Coffea-casa Dask cluster should provide you with a scheduler and workers, which you can see by clicking on the colored Dask icon in the left sidebar.
 
 .. image:: _static/coffea-casa-startr.png
@@ -134,6 +198,9 @@ The buttons in the top right allow for pulling and pushing respectively. When yo
 
 Using XCache
 -------
+.. important::
+   This section applies only to the CMS Coffea-Casa instance.
+   
 When we use CMS data, we generally require certificates or we will be faced with authentication errors. Coffea-casa handles the issue of certificates internally through xcache tokens so that its users do not explicitly have to import their certificates, though this dynamic requires adjustiment of the redirector portion of the path to the root file requested. 
 
 Let's say we wish to request the file:
@@ -152,8 +219,75 @@ Now, we will be able to access our data.
 
 In addition to handling authentication, XCache will cache files so that they are able to be pulled more quickly in subsequent runs of the analysis. It should be expected, then, that the first analysis run with a new coffea-casa file will run slower than ones which follow afterwards.
 
-Example
+Opendata Example
 -------
+In this example (which corresponds to `ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/example1.ipynb>`_), we'll try to run a simple analysis example on the Coffea-Casa Analysis Facility. We will use the ``coffea_casa`` wrapper library, which allows use of pre-configured settings for HTCondor configuration and Dask scheduler/worker images.
+
+Our goal in this `toy` analysis is to plot the missing transverse energy (*MET*) of all events from a sample dataset; this data was converted from 2012 CMS Open Data (17 GB, 54 million events), and is available in public EOS (root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root).
+
+First, we need to import the ``coffea`` libraries used in this example:
+
+.. code-block:: python
+
+    import numpy as np
+    %matplotlib inline
+    from coffea import hist
+    import coffea.processor as processor
+    import awkward as ak
+    from coffea.nanoevents import schemas
+    
+To select the aforementioned data in a coffea-friendly syntax, we employ a dictionary of datasets, where each dataset (key) corresponds to a list of files (values):
+
+.. code-block:: python
+
+    fileset = {'SingleMu' : ["root://eospublic.cern.ch//eos/root-eos/benchmark/Run2012B_SingleMu.root"]}
+
+Coffea provides the coffea.processor module, where users may write their analysis code without worrying about the details of efficient parallelization, assuming that the parallelization is a trivial map-reduce operation (e.g., filling histograms and adding them together).
+
+.. code-block:: python
+
+    # This program plots an event-level variable (in this case, MET, but switching it is as easy as a dict-key change). It also demonstrates an easy use of the book-keeping cutflow tool, to keep track of the number of events processed.
+
+    # The processor class bundles our data analysis together while giving us some helpful tools.  It also leaves looping and chunks to the framework instead of us.
+    class Processor(processor.ProcessorABC):
+        def __init__(self):
+            # Bins and categories for the histogram are defined here. For format, see https://coffeateam.github.io/coffea/stubs/coffea.hist.hist_tools.Hist.html && https://coffeateam.github.io/coffea/stubs/coffea.hist.hist_tools.Bin.html
+            dataset_axis = hist.Cat("dataset", "")
+            MET_axis = hist.Bin("MET", "MET [GeV]", 50, 0, 100)
+        
+            # The accumulator keeps our data chunks together for histogramming. It also gives us cutflow, which can be used to keep track of data.
+            self._accumulator = processor.dict_accumulator({
+                'MET': hist.Hist("Counts", dataset_axis, MET_axis),
+                'cutflow': processor.defaultdict_accumulator(int)
+            })
+    
+        @property
+        def accumulator(self):
+            return self._accumulator
+    
+        def process(self, events):
+            output = self.accumulator.identity()
+        
+            # This is where we do our actual analysis. The dataset has columns similar to the TTree's; events.columns can tell you them, or events.[object].columns for deeper depth.
+            dataset = events.metadata["dataset"]
+            MET = events.MET.pt
+        
+            # We can define a new key for cutflow (in this case 'all events'). Then we can put values into it. We need += because it's per-chunk (demonstrated below)
+            output['cutflow']['all events'] += ak.size(MET)
+            output['cutflow']['number of chunks'] += 1
+        
+            # This fills our histogram once our data is collected. The hist key ('MET=') will be defined in the bin in __init__.
+            output['MET'].fill(dataset=dataset, MET=MET)
+            return output
+
+        def postprocess(self, accumulator):
+            return accumulator
+
+CMS Example
+-------
+.. important::
+   This section applies only to the CMS Coffea-Casa instance.
+   
 Now we will try to run a short example, using CMS data, which corresponds to plotting the `dimuon Z-peak <https://github.com/CoffeaTeam/coffea-casa-tutorials/blob/master/examples/zpeak_example.ipynb>`_. We use dimuon data which consists of ~3 million events at ~2.7 GB which belongs to the ``/DoubleMuon/Run2018A-02Apr2020-v1/NANOAOD`` dataset.
 
 We import some common coffea libraries used in this example:
