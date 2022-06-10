@@ -46,7 +46,6 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :hidden:
    :caption: How To Use Coffea-casa
 
-   cc_user_opendata.rst
    cc_user.rst
    cc_user_ssl.rst
    cc_packages.rst
