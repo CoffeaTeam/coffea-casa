@@ -11,7 +11,7 @@ Let's run through an example: we want to install pytest to our scheduler, and we
    :width: 100%
    :align: center
    
-More complicated pip installations are also available. Refer to the `pip install docs <https://pip.pypa.io/en/stable/reference/pip_install/>`_ for more information.
+More complicated pip installations are also available. Refer to the `pip install docs <https://pip.pypa.io/en/stable/cli/pip_install/>`_ for more information.
 
 Installations on the Workers
 -----
