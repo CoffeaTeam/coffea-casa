@@ -64,7 +64,7 @@ Users can edit `kwargs: {}` to change a :class:`CoffeaCasaCluster` constructor d
 
 To get an address of scheduler that will be used during client connection, try right-clicking on the cluster in the sidebar:
 
-.. image:: _static/dask_labextension_address.png
+.. image:: _static/dask-labextention-address.png
    :alt: Dask Labextention powered cluster, with right-click menu
    :width: 50%
    :align: center
