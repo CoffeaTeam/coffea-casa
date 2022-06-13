@@ -20,7 +20,7 @@ The simplest metrics that can be obtained stem from coffea. They include the num
                             
     output, metrics = run(fileset, "Events", processor_instance=Processor())
                                      
-It should be noted that the introduction of this argument changes the format of your ``output`` by converting it into a tuple. Within this tuple, ``output[0]`` will contain everything that ``output`` did without ``savemetrics`` on, while ``output[1]`` will contain the metrics. You can retrieve the "standard" behavior by taking the output of ``run()`` as two variables, as we did above, because Python automatically parse
+It should be noted that the introduction of this argument changes the format of your ``output`` by converting it into a tuple. Within this tuple, ``output[0]`` will contain everything that ``output`` did without ``savemetrics`` on, while ``output[1]`` will contain the metrics. You can retrieve the "standard" behavior by taking the output of ``run()`` as two variables, as we did above, because Python is capable of parsing tuple outputs into multiple variables.
 
 Dask Interactive Dashboard
 -----
