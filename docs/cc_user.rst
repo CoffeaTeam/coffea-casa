@@ -10,6 +10,9 @@ If you aren't familiar with any of these tools, please click on the links above 
 
 Access
 ------
+.. important::
+    For CMS or opendata files, please see the relevant sections for coffea-casa at T2 Nebraska. For ATLAS files, see coffea-casa at UChicago.
+
 There are two access points to the Coffea-casa AF @ T2 Nebraska. The site at `https://coffea-opendata.casa <https://coffea-opendata.casa>`_ is for Opendata and can be accessed through any CILogon identity provider, though it will not be able to process any files that require authentication. 
 
 .. image:: _static/cc-login.png
@@ -28,6 +31,13 @@ The other at `https://coffea.casa <https://coffea.casa>`_ is for CMS data and ca
    :width: 50%
    :align: center
    
+Another coffea-casa instance exists for the AF @ UChicago, which is meant to be used with ATLAS data. You can accesss it at `https://coffea.af.uchicago.edu`_.
+
+.. image:: _static/coffea.af.uchicago.edu_hub_login.png
+   :alt: Access to Coffea-casa Analysis Facility @ UChicago
+   :width: 50%
+   :align: center
+
 See the appropriate section below if you need help going through the registration process for either access point.
 
 Opendata CILogon Authentication Instance
@@ -100,6 +110,23 @@ To access it please sign in or sign up using ``Apply for an account``.
 
 .. image:: _static/coffea-casa-authz-approval.png
    :alt: Approval required for CMS Authz authentification to Coffea-casa Analysis Facility @ T2 Nebraska
+   :width: 50%
+   :align: center
+   
+ATLAS AuthZ Authentication Instance
+```````````````````````````````````
+Currently Coffea-Casa Analysis Facility @ UChicago can support any member of ATLAS.
+
+Sign in with your ATLAS CERN credential:
+
+.. image:: _static/atlas-auth.web.cern.ch_login.png
+   :alt: ATLAS Authz authentification to Coffea-casa Analysis Facility @ UChicago
+   :width: 50%
+   :align: center
+
+
+.. image:: _static/coffea-casa-authz-approval.png
+   :alt: Approval required for CMS Authz authentification to Coffea-casa Analysis Facility @ UChicago
    :width: 50%
    :align: center
 
@@ -218,6 +245,45 @@ Then we would replace the ``cmsxrootd.fnal.gov`` redirector with the ``xcache`` 
 Now, we will be able to access our data.
 
 In addition to handling authentication, XCache will cache files so that they are able to be pulled more quickly in subsequent runs of the analysis. It should be expected, then, that the first analysis run with a new coffea-casa file will run slower than ones which follow afterwards.
+
+ServiceX
+--------
+.. important::
+   This section applies only to the ATLAS Coffea-Casa instance at UChicago. The instances at T2 Nebraska are capable of handling ServiceX requests through uproot, but the feature is still at an experimental stage. Ask an administrator for more information on accessing ServiceX on the T2 Nebraska instances.
+   
+When dealing with very large datasets it is often better to do initial data filtering and augmentation using `ServiceX <https://iris-hep.org/projects/servicex>`_.
+ServiceX transformations produce their output as an Awkward Array. The array can then be used in a regular Coffea processor. Here is a schema explaining the workflow:
+
+.. image:: _static/servicex-coffea-workflow.png
+   :alt: ServiceX and Coffea-Casa workflow schema.
+   :width: 80%
+   :align: center
+
+There are two different UC AF-deployed ServiceX instances. The only difference between them is the type of input data they are capable of processing.
+`Uproot <https://uproot-atlas.servicex.af.uchicago.edu/>`_ processes any kind of "flat" ROOT files, while `xAOD <https://xaod.servicex.af.uchicago.edu/>`_ processes only Rucio registered xAOD files.
+
+To use them one has to register and get approved. Sign in will lead you to a Globus registration page where you may choose to use an account connected to your institution:
+
+.. image:: _static/servicex-registration.png
+   :alt: ServiceX registration.
+   :width: 80%
+   :align: center
+
+Once approved, you will be able to see the status of your requests in the dashboard:
+
+.. image:: _static/servicex-dashboard.png
+   :alt: ServiceX dashboard.
+   :width: 80%
+   :align: center
+
+For your code to be able to authenticate your requests you need to download a servicex.yaml file, which should be placed in your working directory. The file is downloaded from your profile page:
+
+.. image:: _static/servicex-profile.png
+   :alt: ServiceX profile.
+   :width: 80%
+   :align: center
+
+For an example analysis using ServiceX and Coffea look `here. <https://github.com/iris-hep/analysis-grand-challenge/blob/main/workshops/agctools2021/HZZ_analysis_pipeline/HZZ_analysis_pipeline.ipynb>`_
 
 Opendata Example
 -------
@@ -405,3 +471,7 @@ As a result you should see the following plot:
    :alt: Final plot that you should see at the end of example
    :width: 50%
    :align: center
+   
+ATLAS Examples
+----------------
+The notebooks about columnar data analysis with DAOD_PHYSLITE `here<https://github.com/nikoladze/agc-tools-workshop-2021-physlite>`_ may be useful as a reference.
