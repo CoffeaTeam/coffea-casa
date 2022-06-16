@@ -249,6 +249,9 @@ In addition to handling authentication, XCache will cache files so that they are
 ServiceX
 --------
 .. important::
+   This section applies only to the ATLAS Coffea-Casa instance.
+   
+.. important::
    This section applies only to the ATLAS Coffea-Casa instance at UChicago. The instances at T2 Nebraska are capable of handling ServiceX requests through uproot, but the feature is still at an experimental stage. Ask an administrator for more information on accessing ServiceX on the T2 Nebraska instances.
    
 When dealing with very large datasets it is often better to do initial data filtering and augmentation using `ServiceX <https://iris-hep.org/projects/servicex>`_.
@@ -474,4 +477,7 @@ As a result you should see the following plot:
    
 ATLAS Examples
 ----------------
+.. important::
+   This section applies only to the ATLAS Coffea-Casa instance.
+
 The notebooks about columnar data analysis with DAOD_PHYSLITE `here<https://github.com/nikoladze/agc-tools-workshop-2021-physlite>`_ may be useful as a reference.
