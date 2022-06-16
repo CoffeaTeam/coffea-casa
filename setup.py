@@ -12,8 +12,8 @@ INSTALL_REQUIRES = ['dask-jobqueue']
 TESTS_REQUIRE = ['pytest', 'pytest-cov'
                  'pytest-timeout', 'pytest-rerunfailures']
 EXTRAS_REQUIRE = {
-    'docs': ['ipython', 'sphinx == 1.8.5', 'sphinx_rtd_theme',
-             'sphinx-gallery', 'nbsphinx', 'nbstripout', 'docutils == 0.15.2', 'sphinx_rtd_theme'],
+    'docs': ['ipython', 'sphinx', 'sphinx_rtd_theme',
+             'sphinx-gallery', 'nbsphinx', 'nbstripout', 'docutils', 'sphinx_rtd_theme' , "mkdocs==1.2.4"],
     'test': ['pytest', 'pytest-cov', 'pytest-timeout', 'pytest-rerunfailures']
 }
 
