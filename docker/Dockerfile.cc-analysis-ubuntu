@@ -107,7 +107,8 @@ RUN pip install --no-cache-dir \
     func-adl-servicex \
     servicex \
     func-adl-uproot \
-    cabinetry
+    cabinetry \
+    aiostream
 
 # ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
