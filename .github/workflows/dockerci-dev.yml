@@ -16,13 +16,10 @@ on:
 jobs:
   version:
     runs-on: ubuntu-latest
-    outputs:
-      base: unstable
-      date: unstable-${{ steps.date.outputs.date }}
     steps:
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +%F)"
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
   dask-base:
     runs-on: ubuntu-latest
