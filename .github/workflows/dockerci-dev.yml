@@ -14,19 +14,19 @@ on:
       - develop
 
 jobs:
-  version:
+  version-check:
     runs-on: ubuntu-latest
-    outputs:
-      base: unstable
-      date: unstable-${{ steps.date.outputs.date }}
     steps:
-      - name: Get current date
+      - name: Fetch current date
         id: date
-        run: echo "::set-output name=date::$(date +%F)"
+        run: |
+          echo "::set-output name=date::$(date +'%Y%m')"
+    outputs:
+      date: ${{ steps.date.outputs.date }}
 
   dask-base:
     runs-on: ubuntu-latest
-    needs: version
+    needs: version-check
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -44,8 +44,7 @@ jobs:
           context: ./docker
           file: ${{context}}/Dockerfile.cc-base-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version.outputs.base }}
-            hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
@@ -54,7 +53,7 @@ jobs:
 
   dask-cc:
     runs-on: ubuntu-latest
-    needs: [version, dask-base]
+    needs: [version-check, dask-base]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -72,8 +71,7 @@ jobs:
           context: ./docker
           file: ${{context}}/Dockerfile.cc-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version.outputs.base }}
-            hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
@@ -82,7 +80,7 @@ jobs:
 
   dask-skyhook:
     runs-on: ubuntu-latest
-    needs: [version, dask-cc]
+    needs: [version-check, dask-cc]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -100,8 +98,7 @@ jobs:
           context: ./docker
           file: ${{context}}/Dockerfile.cc-base-centos7
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version.outputs.base }}
-            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
@@ -110,7 +107,7 @@ jobs:
 
   dask-analysis:
     runs-on: ubuntu-latest
-    needs: version
+    needs: version-check
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -128,8 +125,7 @@ jobs:
           context: ./docker
           file: ${{context}}/Dockerfile.cc-analysis-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:${{ needs.version.outputs.base }}
-            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:${{ needs.version.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
@@ -138,7 +134,7 @@ jobs:
 
   dask-analysis-skyhook:
     runs-on: ubuntu-latest
-    needs: [version, dask-analysis]
+    needs: [version-check, dask-analysis]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -156,8 +152,7 @@ jobs:
           context: ./docker
           file: ${{context}}/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version.outputs.base }}
-            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
