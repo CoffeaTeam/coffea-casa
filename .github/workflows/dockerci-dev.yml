@@ -41,6 +41,7 @@ jobs:
           file: ${{context}}/Dockerfile.cc-base-ubuntu
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:development
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
@@ -68,6 +69,7 @@ jobs:
           file: ${{context}}/Dockerfile.cc-ubuntu
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-ubuntu:development
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
@@ -95,6 +97,7 @@ jobs:
           file: ${{context}}/Dockerfile.cc-base-centos7
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:development
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
@@ -121,7 +124,8 @@ jobs:
           context: ./docker
           file: ${{context}}/Dockerfile.cc-analysis-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
@@ -149,6 +153,7 @@ jobs:
           file: ${{context}}/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:development
           build-args: |
             TAG="development"
             HUB="hub.opensciencegrid.org"
