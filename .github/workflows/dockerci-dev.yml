@@ -3,15 +3,11 @@ name: Build docker images
 on:
   push:
     branches:
-    - master
-
-#    tags:
-#    - '*'
-
-  pull_request:
-    branches:
-      - master
-      - develop
+      - main
+      - develop/**
+    paths:
+      - docker
+  workflow_dispatch:
 
 jobs:
   version-check:
