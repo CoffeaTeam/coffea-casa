@@ -1,9 +1,12 @@
-name: Test docker images
+name: Build docker images
 
 on:
-  pull_request:
+  push:
     branches:
-      - master
+      - main
+      - develop/**
+    paths:
+      - docker
   workflow_dispatch:
 
 jobs:
@@ -30,10 +33,10 @@ jobs:
         with:
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Build
+      - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: true
           context: ./docker
           file: ${{context}}/Dockerfile.cc-base-ubuntu
           tags: |
@@ -60,7 +63,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: true
           context: ./docker
           file: ${{context}}/Dockerfile.cc-ubuntu
           tags: |
@@ -87,7 +90,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: true
           context: ./docker
           file: ${{context}}/Dockerfile.cc-base-centos7
           tags: |
@@ -114,7 +117,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: true
           context: ./docker
           file: ${{context}}/Dockerfile.cc-analysis-ubuntu
           tags: |
@@ -141,7 +144,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: true
           context: ./docker
           file: ${{context}}/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
