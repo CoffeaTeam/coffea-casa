@@ -6,6 +6,12 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: 'hub.opensciencegrid.org'
+  PROJECT: 'coffea-casa'
+  GITHUB_ACTIONS: 'true'
+
 jobs:
   version-check:
     runs-on: ubuntu-latest
@@ -52,9 +58,9 @@ jobs:
             hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS 
+            HUB=${{ env.HUB }} 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 
   dask-cc:
     runs-on: ubuntu-latest
@@ -91,9 +97,9 @@ jobs:
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS
+            HUB=${{ env.HUB }} 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 
   dask-skyhook:
     runs-on: ubuntu-latest
@@ -130,9 +136,9 @@ jobs:
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS 
+            HUB=${{ env.HUB }} 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 
   dask-analysis:
     runs-on: ubuntu-latest
@@ -169,9 +175,9 @@ jobs:
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS 
+            HUB=${{ env.HUB }} 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 
   dask-analysis-skyhook:
     runs-on: ubuntu-latest
@@ -208,6 +214,6 @@ jobs:
             hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS 
+            HUB=${{ env.HUB }} 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
