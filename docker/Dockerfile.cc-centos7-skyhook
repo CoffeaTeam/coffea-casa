@@ -1,7 +1,8 @@
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
+ARG REGISTRY="hub.opensciencegrid.org"
 ARG NAME="${PROJECT}}/cc-centos7"
-FROM ${NAME}:${TAG}
+FROM ${REGISTRY}/${NAME}:${TAG}
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
