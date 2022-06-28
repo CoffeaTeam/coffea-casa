@@ -7,8 +7,6 @@ on:
   workflow_dispatch:
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: 'hub.opensciencegrid.org'
   PROJECT: 'coffea-casa'
   GITHUB_ACTIONS: 'true'
 
@@ -59,7 +57,6 @@ jobs:
             coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
       - uses: actions/upload-artifact@v2
