@@ -13,7 +13,7 @@ jobs:
       - name: Fetch current date
         id: date
         run: |
-          echo "::set-output name=date::$(date +'%Y%m')"
+          echo "::set-output name=date::$(date +'%Y-%m-%d')"
     outputs:
       date: ${{ steps.date.outputs.date }}
 
@@ -35,7 +35,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: ${{ github.event_name != 'pull_request' }}
           context: docker/
           file: docker/Dockerfile.cc-base-ubuntu
           tags: |
@@ -64,7 +64,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: ${{ github.event_name != 'pull_request' }}
           context: docker/
           file: docker/Dockerfile.cc-ubuntu
           tags: |
@@ -93,7 +93,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: ${{ github.event_name != 'pull_request' }}
           context: docker/
           file: docker/Dockerfile.cc-base-centos7
           tags: |
@@ -122,7 +122,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: ${{ github.event_name != 'pull_request' }}
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
@@ -151,7 +151,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: false
+          push: ${{ github.event_name != 'pull_request' }}
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
