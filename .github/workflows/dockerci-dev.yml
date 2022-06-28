@@ -62,6 +62,10 @@ jobs:
             HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cc-base-ubuntu
+          path: /tmp/cc-base-ubuntu.tar
 
   dask-cc:
     runs-on: ubuntu-latest
@@ -110,6 +114,10 @@ jobs:
             HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cc-ubuntu
+          path: /tmp/cc-ubuntu.tar
 
   dask-skyhook:
     runs-on: ubuntu-latest
@@ -197,6 +205,11 @@ jobs:
             HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cc-analysis-ubuntu
+          path: /tmp/cc-analysis-ubuntu.tar
+
 
   dask-analysis-skyhook:
     runs-on: ubuntu-latest
