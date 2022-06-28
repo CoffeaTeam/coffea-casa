@@ -1,15 +1,13 @@
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
-ARG REGISTRY="hub.opensciencegrid.org"
 ARG NAME="${PROJECT}/cc-analysis-ubuntu"
-FROM ${REGISTRY}/${NAME}:${TAG}
+FROM ${NAME}:${TAG}
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
 ARG TAG
 ARG PROJECT
-ARG HUB
 # Try to see if CEPH_CONF works (https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/1.2.3/html/ceph_configuration_guide/configuration_file_structure)
 ARG CEPH_DIR="/opt/ceph"
 ARG CEPH_CONF=$CEPH_DIR"/ceph.conf"
