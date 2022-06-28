@@ -1,8 +1,7 @@
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
-ARG HUB="hub.opensciencegrid.org"
 ARG NAME="${PROJECT}/cc-analysis-ubuntu"
-FROM ${HUB}/${NAME}:${TAG}
+FROM ${NAME}:${TAG}
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"

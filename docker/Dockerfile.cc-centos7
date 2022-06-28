@@ -1,7 +1,6 @@
 ARG TAG="development"
 ARG NAME="coffea-casa/cc-base-centos7"
-ARG HUB="hub.opensciencegrid.org/"
-FROM ${HUB}${NAME}:${TAG}
+FROM ${NAME}:${TAG}
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
