@@ -37,7 +37,7 @@ jobs:
         with:
           push: false
           context: docker/
-          file: Dockerfile.cc-base-ubuntu
+          file: docker/Dockerfile.cc-base-ubuntu
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
@@ -66,7 +66,7 @@ jobs:
         with:
           push: false
           context: docker/
-          file: Dockerfile.cc-ubuntu
+          file: docker/Dockerfile.cc-ubuntu
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
@@ -95,7 +95,7 @@ jobs:
         with:
           push: false
           context: docker/
-          file: Dockerfile.cc-base-centos7
+          file: docker/Dockerfile.cc-base-centos7
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
@@ -124,7 +124,7 @@ jobs:
         with:
           push: false
           context: docker/
-          file: Dockerfile.cc-analysis-ubuntu
+          file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
@@ -153,7 +153,7 @@ jobs:
         with:
           push: false
           context: docker/
-          file: Dockerfile.cc-analysis-ubuntu-skyhook
+          file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
