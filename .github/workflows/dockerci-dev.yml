@@ -49,9 +49,10 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
+          outputs: type=docker,dest=/tmp/cc-base-ubuntu.tar
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
           file: docker/Dockerfile.cc-base-ubuntu
           tags: |
@@ -61,10 +62,6 @@ jobs:
             HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-      - name: Upload image
-        uses: ishworkh/docker-image-artifact-upload@v1
-        with:
-          image: "hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}"
 
   dask-cc:
     runs-on: ubuntu-latest
@@ -89,16 +86,21 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Download image
-        uses: ishworkh/docker-image-artifact-download@v1
+      - name: Download artifact
+        uses: actions/download-artifact@v2
         with:
-          image: "hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}"
+          name: cc-base-ubuntu
+          path: /tmp
+      - name: Load Docker image
+        run: |
+          docker load --input /tmp/cc-base-ubuntu.tar
       - name: Build
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
+          outputs: type=docker,dest=/tmp/cc-ubuntu.tar
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
           file: docker/Dockerfile.cc-ubuntu
           tags: |
@@ -108,10 +110,6 @@ jobs:
             HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-      - name: Upload image
-        uses: ishworkh/docker-image-artifact-upload@v1
-        with:
-          image: "hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}"
 
   dask-skyhook:
     runs-on: ubuntu-latest
@@ -136,16 +134,20 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Download image
-        uses: ishworkh/docker-image-artifact-download@v1
+      - name: Download artifact
+        uses: actions/download-artifact@v2
         with:
-          image: "hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}"
+          name: cc-ubuntu
+          path: /tmp
+      - name: Load Docker image
+        run: |
+          docker load --input /tmp/cc-ubuntu.tar
       - name: Build
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
           file: docker/Dockerfile.cc-base-centos7
           tags: |
@@ -183,21 +185,18 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
+          outputs: type=docker,dest=/tmp/cc-analysis-ubuntu.tar
           cache-from: type=local,src=/tmp/.buildx-cache   
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
             HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-      - name: Upload image
-        uses: ishworkh/docker-image-artifact-upload@v1
-        with:
-          image: hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
 
   dask-analysis-skyhook:
     runs-on: ubuntu-latest
@@ -222,16 +221,20 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Download image
-        uses: ishworkh/docker-image-artifact-download@v1
+      - name: Download artifact
+        uses: actions/download-artifact@v2
         with:
-          image: "hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}"
+          name: cc-analysis-ubuntu
+          path: /tmp
+      - name: Load Docker image
+        run: |
+          docker load --input /tmp/cc-analysis-ubuntu.tar
       - name: Build
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
