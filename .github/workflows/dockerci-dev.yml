@@ -56,9 +56,10 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-base-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
-            TAG=${{ needs.version-check.outputs.date }} 
+            TAG=${{ needs.version-check.outputs.date }}
+            HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
       - uses: actions/upload-artifact@v2
@@ -107,7 +108,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
@@ -157,7 +158,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-base-centos7
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
@@ -196,7 +197,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
@@ -247,7 +248,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 

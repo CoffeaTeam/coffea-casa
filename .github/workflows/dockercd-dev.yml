@@ -9,16 +9,47 @@ on:
       - docker
   workflow_dispatch:
 
+  release:
+    types: [published, edited]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: 'hub.opensciencegrid.org'
+  PROJECT: 'coffea-casa'
+  GITHUB_ACTIONS: 'true'
+
 jobs:
-  version-check:
+  setup:
     runs-on: ubuntu-latest
-    steps:
-      - name: Fetch current date
-        id: date
-        run: |
-          echo "::set-output name=date::$(date +'%Y%m')"
     outputs:
-      date: ${{ steps.date.outputs.date }}
+      tag: ${{ steps.tag.outputs.tag }}
+      unique_tag: ${{ steps.tag.outputs.unique_tag }}
+      publish: ${{ steps.publish.outputs.publish }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Compute Tag
+        id: tag
+        run: |
+          echo "GITHUB_REF: $GITHUB_REF"
+          SHORT_SHA=$(git rev-parse --short "$GITHUB_SHA")
+          TAG=$(echo ${GITHUB_REF} | sed -e "s,refs/heads/master,head\,${SHORT_SHA},g" -e 's,refs/tags/,,g' -e 's,refs/pull/\([0-9]*\).*,pr\1,g')
+          UNIQUE_TAG=$(echo ${GITHUB_REF} | sed -e "s,refs/heads/master,${SHORT_SHA},g" -e 's,refs/tags/,,g' -e 's,refs/pull/\([0-9]*\).*,pr\1,g')
+          echo "tag=$TAG"
+          echo "unique_tag=$UNIQUE_TAG"
+          echo "::set-output name=tag::$TAG"
+          echo "::set-output name=unique_tag::$UNIQUE_TAG"
+      - name: Check whether publishing enabled
+        id: publish
+        env:
+          ENABLE_PUBLISH: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          echo "Enable publish: ${{ env.ENABLE_PUBLISH != '' }}"
+          echo "::set-output name=publish::${{ env.ENABLE_PUBLISH != '' }}"
 
   dask-base:
     runs-on: ubuntu-latest
@@ -28,24 +59,40 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to Harbor Hub
+        if: success() && github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: true
+          outputs: type=docker,dest=/tmp/cc-base-ubuntu.tar
+          push: ${{ needs.setup.outputs.publish != 'true' }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
-          file: Dockerfile.cc-base-ubuntu
+          file: docker/Dockerfile.cc-base-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
+            ${{ steps.docker_meta.outputs.tags }}
           build-args: |
-            TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS 
+            TAG=${{ needs.version-check.outputs.date }} 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cc-base-ubuntu
+          path: /tmp/cc-base-ubuntu.tar
 
   dask-cc:
     runs-on: ubuntu-latest
@@ -55,24 +102,49 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to Harbor Hub
+        if: success() && github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Build and push
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: cc-base-ubuntu
+          path: /tmp
+      - name: Load Docker image
+        run: |
+          docker load --input /tmp/cc-base-ubuntu.tar
+      - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
+          outputs: type=docker,dest=/tmp/cc-ubuntu.tar
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
-          file: Dockerfile.cc-ubuntu
+          file: docker/Dockerfile.cc-ubuntu
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cc-ubuntu
+          path: /tmp/cc-ubuntu.tar
 
   dask-skyhook:
     runs-on: ubuntu-latest
@@ -82,24 +154,44 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to Harbor Hub
+        if: success() && github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Build and push
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: cc-ubuntu
+          path: /tmp
+      - name: Load Docker image
+        run: |
+          docker load --input /tmp/cc-ubuntu.tar
+      - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
-          file: Dockerfile.cc-base-centos7
+          file: docker/Dockerfile.cc-base-centos7
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 
   dask-analysis:
     runs-on: ubuntu-latest
@@ -109,24 +201,42 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to Harbor Hub
+        if: success() && github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
+          outputs: type=docker,dest=/tmp/cc-analysis-ubuntu.tar
+          cache-from: type=local,src=/tmp/.buildx-cache   
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
-          file: Dockerfile.cc-analysis-ubuntu
+          file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
-            hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
-            TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS 
+            TAG=${{ needs.version-check.outputs.date }} 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cc-analysis-ubuntu
+          path: /tmp/cc-analysis-ubuntu.tar
+
 
   dask-analysis-skyhook:
     runs-on: ubuntu-latest
@@ -136,21 +246,41 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to Harbor Hub
+        if: success() && github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Build and push
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: cc-analysis-ubuntu
+          path: /tmp
+      - name: Load Docker image
+        run: |
+          docker load --input /tmp/cc-analysis-ubuntu.tar
+      - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
-          file: Dockerfile.cc-analysis-ubuntu-skyhook
+          file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB="hub.opensciencegrid.org"
-            PROJECT="coffea-casa" 
-            GITHUB_ACTIONS=$GITHUB_ACTIONS 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
