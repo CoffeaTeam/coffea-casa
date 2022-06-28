@@ -58,8 +58,7 @@ jobs:
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
-            TAG=${{ needs.version-check.outputs.date }}
-            HUB=${{ env.HUB }} 
+            TAG=${{ needs.version-check.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
       - uses: actions/upload-artifact@v2
@@ -111,7 +110,6 @@ jobs:
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
       - uses: actions/upload-artifact@v2
@@ -162,7 +160,6 @@ jobs:
             hub.opensciencegrid.org/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 
@@ -201,8 +198,7 @@ jobs:
           tags: |
             hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
-            TAG=${{ needs.version-check.outputs.date }}
-            HUB=${{ env.HUB }} 
+            TAG=${{ needs.version-check.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
       - uses: actions/upload-artifact@v2
@@ -254,6 +250,5 @@ jobs:
             hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
-            HUB=${{ env.HUB }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
