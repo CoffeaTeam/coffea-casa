@@ -25,6 +25,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: Login to Harbor Hub
         if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v2
@@ -36,6 +44,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           context: docker/
           file: docker/Dockerfile.cc-base-ubuntu
           tags: |
@@ -54,6 +64,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: Login to Harbor Hub
         if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v2
@@ -65,6 +83,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           context: docker/
           file: docker/Dockerfile.cc-ubuntu
           tags: |
@@ -83,6 +103,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: Login to Harbor Hub
         if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v2
@@ -94,6 +122,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           context: docker/
           file: docker/Dockerfile.cc-base-centos7
           tags: |
@@ -112,6 +142,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: Login to Harbor Hub
         if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v2
@@ -123,6 +161,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=local,src=/tmp/.buildx-cache   
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
@@ -141,6 +181,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: Login to Harbor Hub
         if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v2
@@ -152,6 +200,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
