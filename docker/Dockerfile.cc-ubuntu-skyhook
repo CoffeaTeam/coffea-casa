@@ -1,7 +1,8 @@
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
 ARG NAME="${PROJECT}/cc-ubuntu"
-FROM ${NAME}:${TAG}
+ARG REGISTRY="hub.opensciencegrid.org"
+FROM ${REGISTRY}/${NAME}:${TAG}
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
