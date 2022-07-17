@@ -68,6 +68,11 @@ jobs:
 
   dask-cc:
     runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     needs: [version-check, dask-base]
     steps:
       - name: Check out code
@@ -121,6 +126,11 @@ jobs:
 
   dask-skyhook:
     runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     needs: [version-check, dask-cc]
     steps:
       - name: Check out code
@@ -164,9 +174,15 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+            REGISTRY="localhost:5000"
 
   dask-analysis:
     runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     needs: version-check
     steps:
       - name: Check out code
@@ -203,6 +219,7 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+            REGISTRY="localhost:5000"
       - uses: actions/upload-artifact@v2
         with:
           name: cc-analysis-ubuntu
@@ -212,6 +229,11 @@ jobs:
 
   dask-analysis-skyhook:
     runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     needs: [version-check, dask-analysis]
     steps:
       - name: Check out code
