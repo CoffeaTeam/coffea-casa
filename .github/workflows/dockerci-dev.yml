@@ -9,6 +9,7 @@ on:
 env:
   PROJECT: 'coffea-casa'
   GITHUB_ACTIONS: 'true'
+  REGISTRY: 'localhost:5000'
 
 jobs:
   version-check:
@@ -48,7 +49,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           #outputs: type=docker,dest=/tmp/cc-base-ubuntu.tar
-          push: ${{ github.event_name != 'pull_request' }}
+          #push: ${{ github.event_name != 'pull_request' }}
+          push: true
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
@@ -59,7 +61,6 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-            REGISTRY="localhost:5000"
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-base-ubuntu
@@ -105,7 +106,8 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: ${{ github.event_name != 'pull_request' }}
+          #push: ${{ github.event_name != 'pull_request' }}
+          push: true
           #outputs: type=docker,dest=/tmp/cc-ubuntu.tar
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -117,7 +119,6 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-            REGISTRY="localhost:5000"
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-ubuntu
@@ -174,7 +175,6 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-            REGISTRY="localhost:5000"
 
   dask-analysis:
     runs-on: ubuntu-latest
@@ -207,7 +207,8 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: ${{ github.event_name != 'pull_request' }}
+          #push: ${{ github.event_name != 'pull_request' }}
+          push: true
           #outputs: type=docker,dest=/tmp/cc-analysis-ubuntu.tar
           cache-from: type=local,src=/tmp/.buildx-cache   
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -219,7 +220,6 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-            REGISTRY="localhost:5000"
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-analysis-ubuntu
@@ -266,7 +266,8 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          push: ${{ github.event_name != 'pull_request' }}
+          #push: ${{ github.event_name != 'pull_request' }}
+          push: true
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
@@ -277,4 +278,3 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-            REGISTRY="localhost:5000"
