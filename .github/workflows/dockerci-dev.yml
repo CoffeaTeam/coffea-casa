@@ -25,13 +25,6 @@ jobs:
 
   dask-base:
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
-        volumes:
-          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: version-check
     steps:
       - name: Check out code
@@ -44,6 +37,9 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Start Docker registry
+        run: |
+          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -89,13 +85,6 @@ jobs:
 
   dask-cc:
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
-        volumes:
-          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: [version-check, dask-base]
     steps:
       - name: Check out code
@@ -108,6 +97,9 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Start Docker registry
+        run: |
+          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -160,13 +152,6 @@ jobs:
 
   dask-skyhook:
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
-        volumes:
-          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: [version-check, dask-cc]
     steps:
       - name: Check out code
@@ -179,6 +164,9 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Start Docker registry
+        run: |
+          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -219,13 +207,6 @@ jobs:
 
   dask-analysis:
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
-        volumes:
-          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: version-check
     steps:
       - name: Check out code
@@ -238,6 +219,9 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Start Docker registry
+        run: |
+          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -284,13 +268,6 @@ jobs:
 
   dask-analysis-skyhook:
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
-        volumes:
-          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: [version-check, dask-analysis]
     steps:
       - name: Check out code
@@ -303,6 +280,9 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Start Docker registry
+        run: |
+          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
