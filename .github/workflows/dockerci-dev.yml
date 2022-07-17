@@ -67,6 +67,7 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+            REGISTRY=${{ env.REGISTRY }}
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-base-ubuntu
@@ -131,6 +132,7 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+            REGISTRY=${{ env.REGISTRY }}
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-ubuntu
@@ -193,6 +195,7 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+            REGISTRY=${{ env.REGISTRY }}
 
   dask-analysis:
     runs-on: ubuntu-latest
@@ -244,6 +247,7 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+            REGISTRY=${{ env.REGISTRY }}
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-analysis-ubuntu
@@ -308,3 +312,4 @@ jobs:
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+            REGISTRY=${{ env.REGISTRY }}
