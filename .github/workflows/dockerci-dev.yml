@@ -47,7 +47,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v2
         with:
-          outputs: type=docker,dest=/tmp/cc-base-ubuntu.tar
+          #outputs: type=docker,dest=/tmp/cc-base-ubuntu.tar
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -60,11 +60,11 @@ jobs:
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY="localhost:5000"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: cc-base-ubuntu
-          path: /tmp/cc-base-ubuntu.tar
-          retention-days: 1
+      #- uses: actions/upload-artifact@v2
+      #  with:
+      #    name: cc-base-ubuntu
+      #    path: /tmp/cc-base-ubuntu.tar
+      #    retention-days: 1
 
   dask-cc:
     runs-on: ubuntu-latest
@@ -94,19 +94,19 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: cc-base-ubuntu
-          path: /tmp
-      - name: Load Docker image
-        run: |
-          docker load --input /tmp/cc-base-ubuntu.tar
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: cc-base-ubuntu
+      #    path: /tmp
+      #- name: Load Docker image
+      #  run: |
+      #    docker load --input /tmp/cc-base-ubuntu.tar
       - name: Build
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
-          outputs: type=docker,dest=/tmp/cc-ubuntu.tar
+          #outputs: type=docker,dest=/tmp/cc-ubuntu.tar
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
@@ -118,11 +118,11 @@ jobs:
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY="localhost:5000"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: cc-ubuntu
-          path: /tmp/cc-ubuntu.tar
-          retention-days: 1
+      #- uses: actions/upload-artifact@v2
+      #  with:
+      #    name: cc-ubuntu
+      #    path: /tmp/cc-ubuntu.tar
+      #    retention-days: 1
 
   dask-skyhook:
     runs-on: ubuntu-latest
@@ -152,14 +152,14 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: cc-ubuntu
-          path: /tmp
-      - name: Load Docker image
-        run: |
-          docker load --input /tmp/cc-ubuntu.tar
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: cc-ubuntu
+      #    path: /tmp
+      #- name: Load Docker image
+      #  run: |
+      #    docker load --input /tmp/cc-ubuntu.tar
       - name: Build
         uses: docker/build-push-action@v2
         with:
@@ -208,7 +208,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: ${{ github.event_name != 'pull_request' }}
-          outputs: type=docker,dest=/tmp/cc-analysis-ubuntu.tar
+          #outputs: type=docker,dest=/tmp/cc-analysis-ubuntu.tar
           cache-from: type=local,src=/tmp/.buildx-cache   
           cache-to: type=local,dest=/tmp/.buildx-cache
           context: docker/
@@ -220,11 +220,11 @@ jobs:
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY="localhost:5000"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: cc-analysis-ubuntu
-          path: /tmp/cc-analysis-ubuntu.tar
-          retention-days: 1
+      #- uses: actions/upload-artifact@v2
+      #  with:
+      #    name: cc-analysis-ubuntu
+      #    path: /tmp/cc-analysis-ubuntu.tar
+      #    retention-days: 1
 
 
   dask-analysis-skyhook:
@@ -255,14 +255,14 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: cc-analysis-ubuntu
-          path: /tmp
-      - name: Load Docker image
-        run: |
-          docker load --input /tmp/cc-analysis-ubuntu.tar
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: cc-analysis-ubuntu
+      #    path: /tmp
+      #- name: Load Docker image
+      #  run: |
+      #    docker load --input /tmp/cc-analysis-ubuntu.tar
       - name: Build
         uses: docker/build-push-action@v2
         with:
