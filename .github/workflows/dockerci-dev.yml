@@ -10,6 +10,7 @@ env:
   PROJECT: 'coffea-casa'
   GITHUB_ACTIONS: 'true'
   REGISTRY: 'localhost:5000'
+  REGISTRY_PATH: ${{ github.workspace }}/registry
 
 jobs:
   version-check:
@@ -24,6 +25,13 @@ jobs:
 
   dask-base:
     runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+        volumes:
+          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: version-check
     steps:
       - name: Check out code
@@ -81,6 +89,8 @@ jobs:
         image: registry:2
         ports:
           - 5000:5000
+        volumes:
+          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: [version-check, dask-base]
     steps:
       - name: Check out code
@@ -146,6 +156,8 @@ jobs:
         image: registry:2
         ports:
           - 5000:5000
+        volumes:
+          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: [version-check, dask-cc]
     steps:
       - name: Check out code
@@ -204,6 +216,8 @@ jobs:
         image: registry:2
         ports:
           - 5000:5000
+        volumes:
+          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: version-check
     steps:
       - name: Check out code
@@ -262,6 +276,8 @@ jobs:
         image: registry:2
         ports:
           - 5000:5000
+        volumes:
+          - "${REGISTRY_PATH}:/var/lib/registry"
     needs: [version-check, dask-analysis]
     steps:
       - name: Check out code
