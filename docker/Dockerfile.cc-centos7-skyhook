@@ -1,6 +1,6 @@
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
-ARG NAME="${PROJECT}}/cc-centos7"
+ARG NAME="${PROJECT}/cc-centos7"
 ARG REGISTRY="hub.opensciencegrid.org"
 FROM ${REGISTRY}/${NAME}:${TAG}
 
