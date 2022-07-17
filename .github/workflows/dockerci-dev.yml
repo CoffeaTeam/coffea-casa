@@ -169,7 +169,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-base-centos7
           tags: |
-            coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            localhost:5000/coffea-casa/cc-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
@@ -214,7 +214,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
-            coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
+            localhost:5000/coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
@@ -272,7 +272,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
-            coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
+            localhost:5000/coffea-casa/cc-analysis-ubuntu-skyhook:${{ needs.version-check.outputs.date }}
           build-args: |
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
