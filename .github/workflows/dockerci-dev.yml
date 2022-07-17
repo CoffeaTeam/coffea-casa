@@ -76,6 +76,11 @@ jobs:
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
+      - name: Upload Docker registry data for testing
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-registry-data
+          path: ${{ env.REGISTRY_PATH }}/
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-base-ubuntu
@@ -118,14 +123,13 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      #- name: Download artifact
-      #  uses: actions/download-artifact@v2
-      #  with:
-      #    name: cc-base-ubuntu
-      #    path: /tmp
-      #- name: Load Docker image
-      #  run: |
-      #    docker load --input /tmp/cc-base-ubuntu.tar
+      - name: Download Docker registry data from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-registry-data
+          path: ${{ env.REGISTRY_PATH }}
+      - name: Import Docker images
+        run: docker pull --platform localhost:5000/coffea-casa/cc-base-ubuntu
       - name: Build
         uses: docker/build-push-action@v3.0.0
         with:
@@ -143,6 +147,11 @@ jobs:
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
+      - name: Upload Docker registry data for testing
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-registry-data
+          path: ${{ env.REGISTRY_PATH }}/
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-ubuntu
@@ -185,14 +194,13 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      #- name: Download artifact
-      #  uses: actions/download-artifact@v2
-      #  with:
-      #    name: cc-ubuntu
-      #    path: /tmp
-      #- name: Load Docker image
-      #  run: |
-      #    docker load --input /tmp/cc-ubuntu.tar
+      - name: Download Docker registry data from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-registry-data
+          path: ${{ env.REGISTRY_PATH }}
+      - name: Import Docker images
+        run: docker pull --platform localhost:5000/coffea-casa/cc-ubuntu
       - name: Build
         uses: docker/docker/build-push-action@v3.0.0
         with:
@@ -262,6 +270,11 @@ jobs:
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
+      - name: Upload Docker registry data for testing
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-registry-data
+          path: ${{ env.REGISTRY_PATH }}/
       #- uses: actions/upload-artifact@v2
       #  with:
       #    name: cc-analysis-ubuntu
@@ -305,11 +318,13 @@ jobs:
           registry: hub.opensciencegrid.org
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      #- name: Download artifact
-      #  uses: actions/download-artifact@v2
-      #  with:
-      #    name: cc-analysis-ubuntu
-      #    path: /tmp
+      - name: Download Docker registry data from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-registry-data
+          path: ${{ env.REGISTRY_PATH }}
+      - name: Import Docker images
+        run: docker pull --platform localhost:5000/coffea-casa/cc-analysis-ubuntu
       #- name: Load Docker image
       #  run: |
       #    docker load --input /tmp/cc-analysis-ubuntu.tar
