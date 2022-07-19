@@ -70,6 +70,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    ADL Benchmark 8 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example8.ipynb>
    Single Top-Higgs Production (tHq) Analysis <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/analysis-casa.ipynb>
    Single Top-Higgs Production (tHq) Analysis Tutorial <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/analysis_tutorial.ipynb>
+   Coffea + Dask + ServiceX Example <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/ttbar_HT.ipynb>
 
 
 .. toctree::
