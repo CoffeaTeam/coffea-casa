@@ -11,6 +11,7 @@ env:
   GITHUB_ACTIONS: 'true'
   REGISTRY: 'localhost:5000'
   REGISTRY_PATH: ${{ github.workspace }}/registry
+  CACHE_PATH: /tmp/.buildx-cache
 
 jobs:
   version-check:
@@ -24,11 +25,18 @@ jobs:
       date: ${{ steps.date.outputs.date }}
 
   dask-base:
+    services:
+      registry:
+        image: registry:2
+        volumes:
+          - ${{ env.REGISTRY_PATH }}:/var/lib/registry/
+        ports:
+          - "5000:5000"
     runs-on: ubuntu-latest
     needs: version-check
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -37,14 +45,11 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
-      - name: Start Docker registry
-        run: |
-          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
         with:
-          path: /tmp/.buildx-cache
+          path: ${{ env.CACHE_PATH }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
@@ -61,8 +66,10 @@ jobs:
           #outputs: type=docker,dest=/tmp/cc-base-ubuntu.tar
           #push: ${{ github.event_name != 'pull_request' }}
           push: true
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: |
+            type=local,src=${{ env.CACHE_PATH }}
+          cache-to: type=local,dest=${{ env.CACHE_PATH }}
+          builder: ${{ steps.buildx.outputs.name }}
           context: docker/
           file: docker/Dockerfile.cc-base-ubuntu
           tags: |
@@ -77,11 +84,6 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}/
-      #- uses: actions/upload-artifact@v2
-      #  with:
-      #    name: cc-base-ubuntu
-      #    path: /tmp/cc-base-ubuntu.tar
-      #    retention-days: 1
 
   dask-cc:
     runs-on: ubuntu-latest
@@ -97,9 +99,6 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
-      - name: Start Docker registry
-        run: |
-          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -120,6 +119,12 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}
+      - name: Start Docker registry
+        run: |
+          docker run --rm --detach --publish 5000:5000 \
+            --volume ${{ env.REGISTRY_PATH }}:/var/lib/registry \
+            --name registry registry:2
+          sleep 10
       - name: Import Docker images
         run: docker pull --platform localhost:5000/coffea-casa/cc-base-ubuntu
       - name: Build
@@ -127,9 +132,9 @@ jobs:
         with:
           #push: ${{ github.event_name != 'pull_request' }}
           push: true
-          #outputs: type=docker,dest=/tmp/cc-ubuntu.tar
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: |
+            type=local,src=${{ env.CACHE_PATH }}
+          cache-to: type=local,dest=${{ env.CACHE_PATH }}
           context: docker/
           file: docker/Dockerfile.cc-ubuntu
           tags: |
@@ -144,11 +149,6 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}/
-      #- uses: actions/upload-artifact@v2
-      #  with:
-      #    name: cc-ubuntu
-      #    path: /tmp/cc-ubuntu.tar
-      #    retention-days: 1
 
   dask-skyhook:
     runs-on: ubuntu-latest
@@ -164,9 +164,6 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
-      - name: Start Docker registry
-        run: |
-          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -187,14 +184,21 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}
+      - name: Start Docker registry
+        run: |
+          docker run --rm --detach --publish 5000:5000 \
+            --volume ${{ env.REGISTRY_PATH }}:/var/lib/registry \
+            --name registry registry:2
+          sleep 10
       - name: Import Docker images
         run: docker pull --platform localhost:5000/coffea-casa/cc-ubuntu
       - name: Build
         uses: docker/docker/build-push-action@v3.0.0
         with:
           push: ${{ github.event_name != 'pull_request' }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: |
+            type=local,src=${{ env.CACHE_PATH }}
+          cache-to: type=local,dest=${{ env.CACHE_PATH }}
           context: docker/
           file: docker/Dockerfile.cc-base-centos7
           tags: |
@@ -206,6 +210,13 @@ jobs:
             REGISTRY=${{ env.REGISTRY }}
 
   dask-analysis:
+    services:
+      registry:
+        image: registry:2
+        volumes:
+          - ${{ env.REGISTRY_PATH }}:/var/lib/registry/
+        ports:
+          - "5000:5000"
     runs-on: ubuntu-latest
     needs: version-check
     steps:
@@ -219,9 +230,6 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
-      - name: Start Docker registry
-        run: |
-          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -243,8 +251,9 @@ jobs:
           #push: ${{ github.event_name != 'pull_request' }}
           push: true
           #outputs: type=docker,dest=/tmp/cc-analysis-ubuntu.tar
-          cache-from: type=local,src=/tmp/.buildx-cache   
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: |
+            type=local,src=${{ env.CACHE_PATH }}
+          cache-to: type=local,dest=${{ env.CACHE_PATH }}
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
@@ -259,11 +268,6 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}/
-      #- uses: actions/upload-artifact@v2
-      #  with:
-      #    name: cc-analysis-ubuntu
-      #    path: /tmp/cc-analysis-ubuntu.tar
-      #    retention-days: 1
 
 
   dask-analysis-skyhook:
@@ -280,9 +284,6 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
-      - name: Start Docker registry
-        run: |
-          docker run -d -p 5000:5000 -v ${REGISTRY_PATH}:/var/lib/registry --name registry registry:2
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -303,18 +304,22 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}
+      - name: Start Docker registry
+        run: |
+          docker run --rm --detach --publish 5000:5000 \
+            --volume ${{ env.REGISTRY_PATH }}:/var/lib/registry \
+            --name registry registry:2
+          sleep 10
       - name: Import Docker images
         run: docker pull --platform localhost:5000/coffea-casa/cc-analysis-ubuntu
-      #- name: Load Docker image
-      #  run: |
-      #    docker load --input /tmp/cc-analysis-ubuntu.tar
       - name: Build
         uses: docker/build-push-action@v3.0.0
         with:
           #push: ${{ github.event_name != 'pull_request' }}
           push: true
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: |
+            type=local,src=${{ env.CACHE_PATH }}
+          cache-to: type=local,dest=${{ env.CACHE_PATH }}
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
           tags: |
