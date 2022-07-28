@@ -1,8 +1,8 @@
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
-ARG HUB="hub.opensciencegrid.org"
-ARG NAME="${PROJECT}}/cc-centos7"
-FROM ${HUB}/${NAME}:${TAG}
+ARG NAME="${PROJECT}/cc-centos7"
+ARG REGISTRY="hub.opensciencegrid.org"
+FROM ${REGISTRY}/${NAME}:${TAG}
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
@@ -10,7 +10,6 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
 ARG TAG
 ARG PROJECT
-ARG HUB
 ARG WORKER_IMAGE="${HUB}/${PROJECT}/cc-centos7-skyhook"
 # Try to see if CEPH_CONF works (https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/1.2.3/html/ceph_configuration_guide/configuration_file_structure)
 ARG CEPH_DIR="/opt/ceph"

@@ -1,8 +1,8 @@
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
-ARG HUB="hub.opensciencegrid.org"
 ARG NAME="${PROJECT}/cc-base-ubuntu"
-FROM ${HUB}/${NAME}:${TAG}
+ARG REGISTRY="hub.opensciencegrid.org"
+FROM ${REGISTRY}/${NAME}:${TAG}
 
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
@@ -15,7 +15,6 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
 ARG TAG
 ARG PROJECT
-ARG HUB
 ARG WORKER_IMAGE="${HUB}/${PROJECT}/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
