@@ -106,51 +106,51 @@ jobs:
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
 
-  dask-skyhook:
-    runs-on: ubuntu-latest
-    needs: [dask-cc]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          version: latest
-          driver-opts: network=host
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        id: cache
-        with:
-          path: ${{ env.CACHE_PATH }}
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-      - name: Login to Harbor Hub
-        if: success() && github.event_name != 'pull_request'
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.HARBOR_USER }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Build
-        uses: docker/docker/build-push-action@v3.0.0
-        with:
-          push: ${{ github.event_name != 'pull_request' }}
-          cache-from: |
-            type=local,src=${{ env.CACHE_PATH }}
-          cache-to: type=local,dest=${{ env.CACHE_PATH }}
-          context: docker/
-          file: docker/Dockerfile.cc-base-centos7
-          tags: |
-            ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu-skyhook:development
-          build-args: |
-            TAG=development
-            PROJECT=${{ env.PROJECT }} 
-            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-            REGISTRY=${{ env.REGISTRY }}
+#  dask-skyhook:
+#    runs-on: ubuntu-latest
+#    needs: [dask-cc]
+#    steps:
+#      - name: Check out code
+#        uses: actions/checkout@v2
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#      - name: Set up Docker Buildx
+#        id: buildx
+#        uses: docker/setup-buildx-action@v2
+#        with:
+#          version: latest
+#          driver-opts: network=host
+#      - name: Cache Docker layers
+#        uses: actions/cache@v2
+#        id: cache
+#        with:
+#          path: ${{ env.CACHE_PATH }}
+#          key: ${{ runner.os }}-buildx-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-buildx-
+#      - name: Login to Harbor Hub
+#        if: success() && github.event_name != 'pull_request'
+#        uses: docker/login-action@v2
+#        with:
+#          registry: ${{ env.REGISTRY }}
+#          username: ${{ secrets.HARBOR_USER }}
+#          password: ${{ secrets.HARBOR_PASSWORD }}
+#      - name: Build
+#        uses: docker/docker/build-push-action@v3.0.0
+#        with:
+#          push: ${{ github.event_name != 'pull_request' }}
+#          cache-from: |
+#            type=local,src=${{ env.CACHE_PATH }}
+#          cache-to: type=local,dest=${{ env.CACHE_PATH }}
+#          context: docker/
+#          file: docker/Dockerfile.cc-base-centos7
+#          tags: |
+#            ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu-skyhook:development
+#          build-args: |
+#            TAG=development
+#            PROJECT=${{ env.PROJECT }} 
+#            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+#            REGISTRY=${{ env.REGISTRY }}
 
   dask-analysis:
     runs-on: ubuntu-latest
@@ -199,49 +199,49 @@ jobs:
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
 
-  dask-analysis-skyhook:
-    runs-on: ubuntu-latest
-    needs: [dask-analysis]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          version: latest
-          driver-opts: network=host
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        id: cache
-        with:
-          path: ${{ env.CACHE_PATH }}
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-      - name: Login to Harbor Hub
-        if: success() && github.event_name != 'pull_request'
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.HARBOR_USER }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Build
-        uses: docker/build-push-action@v3.0.0
-        with:
-          #push: ${{ github.event_name != 'pull_request' }}
-          push: true
-          cache-from: |
-            type=local,src=${{ env.CACHE_PATH }}
-          cache-to: type=local,dest=${{ env.CACHE_PATH }}
-          context: docker/
-          file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
-          tags: |
-            ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu-skyhook:development
-          build-args: |
-            TAG=development
-            PROJECT=${{ env.PROJECT }} 
-            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
-            REGISTRY=${{ env.REGISTRY }}
+#  dask-analysis-skyhook:
+#    runs-on: ubuntu-latest
+#    needs: [dask-analysis]
+#    steps:
+#      - name: Check out code
+#        uses: actions/checkout@v2
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#      - name: Set up Docker Buildx
+#        id: buildx
+#        uses: docker/setup-buildx-action@v2
+#        with:
+#          version: latest
+#          driver-opts: network=host
+#      - name: Cache Docker layers
+#        uses: actions/cache@v2
+#        id: cache
+#        with:
+#          path: ${{ env.CACHE_PATH }}
+#          key: ${{ runner.os }}-buildx-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-buildx-
+#      - name: Login to Harbor Hub
+#        if: success() && github.event_name != 'pull_request'
+#        uses: docker/login-action@v2
+#        with:
+#          registry: ${{ env.REGISTRY }}
+#          username: ${{ secrets.HARBOR_USER }}
+#          password: ${{ secrets.HARBOR_PASSWORD }}
+#      - name: Build
+#        uses: docker/build-push-action@v3.0.0
+#        with:
+#          #push: ${{ github.event_name != 'pull_request' }}
+#          push: true
+#          cache-from: |
+#            type=local,src=${{ env.CACHE_PATH }}
+#          cache-to: type=local,dest=${{ env.CACHE_PATH }}
+#          context: docker/
+#          file: docker/Dockerfile.cc-analysis-ubuntu-skyhook
+#          tags: |
+#            ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu-skyhook:development
+#          build-args: |
+#            TAG=development
+#            PROJECT=${{ env.PROJECT }} 
+#            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+#            REGISTRY=${{ env.REGISTRY }}
