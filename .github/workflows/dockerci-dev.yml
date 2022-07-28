@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - docker
   workflow_dispatch:
 
 env:
@@ -17,10 +19,10 @@ jobs:
   version-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch current date
+      - name: Fetch current date (with timestamp)
         id: date
         run: |
-          echo "::set-output name=date::$(date +'%Y-%m-%d')"
+          echo "::set-output name=date::$(date +"%Y-%m-%d_%H-%M-%S")"
     outputs:
       date: ${{ steps.date.outputs.date }}
 
@@ -83,6 +85,7 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}/
+          retention-days: 1
 
   dask-cc:
     runs-on: ubuntu-latest
@@ -102,7 +105,7 @@ jobs:
         uses: actions/cache@v2
         id: cache
         with:
-          path: /tmp/.buildx-cache
+          path: ${{ env.CACHE_PATH }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
@@ -148,6 +151,7 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}/
+          retention-days: 1
 
   dask-skyhook:
     runs-on: ubuntu-latest
@@ -167,7 +171,7 @@ jobs:
         uses: actions/cache@v2
         id: cache
         with:
-          path: /tmp/.buildx-cache
+          path: ${{ env.CACHE_PATH }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
@@ -207,6 +211,9 @@ jobs:
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
+      - name: Cleanup
+        run: |
+          docker stop registry
 
   dask-analysis:
     runs-on: ubuntu-latest
@@ -226,7 +233,7 @@ jobs:
         uses: actions/cache@v2
         id: cache
         with:
-          path: /tmp/.buildx-cache
+          path: ${{ env.CACHE_PATH }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
@@ -266,6 +273,7 @@ jobs:
         with:
           name: docker-registry-data
           path: ${{ env.REGISTRY_PATH }}/
+          retention-days: 1
 
 
   dask-analysis-skyhook:
@@ -286,7 +294,7 @@ jobs:
         uses: actions/cache@v2
         id: cache
         with:
-          path: /tmp/.buildx-cache
+          path: ${{ env.CACHE_PATH }}
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
@@ -327,3 +335,6 @@ jobs:
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
+      - name: Cleanup
+        run: |
+          docker stop registry
