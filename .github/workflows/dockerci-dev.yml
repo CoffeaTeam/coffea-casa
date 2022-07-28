@@ -125,7 +125,7 @@ jobs:
             --name registry registry:2
           sleep 10
       - name: Import Docker images
-        run: docker pull --platform localhost:5000/coffea-casa/cc-base-ubuntu
+        run: docker pull localhost:5000/coffea-casa/cc-base-ubuntu
       - name: Build
         uses: docker/build-push-action@v3.0.0
         with:
@@ -190,7 +190,7 @@ jobs:
             --name registry registry:2
           sleep 10
       - name: Import Docker images
-        run: docker pull --platform localhost:5000/coffea-casa/cc-ubuntu
+        run: docker pull localhost:5000/coffea-casa/cc-ubuntu
       - name: Build
         uses: docker/docker/build-push-action@v3.0.0
         with:
@@ -309,7 +309,7 @@ jobs:
             --name registry registry:2
           sleep 10
       - name: Import Docker images
-        run: docker pull --platform localhost:5000/coffea-casa/cc-analysis-ubuntu
+        run: docker pull localhost:5000/coffea-casa/cc-analysis-ubuntu
       - name: Build
         uses: docker/build-push-action@v3.0.0
         with:
