@@ -124,6 +124,11 @@ RUN mamba install --quiet --yes \
 
 EXPOSE 8888
 
+RUN pip install git+https://github.com/ssl-hep/servicex-labextension.git#subdirectory=servicex-dashboard \
+    && git clone https://github.com/ssl-hep/servicex-labextension.git \
+    && cd servicex-labextension \
+    && jupyter labextension develop --overwrite .
+
 # Copy local files as late as possible to avoid cache busting
 COPY jupyterhub/start.sh jupyterhub/start-notebook.sh jupyterhub/start-singleuser.sh /usr/local/bin/
 # Currently need to have both jupyter_notebook_config and jupyter_server_config to support classic and lab
