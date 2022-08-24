@@ -87,8 +87,6 @@ RUN mkdir $HOME/work && \
     fix-permissions $HOME
 
 # Dask dependencies and HTCondor
-# https://anaconda.org/conda-forge/htcondor
-RUN conda install mamba -n base -c conda-forge --yes
 RUN mamba install --yes \
     -c conda-forge \
     htcondor \
