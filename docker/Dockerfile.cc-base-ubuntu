@@ -203,6 +203,7 @@ RUN mamba install --yes \
     -c conda-forge \
     conda-build \
     htcondor \
+    voms-clients \
     xgboost \
     pyhf \
     vector \
