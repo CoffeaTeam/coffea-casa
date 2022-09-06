@@ -86,7 +86,7 @@ RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/distributed && \
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
-    && mamba clean -tipsy \
+    && mamba clean --all -f -y \
     && jupyter lab clean \
     && jlpm cache clean \
     && npm cache clean --force \
