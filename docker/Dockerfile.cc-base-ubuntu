@@ -225,8 +225,8 @@ RUN pip install --no-cache-dir \
     correctionlib \
     cabinetry \
     #funcx==0.3.9 \
-    pyyaml \
-    git+https://github.com/ssl-hep/servicex-labextension.git#subdirectory=servicex-dashboard
+    pyyaml
+    #git+https://github.com/ssl-hep/servicex-labextension.git#subdirectory=servicex-dashboard
 
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
