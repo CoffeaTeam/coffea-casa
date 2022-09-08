@@ -239,7 +239,7 @@ COPY condor/condor_config /etc/condor/
 COPY condor/config.d  /etc/condor/config.d/
 
 RUN curl -L https://github.com/opensciencegrid/osg-vo-config/archive/refs/heads/master.tar.gz | \
-    tar -xz --strip-components=1 --directory=/etc/grid-security */vomses */vomsdir && \
+    tar -xz --strip-components=1 --directory=/etc/grid-security --wildcards */vomses */vomsdir && \
     mv /etc/grid-security/vomses /etc
 
 # Setup HTCondor user/group and change group for user $NB_USER
