@@ -146,6 +146,7 @@ RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
     vim-tiny \
     git \
+    curl \
     inkscape \
     libsm6 \
     libxext-dev \
