@@ -14,7 +14,7 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
 ARG TAG
 ARG PROJECT
-ARG WORKER_IMAGE="${HUB}/${PROJECT}/cc-analysis-centos7"
+ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-centos7"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"

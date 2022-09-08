@@ -72,9 +72,9 @@ See below full table of arguments for Scheduler and Worker image:
 
 | Parameter                | Description             | Default        |
 | ------------------------ | ----------------------- | -------------- |
-|`TAG`| Name of tag in HUB (only for "derived" images) | "development" |
-|`PROJECT`| Name of project in HUB (only for "derived" images) | "coffea-casa" |
-|`HUB`| Name of Hub (only for "derived" images) | "hub.opensciencegrid.org" |
+|`TAG`| Name of tag in REGISTRY (only for "derived" images) | "development" |
+|`PROJECT`| Name of project in REGISTRY (only for "derived" images) | "coffea-casa" |
+|`REGISTRY`| Name of Hub (only for "derived" images) | "hub.opensciencegrid.org" |
 |`NAME`| Name of Base image (only for "derived" images) | "${PROJECT}/cc-base-ubuntu"|
 |`NB_USER` | User for Jupyter notebook (as well for HTCondor) | `cms-jovyan` |
 |`NB_UID`| User UID | `6440` |
@@ -121,7 +121,7 @@ docker build
 docker build
 --build-arg PROJECT="coffea-casa" \
 --build-arg TAG="2021.10.28" \
---build-arg HUB="hub.opensciencegrid.org" \
+--build-arg REGISTRY="hub.opensciencegrid.org" \
 --build-arg XCACHE_HOST="red-xcache1.unl.edu" \
 --build-arg CACHE_PREFIX="red-xcache1.unl.edu" \
 --build-arg LABEXTENTION_CLUSTER="UNL HTCondor Cluster" \
@@ -149,7 +149,7 @@ Other build arguments, which are optional to be changed:
 docker build
 --build-arg PROJECT="coffea-casa" \
 --build-arg TAG="2021.10.28" \
---build-arg HUB="hub.opensciencegrid.org" \
+--build-arg REGISTRY="hub.opensciencegrid.org" \
 -t hub.opensciencegrid.org/coffea-casa/cc-ubuntu:$TAG -f Dockerfile.cc-ubuntu
 ```
 
@@ -179,6 +179,6 @@ Other build arguments, which are optional to be changed:
 docker build 
 --build-arg PROJECT="coffea-casa" \
 --build-arg TAG="2021.10.28" \
---build-arg HUB="hub.opensciencegrid.org" \
+--build-arg REGISTRY="hub.opensciencegrid.org" \
 -t hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:$TAG -f Dockerfile.cc-analysis-ubuntu-skyhook
 ```
