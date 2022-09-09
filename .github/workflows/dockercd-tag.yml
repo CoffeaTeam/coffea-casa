@@ -60,7 +60,7 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.tags }}
           build-args: |
-            TAG=${{ steps.meta.outputs.tags }}
+            TAG=${{ github.ref_name }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
@@ -115,7 +115,7 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.tags }}
           build-args: |
-            TAG=${{ steps.meta.outputs.tags }}
+            TAG=${{ github.ref_name }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
@@ -161,7 +161,7 @@ jobs:
 #          tags: |
 #            ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu-skyhook:${{ steps.meta.outputs.tags }}
 #          build-args: |
-#            TAG=${{ steps.meta.outputs.tags }}
+#            TAG=${{ github.ref_name }}
 #            PROJECT=${{ env.PROJECT }} 
 #            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 #            REGISTRY=${{ env.REGISTRY }}
@@ -219,7 +219,7 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.tags }}
           build-args: |
-            TAG=${{ steps.meta.outputs.tags }} 
+            TAG=${{ github.ref_name }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
@@ -266,7 +266,7 @@ jobs:
 #          tags: |
 #            ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu-skyhook:${{ steps.meta.outputs.tags }}
 #          build-args: |
-#            TAG=${{ steps.meta.outputs.tags }}
+#            TAG=${{ github.ref_name }}
 #            PROJECT=${{ env.PROJECT }} 
 #            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 #            REGISTRY=${{ env.REGISTRY }}
