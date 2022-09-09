@@ -2,6 +2,8 @@ name: Push development tag of docker images
 
 on:
   push:
+    paths:
+      - docker/**
     branches:
       - master
   workflow_dispatch:
