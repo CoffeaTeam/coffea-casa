@@ -28,7 +28,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/coffea-casa/cc-base-ubuntu
+          images: enable=false
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -58,7 +58,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-base-ubuntu
           tags: |
-            ${{ steps.meta.outputs.tags }}
+            ${{ env.REGISTRY }}/coffea-casa/cc-base-ubuntu:${{ steps.meta.outputs.tags }}
           build-args: |
             TAG=${{ steps.meta.outputs.tags }}
             PROJECT=${{ env.PROJECT }} 
@@ -83,7 +83,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu
+          images: enable=false
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -113,7 +113,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-ubuntu
           tags: |
-            ${{ steps.meta.outputs.tags }}
+            ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu:${{ steps.meta.outputs.tags }}
           build-args: |
             TAG=${{ steps.meta.outputs.tags }}
             PROJECT=${{ env.PROJECT }} 
@@ -186,7 +186,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu
+          images: |
+            enable=false
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -217,7 +218,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
-            ${{ steps.meta.outputs.tags }}
+            ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu:${{ steps.meta.outputs.tags }}
           build-args: |
             TAG=${{ steps.meta.outputs.tags }} 
             PROJECT=${{ env.PROJECT }} 
