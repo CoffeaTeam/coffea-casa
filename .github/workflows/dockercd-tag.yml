@@ -9,6 +9,8 @@ env:
   GITHUB_ACTIONS: 'true'
   REGISTRY: 'hub.opensciencegrid.org'
   CACHE_PATH: /tmp/.buildx-cache
+  REPOSITORY: CoffeaTeam/coffea-casa
+
 
 jobs:
   dask-base:
@@ -24,6 +26,14 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REPOSITORY }}
+          flavor: latest=false
+          tags: |
+            type=ref,event=tag
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -71,6 +81,14 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REPOSITORY }}
+          flavor: latest=false
+          tags: |
+            type=ref,event=tag
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -166,6 +184,14 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REPOSITORY }}
+          flavor: latest=false
+          tags: |
+            type=ref,event=tag
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
