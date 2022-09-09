@@ -9,8 +9,6 @@ env:
   GITHUB_ACTIONS: 'true'
   REGISTRY: 'hub.opensciencegrid.org'
   CACHE_PATH: /tmp/.buildx-cache
-  REPOSITORY: coffeateam/coffea
-
 
 jobs:
   dask-base:
@@ -30,7 +28,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REPOSITORY }}
+          images: enable=false
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -62,8 +60,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/coffea-casa/cc-base-ubuntu:${{ steps.meta.outputs.tags }}
           build-args: |
-            TAG=${{ github.ref_name }}
-            PROJECT=${{ env.PROJECT }}
+            TAG=${{ steps.meta.outputs.tags }}
+            PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
 
@@ -85,7 +83,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REPOSITORY }}
+          images: enable=false
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -117,8 +115,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu:${{ steps.meta.outputs.tags }}
           build-args: |
-            TAG=${{ github.ref_name }}
-            PROJECT=${{ env.PROJECT }}
+            TAG=${{ steps.meta.outputs.tags }}
+            PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
 
@@ -188,7 +186,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REPOSITORY }}
+          images: |
+            enable=false
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -221,8 +220,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu:${{ steps.meta.outputs.tags }}
           build-args: |
-            TAG=${{ github.ref_name }}
-            PROJECT=${{ env.PROJECT }}
+            TAG=${{ steps.meta.outputs.tags }} 
+            PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
             REGISTRY=${{ env.REGISTRY }}
 
