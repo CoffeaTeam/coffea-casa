@@ -9,8 +9,6 @@ env:
   GITHUB_ACTIONS: 'true'
   REGISTRY: 'hub.opensciencegrid.org'
   CACHE_PATH: /tmp/.buildx-cache
-  REPOSITORY: CoffeaTeam/coffea-casa
-
 
 jobs:
   dask-base:
@@ -30,7 +28,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REPOSITORY }}
+          images: ${{ env.REGISTRY }}/coffea-casa/cc-base-ubuntu
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -60,7 +58,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-base-ubuntu
           tags: |
-            ${{ env.REGISTRY }}/coffea-casa/cc-base-ubuntu:${{ steps.meta.outputs.tags }}
+            ${{ steps.meta.outputs.tags }}
           build-args: |
             TAG=${{ steps.meta.outputs.tags }}
             PROJECT=${{ env.PROJECT }} 
@@ -85,7 +83,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REPOSITORY }}
+          images: ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -115,7 +113,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-ubuntu
           tags: |
-            ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu:${{ steps.meta.outputs.tags }}
+            ${{ steps.meta.outputs.tags }}
           build-args: |
             TAG=${{ steps.meta.outputs.tags }}
             PROJECT=${{ env.PROJECT }} 
@@ -188,7 +186,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REPOSITORY }}
+          images: ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu
           flavor: latest=false
           tags: |
             type=ref,event=tag
@@ -219,7 +217,7 @@ jobs:
           context: docker/
           file: docker/Dockerfile.cc-analysis-ubuntu
           tags: |
-            ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu:${{ steps.meta.outputs.tags }}
+            ${{ steps.meta.outputs.tags }}
           build-args: |
             TAG=${{ steps.meta.outputs.tags }} 
             PROJECT=${{ env.PROJECT }} 
