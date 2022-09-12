@@ -13,8 +13,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Tag
+# Tag
 ARG TAG
 ARG PROJECT
+ARG REGISTRY
 ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -40,6 +42,7 @@ ARG GITHUB_ACTIONS="false"
 # Configure environment
 ENV CERT_DIR=$CERT_DIR
 ENV TAG=$TAG
+ENV REGISTRY=$REGISTRY
 ENV WORKER_IMAGE=$WORKER_IMAGE
 ENV BEARER_TOKEN_FILE=$BEARER_TOKEN_FILE
 ENV DASK_ROOT_CONFIG=$DASK_ROOT_CONFIG
