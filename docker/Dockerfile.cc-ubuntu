@@ -55,7 +55,7 @@ ENV CACHE_PREFIX=$CACHE_PREFIX
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
-    dask_jobqueue==0.7.4 \
+    dask_jobqueue==0.7.3 \
     # funcx
     funcx==0.3.9 \
     # visualization
