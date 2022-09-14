@@ -4,7 +4,7 @@ set -x
 
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."
-    /opt/conda/bin/conda install -y $EXTRA_CONDA_PACKAGES
+    /opt/conda/bin/mamba install -y $EXTRA_CONDA_PACKAGES
 fi
 
 if [ "$EXTRA_PIP_PACKAGES" ]; then
@@ -81,10 +81,10 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   
   if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
     echo "Conda: environment.yml found. Installing packages."
-    /opt/conda/bin/conda env update -n base -f $_CONDOR_JOB_IWD/environment.yml
+    /opt/conda/bin/mamba env update -n base -f $_CONDOR_JOB_IWD/environment.yml
   elif [ -e "$_CONDOR_JOB_IWD/environment.yaml" ]; then
     echo "Conda: environment.yaml found. Installing packages."
-    /opt/conda/bin/conda env update -n base -f $_CONDOR_JOB_IWD/environment.yaml
+    /opt/conda/bin/mamba env update -n base -f $_CONDOR_JOB_IWD/environment.yaml
   else
     echo "No environment.yml, conda will not install any package."
   fi
