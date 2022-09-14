@@ -62,10 +62,10 @@ fi
 # Check environment
 if [ -e "$HOME/environment.yml" ]; then
     echo "Conda: environment.yml found. Installing packages."
-    /opt/conda/bin/conda env update -f $HOME/environment.yml
+    /opt/conda/bin/mamba env update -f $HOME/environment.yml
   elif [ -e "$HOME/environment.yaml" ]; then
     echo "Conda: environment.yaml found. Installing packages."
-    /opt/conda/bin/conda env update -f $HOME/environment.yaml
+    /opt/conda/bin/mamba env update -f $HOME/environment.yaml
   else
     echo "No environment.yml, conda will not install any package."
   fi
@@ -79,7 +79,7 @@ if [ -e "$HOME/environment.yml" ]; then
 
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."
-    /opt/conda/bin/conda install -y $EXTRA_CONDA_PACKAGES
+    /opt/conda/bin/mamba install -y $EXTRA_CONDA_PACKAGES
 fi
 
 if [ "$EXTRA_PIP_PACKAGES" ]; then
