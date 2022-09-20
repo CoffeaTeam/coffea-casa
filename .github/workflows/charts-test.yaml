@@ -86,7 +86,7 @@ jobs:
       # reach the ACME client in our autohttps pod.
       - name: Install local ACME server
         run: |
-          helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values charts/dev-pebble.yaml --namespace coffea-casa
+          helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values charts/dev-pebble.yaml
       # Build our images if needed and update values.yaml with the tags
       - name: Install and run chartpress
         run: |
@@ -94,12 +94,6 @@ jobs:
           cd charts && chartpress
         env:
           DOCKER_BUILDKIT: "1"
-
-      - name: Create a dedicated namespace coffea-casa
-        run: |
-          kubectl create namespace coffea-casa
-        env:
-          DOCKER_BUILDKIT: "1"       
 
       # Generate values.schema.json from schema.yaml
       #- name: Generate values.schema.json from schema.yaml
@@ -124,7 +118,6 @@ jobs:
       - name: "Install local chart"
         run: |
           helm upgrade --install coffea-casa ./charts/coffea-casa \
-              --namespace coffea-casa
               --values dev-config.yaml
 
       - name: "Await local chart"
