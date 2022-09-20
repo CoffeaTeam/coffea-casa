@@ -92,9 +92,18 @@ jupyterhub:
     db:
       pvc:
         storageClassName: standard
-    image:
-      name: hub.opensciencegrid.org/coffea-casa/k8s-hub-coffea-casa
-      tag: "2022.2.1-n001.h0f14623"
+      image:
+        name: jupyterhub/k8s-hub
+        tag: 1.2.0
+      command: ["sh", "-c"]
+      args:
+        -    pip install
+               --cache-dir /srv/jupyterhub/.cache/pip
+               pyjwt
+               pymacaroons
+          && jupyterhub
+               --config /usr/local/etc/jupyterhub/jupyterhub_config.py
+               --upgrade-db
     extraEnv:
       DASK_BASE_DOMAIN: kubernetes.docker.internal
       CONDOR_ENABLED: 'False'
@@ -122,7 +131,7 @@ jupyterhub:
       enabled: true
       type: letsencrypt
       hosts:
-        - local.jovyan.org
+        - coffea-test.casa
       letsencrypt:
         contactEmail: local@jovyan.org
         acmeServer: https://pebble.coffea-casa/dir
