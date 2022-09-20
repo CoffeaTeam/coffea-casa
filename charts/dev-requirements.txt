@@ -1,0 +1,16 @@
+# chartpress is important for local development, CI and CD
+# - builds images and can push them also (--push)
+# - updates image names and tags in values.yaml
+# - can publish the built Helm chart (--publish)
+#
+# ref: https://github.com/jupyterhub/chartpress
+#
+chartpress>=2.1,<3
+
+# pytest run tests that require requests and pyyaml
+pytest>=3.7.1
+pyyaml
+requests
+
+# used to formatting and linting
+pre-commit>=2.0.0
