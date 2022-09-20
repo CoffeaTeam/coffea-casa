@@ -97,8 +97,17 @@ jupyterhub:
       pvc:
         storageClassName: rook-ceph-block
     image:
-      name: carljetter/k8s-hub
-      tag: '0.2.0'
+      name: jupyterhub/k8s-hub
+      tag: 1.2.0
+    command: ["sh", "-c"]
+    args:
+        -    pip install
+               --cache-dir /srv/jupyterhub/.cache/pip
+               pyjwt
+               pymacaroons
+          && jupyterhub
+               --config /usr/local/etc/jupyterhub/jupyterhub_config.py
+               --upgrade-db
     extraEnv:
       OAUTH2_AUTHORIZE_URL:
       OAUTH2_TOKEN_URL:
