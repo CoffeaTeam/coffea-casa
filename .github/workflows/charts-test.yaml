@@ -1,0 +1,150 @@
+# This is a GitHub workflow defining a set of jobs with a set of steps.
+# ref: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+#
+name: Test chart
+
+# Trigger the workflow's on all PRs and pushes so that other contributors can
+# run tests in their own forks. Avoid triggering these tests on changes to
+# documentation only changes.
+on:
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "docs-img/**"
+      - "**.md"
+      - ".github/workflows/*"
+      - "!.github/workflows/charts-test.yaml"
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "docs-img/**"
+      - "**.md"
+      - ".github/workflows/*"
+      - "!.github/workflows/charts-test.yaml"
+    branches-ignore:
+      - "dependabot/**"
+      - "pre-commit-ci-update-config"
+      - "update-*"
+      - "vuln-scan-*"
+  workflow_dispatch:
+
+jobs:
+  
+  test:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 20
+
+    strategy:
+      # Keep running even if one variation of the job fail
+      fail-fast: false
+      matrix:
+        # We run this job multiple times with different parameterization
+        # specified below, these parameters have no meaning on their own and
+        # gain meaning on how job steps use them.
+        #
+        # k3s-version: https://github.com/rancher/k3s/tags
+        # k3s-channel: https://update.k3s.io/v1-release/channels
+        # TODO: add upgrade test
+        include:
+          - k3s-channel: latest
+            test: install
+          - k3s-channel: stable
+            test: install
+          - k3s-channel: v1.20
+            test: install
+          - k3s-channel: v1.21 
+            test: install
+          - k3s-channel: v1.22
+            test: install
+          - k3s-channel: v1.23
+            test: install
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # chartpress requires git history to set chart version and image tags
+          # correctly
+          fetch-depth: 0
+
+      # Starts a k8s cluster with NetworkPolicy enforcement and installs both
+      # kubectl and helm
+      #
+      # ref: https://github.com/jupyterhub/action-k3s-helm/
+      - uses: jupyterhub/action-k3s-helm@v3
+        with:
+          k3s-channel: ${{ matrix.k3s-channel }}
+          metrics-enabled: false
+          traefik-enabled: false
+          docker-enabled: true
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      # Install a local ACME server to fill the role of Let's Encrypt (LE). We
+      # do this as the HTTP challenge sent out by an ACME server must be able to
+      # reach the ACME client in our autohttps pod.
+      - name: Install local ACME server
+        run: |
+          helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values charts/dev-pebble.yaml --namespace coffea-casa
+      # Build our images if needed and update values.yaml with the tags
+      - name: Install and run chartpress
+        run: |
+          pip3 install -r charts/dev-requirements.txt
+          cd charts && chartpress
+        env:
+          DOCKER_BUILDKIT: "1"
+
+      # Generate values.schema.json from schema.yaml
+      #- name: Generate values.schema.json from schema.yaml
+      #  run: |
+      #    tools/generate-json-schema.py
+
+      # Validate rendered helm templates against the k8s api-server with the
+      # dedicated lint-and-validate-values.yaml config.
+      #- name: "Helm template --validate (with lint and validate config)"
+      #  run: |
+      #    helm template --validate jupyterhub ./jupyterhub --values tools/templates/lint-and-validate-values.yaml ${{ matrix.helm-template-validate-extra-args }}
+
+      # It is only needed at this point forward as this is when we install
+      # jupyterhub and the autohttps pod is about to start, so for CI
+      # performance we delayed this until now and did other things in between.
+      - name: Await local ACME server
+        uses: jupyterhub/action-k8s-await-workloads@v1
+        with:
+          timeout: 150
+          max-restarts: 1
+
+      - name: "Install local chart"
+        run: |
+          helm upgrade --install coffea-casa ./charts/coffea-casa \
+              --namespace coffea-casa
+              --values dev-config.yaml
+
+      - name: "Await local chart"
+        uses: jupyterhub/action-k8s-await-workloads@v1
+        with:
+          timeout: 150
+          max-restarts: 1
+
+      - name: Await local chart cert acquisition
+        run: |
+          i=0; while [ $i -ne 60 ]; do
+            kubectl logs deploy/autohttps -c traefik | grep "Adding certificate" \
+              && acquired_cert=true && break \
+              || acquired_cert=false && sleep 0.5 && i=$((i + 1))
+          done
+
+
+      - name: Run tests
+        continue-on-error: ${{ matrix.accept-failure == true }}
+        run: |
+          # If you have problems with the tests add '--capture=no' to show stdout
+          pytest --verbose --color=yes ./tests-charts
+
+      # ref: https://github.com/jupyterhub/action-k8s-namespace-report
+      - name: Kubernetes namespace report
+        uses: jupyterhub/action-k8s-namespace-report@v1
+        if: always()
+        with:
+          important-workloads: deploy/hub deploy/proxy
