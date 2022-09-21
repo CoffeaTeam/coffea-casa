@@ -1,6 +1,6 @@
 charts:
   - name: coffea-casa
-    #imagePrefix: hub.opensciencegrid.org/coffea-casa/
+    imagePrefix: hub.opensciencegrid.org/coffea-casa/
     #imagePrefix: jupyterhub/k8s-
     repo:
       git: coffeateam/coffea-casa
@@ -32,7 +32,7 @@ charts:
       #singleuser-sample:
       #  valuesPath: jupyterhub.singleuser.image
 
-      coffea-casa:
+      cc-ubuntu:
         # We will not use the default build contextPath, and must therefore
         # specify the dockerfilePath explicitly.
         dockerfilePath: ../docker/Dockerfile.cc-ubuntu
@@ -49,7 +49,7 @@ charts:
         paths:
           - ../docker/Dockerfile.cc-ubuntu
         valuesPath:
-          - jupyterhub.singleuser.profileList[0].kubespawner_override.image
+          - jupyterhub.singleuser.profileList.0.kubespawner_override.image
 
       #coffea-casa-analysis:
       #  # We will not use the default build contextPath, and must therefore
