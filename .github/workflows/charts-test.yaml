@@ -139,11 +139,11 @@ jobs:
           done
 
 
-      - name: Run tests
-        continue-on-error: ${{ matrix.accept-failure == true }}
-        run: |
-          # If you have problems with the tests add '--capture=no' to show stdout
-          pytest --verbose --color=yes ./tests-charts
+      #- name: Run tests
+      #  continue-on-error: ${{ matrix.accept-failure == true }}
+      #  run: |
+      #    # If you have problems with the tests add '--capture=no' to show stdout
+      #    pytest --verbose --color=yes ./tests-charts
 
       # ref: https://github.com/jupyterhub/action-k8s-namespace-report
       - name: Kubernetes namespace report
