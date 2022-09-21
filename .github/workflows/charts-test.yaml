@@ -115,6 +115,11 @@ jobs:
           timeout: 150
           max-restarts: 1
 
+      - name: "Check if the Helm dependencies are pulled"
+        run: |
+          cd charts/coffea-casa && helm dependency build
+
+
       - name: "Install local chart"
         run: |
           helm upgrade --install coffea-casa ./charts/coffea-casa
