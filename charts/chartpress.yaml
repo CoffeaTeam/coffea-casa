@@ -49,23 +49,23 @@ charts:
         paths:
           - ../docker/Dockerfile.cc-ubuntu
         valuesPath:
-          - jupyterhub.singleuser.profileList.0.kubespawner_override.image
+          - jupyterhub.singleuser.profileList[0].kubespawner_override.image
 
-      coffea-casa-analysis:
-        # We will not use the default build contextPath, and must therefore
-        # specify the dockerfilePath explicitly.
-        dockerfilePath: ../docker/Dockerfile.cc-analysis-ubuntu
-        # Context to send to docker build for use by the Dockerfile. We pass the
-        # root folder in order to allow the image to access and build the python
-        # package.
-        contextPath: ../docker
-        # To avoid chartpress to react to changes in documentation and other
-        # things, we ask it to not trigger on changes to the contextPath, which
-        # means we manually should add paths rebuild should be triggered on
-        rebuildOnContextPathChanges: false
-        # We manually specify the paths which chartpress should monitor for
-        # changes that should trigger a rebuild of this image.
-        paths:
-          - ../docker/Dockerfile.cc-analysis-ubuntu
-        valuesPath:
-          - jupyterhub.singleuser.extraContainers.image
+      #coffea-casa-analysis:
+      #  # We will not use the default build contextPath, and must therefore
+      #  # specify the dockerfilePath explicitly.
+      #  dockerfilePath: ../docker/Dockerfile.cc-analysis-ubuntu
+      #  # Context to send to docker build for use by the Dockerfile. We pass the
+      #  # root folder in order to allow the image to access and build the python
+      #  # package.
+      #  contextPath: ../docker
+      #  # To avoid chartpress to react to changes in documentation and other
+      #  # things, we ask it to not trigger on changes to the contextPath, which
+      #  # means we manually should add paths rebuild should be triggered on
+      #  rebuildOnContextPathChanges: false
+      #  # We manually specify the paths which chartpress should monitor for
+      #  # changes that should trigger a rebuild of this image.
+      #  paths:
+      #    - ../docker/Dockerfile.cc-analysis-ubuntu
+      #  valuesPath:
+      #    - jupyterhub.singleuser.extraContainers.image
