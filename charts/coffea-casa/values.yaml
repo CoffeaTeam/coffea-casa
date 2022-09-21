@@ -120,11 +120,7 @@ jupyterhub:
     readinessProbe:
       periodSeconds: 10
     db:
-      pvc:
-        # On minikube, default storage class is standard,
-        # while on k3s it is default
-        #storageClassName: standard
-        storageClassName: default
+      type: sqlite-memory
     extraEnv:
       DASK_BASE_DOMAIN: kubernetes.docker.internal
       CONDOR_ENABLED: 'False'
@@ -191,11 +187,7 @@ jupyterhub:
           command: ['bash', '-c', 'mkdir -p /home/cms-jovyan/.condor/tokens.d/ ']
           #&& cp -f /etc/cmsaf-secrets/condor_token /home/cms-jovyan/.condor/tokens.d/condor_token ']
     storage:
-      homeMountPath: /home/cms-jovyan/
-      dynamic:
-        # On minikube, default storage class is standard,
-        # while on k3s it is default
-        storageClass: default
+      type: none
     defaultUrl: "/lab"
     extraEnv:
       LABEXTENTION_FACTORY_CLASS: LocalCluster
