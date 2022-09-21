@@ -121,7 +121,10 @@ jupyterhub:
       periodSeconds: 10
     db:
       pvc:
-        storageClassName: standard
+        # On minikube, default storage class is standard,
+        # while on k3s it is default
+        #storageClassName: standard
+        storageClassName: default
     extraEnv:
       DASK_BASE_DOMAIN: kubernetes.docker.internal
       CONDOR_ENABLED: 'False'
@@ -190,7 +193,9 @@ jupyterhub:
     storage:
       homeMountPath: /home/cms-jovyan/
       dynamic:
-        storageClass: standard
+        # On minikube, default storage class is standard,
+        # while on k3s it is default
+        storageClass: default
     defaultUrl: "/lab"
     extraEnv:
       LABEXTENTION_FACTORY_CLASS: LocalCluster
