@@ -4,4 +4,4 @@ metadata:
   name: hub-config-d
   namespace: {{ .Release.Namespace }}
 data:
-{{ (.Files.Glob "files/hub/*").AsConfig | indent 2 }}
+{{- (.Files.Glob "files/hub/*").AsConfig | nindent 2 }}

@@ -69,46 +69,46 @@ jupyterhub:
     args:
       - pip install --cache-dir /srv/jupyterhub/.cache/pip pyjwt pymacaroons && jupyterhub
         --config /usr/local/etc/jupyterhub/jupyterhub_config.py --upgrade-db
-    extraVolumeMounts:
-      - name: custom-templates
-        mountPath: /etc/jupyterhub/custom
-      - name: hub-config-d
-        mountPath: /usr/local/etc/jupyterhub/auth.py
-        subPath: auth.py
-      - name: hub-config-d
-        mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
-        subPath: secret_creation_hook.py
-      - name: hub-config-d
-      # Custom login page
-        mountPath: /etc/jupyterhub/custom/login.html
-        subPath: login.html
-      - name: hub-config-d
-      # Custom login logo
-        mountPath: /usr/local/share/jupyterhub/static/images/logo.png
-        subPath: logo.png.bin
-      - name: hub-config-d
-      # Override GenericOAuthenticator with token refresh version
-        mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/generic.py
-        subPath: oauthenticator-generic.py
-      - name: hub-config-d
-      # Pull in v14.2.0 of oauthenticator/oauth2.py, unmodified
-      # Our patched oauthenticator/generic.py comes from v14.2. as well
-      # Remove once hub is running v14+
-        mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/oauth2.py
-        subPath: oauthenticator-oauth2-14.2.0.py
-      - name: hub-config-d
-      # Add CoffeaOAuthenticator to save tokens to secret
-        mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/coffea.py
-        subPath: oauthenticator-coffea.py
-    extraVolumes:
-      - name: custom-templates
-        emptyDir: {}
-      - name: hub-config-d
-        configMap:
-          name: hub-config-d
-    extraConfig:
-      templates: |
-        c.JupyterHub.template_paths = ['/etc/jupyterhub/custom/']
+    #extraVolumes:
+    #  - name: custom-templates
+    #    emptyDir: {}
+    #  - name: hub-config-d
+    #    configMap:
+    #      name: hub-config-d
+    #extraVolumeMounts:
+    #  - name: custom-templates
+    #    mountPath: /etc/jupyterhub/custom
+    #  - name: hub-config-d
+    #    mountPath: /usr/local/etc/jupyterhub/auth.py
+    #    subPath: auth.py
+    #  - name: hub-config-d
+    #    mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
+    #    subPath: secret_creation_hook.py
+    #  - name: hub-config-d
+    #  # Custom login page
+    #    mountPath: /etc/jupyterhub/custom/login.html
+    #    subPath: login.html
+    #  - name: hub-config-d
+    #  # Custom login logo
+    #    mountPath: /usr/local/share/jupyterhub/static/images/logo.png
+    #    subPath: logo.png.bin
+    #  - name: hub-config-d
+    #  # Override GenericOAuthenticator with token refresh version
+    #    mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/generic.py
+    #    subPath: oauthenticator-generic.py
+    #  - name: hub-config-d
+    #  # Pull in v14.2.0 of oauthenticator/oauth2.py, unmodified
+    #  # Our patched oauthenticator/generic.py comes from v14.2. as well
+    #  # Remove once hub is running v14+
+    #    mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/oauth2.py
+    #    subPath: oauthenticator-oauth2-14.2.0.py
+    #  - name: hub-config-d
+    #  # Add CoffeaOAuthenticator to save tokens to secret
+    #    mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/coffea.py
+    #    subPath: oauthenticator-coffea.py
+    #extraConfig:
+    #  templates: |
+    #    c.JupyterHub.template_paths = ['/etc/jupyterhub/custom/']
     config:
       JupyterHub:
         admin_access: true
