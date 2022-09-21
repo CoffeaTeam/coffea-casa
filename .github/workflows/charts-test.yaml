@@ -117,8 +117,7 @@ jobs:
 
       - name: "Install local chart"
         run: |
-          helm upgrade --install coffea-casa ./charts/coffea-casa \
-              --values dev-config.yaml
+          helm upgrade --install coffea-casa ./charts/coffea-casa
 
       - name: "Await local chart"
         uses: jupyterhub/action-k8s-await-workloads@v1
