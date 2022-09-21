@@ -127,8 +127,8 @@ jobs:
       - name: "Await local chart"
         uses: jupyterhub/action-k8s-await-workloads@v1
         with:
-          timeout: 150
-          max-restarts: 1
+          timeout: 350
+          max-restarts: 3
 
       - name: Await local chart cert acquisition
         run: |
