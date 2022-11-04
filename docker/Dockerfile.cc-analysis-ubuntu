@@ -92,6 +92,7 @@ RUN mamba install --yes \
     htcondor \
     xgboost \
     pyhf \
+    cabinetry>=0.5.1 \
     vector \
     hist \
     mplhep \
@@ -105,7 +106,6 @@ RUN pip install --no-cache-dir \
     func-adl-servicex \
     servicex \
     func-adl-uproot \
-    cabinetry \
     dask_jobqueue==0.7.3 \
     tornado==6.2 \
     aiostream
