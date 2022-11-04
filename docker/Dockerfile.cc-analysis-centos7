@@ -115,7 +115,10 @@ RUN mamba install --yes \
     hist \
     mplhep \
     iminuit \
-    cmake
+    cmake \
+    && mamba clean \
+        --all \
+        --yes
 
 #
 RUN pip install --no-cache-dir coffea[servicex] \
@@ -177,7 +180,6 @@ RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
-    && mamba clean -tipsy \
     && find ${CONDA_DIR} -type f -name '*.a' -delete \
     && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
