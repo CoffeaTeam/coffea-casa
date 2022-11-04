@@ -47,7 +47,7 @@ ENV CONDOR_HOST $CONDOR_HOST
 ENV COLLECTOR_NAME $COLLECTOR_NAME
 ENV UID_DOMAIN $UID_DOMAIN
 ENV SCHEDD_HOST $SCHEDD_HOST
-     
+
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
 RUN apt-get update --yes && \
@@ -206,6 +206,7 @@ RUN mamba install --yes \
     htcondor \
     xgboost \
     pyhf \
+    cabinetry>=0.5.1 \
     vector \
     hist \
     mplhep \
@@ -224,7 +225,6 @@ RUN pip install --no-cache-dir \
     # Packages depends on the older version of servicex
     servicex-databinder \
     correctionlib \
-    cabinetry \
     #funcx==0.3.9 \
     pyyaml
     #git+https://github.com/ssl-hep/servicex-labextension.git#subdirectory=servicex-dashboard
