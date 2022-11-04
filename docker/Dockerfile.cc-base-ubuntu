@@ -114,7 +114,10 @@ RUN mamba install --quiet --yes \
     jupyterlab_widgets \
     jupyterlab-git \
     dask_labextension && \
-    mamba clean --all -f -y && \
+    mamba clean \
+        --all \
+        --force-pkgs-dirs \
+        --yes && \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
     jupyter lab clean && \
@@ -212,7 +215,11 @@ RUN mamba install --yes \
     mplhep \
     iminuit \
     cmake \
-    scikit-hep-testdata
+    scikit-hep-testdata \
+    && mamba clean \
+        --all \
+        --force-pkgs-dirs \
+        --yes
 
 RUN pip install --no-cache-dir \
     aiostream \
@@ -250,7 +257,6 @@ RUN groupadd -r condor && \
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
-    && mamba clean --all -f -y \
     && jupyter lab clean \
     && jlpm cache clean \
     && npm cache clean --force \

@@ -97,7 +97,11 @@ RUN mamba install --yes \
     hist \
     mplhep \
     iminuit \
-    cmake
+    cmake \
+    && mamba clean \
+        --all \
+        --force-pkgs-dirs \
+        --yes
 
 #
 RUN pip install --no-cache-dir \
@@ -158,7 +162,6 @@ RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
-    && mamba clean --all -f -y \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
