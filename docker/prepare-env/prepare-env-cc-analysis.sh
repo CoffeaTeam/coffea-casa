@@ -13,7 +13,7 @@ if [ "$EXTRA_PIP_PACKAGES" ]; then
 fi
 
   # FIXME: in case of sidecar dask worker is available
-  if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" && "$SKYHOOK_CLUSTER_ADDR" && "$SKYHOOK_PUBLIC_ADDR" && "$SKYHOOK_MON_HOST" ]]; then
+if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" && "$SKYHOOK_CLUSTER_ADDR" && "$SKYHOOK_PUBLIC_ADDR" && "$SKYHOOK_MON_HOST" ]]; then
   sed -i -e "s|%(SKYHOOK_CEPH_UUIDGEN)|${SKYHOOK_CEPH_UUIDGEN}|g" $CEPH_DIR/ceph.conf
   sed -i -e "s|%(SKYHOOK_CEPH_KEYRING)|${SKYHOOK_CEPH_KEYRING}|g" $CEPH_DIR/keyring
   sed -i -e "s|%(SKYHOOK_MON_HOST)|${SKYHOOK_MON_HOST}|g" $CEPH_DIR/ceph.conf
