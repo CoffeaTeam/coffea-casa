@@ -173,8 +173,8 @@ RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
     #patch -p2 < 0003-Activate-patch.patch && \
-    patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
-    # && patch -p2 < 0005-Add-patch-from-John-Thiltges.patch
+    patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch && \
+    patch -p2 < 0005-Add-patch-from-John-Thiltges.patch
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
