@@ -23,7 +23,9 @@ CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
 HOME_DIR = Path.home()
 # XCache
+# REMOVE ME (backward compatibity for now)
 XCACHE_FILE = SECRETS_DIR / "xcache_token"
+XCACHE_SCITOKEN_FILE = SECRETS_DIR / "access_token"
 # pip
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
 # conda, with yml/yaml both supported
@@ -142,7 +144,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         if (CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")["require_encryption"]):
             job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
-            input_files += [CA_FILE, CERT_FILE, XCACHE_FILE]
+            input_files += [CA_FILE, CERT_FILE, XCACHE_FILE, XCACHE_SCITOKEN_FILE]
         else:
             raise KeyError("Please check with system administarator why you do not have a certificate.")
         files = ", ".join(str(path) for path in input_files)
