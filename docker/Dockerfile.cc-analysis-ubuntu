@@ -126,7 +126,7 @@ RUN pip install --no-cache-dir \
 
 RUN chmod 755 /etc/grid-security/certificates
 
-RUN cat <<EOF >> /etc/grid-security/certificates/hcc-flatiron.pem
+COPY <<EOF /etc/grid-security/certificates/hcc-flatiron.pem
 -----BEGIN CERTIFICATE-----
 MIIC+DCCAeCgAwIBAgIQKnsyFkDsuVdGOdnQXStdeTANBgkqhkiG9w0BAQsFADAW
 MRQwEgYDVQQDEwtJbnRlcm5hbCBDQTAeFw0yMjEyMTMxNjMzMDVaFw0zMjEyMTAx
