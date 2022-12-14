@@ -20,6 +20,7 @@ ARG REGISTRY
 ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
+# FIX ME AFTER TEST:
 ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
 # Configure Labextention Dask Cluster factory
 ARG DASK_ROOT_CONFIG="/opt/dask"
@@ -32,9 +33,7 @@ ARG COLLECTOR_NAME="Nebraska T2"
 ARG UID_DOMAIN="unl.edu"
 ARG SCHEDD_HOST="t3.unl.edu"
 # XCACHE
-ARG XCACHE_HOST="red-xcache1.unl.edu"
-# XCACHE settings for Servicex
-ARG CACHE_PREFIX="red-xcache1.unl.edu"
+# ARG XCACHE_HOST="red-xcache1.unl.edu"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -69,16 +68,47 @@ RUN pip install --no-cache-dir \
     # coffea casa jobqueue modules
     coffea_casa -U
 
+# REMOVE ME AFTER TEST:
 # ------- xrootd-authz-plugin -------------------------------
-RUN cd /tmp && \
-    # ------- xrdcl-authz-plugin -------------------------------
-    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-    cd xrdcl-authz-plugin && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
-    make && \
-    make install
+#RUN cd /tmp && \
+#    # ------- xrdcl-authz-plugin -------------------------------
+#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+#    cd xrdcl-authz-plugin && \
+#    mkdir build && \
+#    cd  build && \
+#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+#    make && \
+#    make install
+
+RUN chmod 755 /etc/grid-security/certificates
+
+RUN cat << EOF > /etc/grid-security/certificates/hcc-flatiron.pem
+-----BEGIN CERTIFICATE-----
+MIIC+DCCAeCgAwIBAgIQKnsyFkDsuVdGOdnQXStdeTANBgkqhkiG9w0BAQsFADAW
+MRQwEgYDVQQDEwtJbnRlcm5hbCBDQTAeFw0yMjEyMTMxNjMzMDVaFw0zMjEyMTAx
+NjMzMDVaMBYxFDASBgNVBAMTC0ludGVybmFsIENBMIIBIjANBgkqhkiG9w0BAQEF
+AAOCAQ8AMIIBCgKCAQEAxxLTYp6aOjpwJp7FMgEqk0ZOOQ0BzC5htlSnaP/y/2l0
+ExD1z/moV5qEWt/T53GslBsGmezVbYBI7Eijb6sOiM4Bj6o4AALdYbUdrkqf+0LR
+aV6dP8BTnJtwCVDpUgSlPABiDYAteIoKYjd1+cGLvXlOqdrmr20WQFcykK3OsNCd
+vgC9In2goAQuaUxcLoOgr+I3SQ6EuYtMhJYh+XqhpIc/2tE29ORHHj0VRIG+xQ8H
+3nZvVofB6cEcCPIWvuMh+OVb90hwB3+X429Obupr0WFafdw9de3fi0Y03q4VMJQf
+L4CB9xp1S+0qGLJ8hdo4R1L+AEOh9ilEPSigPvkZcwIDAQABo0IwQDAOBgNVHQ8B
+Af8EBAMCAqQwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUz/QKVJPhNVUsAH6Z
+6LgehKWREsIwDQYJKoZIhvcNAQELBQADggEBAFjo/OcNe2PuQlef6y55QiIPl/X5
+WS35qBZJYo4ME9LdFxF8sYd8BwCyVhW+uvDes/EiYVGHQJfLQjaSSoMKHjWqcDF0
+KrlKMiqxnpFeJrVc2mlDEqMa/2LE7ln05t9jHhUH0bXvUfXqDsmXStzUYaNf5iDT
+6EwdT070gIdL32NSzT2pnRsnAfiAqJngSiiW1ehKCZuqH5zR0UK80dDiNcnFs/rF
+Pv2TukoTv8rNDbDjw3Zk1Q/+xnuL6Cji+OHSjqVRrryS7scn8G3QA1nFK1d+mm0h
+tWATifspL3kF4eC/jcAY0bT+D2LUMxwaNfM5oEncZiwMME2UYMr9D4hALzI=
+-----END CERTIFICATE-----
+EOF
+
+RUN ln -s /etc/grid-security/certificates/hcc-flatiron.pem /etc/grid-security/certificates/80d1fda9.0
+
+# REMOVE ME AFTER TEST:
+# xcache setup
+#ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+#ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
@@ -110,10 +140,6 @@ RUN rm -rf /tmp/* \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
     && (find ${CONDA_DIR}/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
-
-# xcache setup
-ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 
 # FIXME: add better layering for preparation of env
 ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
