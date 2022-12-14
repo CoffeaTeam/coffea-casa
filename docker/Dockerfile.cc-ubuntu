@@ -115,9 +115,10 @@ COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
 
+# REMOVE ME AFTER TEST:
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
-COPY uproot/uproot_xrd_source.patch ${CONDA_DIR}/lib/python3.8/site-packages/uproot
-RUN cd ${CONDA_DIR}/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+#COPY uproot/uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
+#RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
 
 # Distributed: we need to install patched version of distributed version
 COPY dask/distributed ${CONDA_DIR}/lib/python3.8/site-packages/distributed
