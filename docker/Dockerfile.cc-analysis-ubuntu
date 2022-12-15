@@ -6,16 +6,14 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
-# XCACHE
-ARG XCACHE_HOST="red-xcache1.unl.edu"
 ARG CERT_DIR="/etc/cmsaf-secrets"
-# FIX ME AFTER TEST:
-ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
-
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
+ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
 
 # Configure environment
+ENV CERT_DIR=$CERT_DIR
+ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
 ENV NB_USER $NB_USER
@@ -24,10 +22,6 @@ ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
-ENV XCACHE_HOST $XCACHE_HOST
-ENV CACHE_PREFIX $CACHE_PREFIX
-ENV CERT_DIR $CERT_DIR
-ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)

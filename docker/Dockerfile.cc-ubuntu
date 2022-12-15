@@ -21,7 +21,7 @@ ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
 # FIX ME AFTER TEST:
-ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
+ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets-chown/access_token"
 # Configure Labextention Dask Cluster factory
 ARG DASK_ROOT_CONFIG="/opt/dask"
 ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
@@ -52,8 +52,6 @@ ENV CONDOR_HOST=$CONDOR_HOST
 ENV COLLECTOR_NAME=$COLLECTOR_NAME
 ENV UID_DOMAIN=$UID_DOMAIN
 ENV SCHEDD_HOST=$SCHEDD_HOST
-ENV XCACHE_HOST=$XCACHE_HOST
-ENV CACHE_PREFIX=$CACHE_PREFIX
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \

@@ -45,14 +45,6 @@ else
   echo "Skyhook was not configured. Please add next env values: SKYHOOK_CEPH_KEYRING SKYHOOK_CEPH_UUIDGEN SKYHOOK_CLUSTER_ADDR SKYHOOK_PUBLIC_ADDR SKYHOOK_MON_HOST in helm charts."
 fi
 
-# REMOVE ME AFTER TEST:
-if [[ -f "/etc/cmsaf-secrets/access_token" ]]; then
-  cat /etc/cmsaf-secrets/access_token > /tmp/access_token
-  chmod 600 /tmp/access_token
-  # Redefine BEARER_TOKEN_FILE
-  BEARER_TOKEN_FILE="/tmp/access_token"
-fi
-
 # Check environment
 if [ -e "$HOME/environment.yml" ]; then
     echo "Conda: environment.yml found. Installing packages."

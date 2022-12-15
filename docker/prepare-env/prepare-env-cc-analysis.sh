@@ -66,11 +66,6 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   if [[ -f "$_CONDOR_JOB_IWD/condor_token" ]]; then
       mkdir -p /home/$NB_USER/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/$NB_USER/.condor/tokens.d/condor_token
   fi
-
-  # Bearer token (overwrite value preconfigured for k8s)
-  #if [[ -f "$_CONDOR_JOB_IWD/xcache_token" ]]; then
-  #    export BEARER_TOKEN_FILE="$_CONDOR_JOB_IWD/xcache_token"
-  #fi
   
   # REMOVE ME AFTER TEST:
   # Bearer token (overwrite value preconfigured for k8s)
@@ -132,6 +127,8 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       MEMORY_MB_FORMATTED=$MEMORY".00MB"
       # Requirement: to add to Condor job decription "+DaskSchedulerAddress": '"tcp://129.93.183.34:8787"',
       EXTERNALIP_PORT=`cat $_CONDOR_JOB_AD | grep DaskSchedulerAddress | tr -d '"' | awk '{print $NF;}'`
+      # From jthiltges 
+      #WORKER_LIFETIME=${WORKER_LIFETIME:-1 hour}
 
       echo "Print ClassAd:" 1>&2
       cat $_CONDOR_JOB_AD 1>&2
@@ -149,6 +146,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --nanny \
       --death-timeout 60 \
       --protocol tls \
+      --lifetime 7200 \
       --listen-address tls://0.0.0.0:$CONTAINER_PORT \
       --contact-address tls://$HOST:$PORT"
       # Debug print
