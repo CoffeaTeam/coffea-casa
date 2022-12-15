@@ -67,10 +67,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       mkdir -p /home/$NB_USER/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/$NB_USER/.condor/tokens.d/condor_token
   fi
   
-  # REMOVE ME AFTER TEST:
-  # Bearer token (overwrite value preconfigured for k8s)
   if [[ -f "$_CONDOR_JOB_IWD/access_token" ]]; then
-      chmod 600 $_CONDOR_JOB_IWD/access_token
       export BEARER_TOKEN_FILE="$_CONDOR_JOB_IWD/access_token"
   fi
 

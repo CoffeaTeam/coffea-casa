@@ -14,7 +14,9 @@ DEFAULT_CONTAINER_PORT = 8786
 #DEFAULT_NANNY_PORT = 8001
 
 # Security settings for Dask scheduler
+# REMOVE ME (backward compatibity for now)
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
+SECRETS_DIR_CHOWN = Path("/etc/cmsaf-secrets-chown")
 # CEPH (Skyhook)
 CEPH_DIR = Path("/opt/ceph")
 CEPH_CONF = CEPH_DIR / "ceph.conf"
@@ -25,7 +27,7 @@ HOME_DIR = Path.home()
 # XCache
 # REMOVE ME (backward compatibity for now)
 XCACHE_FILE = SECRETS_DIR / "xcache_token"
-XCACHE_SCITOKEN_FILE = SECRETS_DIR / "access_token"
+XCACHE_SCITOKEN_FILE = SECRETS_DIR_CHOWN / "access_token"
 # pip
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
 # conda, with yml/yaml both supported

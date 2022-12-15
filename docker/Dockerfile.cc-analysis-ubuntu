@@ -9,10 +9,10 @@ ARG NB_GID="11265"
 ARG CERT_DIR="/etc/cmsaf-secrets"
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
-ARG BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
+ARG BEARER_TOKEN_FILE
 
 # Configure environment
-ENV CERT_DIR=$CERT_DIR
+ENV CERT_DIR $CERT_DIR
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
