@@ -7,15 +7,6 @@
     box-sizing: border-box;
 }
 
-.hero-image {
-	background-image: url('/static/images/logo.png');
-	background-repeat: no-repeat;
-	background-position: center;
-	background-size:400px ;
-	height: 267px;
-	position: relative;
-	opacity: 0.3;
-}
 .hero-text {
   text-align: center;
   position: absolute;
@@ -88,17 +79,13 @@ button,.btn,.btn-lg,.btn-jupyter {
 <body>
 
 <div class="header">
-  <h2>CMS Analysis Facility @ T2_US_Nebraska</h1>
+  <h2>Opendata Analysis Facility @ T2_US_Nebraska</h1>
 </div>
 <div class="hero-image">
   <div class="hero-text">
   </div>
 </div>
-  <H1>Authorized CMS Users Only!</H1>
   <center>
-
-  <p>To login into the Coffea-Casa Analysis Facility, you will need to get a CMS OAuth token.</i></p>
-  To get a token you need to a) be member of CMS and b) register with the OAuth service at: <a href="https://cms-auth.web.cern.ch"> CMS-Auth.web.cern.ch </a></p>
   <H2>Useful Links</H2>
     <a href="https://github.com/CoffeaTeam/coffea-casa/discussions/categories/unl-tech-support" target="_blank">Coffea-Casa Support Page</a>
     <a href="https://coffea-casa.readthedocs.io/en/latest/" target="_blank"> Coffea-Casa Docs</a>
@@ -106,12 +93,17 @@ button,.btn,.btn-lg,.btn-jupyter {
 
 Watch here for announcements!
 
+<div class="service-login">
+	<a role="button" class='btn btn-jupyter btn-lg'  href="https://registry.cilogon.org/registry/co_petitions/start/coef:178">Register for access</a>
+  </a>
+</div>
 
 <div class="service-login">
 	<a role="button" class='btn btn-jupyter btn-lg' href='{{authenticator_login_url}}'>
-    Authorized CMS Users Only: <br> Sign in with {{login_service}}
+    Authorized Users Only: <br> Sign in with {{login_service}}
   </a>
 </div>
+
 </div>
 
 {% endblock %}

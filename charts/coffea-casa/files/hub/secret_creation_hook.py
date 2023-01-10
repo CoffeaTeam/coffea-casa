@@ -68,9 +68,9 @@ async def pre_spawn_hook(spawner):
     euser = escape_username(spawner.user.name)
 
     # Detect if there are tokens for this user - if so, add them as volume mounts.
-    spawner.environment["BEARER_TOKEN_FILE"] = "/etc/cmsaf-secrets/xcache_token"
+    #spawner.environment["BEARER_TOKEN_FILE"] = "/etc/cmsaf-secrets/xcache_token"
     #c.KubeSpawner.environment["XCACHE_HOST"] = "red-xcache1.unl.edu"
-    spawner.environment["XRD_PLUGINCONFDIR"] = "/opt/conda/etc/xrootd/client.plugins.d/"
+    #spawner.environment["XRD_PLUGINCONFDIR"] = "/opt/conda/etc/xrootd/client.plugins.d/"
     spawner.environment["LD_LIBRARY_PATH"] = "/opt/conda/lib/"
 
     ##########################################################################
