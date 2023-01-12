@@ -1,8 +1,3 @@
-# Enable local deployment
-devAFDeployment: true
-testpem: "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"
-testtoken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-
 # Disable/enable RBAC
 rbac:
   enabled: true
@@ -51,7 +46,7 @@ servicex:
   # host: "http://coffea-casa-servicex-app:8000"
 
 xcache:
-  enabled: true
+  enabled: false
 
 htcondor:
   enabled: false
@@ -59,7 +54,10 @@ htcondor:
 oidc_auth:
   enabled: false
 
+
+#####################
 # Jupyterhub settings
+# FIXME: pymacaroons is not possible install
 jupyterhub:
   hub:
     image:
@@ -67,48 +65,61 @@ jupyterhub:
       tag: 1.2.0
     command: ["sh", "-c"]
     args:
-      - pip install --cache-dir /srv/jupyterhub/.cache/pip pyjwt pymacaroons && jupyterhub
-        --config /usr/local/etc/jupyterhub/jupyterhub_config.py --upgrade-db
-    #extraVolumes:
-    #  - name: custom-templates
-    #    emptyDir: {}
-    #  - name: hub-config-d
-    #    configMap:
-    #      name: hub-config-d
-    #extraVolumeMounts:
-    #  - name: custom-templates
-    #    mountPath: /etc/jupyterhub/custom
-    #  - name: hub-config-d
-    #    mountPath: /usr/local/etc/jupyterhub/auth.py
-    #    subPath: auth.py
-    #  - name: hub-config-d
-    #    mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
-    #    subPath: secret_creation_hook.py
-    #  - name: hub-config-d
-    #  # Custom login page
-    #    mountPath: /etc/jupyterhub/custom/login.html
-    #    subPath: login.html
-    #  - name: hub-config-d
-    #  # Custom login logo
-    #    mountPath: /usr/local/share/jupyterhub/static/images/logo.png
-    #    subPath: logo.png.bin
-    #  - name: hub-config-d
+      - pip install --cache-dir /srv/jupyterhub/.cache/pip pyjwt && jupyterhub --config
+        /usr/local/etc/jupyterhub/jupyterhub_config.py --upgrade-db
+    # attemp to debug
+    #args: ["while true; do echo 'debug' && sleep 5; done;"]
+    extraEnv:
+      DASK_BASE_DOMAIN: kubernetes.docker.internal
+      CONDOR_ENABLED: 'False'
+      SERVICEX_ENABLED: 'False'
+    extraVolumeMounts:
+      - name: custom-templates
+        mountPath: /etc/jupyterhub/custom
+      - name: hub-config-d
+        mountPath: /usr/local/etc/jupyterhub/auth.py
+        subPath: auth.py
+    # FIXME: can't load file, since it is detected as directory...
+    #- name: hub-config-d
+    # mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
+    #  subPath: secret_creation_hook.py
+      - name: hub-config-d
+      # Custom login page
+        mountPath: /etc/jupyterhub/custom/login.html
+        subPath: login.html
+      - name: hub-config-d
+      # Custom login logo
+        mountPath: /usr/local/share/jupyterhub/static/images/logo.png
+        subPath: logo.png.bin
+    #- name: hub-config-d
     #  # Override GenericOAuthenticator with token refresh version
-    #    mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/generic.py
-    #    subPath: oauthenticator-generic.py
-    #  - name: hub-config-d
+    #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/generic.py
+    #  subPath: oauthenticator-generic.py
+    #- name: hub-config-d
     #  # Pull in v14.2.0 of oauthenticator/oauth2.py, unmodified
     #  # Our patched oauthenticator/generic.py comes from v14.2. as well
     #  # Remove once hub is running v14+
-    #    mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/oauth2.py
-    #    subPath: oauthenticator-oauth2-14.2.0.py
-    #  - name: hub-config-d
+    #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/oauth2.py
+    #  subPath: oauthenticator-oauth2-14.2.0.py
+    #- name: hub-config-d
     #  # Add CoffeaOAuthenticator to save tokens to secret
-    #    mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/coffea.py
-    #    subPath: oauthenticator-coffea.py
-    #extraConfig:
-    #  templates: |
-    #    c.JupyterHub.template_paths = ['/etc/jupyterhub/custom/']
+    #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/coffea.py
+    #  subPath: oauthenticator-coffea.py
+    extraVolumes:
+      - name: pool-password
+        secret:
+          secretName: htcondor-pool-password
+          items:
+            - key: token
+              path: POOL
+      - name: custom-templates
+        emptyDir: {}
+      - name: hub-config-d
+        configMap:
+          name: hub-config-d
+    extraConfig:
+      templates: |
+        c.JupyterHub.template_paths = ['/etc/jupyterhub/custom/']
     config:
       JupyterHub:
         admin_access: true
@@ -121,10 +132,6 @@ jupyterhub:
       periodSeconds: 10
     db:
       type: sqlite-memory
-    extraEnv:
-      DASK_BASE_DOMAIN: kubernetes.docker.internal
-      CONDOR_ENABLED: 'False'
-      SERVICEX_ENABLED: 'False'
   proxy:
     chp:
       resources:
@@ -145,32 +152,23 @@ jupyterhub:
           fieldRef:
             fieldPath: metadata.namespace
     https:
-      enabled: true
+      enabled: false
       type: letsencrypt
       hosts:
         - coffea-test.casa
       letsencrypt:
-        contactEmail: local@jovyan.org
-        acmeServer: https://pebble.coffea-casa/dir
-    secretToken: pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
+        contactEmail: ksu.shadura@gmail.com
     service:
-      # type: LoadBalancer
-      type: NodePort
+      type: LoadBalancer
+      labels: {}
+      #annotations:
+      #  external-dns.alpha.kubernetes.io/hostname: coffea-test.casa
       nodePorts:
-        http: 30080
-        https: 30443
-      # loadBalancerIP: 127.0.0.1
-    traefik:
-      extraVolumes:
-        - name: pebble-root-cert
-          configMap:
-            name: pebble
-      extraVolumeMounts:
-        - name: pebble-root-cert
-          subPath: root-cert.pem
-          mountPath: /etc/pebble/root-cert.pem
-      extraEnv:
-        LEGO_CA_CERTIFICATES: /etc/pebble/root-cert.pem
+        http:
+        https:
+      disableHttpPort: false
+      extraPorts: []
+      loadBalancerIP:
   singleuser:
     networkPolicy:
       enabled: false
@@ -196,7 +194,7 @@ jupyterhub:
       - display_name: "Coffea Base Image"
         description: "Test build"
         kubespawner_override:
-          image: hub.opensciencegrid.org/coffea-casa/cc-ubuntu:2022.09.09-0.dev.git.1097.hf9ccf53
+          image: hub.opensciencegrid.org/coffea-casa/cc-ubuntu:latest
           #tag: "set-by-chartpress"
           #imagePullPolicy: Always
           securityContext:
