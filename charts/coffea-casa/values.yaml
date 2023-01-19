@@ -60,20 +60,19 @@ htcondor:
 oidc_auth:
   enabled: false
 
-
 #####################
 # Jupyterhub settings
 jupyterhub:
   hub:
-    #image:
-    #  name: jupyterhub/k8s-hub
-    #  tag: 1.2.0
+    image:
+      name: jupyterhub/k8s-hub
+      tag: 1.2.0
     command: ["sh", "-c"]
     args:
       - pip install --cache-dir /srv/jupyterhub/.cache/pip pyjwt pymacaroons && jupyterhub --config
         /usr/local/etc/jupyterhub/jupyterhub_config.py --upgrade-db
     # attemp to debug
-    #args: ["while true; do echo 'debug' && sleep 5; done;"]
+    # args: ["while true; do echo 'debug' && sleep 5; done;"]
     extraEnv:
       DASK_BASE_DOMAIN: kubernetes.docker.internal
       CONDOR_ENABLED: 'False'
@@ -87,25 +86,25 @@ jupyterhub:
       - name: hub-extra-config-d
         mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
         subPath: secret_creation_hook.py
-      #- name: hub-extra-config-d
+      # - name: hub-extra-config-d
       ## Custom login page
       #  mountPath: /etc/jupyterhub/custom/login.html
       #  subPath: login.html
-      #- name: hub-extra-config-d
+      # - name: hub-extra-config-d
       ## Custom login logo
       #  mountPath: /usr/local/share/jupyterhub/static/images/logo.png
       #  subPath: logo.png.bin
-    #- name: hub-extra-config-d
+    # - name: hub-extra-config-d
     #  # Override GenericOAuthenticator with token refresh version
     #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/generic.py
     #  subPath: oauthenticator-generic.py
-    #- name: hub-extra-config-d
+    # - name: hub-extra-config-d
     #  # Pull in v14.2.0 of oauthenticator/oauth2.py, unmodified
     #  # Our patched oauthenticator/generic.py comes from v14.2. as well
     #  # Remove once hub is running v14+
     #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/oauth2.py
     #  subPath: oauthenticator-oauth2-14.2.0.py
-    #- name: hub-extra-config-d
+    # - name: hub-extra-config-d
     #  # Add CoffeaOAuthenticator to save tokens to secret
     #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/coffea.py
     #  subPath: oauthenticator-coffea.py
@@ -147,7 +146,7 @@ jupyterhub:
       # readinessProbe:
       #  periodSeconds: 10
       networkPolicy:
-        egress: [] # overrides allowance of 0.0.0.0/0
+        egress: []
     extraEnv:
       # explicit notation (the "name" field takes precedence)
       CHP_NAMESPACE:
@@ -165,7 +164,7 @@ jupyterhub:
     service:
       type: LoadBalancer
       labels: {}
-      #annotations:
+      # annotations:
       #  external-dns.alpha.kubernetes.io/hostname: coffea-test.casa
       nodePorts:
         http:
@@ -187,7 +186,7 @@ jupyterhub:
       postStart:
         exec:
           command: ['bash', '-c', 'mkdir -p /home/cms-jovyan/.condor/tokens.d/ ']
-          #&& cp -f /etc/cmsaf-secrets/condor_token /home/cms-jovyan/.condor/tokens.d/condor_token ']
+          # && cp -f /etc/cmsaf-secrets/condor_token /home/cms-jovyan/.condor/tokens.d/condor_token ']
     storage:
       type: none
     defaultUrl: "/lab"
@@ -199,8 +198,8 @@ jupyterhub:
         description: "Test build"
         kubespawner_override:
           image: hub.opensciencegrid.org/coffea-casa/cc-ubuntu:latest
-          #tag: "set-by-chartpress"
-          #imagePullPolicy: Always
+          # tag: "set-by-chartpress"
+          # imagePullPolicy: Always
           securityContext:
             runAsUser: 6440
             runAsGroup: 11265
