@@ -89,12 +89,12 @@ jobs:
       #    helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values charts/dev-pebble.yaml
       
       # Build our images if needed and update values.yaml with the tags
-      - name: Install and run chartpress
-        run: |
-          pip3 install -r charts/dev-requirements.txt
-          cd charts && chartpress
-        env:
-          DOCKER_BUILDKIT: "1"
+      #- name: Install and run chartpress
+      #  run: |
+      #    pip3 install -r charts/dev-requirements.txt
+      #    cd charts && chartpress
+      #  env:
+      #    DOCKER_BUILDKIT: "1"
 
       # Generate values.schema.json from schema.yaml
       #- name: Generate values.schema.json from schema.yaml
