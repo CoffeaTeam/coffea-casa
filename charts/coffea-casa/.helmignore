@@ -1,6 +1,4 @@
-.frigate
-dev-values.yaml
-README.md
+schema.yaml
 
 # Patterns to ignore when building packages.
 # This supports shell glob matching, relative path matching, and
@@ -18,10 +16,8 @@ README.md
 *.swp
 *.bak
 *.tmp
-*.orig
 *~
 # Various IDEs
 .project
 .idea/
 *.tmproj
-.vscode/
