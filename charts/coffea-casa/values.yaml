@@ -1,3 +1,9 @@
+devaf:
+  enabled: true
+  testtoken: dGVzdA==
+  testpem: dGVzdA==
+
+
 # Disable/enable RBAC
 rbac:
   enabled: true
@@ -57,15 +63,14 @@ oidc_auth:
 
 #####################
 # Jupyterhub settings
-# FIXME: pymacaroons is not possible install
 jupyterhub:
   hub:
-    image:
-      name: jupyterhub/k8s-hub
-      tag: 1.2.0
+    #image:
+    #  name: jupyterhub/k8s-hub
+    #  tag: 1.2.0
     command: ["sh", "-c"]
     args:
-      - pip install --cache-dir /srv/jupyterhub/.cache/pip pyjwt && jupyterhub --config
+      - pip install --cache-dir /srv/jupyterhub/.cache/pip pyjwt pymacaroons && jupyterhub --config
         /usr/local/etc/jupyterhub/jupyterhub_config.py --upgrade-db
     # attemp to debug
     #args: ["while true; do echo 'debug' && sleep 5; done;"]
@@ -76,31 +81,31 @@ jupyterhub:
     extraVolumeMounts:
       - name: custom-templates
         mountPath: /etc/jupyterhub/custom
-      - name: hub-config-d
+      - name: hub-extra-config-d
         mountPath: /usr/local/etc/jupyterhub/auth.py
         subPath: auth.py
-      - name: hub-config-d
+      - name: hub-extra-config-d
         mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
         subPath: secret_creation_hook.py
-      - name: hub-config-d
-      # Custom login page
-        mountPath: /etc/jupyterhub/custom/login.html
-        subPath: login.html
-      - name: hub-config-d
-      # Custom login logo
-        mountPath: /usr/local/share/jupyterhub/static/images/logo.png
-        subPath: logo.png.bin
-    #- name: hub-config-d
+      #- name: hub-extra-config-d
+      ## Custom login page
+      #  mountPath: /etc/jupyterhub/custom/login.html
+      #  subPath: login.html
+      #- name: hub-extra-config-d
+      ## Custom login logo
+      #  mountPath: /usr/local/share/jupyterhub/static/images/logo.png
+      #  subPath: logo.png.bin
+    #- name: hub-extra-config-d
     #  # Override GenericOAuthenticator with token refresh version
     #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/generic.py
     #  subPath: oauthenticator-generic.py
-    #- name: hub-config-d
+    #- name: hub-extra-config-d
     #  # Pull in v14.2.0 of oauthenticator/oauth2.py, unmodified
     #  # Our patched oauthenticator/generic.py comes from v14.2. as well
     #  # Remove once hub is running v14+
     #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/oauth2.py
     #  subPath: oauthenticator-oauth2-14.2.0.py
-    #- name: hub-config-d
+    #- name: hub-extra-config-d
     #  # Add CoffeaOAuthenticator to save tokens to secret
     #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/coffea.py
     #  subPath: oauthenticator-coffea.py
@@ -113,9 +118,9 @@ jupyterhub:
               path: POOL
       - name: custom-templates
         emptyDir: {}
-      - name: hub-config-d
+      - name: hub-extra-config-d
         configMap:
-          name: hub-config-d
+          name: hub-extra-config-d
     extraConfig:
       templates: |
         c.JupyterHub.template_paths = ['/etc/jupyterhub/custom/']
