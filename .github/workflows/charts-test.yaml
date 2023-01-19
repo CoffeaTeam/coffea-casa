@@ -44,12 +44,13 @@ jobs:
         #
         # k3s-version: https://github.com/rancher/k3s/tags
         # k3s-channel: https://update.k3s.io/v1-release/channels
-        # TODO: add upgrade test
         include:
+          # FIXME: enable when we update jupyterhub version
+          # TODO: add more complex matrix
           #- k3s-channel: latest
           #  test: install
-          - k3s-channel: stable
-            test: install
+          #- k3s-channel: stable
+          #  test: install
           - k3s-channel: v1.20
             test: install
           - k3s-channel: v1.21 
@@ -101,16 +102,7 @@ jobs:
       #  run: |
       #    tools/generate-json-schema.py
 
-      # Validate rendered helm templates against the k8s api-server with the
-      # dedicated lint-and-validate-values.yaml config.
-      #- name: "Helm template --validate (with lint and validate config)"
-      #  run: |
-      #    helm template --validate jupyterhub ./jupyterhub --values tools/templates/lint-and-validate-values.yaml ${{ matrix.helm-template-validate-extra-args }}
-
-      # It is only needed at this point forward as this is when we install
-      # jupyterhub and the autohttps pod is about to start, so for CI
-      # performance we delayed this until now and did other things in between.
-      - name: Await local ACME server
+      - name: Await successful startup of Kubernetes workloads
         uses: jupyterhub/action-k8s-await-workloads@v1
         with:
           timeout: 150
@@ -131,7 +123,7 @@ jobs:
           timeout: 900
           max-restarts: 3
 
-      - name: Await local chart cert acquisition
+      - name: Await local chart cert acquisition (FIXME)
         run: |
           i=0; while [ $i -ne 60 ]; do
             kubectl logs deploy/autohttps -c traefik | grep "Adding certificate" \
