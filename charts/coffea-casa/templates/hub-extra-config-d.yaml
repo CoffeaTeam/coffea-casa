@@ -1,0 +1,10 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: hub-extra-config-d
+  labels:
+    {{- include "jupyterhub.labels" . | nindent 4 }}
+data:
+  {{- /* Glob files to allow them to be mounted by the hub pod */ -}}
+  {{- /* key=filename: value=content */ -}}
+  {{- (.Files.Glob "files/hub-extra/*").AsConfig | nindent 2 }}
