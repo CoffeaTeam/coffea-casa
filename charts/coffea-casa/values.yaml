@@ -79,10 +79,9 @@ jupyterhub:
       - name: hub-config-d
         mountPath: /usr/local/etc/jupyterhub/auth.py
         subPath: auth.py
-    # FIXME: can't load file, since it is detected as directory...
-    #- name: hub-config-d
-    # mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
-    #  subPath: secret_creation_hook.py
+      - name: hub-config-d
+        mountPath: /usr/local/etc/jupyterhub/jupyterhub_config.d/secret_creation_hook.py
+        subPath: secret_creation_hook.py
       - name: hub-config-d
       # Custom login page
         mountPath: /etc/jupyterhub/custom/login.html
