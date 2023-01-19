@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hub-config-d
-  namespace: {{ .Release.Namespace }}
-data:
-{{- (.Files.Glob "files/hub/*").AsConfig | nindent 2 }}
