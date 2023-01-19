@@ -9,24 +9,28 @@ from kubernetes import client
 # Various secret management configurations
 c.KubeSpawner.namespace = os.environ.get('POD_NAMESPACE', 'default')
 K8S_NAMESPACE = os.environ.get('POD_NAMESPACE', 'default')
-condor_secret_name = "condor-token"
-condor_user = 'submituser@submit.condorsub.cmsaf-dev.svc.cluster.local'
-issuer = socket.gethostbyname('condor.cmsaf-dev.svc.cluster.local')
-kid = 'POOL'
+
+condor_settings = bool(distutils.util.strtobool(os.environ.get('CONDOR_ENABLED', 'True')))
+servicex_settings = bool(distutils.util.strtobool(os.environ.get('SERVICEX_ENABLED', 'True')))
+
+if condor_settings is True:
+    condor_secret_name = "condor-token"
+    condor_user = 'submituser@submit.condorsub.cmsaf-dev.svc.cluster.local'
+    issuer = socket.gethostbyname('condor.cmsaf-dev.svc.cluster.local')
+    kid = 'POOL'
 
 xcache_secret_name = 'xcache-token'
 xcache_location_name = "T2_US_Nebraska"
 xcache_user_name = "cms-jovyan"
 
-servicex_secret_name = 'servicex-token'
-servicex_user = 'cms-jovyan@unl.edu'
-servicex_issuer = 'cmsaf-jh.unl.edu'
-servicex_user_name = "cms-jovyan"
+if servicex_settings is True:
+    servicex_secret_name = 'servicex-token'
+    servicex_user = 'cms-jovyan@unl.edu'
+    servicex_issuer = 'cmsaf-jh.unl.edu'
+    servicex_user_name = "cms-jovyan"
 
 external_dns = False
 dask_base_domain = os.environ.get('DASK_BASE_DOMAIN', 'coffea.example.edu')
-condor_settings = bool(distutils.util.strtobool(os.environ.get('CONDOR_ENABLED', 'True')))
-servicex_settings = bool(distutils.util.strtobool(os.environ.get('SERVICEX_ENABLED', 'True')))
 
 set_config_if_not_none(c.KubeSpawner, 'gid', 'singleuser.gid')
 
