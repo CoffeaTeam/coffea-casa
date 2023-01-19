@@ -81,12 +81,13 @@ jobs:
         with:
           python-version: "3.9"
 
-      # Install a local ACME server to fill the role of Let's Encrypt (LE). We
-      # do this as the HTTP challenge sent out by an ACME server must be able to
-      # reach the ACME client in our autohttps pod.
-      - name: Install local ACME server
-        run: |
-          helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values charts/dev-pebble.yaml
+      ## Install a local ACME server to fill the role of Let's Encrypt (LE). We
+      ## do this as the HTTP challenge sent out by an ACME server must be able to
+      ## reach the ACME client in our autohttps pod.
+      #- name: Install local ACME server
+      #  run: |
+      #    helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values charts/dev-pebble.yaml
+      
       # Build our images if needed and update values.yaml with the tags
       - name: Install and run chartpress
         run: |
