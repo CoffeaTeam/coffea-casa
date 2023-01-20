@@ -1,0 +1,40 @@
+# Create a role for additional hub permissions
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hub-extra
+  namespace: {{.Release.Namespace}}
+rules:
+# Allow list, patch, and create of ingressroutetcps for dask
+- apiGroups:
+  - traefik.containo.us
+  resources:
+  - ingressroutetcps
+  verbs:
+  - list
+  - patch
+  - create
+  - delete
+# Add patch so hub can refresh tokens in secrets (it can already create/get/delete)
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - patch
+
+# Give the hub the role to manage ingressroutetcps for dask
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hub-extra
+  namespace: {{.Release.Namespace}}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hub-extra
+subjects:
+- kind: ServiceAccount
+  name: hub
