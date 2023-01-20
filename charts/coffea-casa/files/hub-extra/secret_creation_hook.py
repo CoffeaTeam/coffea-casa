@@ -124,7 +124,7 @@ async def pre_spawn_hook(spawner):
 
     ##########################################################################
     # Mount secrets into pod
-    #spawner.volume_mounts.extend([{"name": "cmsaf-secrets", "mountPath": "/etc/cmsaf-secrets"}])
+    spawner.volume_mounts.extend([{"name": "cmsaf-secrets", "mountPath": "/etc/cmsaf-secrets"}])
     # The spawner state is retained across spawn attempts
     # Remove old volume config if present, preventing duplication (and failure)
     spawner.volumes = [v for v in spawner.volumes if not v.get('name', None)=='cmsaf-secrets']
