@@ -63,7 +63,13 @@ oidc_auth:
 #####################
 # Jupyterhub settings
 jupyterhub:
+  debug:
+    enabled: true
   hub:
+    services:
+      test:
+        admin: true
+        apiToken: ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
     image:
       name: jupyterhub/k8s-hub
       tag: 1.2.0
@@ -130,12 +136,39 @@ jupyterhub:
       securityContext:
         runAsUser: 0
     networkPolicy:
-      enabled: false
+      egress:
+        - ports:
+          - protocol: TCP
+            port: 6443
     readinessProbe:
       periodSeconds: 10
     db:
       type: sqlite-memory
   proxy:
+    service:
+      type: NodePort
+      nodePorts:
+        http: 30080
+        https: 30443
+    https:
+      enabled: true
+      type: letsencrypt
+      hosts:
+        - local.coffea.casa
+      letsencrypt:
+        contactEmail: 'jovyan@jupyter.test'
+        acmeServer: https://localhost:32443/dir
+    traefik:
+      extraVolumes:
+        - name: pebble-root-cert
+          configMap:
+            name: pebble
+      extraVolumeMounts:
+        - name: pebble-root-cert
+          subPath: root-cert.pem
+          mountPath: /etc/pebble/root-cert.pem
+      extraEnv:
+        LEGO_CA_CERTIFICATES: /etc/pebble/root-cert.pem
     chp:
       resources:
         requests:
@@ -154,24 +187,17 @@ jupyterhub:
         valueFrom:
           fieldRef:
             fieldPath: metadata.namespace
-    https:
-      enabled: false
-      type: letsencrypt
-      hosts:
-        - coffea-test.casa
-      letsencrypt:
-        contactEmail: ksu.shadura@gmail.com
-    service:
-      type: LoadBalancer
-      labels: {}
-      # annotations:
-      #  external-dns.alpha.kubernetes.io/hostname: coffea-test.casa
-      nodePorts:
-        http:
-        https:
-      disableHttpPort: false
-      extraPorts: []
-      loadBalancerIP:
+    #service:
+    #  type: LoadBalancer
+    #  labels: {}
+    #  # annotations:
+    #  #  external-dns.alpha.kubernetes.io/hostname: coffea-test.casa
+    #  nodePorts:
+    #    http:
+    #    https:
+    #  disableHttpPort: false
+    #  extraPorts: []
+    #  loadBalancerIP:
   singleuser:
     networkPolicy:
       enabled: false
@@ -217,5 +243,3 @@ jupyterhub:
       enabled: true
       replicas: 2
       logLevel: 10
-  debug:
-    enabled: true
