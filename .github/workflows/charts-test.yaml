@@ -118,25 +118,21 @@ jobs:
           helm upgrade --install coffea-casa ./charts/coffea-casa
 
       - name: "Await local chart"
-        uses: jupyterhub/action-k8s-await-workloads@v1
+        uses: jupyterhub/action-k8s-await-workloads@v2
         with:
-          timeout: 900
-          max-restarts: 3
+          timeout: 150
+          max-restarts: 1
 
-      - name: Await local chart cert acquisition (FIXME)
+      - name: Await local chart cert acquisition
         run: |
-          i=0; while [ $i -ne 60 ]; do
-            kubectl logs deploy/autohttps -c traefik | grep "Adding certificate" \
-              && acquired_cert=true && break \
-              || acquired_cert=false && sleep 0.5 && i=$((i + 1))
-          done
+          . ./ci/common
+          await_autohttps_tls_cert_acquisition
 
-
-      #- name: Run tests
-      #  continue-on-error: ${{ matrix.accept-failure == true }}
-      #  run: |
-      #    # If you have problems with the tests add '--capture=no' to show stdout
-      #    pytest --verbose --color=yes ./tests-charts
+      - name: Run tests
+        continue-on-error: ${{ matrix.accept-failure == true }}
+        run: |
+          # If you have problems with the tests add '--capture=no' to show stdout
+          pytest --verbose --color=yes ./tests-charts
 
       # ref: https://github.com/jupyterhub/action-k8s-namespace-report
       - name: Kubernetes namespace report

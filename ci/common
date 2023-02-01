@@ -1,0 +1,83 @@
+# Sync from https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/main/ci/common
+# Still getting locally an error: 
+# requests.exceptions.SSLError: HTTPSConnectionPool(host='local.jovyan.org', port=30443): Max retries exceeded with url: /hub/api (Caused by SSLError(SSLError(1, '[SSL: TLSV1_UNRECOGNIZED_NAME] tlsv1 unrecognized name (_ssl.c:992)')))
+
+#!/bin/bash
+# Use https://www.shellcheck.net/ to reduce mistakes if you make changes to this file.
+#
+# shellcheck disable=SC2015
+#   Note that A && B || C is not if-then-else. C may run when A is true.
+# shellcheck disable=SC2016
+#   Expressions don't expand in single quotes, use double quotes for that.
+# shellcheck disable=SC2086
+#   Double quote to prevent globbing and word splitting.
+
+setup_helm () {
+    echo "setup helm ${HELM_VERSION}"
+    curl -sf https://raw.githubusercontent.com/helm/helm/HEAD/scripts/get-helm-3 | DESIRED_VERSION=${HELM_VERSION} bash
+}
+
+await_kubectl_rollout() {
+    kubectl rollout status --watch --timeout 300s "$1"
+}
+
+await_pebble() {
+    await_kubectl_rollout deployment/pebble \
+        && await_kubectl_rollout deployment/pebble-coredns
+}
+
+await_jupyterhub() {
+    await_kubectl_rollout deployment/proxy \
+        && await_kubectl_rollout deployment/hub \
+        && (
+        if kubectl get deploy/autohttps &> /dev/null; then
+            await_kubectl_rollout deployment/autohttps
+        fi
+    ) \
+        && (
+        if kubectl get deploy/user-scheduler &> /dev/null; then
+            await_kubectl_rollout deployment/user-scheduler
+        fi
+    )
+}
+
+await_autohttps_tls_cert_acquisition() {
+    i=0; while [ $i -ne 60 ]; do
+        kubectl logs deploy/autohttps -c traefik | grep "Adding certificate" \
+            && acquired_cert=true && break \
+            || acquired_cert=false && sleep 0.5 && i=$((i + 1))
+    done
+    if [ "$acquired_cert" != "true" ]; then
+        echo "Certificate acquisition failed!"
+        kubectl get service,networkpolicy,configmap,pod
+        kubectl describe pod -l app.kubernetes.io/name=pebble
+        kubectl logs deploy/pebble --all-containers # --prefix
+        kubectl describe pod -l app.kubernetes.io/name=pebble-coredns
+        kubectl logs deploy/pebble-coredns --all-containers # --prefix
+        kubectl describe pod -l component=autohttps
+        kubectl logs deploy/autohttps --all-containers # --prefix
+        exit 1
+    fi
+    # a precausion as pebble logs is a bad indicator of the readiness state of
+    # Traefik's readiness to use the cert for TLS termination.
+    sleep 1
+}
+
+await_autohttps_tls_cert_save() {
+    i=0; while [ $i -ne 60 ]; do
+        kubectl logs deploy/autohttps -c secret-sync | grep "Created secret" \
+            && saved_cert=true && break \
+            || saved_cert=false && sleep 0.5 && i=$((i + 1))
+    done
+    if [ "$saved_cert" != "true" ]; then
+        echo "Certificate acquisition failed!"
+        kubectl get service,networkpolicy,configmap,pod
+        kubectl describe pod -l app.kubernetes.io/name=pebble
+        kubectl logs deploy/pebble --all-containers # --prefix
+        kubectl describe pod -l app.kubernetes.io/name=pebble-coredns
+        kubectl logs deploy/pebble-coredns --all-containers # --prefix
+        kubectl describe pod -l component=autohttps
+        kubectl logs deploy/autohttps --all-containers # --prefix
+        exit 1
+    fi
+}
