@@ -53,8 +53,8 @@ spec:
             - --entryPoints.web.address=:80
             - --entryPoints.websecure.address=:443
             ####
-            #- --entrypoints.web.http.redirections.entryPoint.to=websecure
-            #- --entrypoints.web.http.redirections.entryPoint.scheme=https
+            - --entrypoints.web.http.redirections.entryPoint.to=websecure
+            - --entrypoints.web.http.redirections.entryPoint.scheme=https
             # Any Ingress attached to this Entrypoint will have TLS termination by default.
             - --entrypoints.websecure.http.tls
             # Let's Encrypt Configurtion.
@@ -63,7 +63,7 @@ spec:
             - --certificatesresolvers.default.acme.tlschallenge
             # Use the staging ACME server. Uncomment this while testing to prevent
             # hitting rate limits in production.
-            - --certificatesresolvers.default.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+            #- --certificatesresolvers.default.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
             # Define dask and daskworker entry points
             - --entryPoints.dask.address=:{{.Values.traefik.service.port.daskscheduler}}/tcp
             - --entryPoints.daskworker.address=:{{.Values.traefik.service.port.daskworker}}/tcp

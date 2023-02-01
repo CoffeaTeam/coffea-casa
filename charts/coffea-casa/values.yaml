@@ -15,11 +15,11 @@ rbac:
 # that is acting as a proxy for traffic towards the gateway or user created
 # DaskCluster resources.
 traefik:
-  enabled: True
+  enabled: false
   service:
-    type: LoadBalancer
+    #type: LoadBalancer
     # type: ClusterIP
-    # type: NodePort
+    type: NodePort
     port:
       daskscheduler: 8786
       daskworker: 8788
@@ -64,7 +64,7 @@ oidc_auth:
 # Jupyterhub settings
 jupyterhub:
   debug:
-    enabled: true
+    enabled: False
   hub:
     services:
       test:
@@ -162,7 +162,7 @@ jupyterhub:
     # Fixing https://github.com/jupyterhub/zero-to-jupyterhub-k8s/issues/1716
       image:
         name: traefik
-        tag: v2.4.1
+        tag: v2.9.6
       extraVolumes:
         - name: pebble-root-cert
           configMap:
