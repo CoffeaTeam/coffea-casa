@@ -31,7 +31,7 @@ def request_data():
     with open(os.path.join(base_dir, "charts", "coffea-casa", "values.yaml")) as f:
         y = yaml.safe_load(f)
     token = y["jupyterhub"]["hub"]["services"]["test"]["apiToken"]
-    hub_url = os.environ.get("HUB_URL", "https://local.coffea.casa:30443")
+    hub_url = os.environ.get("HUB_URL", "https://local.jovyan.org:30443")
     return {
         "token": token,
         "hub_url": f'{hub_url.rstrip("/")}/hub/api',
@@ -39,7 +39,6 @@ def request_data():
         "test_timeout": 30,
         "request_timeout": 25,
     }
-
 
 @pytest.fixture(scope="module")
 def pebble_acme_ca_cert():
@@ -49,7 +48,12 @@ def pebble_acme_ca_cert():
     when we make web requests with the requests library.
 
         requests.get(..., verify=<True|False|path_to_certificate>)
+
+    If HUB_URL is http:// return False since no certificate is required
     """
+    if os.getenv("HUB_URL", "").startswith("http://"):
+        return False
+
     # 'localhost' may resolve to an ipv6 address which may not be supported on older K3S
     # 127.0.0.1 is more reliable
     response = requests.get("https://localhost:32444/roots/0", verify=False, timeout=10)

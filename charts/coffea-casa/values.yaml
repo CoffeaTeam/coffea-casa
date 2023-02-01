@@ -15,7 +15,7 @@ rbac:
 # that is acting as a proxy for traffic towards the gateway or user created
 # DaskCluster resources.
 traefik:
-  enabled: false
+  enabled: True
   service:
     type: LoadBalancer
     # type: ClusterIP
@@ -154,11 +154,15 @@ jupyterhub:
       enabled: true
       type: letsencrypt
       hosts:
-        - local.coffea.casa
+        - local.jovyan.org
       letsencrypt:
         contactEmail: 'jovyan@jupyter.test'
-        acmeServer: https://localhost:32443/dir
+        acmeServer: https://pebble/dir
     traefik:
+    # Fixing https://github.com/jupyterhub/zero-to-jupyterhub-k8s/issues/1716
+      image:
+        name: traefik
+        tag: v2.4.1
       extraVolumes:
         - name: pebble-root-cert
           configMap:
