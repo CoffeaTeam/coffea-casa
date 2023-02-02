@@ -4,11 +4,11 @@ ref: https://docs.pytest.org/en/latest/writing_plugins.html#conftest-py-plugins
 """
 
 import os
-import requests
+import textwrap
 import uuid
-from urllib.parse import urlparse
 
 import pytest
+import requests
 import yaml
 
 
@@ -26,19 +26,35 @@ def pytest_configure(config):
 
 
 @pytest.fixture(scope="module")
-def request_data():
+def admin_api_token():
     base_dir = os.path.dirname(os.path.dirname(__file__))
     with open(os.path.join(base_dir, "charts", "coffea-casa", "values.yaml")) as f:
         y = yaml.safe_load(f)
     token = y["jupyterhub"]["hub"]["services"]["test"]["apiToken"]
+    return token
+
+
+@pytest.fixture(scope="module")
+def scoped_api_token():
+    """This token is granted a limited scope"""
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    with open(os.path.join(base_dir, "charts", "coffea-casa", "values.yaml")) as f:
+        y = yaml.safe_load(f)
+    token = y["jupyterhub"]["hub"]["services"]["test"]["apiToken"]
+    return token
+
+
+@pytest.fixture(scope="module")
+def request_data(admin_api_token):
     hub_url = os.environ.get("HUB_URL", "https://local.jovyan.org:30443")
     return {
-        "token": token,
+        "token": admin_api_token,
         "hub_url": f'{hub_url.rstrip("/")}/hub/api',
-        "headers": {"Authorization": f"token {token}"},
-        "test_timeout": 30,
+        "headers": {"Authorization": f"token {admin_api_token}"},
+        "test_timeout": 60,
         "request_timeout": 25,
     }
+
 
 @pytest.fixture(scope="module")
 def pebble_acme_ca_cert():
@@ -56,7 +72,7 @@ def pebble_acme_ca_cert():
 
     # 'localhost' may resolve to an ipv6 address which may not be supported on older K3S
     # 127.0.0.1 is more reliable
-    response = requests.get("https://localhost:32444/roots/0", verify=False, timeout=10)
+    response = requests.get("https://127.0.0.1:32444/roots/0", verify=False, timeout=10)
     if not response.ok:
         return True
 
@@ -67,7 +83,7 @@ def pebble_acme_ca_cert():
     return cert_path
 
 
-class JupyterRequest(object):
+class JupyterRequest:
     def __init__(self, request_data, pebble_acme_ca_cert):
         self.request_data = request_data
         self.pebble_acme_ca_cert = pebble_acme_ca_cert
@@ -125,3 +141,21 @@ def jupyter_user(api_request):
     yield username
     r = api_request.delete("/users/" + username)
     assert r.status_code == 204
+
+
+@pytest.fixture(scope="module")
+def extra_files_test_command():
+    return textwrap.dedent(
+        """
+        ls -l /tmp/binaryData.txt | grep -- -rw-rw-rw- || exit 1
+        ls -l /tmp/dir1/binaryData.txt | grep -- -rw-rw-rw- || exit 2
+        ls -l /tmp/stringData.txt | grep -- -rw-rw-rw- || exit 3
+        ls -l /tmp/dir1/stringData.txt | grep -- -rw-rw-rw- || exit 4
+        ls -l /etc/test/data.yaml | grep -- -r--r--r-- || exit 5
+        ls -l /etc/test/data.yml | grep -- -r--r--r-- || exit 6
+        ls -l /etc/test/data.json | grep -- -r--r--r-- || exit 7
+        ls -l /etc/test/data.toml | grep -- -r--r--r-- || exit 8
+        cat /tmp/binaryData.txt | grep -- "hello world" || exit 9
+        cat /tmp/stringData.txt | grep -- "hello world" || exit 10
+        """
+    ).strip()
