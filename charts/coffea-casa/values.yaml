@@ -18,7 +18,7 @@ traefik:
   enabled: false
   service:
     # type: LoadBalancer
-    # type: ClusterIP
+    #type: ClusterIP
     type: NodePort
     port:
       daskscheduler: 8786
@@ -149,9 +149,13 @@ jupyterhub:
       type: NodePort
       nodePorts:
         http: 30080
-        https: 30443
+      #  https: 30443
+      # type: LoadBalancer
+      # nodePorts:
+      #    http:
+      #    https:
     https:
-      enabled: true
+      enabled: false
       type: letsencrypt
       hosts:
         - local.jovyan.org

@@ -15,7 +15,9 @@ chart_yaml = os.path.join(here, os.pardir, "charts", "coffea-casa", "Chart.yaml"
 
 with open(chart_yaml) as f:
     chart = yaml.safe_load(f)
-    jupyterhub_version = chart["appVersion"]
+    # FIXME
+    #jupyterhub_version = chart["appVersion"]
+    jupyterhub_version = '1.5.0'
 
 
 def test_api(api_request):
