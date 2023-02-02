@@ -17,7 +17,7 @@ rbac:
 traefik:
   enabled: false
   service:
-    #type: LoadBalancer
+    # type: LoadBalancer
     # type: ClusterIP
     type: NodePort
     port:
@@ -64,7 +64,7 @@ oidc_auth:
 # Jupyterhub settings
 jupyterhub:
   debug:
-    enabled: False
+    enabled: true
   hub:
     services:
       test:
@@ -191,7 +191,7 @@ jupyterhub:
         valueFrom:
           fieldRef:
             fieldPath: metadata.namespace
-    #service:
+    # service:
     #  type: LoadBalancer
     #  labels: {}
     #  # annotations:
