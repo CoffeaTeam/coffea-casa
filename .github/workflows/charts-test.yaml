@@ -85,9 +85,9 @@ jobs:
       ## Install a local ACME server to fill the role of Let's Encrypt (LE). We
       ## do this as the HTTP challenge sent out by an ACME server must be able to
       ## reach the ACME client in our autohttps pod.
-      - name: Install local ACME server
-        run: |
-          helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values ./charts/coffea-casa/pebble-config.yaml
+      #- name: Install local ACME server
+      #  run: |
+      #    helm install pebble --repo https://jupyterhub.github.io/helm-chart/ pebble --values ./charts/coffea-casa/pebble-config.yaml
       
       # Build our images if needed and update values.yaml with the tags
       #- name: Install and run chartpress
@@ -123,15 +123,15 @@ jobs:
           timeout: 900
           max-restarts: 1
 
-      - name: Await local chart cert acquisition
-        run: |
-          . ./ci/common
-          await_autohttps_tls_cert_acquisition
+      #- name: Await local chart cert acquisition
+      #  run: |
+      #    . ./ci/common
+      #    await_autohttps_tls_cert_acquisition
 
       - name: Run tests
         continue-on-error: ${{ matrix.accept-failure == true }}
         run: |
-          # If you have problems with the tests add '--capture=no' to show stdout
+          export HUB_URL=http://localhost:30080
           pytest --verbose --color=yes ./tests-charts
 
       # ref: https://github.com/jupyterhub/action-k8s-namespace-report
