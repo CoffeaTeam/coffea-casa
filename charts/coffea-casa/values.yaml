@@ -18,7 +18,7 @@ traefik:
   enabled: false
   service:
     # type: LoadBalancer
-    #type: ClusterIP
+    # type: ClusterIP
     type: NodePort
     port:
       daskscheduler: 8786
