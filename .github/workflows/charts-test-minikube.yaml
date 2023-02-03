@@ -72,12 +72,7 @@ jobs:
 
       - name: "Install local chart"
         run: |
-          helm upgrade 
-            --debug \
-            --wait \
-            --timeout 600s \ 
-            --install coffea-casa ./charts/coffea-casa \
-            --values charts/coffea-casa/values.yaml
+          helm upgrade --install coffea-casa ./charts/coffea-casa --values charts/coffea-casa/values.yaml
 
       #- name: Await local chart cert acquisition
       #  run: |
