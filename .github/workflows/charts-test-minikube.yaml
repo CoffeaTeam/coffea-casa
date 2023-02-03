@@ -1,0 +1,114 @@
+name: Test chart
+
+on:
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "docs-img/**"
+      - "**.md"
+      - ".github/workflows/*"
+      - "!.github/workflows/charts-test.yaml"
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "docs-img/**"
+      - "**.md"
+      - ".github/workflows/*"
+      - "!.github/workflows/charts-test.yaml"
+    branches-ignore:
+      - "dependabot/**"
+      - "pre-commit-ci-update-config"
+      - "update-*"
+      - "vuln-scan-*"
+  workflow_dispatch:
+
+jobs:
+  
+  test-local:
+    name: Test local chart deployment (minikube)
+    timeout-minutes: 90
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # chartpress requires git history to set chart version and image tags
+          # correctly
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - uses: azure/setup-helm@v3
+        with:
+          version: "v3.9.1"
+
+      - name: Setup Minikube-Kubernetes
+        uses: manusa/actions-setup-minikube@v2.7.2
+        with:
+          minikube version: "v1.28.0"
+          kubernetes version: "v1.24.5"
+          github token: ${{ secrets.GITHUB_TOKEN }}
+          driver: docker
+          start args: --ports=127.0.0.1:30080:30080
+
+      # Build our images if needed and update values.yaml with the tags
+      #- name: Install and run chartpress
+      #  run: |
+      #    eval $(minikube -p minikube docker-env)
+      #    pip3 install -r charts/dev-requirements.txt
+      #    cd charts && chartpress
+      #  env:
+      #    DOCKER_BUILDKIT: "1"
+
+      # Generate values.schema.json from schema.yaml
+      #- name: Generate values.schema.json from schema.yaml
+      #  run: |
+      #    tools/generate-json-schema.py
+
+      - name: "Check if the Helm dependencies are pulled"
+        run: |
+          cd charts/coffea-casa && helm dependency build
+
+      - name: "Install local chart"
+        run: |
+          helm upgrade 
+            --debug \
+            --wait \
+            --timeout 600s \ 
+            --install coffea-casa ./charts/coffea-casa \
+            --values charts/coffea-casa/values.yaml
+
+      #- name: Await local chart cert acquisition
+      #  run: |
+      #    . ./ci/common
+      #    await_autohttps_tls_cert_acquisition
+
+      - name: Run tests
+        run: |
+          export HUB_URL=http://localhost:30080
+          pytest --verbose --color=yes ./tests-charts
+
+      - name: Output some logs in case of failure
+        if: ${{ failure() }}
+        # add set -x to print commands before executing to make logs reading easier
+        run: |
+          set -x
+          minikube ip
+          minikube logs
+          minikube kubectl -- logs -l app.kubernetes.io/component=api,app.kubernetes.io/name=mlrun --tail=-1
+          minikube kubectl -- get all
+          minikube kubectl -- get all -o yaml
+          minikube kubectl -- describe pods
+          minikube kubectl -- get cm
+          minikube kubectl -- get cm -o yaml
+          minikube kubectl -- get secrets
+          minikube kubectl -- get secrets -o yaml
+          minikube kubectl -- get pvc
+          minikube kubectl -- get pv
+          set +x
+
+      # Enable tmate debugging of manually-triggered workflows if the input option was provided
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'true' }}
