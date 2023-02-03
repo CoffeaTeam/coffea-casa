@@ -76,7 +76,7 @@ jobs:
           
       - name: "Await local chart deployment"
         run: |
-          minikube kubectl -- wait --for condition=Available=True --timeout=200s deployment/hub -n coffea-casa
+          minikube kubectl -- wait --for condition=Available=True --timeout=200s deployment/hub
 
       #- name: Await local chart cert acquisition
       #  run: |
