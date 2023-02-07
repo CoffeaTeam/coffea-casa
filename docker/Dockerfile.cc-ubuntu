@@ -63,6 +63,9 @@ RUN pip install --no-cache-dir \
     descartes==1.1.0 \
     # JSON processor
     jq \
+    # ML packages
+    dask-ml \
+    mlflow \
     # coffea casa jobqueue modules
     coffea_casa -U
 

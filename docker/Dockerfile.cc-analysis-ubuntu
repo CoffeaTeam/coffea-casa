@@ -104,6 +104,8 @@ RUN pip install --no-cache-dir \
     func-adl-uproot \
     dask_jobqueue==0.7.3 \
     tornado==6.2 \
+    dask-ml \
+    mlflow \
     aiostream
 
 # REMOVE ME AFTER TEST:
