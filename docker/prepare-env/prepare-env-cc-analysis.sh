@@ -66,10 +66,6 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   if [[ -f "$_CONDOR_JOB_IWD/condor_token" ]]; then
       mkdir -p /home/$NB_USER/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/$NB_USER/.condor/tokens.d/condor_token
   fi
-  
-  if [[ -f "$_CONDOR_JOB_IWD/access_token" ]]; then
-      export BEARER_TOKEN_FILE="$_CONDOR_JOB_IWD/access_token"
-  fi
 
   if [[ -f "$_CONDOR_JOB_IWD/ceph.conf" ]]; then
       cp $_CONDOR_JOB_IWD/ceph.conf ${CEPH_DIR}
