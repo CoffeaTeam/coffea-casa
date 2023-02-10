@@ -203,7 +203,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             {"should_transfer_files": "YES"},
             {"Stream_Output": "False"},
             {"Stream_Error": "False"},
-            {"environment": "BEARER_TOKEN_FILE=$_CONDOR_JOB_IWD/access_token"},
+            #{"environment": "BEARER_TOKEN_FILE=$_CONDOR_JOB_IWD/access_token"},
             {"+DaskSchedulerAddress": external_ip_string},
             job_kwargs.get(
                 "job_extra", dask.config.get(f"jobqueue.{cls.config_name}.job-extra")
