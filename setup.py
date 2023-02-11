@@ -38,7 +38,7 @@ setup(name='coffea_casa',
       zip_safe=False,
       long_description_content_type = 'text/markdown',
       setup_requires=["pytest-runner", "flake8"],
-      dependency_links=['git+git://github.com/oshadura/distributed.git@coffea-casa-facility#egg=distributed'],
+      dependency_links=['distributed@git+git://github.com/oshadura/distributed.git@coffea-casa-facility'],
       tests_require=TESTS_REQUIRE,
       classifiers=[
           "Development Status :: 4 - Beta",
