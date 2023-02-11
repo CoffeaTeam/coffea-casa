@@ -44,7 +44,7 @@ To use this code for your own purposes, you merely have to put in your list of d
 
     dependency_installer = DependencyInstaller([
         "pytest",
-        "git+https://github.com/TopEFT/topcoffea.git#egg=topcoffea",
+        "topcoffea@git+https://github.com/TopEFT/topcoffea.git",
     ])
     
 and your workers should have both pytest and topcoffea installed onto them.
