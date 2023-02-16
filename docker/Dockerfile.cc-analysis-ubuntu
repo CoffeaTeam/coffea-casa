@@ -94,23 +94,26 @@ RUN mamba install --yes \
     hist \
     mplhep \
     iminuit \
-    cmake \
+    #cmake \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
         --yes
 
 RUN pip install --no-cache-dir \
+    aiostream \
     supervisor \
+    servicex-clients \
+    servicex-databinder \
     correctionlib \
-    func-adl-servicex \
-    servicex \
-    func-adl-uproot \
+    funcx \
+    pyyaml \
     dask_jobqueue==0.7.3 \
     tornado==6.2 \
+    comm>=0.1.2 \
+    boto3 \
     dask-ml \
-    mlflow \
-    aiostream
+    mlflow
 
 # REMOVE ME AFTER TEST:
 # ------- xrootd-authz-plugin -------------------------------
