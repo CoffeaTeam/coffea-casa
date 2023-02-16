@@ -215,7 +215,7 @@ RUN mamba install --yes \
     hist \
     mplhep \
     iminuit \
-    cmake \
+    #cmake \
     scikit-hep-testdata \
     && mamba clean \
         --all \
@@ -225,17 +225,13 @@ RUN mamba install --yes \
 RUN pip install --no-cache-dir \
     aiostream \
     tenacity \
-    func-adl-servicex \
-    servicex \
-    #func-adl-servicex==2.0.0 \
-    #servicex==2.5.0 \
-    func_adl_uproot \
-    # Packages depends on the older version of servicex
+    servicex-clients \
     servicex-databinder \
     correctionlib \
-    #funcx==0.3.9 \
-    pyyaml
-    #git+https://github.com/ssl-hep/servicex-labextension.git#subdirectory=servicex-dashboard
+    funcx \
+    pyyaml \
+    # https://github.com/ssl-hep/servicex-labextension.git
+    servicex-dashboard
 
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup

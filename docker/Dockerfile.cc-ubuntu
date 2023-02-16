@@ -56,8 +56,6 @@ ENV SCHEDD_HOST=$SCHEDD_HOST
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
     dask_jobqueue==0.7.3 \
-    # funcx
-    funcx==0.3.9 \
     # visualization
     Shapely==1.8.1.post1 \
     descartes==1.1.0 \
@@ -65,7 +63,9 @@ RUN pip install --no-cache-dir \
     jq \
     # ML packages
     dask-ml \
+    comm>=0.1.2 \
     mlflow \
+    boto3 \
     # coffea casa jobqueue modules
     coffea_casa -U
 
