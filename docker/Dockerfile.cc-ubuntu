@@ -65,7 +65,6 @@ RUN pip install --no-cache-dir \
     dask-ml \
     comm>=0.1.2 \
     mlflow \
-    boto3 \
     # coffea casa jobqueue modules
     coffea_casa -U
 
