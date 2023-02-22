@@ -193,7 +193,6 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "container_service_names": "dask,nanny",
                 "dask_container_port": DEFAULT_CONTAINER_PORT,
                 "nanny_container_port": DEFAULT_NANNY_PORT,
-                "dask_container_port": DEFAULT_CONTAINER_PORT,
             },
             {"transfer_input_files": files},
             {"encrypt_input_files": files},
@@ -202,7 +201,6 @@ class CoffeaCasaCluster(HTCondorCluster):
             {"should_transfer_files": "YES"},
             {"Stream_Output": "False"},
             {"Stream_Error": "False"},
-            #{"environment": "BEARER_TOKEN_FILE=$_CONDOR_JOB_IWD/access_token"},
             {"+DaskSchedulerAddress": external_ip_string},
             job_kwargs.get(
                 "job_extra", dask.config.get(f"jobqueue.{cls.config_name}.job-extra")
