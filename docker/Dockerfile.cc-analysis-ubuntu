@@ -112,7 +112,8 @@ RUN pip install --no-cache-dir \
     tornado==6.2 \
     comm>=0.1.2 \
     dask-ml \
-    mlflow
+    mlflow \
+    coffea_casa -U
 
 # REMOVE ME AFTER TEST:
 # ------- xrootd-authz-plugin -------------------------------
