@@ -146,7 +146,11 @@ class CoffeaCasaCluster(HTCondorCluster):
         if (CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")["require_encryption"]):
             job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
-            input_files += [CA_FILE, CERT_FILE, XCACHE_FILE, XCACHE_SCITOKEN_FILE]
+            input_files += [CA_FILE, CERT_FILE]
+        if (XCACHE_SCITOKEN_FILE.is_file()):
+            input_files += [XCACHE_SCITOKEN_FILE]
+        if (XCACHE_FILE.is_file()):
+            input_files += [XCACHE_FILE]
         else:
             raise KeyError("Please check with system administarator why you do not have a certificate.")
         files = ", ".join(str(path) for path in input_files)
