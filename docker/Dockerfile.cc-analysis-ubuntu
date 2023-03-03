@@ -11,12 +11,12 @@ ARG CERT_DIR="/etc/cmsaf-secrets"
 ARG GITHUB_ACTIONS="false"
 # FIX ME AFTER TEST:
 ARG BEARER_TOKEN_FILE="/home/$NB_USER/.xcache/access_token"
+ARG XCACHE_HOST="red-xcache1.unl.edu"
 
-# For now bearer token location on worker is hardcoded 
-# in coffea_casa module as environment"$_CONDOR_JOB_IWD/xcache_token"
 
 # Configure environment
 ENV CERT_DIR $CERT_DIR
+ENV XCACHE_HOST $XCACHE_HOST
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
@@ -94,7 +94,7 @@ RUN mamba install --yes \
     hist \
     mplhep \
     iminuit \
-    #cmake \
+    cmake \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -115,17 +115,18 @@ RUN pip install --no-cache-dir \
     mlflow \
     coffea_casa -U
 
-# REMOVE ME AFTER TEST:
-# ------- xrootd-authz-plugin -------------------------------
-#RUN cd /tmp && \
-#    # ------- xrdcl-authz-plugin -------------------------------
-#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-#    cd xrdcl-authz-plugin && \
-#    mkdir build && \
-#    cd  build && \
-#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
-#    make && \
-#    make install
+# ------- xrootd-xcache-plugin -------------------------------
+RUN cd /tmp && \
+    git clone https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+    cd xrdcl-authz-plugin && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+    make && \
+    make install
+
+ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin.so"
 
 RUN chmod 755 /etc/grid-security/certificates
 COPY certs/hcc-flatiron.pem /etc/grid-security/certificates/
