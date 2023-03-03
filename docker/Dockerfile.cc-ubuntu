@@ -89,7 +89,7 @@ RUN ln -s /etc/grid-security/certificates/hcc-flatiron.pem /etc/grid-security/ce
 
 # xcache setup
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin.so"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
