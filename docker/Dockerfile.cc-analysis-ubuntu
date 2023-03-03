@@ -117,7 +117,7 @@ RUN pip install --no-cache-dir \
 
 # ------- xrootd-xcache-plugin -------------------------------
 RUN cd /tmp && \
-    git clone https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
