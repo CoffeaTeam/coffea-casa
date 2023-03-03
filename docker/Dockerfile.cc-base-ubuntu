@@ -215,7 +215,7 @@ RUN mamba install --yes \
     hist \
     mplhep \
     iminuit \
-    #cmake \
+    cmake \
     scikit-hep-testdata \
     && mamba clean \
         --all \
