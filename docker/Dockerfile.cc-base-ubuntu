@@ -265,10 +265,7 @@ RUN rm -rf /tmp/* \
 
 # Fix permissions for Dask/Ceph config files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
-# xcache setup
-#ENV XRD_PLUGINCONFDIR="/opt/conda/etc/xrootd/client.plugins.d/"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-#ENV XRD_PLUGIN="/opt/conda/lib/libXrdClAuthzPlugin.so"
 ENV PATH="/opt/conda/bin/:$PATH"
 
 # FIXME: we have a wrong path, let's make a link.
