@@ -142,6 +142,7 @@ jobs:
           tags: |
             localhost:5000/coffea-casa/cc-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
+            DEV=true
             TAG=${{ needs.version-check.outputs.date }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
@@ -264,6 +265,7 @@ jobs:
           tags: |
             localhost:5000/coffea-casa/cc-analysis-ubuntu:${{ needs.version-check.outputs.date }}
           build-args: |
+            DEV=true
             TAG=${{ needs.version-check.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
