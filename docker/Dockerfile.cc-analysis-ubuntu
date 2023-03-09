@@ -3,6 +3,7 @@ FROM coffeateam/coffea-dask:0.7.20-fastjet-3.4.0.1-g0510edd
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Jupyterhub
+ARG DEV
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
@@ -112,8 +113,10 @@ RUN pip install --no-cache-dir \
     tornado==6.2 \
     comm>=0.1.2 \
     dask-ml \
-    mlflow \
-    coffea_casa -U
+    mlflow
+
+RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
+
 
 # ------- xrootd-xcache-plugin -------------------------------
 RUN cd /tmp && \
