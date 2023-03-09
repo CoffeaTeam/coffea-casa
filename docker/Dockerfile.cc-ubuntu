@@ -17,6 +17,7 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG TAG
 ARG PROJECT
 ARG REGISTRY
+ARG DEV
 ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-ubuntu"
 # Secrets
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -69,9 +70,9 @@ RUN pip install --no-cache-dir \
     # ML packages
     dask-ml \
     comm>=0.1.2 \
-    mlflow \
-    # coffea casa jobqueue modules
-    coffea_casa -U
+    mlflow
+
+RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
 
 # ------- xrootd-xcache-plugin -------------------------------
 RUN cd /tmp && \

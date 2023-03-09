@@ -103,6 +103,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/coffea-casa/cc-ubuntu:development
           build-args: |
+            DEV=true
             TAG=development
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
@@ -196,6 +197,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/coffea-casa/cc-analysis-ubuntu:development
           build-args: |
+            DEV=true
             TAG=development 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
