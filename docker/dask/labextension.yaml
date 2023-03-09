@@ -13,5 +13,5 @@ labextension:
   - name: "Local Cluster"
     workers: null
     adapt:
-      minimum: 1
+      minimum: 0
       maximum: 50
