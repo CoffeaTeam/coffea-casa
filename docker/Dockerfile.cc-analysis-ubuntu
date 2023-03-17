@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.20-fastjet-3.4.0.1-g0510edd
+FROM coffeateam/coffea-dask:0.7.21-fastjet-3.4.0.1-g0510edd
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
@@ -119,8 +119,23 @@ RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else p
 
 
 # ------- xrootd-xcache-plugin -------------------------------
+#RUN cd /tmp && \
+#    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+#    cd xrdcl-authz-plugin && \
+#    mkdir build && \
+#    cd  build && \
+#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+#    make && \
+#    make install
+
+#ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+#ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+
+# REMOVE THIS BLOCK AFTER TEST:
+# ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
-    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+    # ------- xrdcl-authz-plugin -------------------------------
+    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
@@ -129,7 +144,11 @@ RUN cd /tmp && \
     make install
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+# Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
+COPY uproot/uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
+RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+
 
 RUN chmod 755 /etc/grid-security/certificates
 COPY certs/hcc-flatiron.pem /etc/grid-security/certificates/
