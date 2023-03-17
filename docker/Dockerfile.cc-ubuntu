@@ -75,8 +75,23 @@ RUN pip install --no-cache-dir \
 RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
 
 # ------- xrootd-xcache-plugin -------------------------------
+#RUN cd /tmp && \
+#    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+#    cd xrdcl-authz-plugin && \
+#    mkdir build && \
+#    cd  build && \
+#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+#    make && \
+#    make install
+
+#ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+#ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+
+# REMOVE THIS BLOCK AFTER TEST:
+# ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
-    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+    # ------- xrdcl-authz-plugin -------------------------------
+    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
@@ -84,13 +99,15 @@ RUN cd /tmp && \
     make && \
     make install
 
+ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+# Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
+COPY uproot/uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
+RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+
 RUN chmod 755 /etc/grid-security/certificates
 COPY certs/hcc-flatiron.pem /etc/grid-security/certificates/
 RUN ln -s /etc/grid-security/certificates/hcc-flatiron.pem /etc/grid-security/certificates/80d1fda9.0
-
-# xcache setup
-ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
