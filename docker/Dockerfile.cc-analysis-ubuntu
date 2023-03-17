@@ -142,7 +142,7 @@ RUN cd /tmp && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
     make && \
     make install && \
-    ln -s ${CONDA_DIR}/lib/libXrdClAuthzPlugin.so ${CONDA_DIR}/lib/libXrdClAuthzPlugin-5.so
+    ln -s ${CONDA_DIR}/lib/libXrdClAuthzPlugin-5.so ${CONDA_DIR}/lib/libXrdClAuthzPlugin.so
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
