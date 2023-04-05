@@ -117,35 +117,34 @@ RUN pip install --no-cache-dir \
 
 RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
 
-
 # ------- xrootd-xcache-plugin -------------------------------
-#RUN cd /tmp && \
-#    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
-#    cd xrdcl-authz-plugin && \
-#    mkdir build && \
-#    cd  build && \
-#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
-#    make && \
-#    make install
-
-#ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-#ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
-
-# REMOVE THIS BLOCK AFTER TEST:
-# ------- xrootd-authz-plugin -------------------------------
 RUN cd /tmp && \
-    # ------- xrdcl-authz-plugin -------------------------------
-    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
     make && \
-    make install && \
-    ln -s ${CONDA_DIR}/lib/libXrdClAuthzPlugin-5.so ${CONDA_DIR}/lib/libXrdClAuthzPlugin.so
+    make install
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+
+# REMOVE THIS BLOCK AFTER TEST:
+# ------- xrootd-authz-plugin -------------------------------
+#RUN cd /tmp && \
+#    # ------- xrdcl-authz-plugin -------------------------------
+#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
+#    cd xrdcl-authz-plugin && \
+#    mkdir build && \
+#    cd  build && \
+#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+#    make && \
+#    make install && \
+#    ln -s ${CONDA_DIR}/lib/libXrdClAuthzPlugin-5.so ${CONDA_DIR}/lib/libXrdClAuthzPlugin.so
+
+#ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+#ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
 COPY uproot/uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
 RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
