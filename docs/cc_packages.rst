@@ -19,33 +19,22 @@ If you install a package to your scheduler but attempt to run it on your workers
 
 .. code-block:: python
 
-    from dask.distributed import Client, Worker, WorkerPlugin
-    from typing import List
-    import os
+    from dask.distributed import Client, PipInstall
 
-    class DependencyInstaller(WorkerPlugin):
-        def __init__(self, dependencies: List[str]):
-            self._depencendies = " ".join(f"'{dep}'" for dep in dependencies)
-
-        def setup(self, worker: Worker):
-            os.system(f"pip install {self._depencendies}")
-
-
-    dependency_installer = DependencyInstaller([
+    dependencies = [
         "pytest",
-    ])
-
+    ]
     client = Client("tls://localhost:8786")
-    client.register_worker_plugin(dependency_installer)
+    client.register_worker_plugin(PipInstall(packages=dependencies))
     
-To use this code for your own purposes, you merely have to put in your list of dependencies in the ``dependency_installer``. This should support all installation formats that pip does, and you can add multiple packages by expanding the list. For example, to install a second package from a GitHub repository, you could specify:
+To use this code for your own purposes, you merely have to put in your dependencies in the ``dependencies`` list. This should support all installation formats that pip does, and you can add multiple packages by expanding the list. For example, to install a second package from a GitHub repository, you could specify:
 
 .. code-block:: python
 
-    dependency_installer = DependencyInstaller([
+    dependencies = [
         "pytest",
         "topcoffea@git+https://github.com/TopEFT/topcoffea.git",
-    ])
+    ]
     
 and your workers should have both pytest and topcoffea installed onto them.
 
