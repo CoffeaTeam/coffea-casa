@@ -111,9 +111,10 @@ RUN mamba install --quiet --yes \
     'notebook' \
     'jupyterhub' \
     'jupyterlab' \
+    'jupyter_server>=2' \
     jupyterlab_widgets \
     jupyterlab-git \
-    dask_labextension && \
+    "dask-labextension>=5" && \
     mamba clean \
         --all \
         --force-pkgs-dirs \
