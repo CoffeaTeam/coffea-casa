@@ -110,6 +110,7 @@ RUN mamba install --yes \
     oidc-agent \
     xgboost \
     pyhf \
+    scipy>=1.8.1 \
     cabinetry>=0.5.1 \
     vector \
     hist \
