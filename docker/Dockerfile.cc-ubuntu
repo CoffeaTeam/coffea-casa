@@ -69,6 +69,7 @@ RUN pip install --no-cache-dir \
     jq \
     # ML packages
     dask-ml \
+    prometheus_client \
     comm>=0.1.2 \
     mlflow
 
