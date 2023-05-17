@@ -114,6 +114,7 @@ RUN pip install --no-cache-dir \
     tornado==6.2 \
     comm>=0.1.2 \
     dask-ml \
+    prometheus_client \
     mlflow
 
 RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
