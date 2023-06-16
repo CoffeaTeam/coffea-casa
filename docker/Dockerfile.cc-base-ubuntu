@@ -162,6 +162,8 @@ RUN apt-get update --yes && \
     texlive-fonts-recommended \
     texlive-plain-generic \
     # ----
+    eos-fuse \
+    # ----
     tzdata \
     unzip \
     gdb \
@@ -200,7 +202,8 @@ RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT
     mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
     mkdir -p ${HOME}/.condor/tokens.d && \
     mkdir -p /var/lib/condor && \
-    mkdir -p /etc/condor/config.d
+    mkdir -p /etc/condor/config.d && \
+    mkdir -p /etc/eos
 
 USER ${NB_UID}
 
