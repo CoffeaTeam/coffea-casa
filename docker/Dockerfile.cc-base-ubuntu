@@ -58,6 +58,7 @@ RUN apt-get update --yes && \
     sudo \
     curl \
     gnupg \
+    lsb-release \
     locales \
     fonts-liberation \
     procps \
