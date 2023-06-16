@@ -56,6 +56,7 @@ RUN apt-get update --yes && \
     wget \
     ca-certificates \
     sudo \
+    curl \
     locales \
     fonts-liberation \
     procps \
