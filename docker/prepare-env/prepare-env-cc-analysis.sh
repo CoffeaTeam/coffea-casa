@@ -71,8 +71,12 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       cp $_CONDOR_JOB_IWD/ceph.conf ${CEPH_DIR}
   fi
 
-    if [[ -f "$_CONDOR_JOB_IWD/access_token" ]]; then
+  if [[ -f "$_CONDOR_JOB_IWD/access_token" ]]; then
       mkdir -p /home/$NB_USER/.xcache && cp $_CONDOR_JOB_IWD/access_token  /home/$NB_USER/.xcache/access_token
+  fi
+
+  if [[ -f "$_CONDOR_JOB_IWD/mlflow_token" ]]; then
+      mkdir -p /home/$NB_USER/.mlflow && cp $_CONDOR_JOB_IWD/mlflow_token  /home/$NB_USER/..mlflow/mlflow_token
   fi
 
   if [[ -f "$_CONDOR_JOB_IWD/keyring" ]]; then
