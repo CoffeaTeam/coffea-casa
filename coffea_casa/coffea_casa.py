@@ -35,6 +35,10 @@ if (HOME_DIR / "environment.yaml").is_file():
     CONDA_ENV = HOME_DIR / "environment.yaml"
 else:
     CONDA_ENV = HOME_DIR / "environment.yml"
+# Test dummy mlflow token
+if (HOME_DIR / "mlflow_token").is_file():
+    MLFLOW_FILE = HOME_DIR / "mlflow_token"
+
 
 
 def merge_dicts(*dict_args):
@@ -151,6 +155,8 @@ class CoffeaCasaCluster(HTCondorCluster):
             input_files += [XCACHE_SCITOKEN_FILE]
         if (XCACHE_FILE.is_file()):
             input_files += [XCACHE_FILE]
+        if (MLFLOW_FILE.is_file()):
+            input_files += [MLFLOW_FILE]
         else:
             raise KeyError("Please check with system administarator why you do not have a certificate.")
         files = ", ".join(str(path) for path in input_files)
