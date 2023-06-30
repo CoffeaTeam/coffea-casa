@@ -13,6 +13,9 @@ ARG GITHUB_ACTIONS="false"
 # FIX ME AFTER TEST:
 ARG BEARER_TOKEN_FILE="/home/$NB_USER/.xcache/access_token"
 ARG XCACHE_HOST="red-xcache1.unl.edu"
+# Test dummy mlflow token
+ARG MLFLOW_TOKEN="/home/$NB_USER/.mlflow/mlflow_token" 
+ARG MLFLOW_TRACKING_URI="https://mlflow-demo.software-dev.ncsa.illinois.edu"
 
 
 # Configure environment
@@ -27,6 +30,9 @@ ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
 ENV PATH "/opt/conda/bin/:$PATH"
+# Test dummy mlflow token
+ENV MLFLOW_TOKEN=$MLFLOW_TOKEN
+ENV MLFLOW_TRACKING_URI=$MLFLOW_TRACKING_URI
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
@@ -184,6 +190,9 @@ RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
 # /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
+
+# mlflow
+ENV MLFLOW_TRACKING_TOKEN="$(cat $MLFLOW_TOKEN)"
 
 # Cleanup
 RUN rm -rf /tmp/* \
