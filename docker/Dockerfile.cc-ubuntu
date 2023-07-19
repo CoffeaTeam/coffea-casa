@@ -35,10 +35,6 @@ ARG UID_DOMAIN="unl.edu"
 ARG SCHEDD_HOST="t3.unl.edu"
 # XCACHE
 ARG XCACHE_HOST="red-xcache1.unl.edu"
-# Test dummy mlflow token
-ARG MLFLOW_TOKEN="/home/cms-jovyan/mlflow_token" 
-ARG MLFLOW_TRACKING_URI="https://mlflow-demo.software-dev.ncsa.illinois.edu"
-
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -57,9 +53,6 @@ ENV CONDOR_HOST=$CONDOR_HOST
 ENV COLLECTOR_NAME=$COLLECTOR_NAME
 ENV UID_DOMAIN=$UID_DOMAIN
 ENV SCHEDD_HOST=$SCHEDD_HOST
-# Test dummy mlflow token
-ENV MLFLOW_TOKEN=$MLFLOW_TOKEN
-ENV MLFLOW_TRACKING_URI=$MLFLOW_TRACKING_URI
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
@@ -120,9 +113,6 @@ RUN ln -s /etc/grid-security/certificates/hcc-flatiron.pem /etc/grid-security/ce
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
-
-# mlflow
-ENV MLFLOW_TRACKING_TOKEN="$(cat $MLFLOW_TOKEN)"
 
 USER root
 
