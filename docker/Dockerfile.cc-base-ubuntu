@@ -108,11 +108,11 @@ RUN mkdir "/home/${NB_USER}/work" && \
 # files across image layers when the permissions change
 RUN mamba install --quiet --yes \
     -c conda-forge \
-    'notebook' \
+    'notebook'==6.5.3 \
     'jupyterhub'==3.1.1 \
     'jupyterlab'==3.6.1 \
-    jupyterlab_widgets \
-    jupyterlab-git \
+    jupyterlab_widgets==3.0.7 \
+    jupyterlab-git==0.41.0 \
     dask_labextension && \
     mamba clean \
         --all \
@@ -173,9 +173,9 @@ RUN update-alternatives --install /usr/bin/nano nano /bin/nano-tiny 10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 RUN pip install --upgrade --no-cache-dir \
-  jupyterlab_github \
-  jupyter_client \
-  ipywidgets
+  jupyterlab_github==3.0.1 \
+  jupyter_client==8.1.0 \
+  ipywidgets==8.0.6
 
 # Enable the serverextensions that do not use the conf.d approach and
 # build JupyterLab.
