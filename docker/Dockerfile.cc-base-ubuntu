@@ -110,7 +110,7 @@ RUN mamba install --quiet --yes \
     -c conda-forge \
     'notebook' \
     'jupyterhub'==3.1.1 \
-    'jupyterlab' \
+    'jupyterlab'==3.6.1 \
     jupyterlab_widgets \
     jupyterlab-git \
     dask_labextension && \
