@@ -64,7 +64,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
 
   # Condor token securily transfered from scheduler
   if [[ -f "$_CONDOR_JOB_IWD/condor_token" ]]; then
-      mkdir -p /home/$NB_USER/.condor/tokens.d/ && cp $_CONDOR_JOB_IWD/condor_token /home/$NB_USER/.condor/tokens.d/condor_token
+      mkdir -p $SEC_TOKEN_SYSTEM_DIRECTORY && cp $_CONDOR_JOB_IWD/condor_token $SEC_TOKEN_SYSTEM_DIRECTORY/condor_token
   fi
 
   if [[ -f "$_CONDOR_JOB_IWD/ceph.conf" ]]; then
@@ -72,7 +72,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
   fi
 
     if [[ -f "$_CONDOR_JOB_IWD/access_token" ]]; then
-      mkdir -p /home/$NB_USER/.xcache && cp $_CONDOR_JOB_IWD/access_token  /home/$NB_USER/.xcache/access_token
+      mkdir -p /tmp/.xcache && cp $_CONDOR_JOB_IWD/access_token  /tmp/.xcache/access_token
   fi
 
   if [[ -f "$_CONDOR_JOB_IWD/keyring" ]]; then
