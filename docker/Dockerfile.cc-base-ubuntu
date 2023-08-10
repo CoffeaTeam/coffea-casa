@@ -22,7 +22,7 @@ ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
 #ARG LABEXTENTION_FACTORY_CLASS="LocalCluster"
 #ARG LABEXTENTION_FACTORY_MODULE="dask.distributed"
 # Condor settings
-ARG CONDOR_HOST="red-condor.unl.edu"
+ARG CONDOR_HOST="red-condor2.unl.edu"
 ARG COLLECTOR_NAME="Nebraska T2"
 ARG UID_DOMAIN="unl.edu"
 ARG SCHEDD_HOST="t3.unl.edu"
@@ -113,6 +113,7 @@ RUN mamba install --quiet --yes \
     'jupyterlab'==3.6.1 \
     jupyterlab_widgets==3.0.7 \
     jupyterlab-git==0.41.0 \
+    pyjwt==2.6.0 \
     dask_labextension && \
     mamba clean \
         --all \
