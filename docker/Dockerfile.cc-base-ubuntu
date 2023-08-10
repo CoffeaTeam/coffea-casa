@@ -113,8 +113,6 @@ RUN mamba install --quiet --yes \
     'jupyterlab'==3.6.1 \
     jupyterlab_widgets==3.0.7 \
     jupyterlab-git==0.41.0 \
-    pyjwt==2.6.0 \
-    openssl==3.1.0 \
     dask_labextension && \
     mamba clean \
         --all \
@@ -209,6 +207,7 @@ USER ${NB_UID}
 RUN mamba install --yes \
     -c conda-forge \
     conda-build \
+    gilknocker \
     htcondor \
     xgboost \
     pyhf \
@@ -219,6 +218,7 @@ RUN mamba install --yes \
     mplhep \
     iminuit \
     cmake \
+    openssl==3.1.0 \
     scikit-hep-testdata \
     && mamba clean \
         --all \
@@ -233,6 +233,7 @@ RUN pip install --no-cache-dir \
     correctionlib \
     funcx \
     pyyaml \
+    jupytext \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard
 
