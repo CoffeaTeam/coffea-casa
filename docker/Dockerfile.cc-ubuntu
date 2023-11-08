@@ -70,6 +70,9 @@ RUN pip install --no-cache-dir \
     comm>=0.1.2 \
     mlflow
 
+RUN mamba install --quiet --yes \
+    -c conda-forge root
+
 RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
 
 # ------- xrootd-xcache-plugin -------------------------------
