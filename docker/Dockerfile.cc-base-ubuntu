@@ -206,8 +206,6 @@ USER ${NB_UID}
 
 RUN mamba install --yes \
     -c conda-forge \
-    conda-build \
-    gilknocker \
     htcondor \
     xgboost \
     pyhf \
