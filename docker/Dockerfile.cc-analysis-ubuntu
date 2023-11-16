@@ -108,16 +108,13 @@ RUN mamba install --yes \
 RUN pip install --no-cache-dir \
     aiostream \
     supervisor \
-    servicex-clients \
-    servicex-databinder \
     correctionlib \
     funcx \
     pyyaml \
-    dask_jobqueue==0.7.3 \
-    tornado==6.2 \
-    comm>=0.1.2 \
+    # ML packages
     dask-ml \
     prometheus_client \
+    comm>=0.1.2 \
     mlflow
 
 RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
