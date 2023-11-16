@@ -56,9 +56,6 @@ ENV SCHEDD_HOST=$SCHEDD_HOST
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
-    dask_jobqueue==0.7.3 \
-    servicex-clients \
-    servicex-databinder \
     correctionlib \
     funcx \
     pyyaml \

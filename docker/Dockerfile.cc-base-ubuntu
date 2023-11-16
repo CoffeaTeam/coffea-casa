@@ -227,8 +227,6 @@ RUN mamba install --yes \
 RUN pip install --no-cache-dir \
     aiostream \
     tenacity \
-    servicex-clients \
-    servicex-databinder \
     correctionlib \
     funcx \
     pyyaml \
