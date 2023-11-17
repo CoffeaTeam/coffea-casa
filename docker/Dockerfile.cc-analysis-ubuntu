@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.21-fastjet-3.4.0.1-g0510edd
+FROM coffeateam/coffea-dask:0.7.22-py3.8-g7cbcc
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
@@ -175,12 +175,12 @@ RUN groupadd -r condor && \
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
 COPY dask/distributed /opt/conda/lib/python3.8/site-packages/distributed
-RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
-    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
-    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
-    #patch -p2 < 0003-Activate-patch.patch && \
-    patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch && \
-    patch -p2 < 0005-Add-nanny-patch.patch
+#RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
+#    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+#    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
+#    #patch -p2 < 0003-Activate-patch.patch && \
+#    patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch && \
+#    patch -p2 < 0005-Add-nanny-patch.patch
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
