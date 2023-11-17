@@ -89,6 +89,8 @@ RUN mkdir $HOME/work && \
 # Dask dependencies and HTCondor
 RUN mamba install --yes \
     -c conda-forge \
+    python=3.8.18 \
+    tornado=6.3.3 \
     htcondor \
     xgboost \
     pyhf \
