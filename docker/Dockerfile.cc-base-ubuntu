@@ -113,6 +113,7 @@ RUN mamba install --quiet --yes \
     'jupyterlab'==3.6.1 \
     jupyterlab_widgets==3.0.7 \
     jupyterlab-git==0.41.0 \
+    dask=2023.11.0 \
     dask_labextension && \
     mamba clean \
         --all \
