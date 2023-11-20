@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask:0.7.22-py3.8-g7cbcc
+FROM coffeateam/coffea-dask:0.7.22-py3.9-g7cbcc
 
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
@@ -89,12 +89,11 @@ RUN mkdir $HOME/work && \
 # Dask dependencies and HTCondor
 RUN mamba install --yes \
     -c conda-forge \
-    python=3.8.18 \
-    tornado=6.3.3 \
     htcondor \
     xgboost \
     pyhf \
     xrootd \
+    dask=2023.11.0 \
     scipy>=1.8.1 \
     cabinetry \
     vector \
@@ -150,8 +149,8 @@ ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 #ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 #ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
 # Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
-COPY uproot/uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
-RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+#COPY uproot/uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
+#RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
 
 
 RUN chmod 755 /etc/grid-security/certificates
@@ -174,11 +173,11 @@ RUN groupadd -r condor && \
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY dask/distributed /opt/conda/lib/python3.8/site-packages/distributed
-#RUN cd /opt/conda/lib/python3.8/site-packages/distributed && \
-#    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
-#    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
-#    #patch -p2 < 0003-Activate-patch.patch && \
+COPY dask/distributed /opt/conda/lib/python3.9/site-packages/distributed
+RUN cd /opt/conda/lib/python3.9/site-packages/distributed && \
+    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
+#    && patch -p2 < 0003-Activate-patch.patch && \
 #    patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch && \
 #    patch -p2 < 0005-Add-nanny-patch.patch
 
