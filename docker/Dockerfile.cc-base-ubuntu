@@ -14,18 +14,26 @@ ARG NB_UID="6440"
 ARG NB_GID="11265"
 # Configure Labextention Dask Cluster factory
 ARG DASK_ROOT_CONFIG="/opt/dask"
+ARG CERT_DIR="/etc/cmsaf-secrets"
 # Labextention
 ARG LABEXTENTION_CLUSTER="UNL HTCondor Cluster"
 ARG LABEXTENTION_FACTORY_CLASS="CoffeaCasaCluster"
 ARG LABEXTENTION_FACTORY_MODULE="coffea_casa"
-#ARG LABEXTENTION_CLUSTER="Local Cluster"
-#ARG LABEXTENTION_FACTORY_CLASS="LocalCluster"
-#ARG LABEXTENTION_FACTORY_MODULE="dask.distributed"
 # Condor settings
 ARG CONDOR_HOST="red-condor1.unl.edu"
 ARG COLLECTOR_NAME="Nebraska T2"
 ARG UID_DOMAIN="unl.edu"
 ARG SCHEDD_HOST="t3.unl.edu"
+# XCACHE
+ARG XCACHE_HOST="red-xcache1.unl.edu"
+# FIX ME AFTER TEST:
+ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets-chown/access_token"
+# Tag
+ARG TAG="development"
+ARG PROJECT="coffea-casa"
+ARG REGISTRY="hub.opensciencegrid.org"
+ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-ubuntu"
+ARG DEV
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -47,6 +55,11 @@ ENV CONDOR_HOST $CONDOR_HOST
 ENV COLLECTOR_NAME $COLLECTOR_NAME
 ENV UID_DOMAIN $UID_DOMAIN
 ENV SCHEDD_HOST $SCHEDD_HOST
+ENV CERT_DIR $CERT_DIR
+ENV TAG $TAG
+ENV XCACHE_HOST $XCACHE_HOST
+ENV WORKER_IMAGE $WORKER_IMAGE
+ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
@@ -225,16 +238,6 @@ RUN mamba install --yes \
         --force-pkgs-dirs \
         --yes
 
-RUN pip install --no-cache-dir \
-    aiostream \
-    tenacity \
-    correctionlib \
-    funcx \
-    pyyaml \
-    jupytext \
-    # https://github.com/ssl-hep/servicex-labextension.git
-    servicex-dashboard
-
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
 COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
@@ -253,17 +256,6 @@ RUN curl -L https://github.com/opensciencegrid/osg-vo-config/archive/refs/heads/
 # it configured from kubernetes side and updated in docker container to match it
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
-# Cleanup
-RUN rm -rf /tmp/* \
-    && rm -rf $HOME/.cache/.pip/* \
-    && jupyter lab clean \
-    && jlpm cache clean \
-    && npm cache clean --force \
-    && find /opt/conda/ -type f,l -name '*.a' -delete \
-    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
-    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && (find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
-    && rm -rf /opt/conda/pkgs
 
 # Fix permissions for Dask/Ceph config files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
@@ -279,8 +271,77 @@ RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 # if not utilized, crucial if CVMFS is desired
 RUN mkdir /cvmfs
 
-# prepare-env.sh script
-COPY prepare-env/prepare-env-cc-base.sh /usr/local/bin/prepare-env.sh
+USER ${NB_USER}    
+RUN pip install --no-cache-dir \
+    correctionlib \
+    funcx \
+    pyyaml \
+    # visualization
+    Shapely==1.8.1.post1 \
+    descartes==1.1.0 \
+    # JSON processor
+    jq \
+    # ML packages
+    dask-ml \
+    prometheus_client \
+    comm>=0.1.2 \
+    mlflow \
+    jupytext \
+    # https://github.com/ssl-hep/servicex-labextension.git
+    servicex-dashboard
+
+RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
+
+# ------- xrootd-xcache-plugin -------------------------------
+RUN cd /tmp && \
+    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+    cd xrdcl-authz-plugin && \
+    mkdir build && \
+    cd  build && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+    make && \
+    make install
+
+ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+
+# Patching uproot (broken xrootd-authz-plugin with xrootd > 5.2.0 and uproot.MultithreadedXRootDSource)
+#COPY uproot/uproot_xrd_source.patch /opt/conda/lib/python3.8/site-packages/uproot
+#RUN cd /opt/conda/lib/python3.8/site-packages/uproot && patch < uproot_xrd_source.patch
+
+RUN chmod 755 /etc/grid-security/certificates
+COPY certs/hcc-flatiron.pem /etc/grid-security/certificates/
+RUN ln -s /etc/grid-security/certificates/hcc-flatiron.pem /etc/grid-security/certificates/80d1fda9.0
+
+# Coffea_casa - > jobqueue-coffea-casa.yaml
+COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
+
+USER root
+
+# Distributed: we need to install patched version of distributed version
+COPY dask/distributed ${CONDA_DIR}/lib/python3.9/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.9/site-packages/distributed && \
+    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
+    # && \ patch -p2 < 0003-Activate-patch.patch && \
+    #patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch && \
+    #patch -p2 < 0005-Add-nanny-patch.patch
+
+# Cleanup
+RUN rm -rf /tmp/* \
+    && rm -rf $HOME/.cache/.pip/* \
+    && mamba clean --all -f -y \
+    && jupyter lab clean \
+    && jlpm cache clean \
+    && npm cache clean --force \
+    && find ${CONDA_DIR} -type f -name '*.a' -delete \
+    && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
+    && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
+    && (find ${CONDA_DIR}/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && rm -rf ${CONDA_DIR}/pkgs
+
+# FIXME: add better layering for preparation of env
+ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
