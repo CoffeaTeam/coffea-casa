@@ -11,9 +11,7 @@ on:
 env:
   PROJECT: 'coffea-casa'
   GITHUB_ACTIONS: 'true'
-  #REGISTRY: 'localhost:5000'
-  #REGISTRY_PATH: ${{ github.workspace }}/registry
-  #CACHE_PATH: /tmp/.buildx-cache
+  REGISTRY: 'hub.opensciencegrid.org'
 
 jobs:
   matrix-build:
@@ -57,7 +55,7 @@ jobs:
           file: docker/Dockerfile.${{ matrix.image }}
           push: ${{  github.event_name == 'push' }}
           platforms: linux/amd64
-          tags: coffea-casa/${{ matrix.image }}:${{ steps.date.outputs.date }}
+          tags: ${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.date.outputs.date }}
           build-args: 
             DEV=true
             TAG=${{ steps.date.outputs.date }} 

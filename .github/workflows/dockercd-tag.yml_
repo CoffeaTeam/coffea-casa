@@ -270,3 +270,70 @@ jobs:
 #            PROJECT=${{ env.PROJECT }} 
 #            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
 #            REGISTRY=${{ env.REGISTRY }}
+
+
+name: Test docker images
+
+on:
+  pull_request:
+    paths:
+      - docker/**
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  PROJECT: 'coffea-casa'
+  GITHUB_ACTIONS: 'true'
+  #REGISTRY: 'localhost:5000'
+  #REGISTRY_PATH: ${{ github.workspace }}/registry
+  #CACHE_PATH: /tmp/.buildx-cache
+
+jobs:
+  matrix-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [cc-base-ubuntu, cc-analysis-ubuntu]
+        # Keep this line in sync with gh actions @ coffea-dask repo
+        # python: [3.8, 3.9, '3.10']
+        #exclude:
+        #  - image: cc7
+        #    python: 3.8           
+    name: ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch current date (with timestamp)
+        id: date
+        run: |
+          echo "::set-output name=date::$(date +"%Y-%m-%d_%H-%M-%S")"
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+          driver-opts: network=host
+      - name: Login to Harbor Hub
+        if: success() && github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: hub.opensciencegrid.org
+          username: ${{ secrets.HARBOR_USER }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+      - name: Build and push
+        uses: docker/build-push-action@v3.0.0
+        with:
+          context: docker/
+          file: docker/Dockerfile.${{ matrix.image }}
+          push: ${{  github.event_name == 'push' }}
+          platforms: linux/amd64
+          tags: coffea-casa/${{ matrix.image }}:development
+          build-args: 
+            DEV=true
+            TAG=development 
+            PROJECT=${{ env.PROJECT }} 
+            GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
