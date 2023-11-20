@@ -1,8 +1,8 @@
 diff --git a/distributed/distributed-schema.yaml b/distributed/distributed-schema.yaml
-index 6187fb34..a6f31a05 100644
+index c93972cc..8b2ea414 100644
 --- a/distributed/distributed-schema.yaml
 +++ b/distributed/distributed-schema.yaml
-@@ -140,6 +140,15 @@ properties:
+@@ -155,6 +155,15 @@ properties:
  
                See https://docs.dask.org/en/latest/how-to/customize-initialization.html for more information
  
@@ -19,7 +19,7 @@ index 6187fb34..a6f31a05 100644
              type: string
              description: |
 diff --git a/distributed/distributed.yaml b/distributed/distributed.yaml
-index 61b6522c..e8db6978 100644
+index a0e02153..85fc5ae4 100644
 --- a/distributed/distributed.yaml
 +++ b/distributed/distributed.yaml
 @@ -25,6 +25,7 @@ distributed:
@@ -31,42 +31,42 @@ index 61b6522c..e8db6978 100644
      default-task-durations:  # How long we expect function names to run ("1h", "1s") (helps for long tasks)
        rechunk-split: 1us
 diff --git a/distributed/scheduler.py b/distributed/scheduler.py
-index f0e303e1..ea93184c 100644
+index 77338888..630ac0c0 100644
 --- a/distributed/scheduler.py
 +++ b/distributed/scheduler.py
-@@ -174,6 +174,8 @@ DEFAULT_DATA_SIZE = declare(
-     Py_ssize_t, parse_bytes(dask.config.get("distributed.scheduler.default-data-size"))
+@@ -172,6 +172,8 @@ DEFAULT_DATA_SIZE = parse_bytes(
  )
+ STIMULUS_ID_UNSET = "<stimulus_id unset>"
  
 +RESOLVE_WORKER_HOSTNAME = dask.config.get("distributed.scheduler.resolve-worker-hostname")
 +
  DEFAULT_EXTENSIONS = {
      "locks": LockExtension,
      "multi_locks": MultiLockExtension,
-@@ -4330,7 +4332,7 @@ class Scheduler(SchedulerState, ServerNode):
-         comm=None,
+@@ -4125,7 +4127,7 @@ class Scheduler(SchedulerState, ServerNode):
+         self,
          *,
-         address,
+         address: str,
 -        resolve_address: bool = True,
-+        resolve_address=RESOLVE_WORKER_HOSTNAME,
-         now: float = None,
-         resources: dict = None,
-         host_info: dict = None,
-@@ -4443,7 +4445,7 @@ class Scheduler(SchedulerState, ServerNode):
-         keys=(),
-         nthreads=None,
-         name=None,
--        resolve_address=True,
-+        resolve_address=RESOLVE_WORKER_HOSTNAME,
-         nbytes=None,
-         types=None,
-         now=None,
-@@ -7656,7 +7658,7 @@ class Scheduler(SchedulerState, ServerNode):
-                 parent._resources[resource] = dr = {}
++        resolve_address: bool = RESOLVE_WORKER_HOSTNAME,
+         now: float | None = None,
+         resources: dict[str, float] | None = None,
+         host_info: dict | None = None,
+@@ -4241,7 +4243,7 @@ class Scheduler(SchedulerState, ServerNode):
+         server_id: str,
+         nthreads: int,
+         name: str,
+-        resolve_address: bool = True,
++        resolve_address: bool = RESOLVE_WORKER_HOSTNAME,
+         now: float,
+         resources: dict[str, float],
+         # FIXME: This is never submitted by the worker
+@@ -7679,7 +7681,7 @@ class Scheduler(SchedulerState, ServerNode):
+             dr = self.resources.setdefault(resource, {})
              del dr[worker]
  
--    def coerce_address(self, addr, resolve=True):
-+    def coerce_address(self, addr, resolve=RESOLVE_WORKER_HOSTNAME):
+-    def coerce_address(self, addr: str | tuple, resolve: bool = True) -> str:
++    def coerce_address(self, addr: str | tuple, resolve: bool = RESOLVE_WORKER_HOSTNAME) -> str:
          """
          Coerce possible input addresses to canonical form.
          *resolve* can be disabled for testing with fake hostnames.
