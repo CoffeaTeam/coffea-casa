@@ -97,7 +97,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             Total amount of memory per job (defaults to 6 GB).
         scheduler_options : dict
             Extra scheduler options for the job (Dask specific).
-        job_extra : dict
+        job_extra_directives : dict
             Extra submit file attributes for the job (HTCondor specific).
 
         Examples
@@ -188,7 +188,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             ),
         )
         ## Job extra settings (HTCondor ClassAd)
-        job_config["job_extra"] = merge_dicts(
+        job_config["job_extra_directives"] = merge_dicts(
             {
                 "universe": "docker",
                 "docker_image": worker_image or dask.config.get(f"jobqueue.{cls.config_name}.worker-image")
@@ -207,7 +207,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             {"Stream_Error": "False"},
             {"+DaskSchedulerAddress": external_ip_string},
             job_kwargs.get(
-                "job_extra", dask.config.get(f"jobqueue.{cls.config_name}.job-extra")
+                "job_extra_directives", dask.config.get(f"jobqueue.{cls.config_name}.job_extra_directives")
             ),
         )
         print(job_config)
