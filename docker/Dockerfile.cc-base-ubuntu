@@ -208,14 +208,6 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
 #COPY jupyterlab-workspace.json $HOME/
 #RUN jupyter lab workspaces import $HOME/jupyterlab-workspace.json
 
-USER root
-# Preparing directories for Dask conf files, patches and job spool directory for HTCondor
-RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
-    mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
-    mkdir -p ${HOME}/.condor/tokens.d && \
-    mkdir -p /var/lib/condor && \
-    mkdir -p /etc/condor/config.d
-
 USER ${NB_UID}
 
 RUN mamba install --yes \
@@ -238,11 +230,13 @@ RUN mamba install --yes \
         --force-pkgs-dirs \
         --yes
 
-USER ${NB_UID}
-# Dask, Labextention and coffea-casa setup
-COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
-
 USER root
+# Preparing directories for Dask conf files, patches and job spool directory for HTCondor
+RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
+    mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
+    mkdir -p ${HOME}/.condor/tokens.d && \
+    mkdir -p /var/lib/condor && \
+    mkdir -p /etc/condor/config.d
 # Add HTCondor configuration files that not needed to be edited
 COPY condor/condor_config /etc/condor/
 COPY condor/config.d  /etc/condor/config.d/
@@ -271,7 +265,10 @@ RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
 # if not utilized, crucial if CVMFS is desired
 RUN mkdir /cvmfs
 
-USER ${NB_USER}    
+USER ${NB_USER}  
+# Dask, Labextention and coffea-casa setup
+COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
+
 RUN pip install --no-cache-dir \
     correctionlib \
     funcx \
