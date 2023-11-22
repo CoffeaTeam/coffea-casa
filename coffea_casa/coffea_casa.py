@@ -167,8 +167,8 @@ class CoffeaCasaCluster(HTCondorCluster):
             address_list = [external_ip, DEFAULT_SCHEDULER_PORT]
             external_address_short = ":".join(str(item) for item in address_list)
             full_address_list = [scheduler_protocol, external_address_short]
-            external_address = "".join(str(item) for item in full_address_list)
-            external_ip_string = '"' + external_address + '"'
+            contact_address = "".join(str(item) for item in full_address_list)
+            external_ip_string = '"' + contact_address + '"'
         # HTCondor logging
         job_config["log_directory"] = "logs"
         job_config["silence_logs"] = "DEBUG"
@@ -180,7 +180,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "port": scheduler_port,
                 "dashboard_address": str(dashboard_port),
                 "protocol": scheduler_protocol.replace("://", ""),
-                "external_address": external_address,
+                "contact_address": contact_address,
             },
             job_kwargs.get(
                 "scheduler_options",
