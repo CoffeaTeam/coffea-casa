@@ -89,7 +89,7 @@ RUN mkdir $HOME/work && \
 # Dask dependencies and HTCondor
 RUN mamba install --yes \
     -c conda-forge \
-    htcondor==10.3.0 \
+    htcondor==10.8.0 \
     xgboost \
     pyhf \
     xrootd \

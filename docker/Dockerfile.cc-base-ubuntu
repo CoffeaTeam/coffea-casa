@@ -221,7 +221,7 @@ USER ${NB_UID}
 RUN mamba install --yes \
     -c conda-forge \
     zstandard \
-    htcondor==10.3.0 \
+    htcondor==10.8.0 \
     xgboost \
     pyhf \
     xrootd \
