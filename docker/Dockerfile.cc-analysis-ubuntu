@@ -34,6 +34,7 @@ ENV PATH "/opt/conda/bin/:$PATH"
 # features (e.g., download as all possible file formats)
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
+    dnsutils \
     tini \
     wget \
     ca-certificates \
