@@ -16,6 +16,8 @@ jobqueue:
 
     # HTCondor Resource Manager options
     disk: "2 GiB"          # Amount of disk per worker job
+
+    extra: null
     env-extra: null
     job-script-prologue: []
     job-extra: null             # Extra submit attributes
