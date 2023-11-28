@@ -165,7 +165,6 @@ ENV PATH="/opt/conda/bin/:$PATH"
 USER root
 # Setup supervisord files
 COPY k8s-worker/supervisord.conf  /etc/supervisor/
-
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it

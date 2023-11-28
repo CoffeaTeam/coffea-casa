@@ -318,7 +318,6 @@ RUN ln -s /etc/grid-security/certificates/hcc-flatiron.pem /etc/grid-security/ce
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
-
 # Distributed: we need to install patched version of distributed version
 COPY dask/distributed ${CONDA_DIR}/lib/python3.9/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.9/site-packages/distributed && \
