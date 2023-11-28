@@ -2,9 +2,9 @@ jobqueue:
   coffea-casa:
     name: dask-worker
     # Dask worker options, taken from https://github.com/dask/dask-jobqueue/tree/master/dask_jobqueue
-    cores: 2                 # Total number of cores per job
-    memory: "6 GiB"                # Total amount of memory per job
-    processes: null                # Number of Python processes per jobs
+    cores: 1                 # Total number of cores per job
+    memory: "2GiB"                # Total amount of memory per job
+    processes: 1                # Number of Python processes per jobs
     worker-image: "hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:development"
 
     # Comunication settings
@@ -12,12 +12,15 @@ jobqueue:
     death-timeout: 60           # Number of seconds to wait if a worker can not find a scheduler
     local-directory: null       # Location of fast local storage like /scratch or $TMPDIR
     shared-temp-directory: null       # Shared directory currently used to dump temporary security objects for workers
-    extra: []
+    worker-extra-args: []
 
     # HTCondor Resource Manager options
-    disk: "5 GiB"          # Amount of disk per worker job
-    env-extra: []
-    job-extra: {}               # Extra submit attributes
+    disk: "2 GiB"          # Amount of disk per worker job
+    env-extra: null
+    job-script-prologue: []
+    job-extra: null             # Extra submit attributes
+    job-extra-directives: {}    # Extra submit attributes
+    job-directives-skip: []
     submit-command-extra: []    # Extra condor_submit arguments
     cancel-command-extra: []    # Extra condor_rm arguments
     log-directory: null
