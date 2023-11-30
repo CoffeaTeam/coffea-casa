@@ -47,3 +47,6 @@ addopts = "--strict-config --strict-markers -ra"
 log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = ['error']
+
+[tool.pytest.ini_options]
+addops = ["-ra", "--strict-config", "--strict-markers"]
