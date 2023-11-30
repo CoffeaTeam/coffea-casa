@@ -41,12 +41,7 @@ enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = [
-    "tests",
-]
-addopts = "--strict-config --strict-markers -ra"
+    "tests",]
 log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = ['error']
-
-[tool.pytest.ini_options]
-addops = ["-ra", "--strict-config", "--strict-markers"]
