@@ -12,21 +12,21 @@ jobqueue:
     death-timeout: 60           # Number of seconds to wait if a worker can not find a scheduler
     local-directory: null       # Location of fast local storage like /scratch or $TMPDIR
     shared-temp-directory: null       # Shared directory currently used to dump temporary security objects for workers
+    extra: null                 # deprecated: use worker-extra-args
+    worker-command: "distributed.cli.dask_worker" # Command to launch a worker
     worker-extra-args: []
 
     # HTCondor Resource Manager options
     disk: "2 GiB"          # Amount of disk per worker job
-
-    extra: null
     env-extra: null
     job-script-prologue: []
     job-extra: null             # Extra submit attributes
     job-extra-directives: {}    # Extra submit attributes
     job-directives-skip: []
-    submit-command-extra: []    # Extra condor_submit arguments
+    submit-command-extra: [ "-spool" ]    # Extra condor_submit arguments
     cancel-command-extra: []    # Extra condor_rm arguments
     log-directory: null
-    shebang: "#!/usr/bin/env condor_submit -spool"
+    shebang: "#!/usr/bin/env condor_submit"
 
     # Scheduler options
     scheduler-options: {}
