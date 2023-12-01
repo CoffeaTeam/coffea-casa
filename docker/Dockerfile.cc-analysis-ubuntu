@@ -174,7 +174,7 @@ RUN groupadd -r condor && \
 # Distributed: we need to install patched version of distributed version
 COPY dask/distributed /opt/conda/lib/python3.9/site-packages/distributed
 RUN cd /opt/conda/lib/python3.9/site-packages/distributed && \
-    # patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
     # && patch -p2 < 0003-Activate-patch.patch
     # && patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
