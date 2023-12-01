@@ -1,9 +1,9 @@
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=42", "versioneer[toml]"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-target-version = ['py37', 'py38', 'py39']
+target-version = ['py39']
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -45,3 +45,9 @@ testpaths = [
 log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = ['error']
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "coffea_casa/_version.py"
+versionfile_build = "coffea_casa/_version.py"
