@@ -1,7 +1,10 @@
+prune **
+graft coffea_casa
+graft tests
+
 include LICENSE
 include README.md
+include pyproject.toml
+include MANIFEST.in
 
-include requirements.txt
-include coffea_casa/*.py
-include coffea_casa/*.yaml
-include coffea_casa/_version.py
+global-exclude __pycache__ *.py[cod]
