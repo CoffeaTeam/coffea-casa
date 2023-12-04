@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.9]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     name: linter - flake8 - python ${{ matrix.python-version }}
 
     steps:
@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest] #
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.11"]
     name: test coffea_casa (${{ matrix.os }}) - python ${{ matrix.python-version }}
 
     steps:
