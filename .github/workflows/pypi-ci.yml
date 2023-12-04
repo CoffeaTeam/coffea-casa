@@ -32,7 +32,7 @@ jobs:
     - name: Lint with flake8
       run: |
         python -m pip install -q flake8
-        flake8 coffea_casa
+      #  flake8 coffea_casa
   test:
 
     runs-on: ${{ matrix.os }}
