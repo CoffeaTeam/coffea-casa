@@ -39,7 +39,7 @@ jobs:
           path: dist/*
 
   publish:
-    needs: [dist]
+    needs: [deploy]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
