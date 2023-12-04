@@ -2,8 +2,10 @@
 name: Deploy to PyPI
 
 on:
+  workflow_dispatch:
   release:
-    types: [created]
+    types:
+      - published
 
 jobs:
   deploy:
