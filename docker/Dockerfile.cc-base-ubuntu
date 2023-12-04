@@ -195,7 +195,7 @@ RUN pip install --upgrade --no-cache-dir \
 # Enable the serverextensions that do not use the conf.d approach and
 # build JupyterLab.
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
-    jupyter labextension install jupyterlab-jupytext && \
+    #jupyter labextension install jupyterlab-jupytext && \
     jupyter serverextension enable --sys-prefix jupyterlab_git && \
     jupyter serverextension enable --sys-prefix jupyterlab_github && \
     jupyter labextension install dask-labextension && \
