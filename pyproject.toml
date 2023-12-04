@@ -1,5 +1,9 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8,<9", "wheel"]
+requires = [
+    "setuptools>=65",
+    "wheel>=0.37.0",
+    "setuptools_scm>=6.0",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -34,15 +38,20 @@ Documentation = "https://coffea-casa.readthedocs.io/en/latest/"
 Repository = "https://github.com/CoffeaTeam/coffea-casa/issues"
 "Bug Tracker" = "https://github.com/CoffeaTeam/coffea-casa/issues"
 
-[tool.setuptools]
-package-dir = {"" = "."}
+[tool.setuptools.packages.find]
+where = ["."]  # list of folders that contain the packages (["."] by default)
+include = ["coffea_casa"]  # package names should match these glob patterns (["*"] by default)
+exclude = []  # exclude packages matching these glob patterns (empty by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0"
+write_to = "coffea_casa/_version.py"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 readme = {file = ["README.md"], content-type = "text/markdown"}
-
-[tool.setuptools_scm]
-version_file = "coffea_casa/_version.py"
 
 [tool.flake8]
 ignore = ["E203", "E266", "E501", "W503"]
@@ -86,7 +95,6 @@ no_implicit_optional = true
 ignore_missing_imports = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 
-# pyproject.toml
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = [

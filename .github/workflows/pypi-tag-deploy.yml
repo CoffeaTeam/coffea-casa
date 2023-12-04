@@ -23,22 +23,18 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install build check-manifest twine
+          pip install build wheel twine setuptools setuptools_scm
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Check MANIFEST
+      - name: Build package
         run: |
-          check-manifest --verbose
-
-      - name: Build a wheel and a sdist
-        run: |
-          python -m build --outdir dist/ .
-
-      - name: Verify the distribution
-        run: twine check dist/*
+          python -m build --outdir dist/
+          python -m twine check dist/*
+          python -m setuptools_scm --strip-dev
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        if: startsWith(github.ref, 'refs/tags')
         with:
           user: ${{ secrets.PYPI_USERNAME }}
           password: ${{ secrets.PYPI_PASSWORD }}
