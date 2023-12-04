@@ -74,9 +74,9 @@ jobs:
           file: docker/Dockerfile.${{ matrix.image }}
           push: ${{  github.event_name == 'push' }}
           platforms: linux/amd64
-          tags: ${{ steps.date.outputs.tags }}
+          tags: ${{ steps.tags.outputs.tags }}
           build-args: 
             DEV=true
-            TAG=${{ steps.date.outputs.releasetag }}
+            TAG=${{ steps.tags.outputs.releasetag }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
