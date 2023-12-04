@@ -37,7 +37,8 @@ jobs:
       - name: Verify the distribution
         run: twine check dist/*
 
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: ${{ secrets.PYPI_USERNAME }}
-          password:  ${{ secrets.PYPI_PASSWORD }}
+          password: ${{ secrets.PYPI_PASSWORD }}
