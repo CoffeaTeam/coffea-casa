@@ -1,14 +1,11 @@
 [build-system]
-requires = [
-    "setuptools>=65",
-    "wheel>=0.37.0",
-    "setuptools_scm>=6.0",
-]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme"]
+build-backend = "hatchling.build"
 
 [project]
 name = "coffea-casa"
-dynamic = ["version", "dependencies", "readme"]
+dynamic = ["version", "readme"]
+dependencies = ["distributed","dask-jobqueue"]
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
 description = "Wrappers for Dask clusters to be used from coffea-casa AF"
@@ -38,20 +35,24 @@ Documentation = "https://coffea-casa.readthedocs.io/en/latest/"
 Repository = "https://github.com/CoffeaTeam/coffea-casa/issues"
 "Bug Tracker" = "https://github.com/CoffeaTeam/coffea-casa/issues"
 
-[tool.setuptools.packages.find]
-where = ["."]  # list of folders that contain the packages (["."] by default)
-include = ["coffea_casa"]  # package names should match these glob patterns (["*"] by default)
-exclude = []  # exclude packages matching these glob patterns (empty by default)
-namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+[project.optional-dependencies]
+test = [
+  "pytest >=7",
+]
+dev = [
+  "pytest >=7",
+]
 
+[tool.hatch]
+version.source = "vcs"
+build.hooks.vcs.version-file = "coffea_casa/_version.py"
 
-[tool.setuptools_scm]
-fallback_version = "0.0.0"
-write_to = "coffea_casa/_version.py"
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
-readme = {file = ["README.md"], content-type = "text/markdown"}
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
 
 [tool.flake8]
 ignore = ["E203", "E266", "E501", "W503"]
@@ -71,34 +72,23 @@ exclude = '''
 )/
 '''
 
+
 [tool.mypy]
-files = "coffea_casa"
-pretty = true
-strict = true
-strict_equality = true
+files = ["coffe_casa", "tests"]
 python_version = "3.10"
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-disallow_untyped_decorators = true
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_subclassing_any = true
-warn_return_any = true
-warn_redundant_casts = true
-warn_unused_ignores = true
 warn_unused_configs = true
-warn_unreachable = true
-show_error_codes = true
-show_error_context = true
-no_implicit_optional = true
-ignore_missing_imports = true
+strict = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+warn_unreachable = true
+disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
-minversion = "6.0"
-testpaths = [
-    "tests",]
-log_cli_level = "INFO"
+minversion = "7.0"
+addopts = ["-ra", "--strict-markers", "--strict-config"]
 xfail_strict = true
-filterwarnings = ['error']
+log_cli_level = "INFO"
+filterwarnings = [
+  'error',
+]
+norecursedirs = ["coffe_casa"]
+testpaths = ["tests"]
