@@ -29,11 +29,10 @@ ARG XCACHE_HOST="red-xcache1.unl.edu"
 # FIX ME AFTER TEST:
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets-chown/access_token"
 # Tag
-ARG TAG="development"
+ARG TAG
 ARG PROJECT="coffea-casa"
 ARG REGISTRY="hub.opensciencegrid.org"
 ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-ubuntu"
-ARG DEV
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -291,7 +290,7 @@ RUN pip install --no-cache-dir \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard
 
-RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
+RUN if [ "${TAG:-}" == "development" ]; ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
 
 # ------- xrootd-xcache-plugin -------------------------------
 RUN cd /tmp && \
