@@ -142,7 +142,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       --tls-key $FILE_KEY \
       --nthreads $CPUS \
       --memory-limit $MEMORY_MB_FORMATTED \
-      --no-nanny \
+      --nanny \
       --death-timeout 60 \
       --protocol tls \
       --lifetime 7200 \
