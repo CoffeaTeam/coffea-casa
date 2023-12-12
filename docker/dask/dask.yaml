@@ -1,4 +1,21 @@
 distributed:
+  scheduler:
+    allowed-failures: 10
+    bandwidth: 1000000000
+    work-stealing: False
+  worker:
+    memory:
+      target: 0.7
+      spill: 0.9
+      pause: 0.92
+      terminate: 0
+    profile:
+      interval: 1d
+      cycle: 2d
+      low-level: False
+  diagnostics:
+    nvml: False
+
   version: 2
   
   dashboard:
