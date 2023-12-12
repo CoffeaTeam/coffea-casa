@@ -3,7 +3,7 @@ FROM coffeateam/coffea-dask:0.7.22-py3.9-g7cbcc
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Jupyterhub
-ARG DEV
+ARG TAG="development"
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
@@ -119,7 +119,7 @@ RUN pip install --no-cache-dir \
     comm>=0.1.2 \
     mlflow
 
-RUN if [[ -z "$DEV" ]] ; then pip install --no-cache-dir coffea_casa -U ; else pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; fi
+RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa; else  pip install --no-cache-dir coffea_casa -U ; fi
 
 # ------- xrootd-xcache-plugin -------------------------------
 RUN cd /tmp && \
