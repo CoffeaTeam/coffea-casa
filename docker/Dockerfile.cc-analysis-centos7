@@ -17,18 +17,21 @@ ARG XCACHE_HOST="red-xcache1.unl.edu"
 
 
 # Configure environment
+ENV CONDA_DIR /usr/local
 ENV CERT_DIR $CERT_DIR
 ENV XCACHE_HOST $XCACHE_HOST
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
 ENV SEC_TOKEN_SYSTEM_DIRECTORY $SEC_TOKEN_SYSTEM_DIRECTORY
-ENV CONDA_DIR /opt/conda
 ENV SHELL /bin/bash
 ENV NB_USER $NB_USER
 ENV USER $NB_USER
 ENV NB_UID $NB_UID
 ENV NB_GID $NB_GID
 ENV HOME /home/$NB_USER
-ENV PATH "/opt/conda/bin/:$PATH"
+ENV PATH "${CONDA_DIR}/bin/:$PATH"
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
@@ -146,29 +149,13 @@ RUN cd /tmp && \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
-# REMOVE THIS BLOCK AFTER TEST:
-# ------- xrootd-authz-plugin -------------------------------
-#RUN cd /tmp && \
-#    # ------- xrdcl-authz-plugin -------------------------------
-#    git clone https://github.com/bbockelm/xrdcl-authz-plugin.git && \
-#    cd xrdcl-authz-plugin && \
-#    mkdir build && \
-#    cd  build && \
-#    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
-#    make && \
-#    make install && \
-#    ln -s ${CONDA_DIR}/lib/libXrdClAuthzPlugin-5.so ${CONDA_DIR}/lib/libXrdClAuthzPlugin.so
-
-#ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-#ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClAuthzPlugin.so"
-
 RUN chmod 755 /etc/grid-security/certificates
 COPY certs/hcc-flatiron.pem /etc/grid-security/certificates/
 RUN ln -s /etc/grid-security/certificates/hcc-flatiron.pem /etc/grid-security/certificates/80d1fda9.0
 
 # TODO: RETEST IF WE STILL NEED THIS 
-ENV LD_LIBRARY_PATH="/opt/conda/lib/:$LD_LIBRARY_PATH"
-ENV PATH="/opt/conda/bin/:$PATH"
+ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
+ENV PATH="${CONDA_DIR}/bin/:$PATH"
 
 USER root
 # Setup supervisord files
@@ -181,8 +168,8 @@ RUN groupadd -r condor && \
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY dask/distributed /opt/conda/lib/python3.9/site-packages/distributed
-RUN cd /opt/conda/lib/python3.9/site-packages/distributed && \
+COPY dask/distributed ${CONDA_DIR}/lib/python3.10/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.10/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
     # && patch -p2 < 0003-Activate-patch.patch
@@ -191,21 +178,22 @@ RUN cd /opt/conda/lib/python3.9/site-packages/distributed && \
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
-# /opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
-RUN rm -rf /opt/conda/condabin && ln -s /opt/conda/bin /opt/conda/condabin
+# ${CONDA_DIR}/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
-    && find /opt/conda/ -type f,l -name '*.a' -delete \
-    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
-    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && rm -rf /opt/conda/pkgs
+    && mamba clean --all -f -y \
+    && find ${CONDA_DIR} -type f -name '*.a' -delete \
+    && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
+    && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
+    && (find ${CONDA_DIR}/lib/python3.10/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && rm -rf ${CONDA_DIR}/pkgs
 
 # Mkdir CVMFS mount directory.  Mount done upstream in configs. Harmless
 # if not utilized, crucial if CVMFS is desired
 RUN mkdir /cvmfs
-
 
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
