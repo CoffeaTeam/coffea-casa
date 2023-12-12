@@ -75,7 +75,7 @@ jobs:
           push: ${{  github.event_name == 'push' }}
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.tags }}
-          build-args: 
+          build-args: |
             TAG=${{ steps.tags.outputs.releasetag }}
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
