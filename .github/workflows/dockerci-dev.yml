@@ -57,7 +57,7 @@ jobs:
           platforms: linux/amd64
           tags: ${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.date.outputs.date }}
           build-args: |
-            DEV=true
             TAG=${{ steps.date.outputs.date }} 
             PROJECT=${{ env.PROJECT }} 
             GITHUB_ACTIONS=${{ env.GITHUB_ACTIONS }}
+            REGISTRY=${{ env.REGISTRY }}
