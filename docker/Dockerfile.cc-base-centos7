@@ -31,7 +31,7 @@ ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets-chown/access_token"
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
 ARG REGISTRY="hub.opensciencegrid.org"
-ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-ubuntu"
+ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-centos7"
 
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
