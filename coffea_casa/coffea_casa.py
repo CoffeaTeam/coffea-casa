@@ -200,6 +200,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             },
             {"transfer_input_files": files},
             {"encrypt_input_files": files},
+            {"accounting_group": "cms.other.t3"},
             {"transfer_output_files": ""},
             {"when_to_transfer_output": "ON_EXIT"},
             {"should_transfer_files": "YES"},
