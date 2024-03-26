@@ -135,7 +135,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       # Dask worker command execurted in HTCondor pool.
       # Communication protocol: in Coffea-casa we use only secured communications (over TLS)
       # re-apply John's patch and add:    --nanny-contact-address tls://$HOST:$NANNYPORT --nanny-port $NANNYCONTAINER_PORT \ \
-      HTCONDOR_COMAND="/opt/conda/bin/python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
+      HTCONDOR_COMAND="python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
       --name $NAME \
       --tls-ca-file $PATH_CA_FILE \
       --tls-cert $FILE_CERT \
