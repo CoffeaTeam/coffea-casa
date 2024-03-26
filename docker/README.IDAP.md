@@ -8,5 +8,5 @@ sudo docker build --build-arg TAG="2024.03.26" -t hub.opensciencegrid.org/coffea
 ```
 
 ```
-docker build --build-arg TAG="2024.03.26" -t hub.opensciencegrid.org/coffea-casa/cc-dask-alma8:2024.03.26 -f ./Dockerfile.cc-analysis-alma8 .
+docker build --build-arg TAG="2024.03.26" -t hub.opensciencegrid.org/coffea-casa/cc-analysis-alma8:2024.03.26 -f ./Dockerfile.cc-analysis-alma8 .
 ```
