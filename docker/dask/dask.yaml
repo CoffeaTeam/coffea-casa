@@ -5,10 +5,12 @@ distributed:
     work-stealing: False
   worker:
     memory:
-      target: 0.7
-      spill: 0.9
-      pause: 0.92
-      terminate: 0
+      # Recommendations for NERSC Cori
+      # https://jobqueue.dask.org/en/latest/configurations.html
+      target: False  # Avoid spilling to disk
+      spill: False  # Avoid spilling to disk
+      pause: 0.80  # fraction at which we pause worker threads
+      terminate: 0.95  # fraction at which we terminate the worker
     profile:
       interval: 1d
       cycle: 2d
