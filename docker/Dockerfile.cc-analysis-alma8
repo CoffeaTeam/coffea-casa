@@ -141,6 +141,7 @@ RUN pip install --no-cache-dir \
     pyyaml \
     # ML packages
     dask-ml \
+    dask-gateway \
     prometheus_client \
     comm>=0.1.2 \
     mlflow
