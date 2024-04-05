@@ -3,11 +3,12 @@ jobqueue:
     name: dask-worker
     # Dask worker options, taken from https://github.com/dask/dask-jobqueue/tree/master/dask_jobqueue
     cores: 1                 # Total number of cores per job
-    memory: "2GiB"                # Total amount of memory per job
+    memory: "3GiB"                # Total amount of memory per job
     processes: 1                # Number of Python processes per jobs
     worker-image: "hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:development"
 
     # Comunication settings
+    python: null                # Python executable
     interface: null             # Network interface to use like eth0 or ib0
     death-timeout: 60           # Number of seconds to wait if a worker can not find a scheduler
     local-directory: null       # Location of fast local storage like /scratch or $TMPDIR
