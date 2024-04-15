@@ -286,9 +286,9 @@ RUN cd /tmp && \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
-RUN chmod 755 /etc/grid-security/certificates
-COPY certs/hcc-flatiron.pem /etc/grid-security/certificates/
-RUN ln -s /etc/grid-security/certificates/hcc-flatiron.pem /etc/grid-security/certificates/80d1fda9.0
+# Include additional CA certificates beyond ca-policy-lcg
+COPY certs/* /etc/grid-security/certificates/
+RUN openssl rehash /etc/grid-security/certificates/
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
