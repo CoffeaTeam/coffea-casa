@@ -121,36 +121,65 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       #NANNYCONTAINER_PORT=`cat $_CONDOR_JOB_AD | grep nanny_ContainerPort | tr -d '"' | awk '{print $NF;}'`
       HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
       NAME=`cat $_CONDOR_JOB_AD | grep "DaskWorkerName "  | tr -d '"' | awk '{print $NF;}'`
-      CPUS=`cat $_CONDOR_JOB_AD | grep "DaskWorkerCores " | tr -d '"' | awk '{print $NF;}'`
-      MEMORY=`cat $_CONDOR_JOB_AD | grep "RequestMemory " | tr -d '"' | awk '{print $NF;}'`
-      MEMORY_MB_FORMATTED=$MEMORY".00MB"
       # Requirement: to add to Condor job decription "+DaskSchedulerAddress": '"tcp://129.93.183.34:8787"',
       EXTERNALIP_PORT=`cat $_CONDOR_JOB_AD | grep DaskSchedulerAddress | tr -d '"' | awk '{print $NF;}'`
       # From jthiltges 
       #WORKER_LIFETIME=${WORKER_LIFETIME:-1 hour}
 
+      WORKER_TYPE=`cat $_CONDOR_JOB_AD | grep "CoffeaCasaWorkerType " | tr -d '"' | awk '{print $NF;}'`
+
+      CPUS_PROVISIONED=`cat $_CONDOR_JOB_AD | grep "CpusProvisioned " | tr -d '"' | awk '{print $NF;}'`
+      MEMORY_PROVISIONED=`cat $_CONDOR_JOB_AD | grep "MemoryProvisioned " | tr -d '"' | awk '{print $NF;}'`
+      DISK_PROVISIONED=`cat $_CONDOR_JOB_AD | grep "DiskProvisioned " | tr -d '"' | awk '{print $NF;}'`
+
       echo "Print ClassAd:" 1>&2
       cat $_CONDOR_JOB_AD 1>&2
 
-      # Dask worker command execurted in HTCondor pool.
-      # Communication protocol: in Coffea-casa we use only secured communications (over TLS)
-      # re-apply John's patch and add:    --nanny-contact-address tls://$HOST:$NANNYPORT --nanny-port $NANNYCONTAINER_PORT \ \
-      HTCONDOR_COMAND="python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
-      --name $NAME \
-      --tls-ca-file $PATH_CA_FILE \
-      --tls-cert $FILE_CERT \
-      --tls-key $FILE_KEY \
-      --nthreads $CPUS \
-      --memory-limit $MEMORY_MB_FORMATTED \
-      --nanny \
-      --death-timeout 60 \
-      --protocol tls \
-      --lifetime 7200 \
-      --listen-address tls://0.0.0.0:$CONTAINER_PORT \
-      --contact-address tls://$HOST:$PORT"
+      if [ -z "${WORKER_TYPE}" ] || [ "${WORKER_TYPE}" = dask ]
+      then
+	      CPUS=`cat $_CONDOR_JOB_AD | grep "DaskWorkerCores " | tr -d '"' | awk '{print $NF;}'`
+	      MEMORY=`cat $_CONDOR_JOB_AD | grep "RequestMemory " | tr -d '"' | awk '{print $NF;}'`
+	      MEMORY_MB_FORMATTED=$MEMORY".00MB"
+
+	      # Dask worker command execurted in HTCondor pool.
+	      # Communication protocol: in Coffea-casa we use only secured communications (over TLS)
+	      # re-apply John's patch and add:    --nanny-contact-address tls://$HOST:$NANNYPORT --nanny-port $NANNYCONTAINER_PORT \ \
+	      HTCONDOR_COMMAND="python -m distributed.cli.dask_worker $EXTERNALIP_PORT \
+	      --name $NAME \
+	      --tls-ca-file $PATH_CA_FILE \
+	      --tls-cert $FILE_CERT \
+	      --tls-key $FILE_KEY \
+	      --nthreads $CPUS_DASK \
+	      --memory-limit $MEMORY_MB_FORMATTED \
+	      --nanny \
+	      --death-timeout 60 \
+	      --protocol tls \
+	      --lifetime 7200 \
+	      --listen-address tls://0.0.0.0:$CONTAINER_PORT \
+	      --contact-address tls://$HOST:$PORT"
+      elif [ "${WORKER_TYPE}" = taskvine ]
+      then
+	      DISK_MB=$((DISK_PROVISIONED/1024))
+	      MANAGER_HOST=${EXTERNALIP_PORT%:*}
+	      MANAGER_HOST=${MANAGER_HOST#*tls:\/\/}        # XXX: fix on vine_worker, it should parsing this
+	      MANAGER_PORT=${EXTERNALIP_PORT##*:}
+	      echo $EXTERNALIP_PORT
+
+	      HTCONDOR_COMMAND="vine_worker --ssl \
+	      --contact-hostport $HOST:$PORT \
+	      --transfer-port $CONTAINER_PORT \
+	      --cores $CPUS_PROVISIONED \
+	      --memory $MEMORY_PROVISIONED \
+	      --disk $DISK_MB \
+	      --timeout 7200 \
+	      $MANAGER_HOST $MANAGER_PORT"
+      else
+	      HTCONDOR_COMMAND="$@"
+      fi
+
       # Debug print
-      echo $HTCONDOR_COMAND 1>&2
-      exec $HTCONDOR_COMAND
+      echo $HTCONDOR_COMMAND 1>&2
+      exec $HTCONDOR_COMMAND
   fi
 else
   exec "$@"
