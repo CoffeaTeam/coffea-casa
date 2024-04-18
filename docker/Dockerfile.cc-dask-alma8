@@ -75,6 +75,7 @@ RUN yum -y update \
     ca-certificates \
     sudo \
     langpacks-en \
+    glibc-langpack-en \
     glibc-all-langpacks \
     liberation-fonts \
     wget \

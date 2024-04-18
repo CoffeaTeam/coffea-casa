@@ -12,6 +12,7 @@ ARG CERT_DIR="/etc/cmsaf-secrets"
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
 # FIX ME AFTER TEST:
+#ARG BEARER_TOKEN_FILE="/tmp/.xcache/access_token"
 ARG BEARER_TOKEN_FILE="/tmp/.xcache/access_token"
 ARG SEC_TOKEN_SYSTEM_DIRECTORY="/tmp/.condor"
 ARG XCACHE_HOST="xcache"
@@ -47,6 +48,7 @@ RUN yum -y update \
     ca-certificates \
     sudo \
     langpacks-en \
+    glibc-langpack-en \
     glibc-all-langpacks \
     liberation-fonts \
     wget \
@@ -79,7 +81,8 @@ RUN chmod a+rx /usr/local/bin/fix-permissions
 
 RUN rm -rf /etc/grid-security && \
     ln -s /usr/local/etc/grid-security /etc/grid-security && \
-    chmod 755 /etc/grid-security/certificates
+    chmod 755 /etc/grid-security/certificates && \
+    chmod g-w /etc/grid-security/certificates
 
 # Enable prompt color in the skeleton .bashrc before creating the default NB_USER
 # hadolint ignore=SC2016
