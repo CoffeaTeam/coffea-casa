@@ -320,6 +320,9 @@ RUN rm -rf /tmp/* \
 # FIXME: add better layering for preparation of env
 ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+RUN chmod g-w /usr/local/etc/grid-security
+RUN chmod g-w /usr/local/etc/grid-security/*
+RUN chmod g-w /usr/local/etc/grid-security/certificates/*
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}
