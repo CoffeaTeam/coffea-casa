@@ -163,7 +163,6 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
 	      MANAGER_HOST=${EXTERNALIP_PORT%:*}
 	      MANAGER_HOST=${MANAGER_HOST#*tls:\/\/}        # XXX: fix on vine_worker, it should parsing this
 	      MANAGER_PORT=${EXTERNALIP_PORT##*:}
-	      echo $EXTERNALIP_PORT
 
 	      HTCONDOR_COMMAND="vine_worker --ssl \
 	      --contact-hostport $HOST:$PORT \
