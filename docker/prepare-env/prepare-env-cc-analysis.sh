@@ -139,7 +139,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       then
 	      CPUS=`cat $_CONDOR_JOB_AD | grep "DaskWorkerCores " | tr -d '"' | awk '{print $NF;}'`
 	      MEMORY=`cat $_CONDOR_JOB_AD | grep "RequestMemory " | tr -d '"' | awk '{print $NF;}'`
-	      MEMORY_MB_FORMATTED=$MEMORY".00MB"
+	      MEMORY_MB_FORMATTED=$MEMORY_PROVISIONED".00MB"
 
 	      # Dask worker command execurted in HTCondor pool.
 	      # Communication protocol: in Coffea-casa we use only secured communications (over TLS)
@@ -149,7 +149,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
 	      --tls-ca-file $PATH_CA_FILE \
 	      --tls-cert $FILE_CERT \
 	      --tls-key $FILE_KEY \
-	      --nthreads $CPUS_DASK \
+	      --nthreads $CPUS \
 	      --memory-limit $MEMORY_MB_FORMATTED \
 	      --nanny \
 	      --death-timeout 60 \
