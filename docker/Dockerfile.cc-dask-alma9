@@ -283,15 +283,6 @@ RUN cd /tmp && \
     make && \
     make install
 
-RUN cd /opt && \
-    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
-    cd HiggsAnalysis/CombinedLimit/ && \
-    mkdir build && \
-    cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
-    make && \
-    make install
-
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
