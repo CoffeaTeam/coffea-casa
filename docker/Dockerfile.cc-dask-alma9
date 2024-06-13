@@ -86,7 +86,6 @@ RUN yum -y update \
     unzip \
     nano \
     vim  \
-    curl \
     net-tools \
     libXext \
     libSM \
