@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [cc-base-ubuntu, cc-analysis-ubuntu, cc-base-centos7, cc-analysis-centos7]
+        image: [cc-base-ubuntu, cc-analysis-ubuntu, cc-dask-alma8, cc-analysis-alma8, cc-dask-alma9, cc-analysis-alma9]
         # Keep this line in sync with gh actions @ coffea-dask repo
         # python: [3.8, 3.9, '3.10']
         #exclude:
