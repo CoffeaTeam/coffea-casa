@@ -1,6 +1,7 @@
 #FROM coffeateam/coffea-base-almalinux8:0.7.22-py3.10
 FROM coffeateam/coffea-dask-almalinux9:latest-py3.10
 
+
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Jupyterhub
@@ -15,9 +16,8 @@ ARG GITHUB_ACTIONS="false"
 #ARG BEARER_TOKEN_FILE="/tmp/.xcache/access_token"
 ARG BEARER_TOKEN_FILE="/tmp/.xcache/access_token"
 ARG SEC_TOKEN_SYSTEM_DIRECTORY="/tmp/.condor"
-ARG XCACHE_HOST="xcache"
+ARG XCACHE_HOST="xcache.cmsaf-dev.flatiron.hollandhpc.org"
 #ARG XCACHE_HOST="red-xcache1.unl.edu"
-
 
 # Configure environment
 ENV CONDA_DIR /usr/local
@@ -113,12 +113,9 @@ RUN mkdir $HOME/work && \
     mkdir -p $HOME/.condor/tokens.d && \
     fix-permissions $HOME
 
-RUN mamba remove htcondor
-
 #Dask dependencies and HTCondor
 RUN mamba install --yes \
     -c conda-forge \
-    htcondor==10.8.0 \
     xgboost \
     pyhf \
     xrootd \

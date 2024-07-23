@@ -5,6 +5,7 @@ FROM coffeateam/coffea-dask-almalinux9:latest-py3.10
 # Fix DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+
 USER root
 LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 # Jupyterhub
@@ -25,7 +26,7 @@ ARG UID_DOMAIN="unl.edu"
 ARG SCHEDD_HOST="t3.unl.edu"
 # XCACHE
 #ARG XCACHE_HOST="red-xcache1.unl.edu"
-ARG XCACHE_HOST="xcache"
+ARG XCACHE_HOST="xcache.cmsaf-dev.flatiron.hollandhpc.org"
 # FIX ME AFTER TEST:
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets-chown/access_token"
 # Tag
@@ -33,7 +34,6 @@ ARG TAG="development"
 ARG PROJECT="coffea-casa"
 ARG REGISTRY="hub.opensciencegrid.org"
 ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-alma8"
-
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
 
@@ -138,8 +138,7 @@ RUN mkdir "/home/${NB_USER}/work" && \
 # Correct permissions
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
-RUN mamba remove htcondor && \
-    mamba install --quiet --yes \
+RUN mamba install --quiet --yes \
     -c conda-forge \
     'notebook'==6.5.3 \
     'jupyterhub'==3.1.1 \
@@ -149,7 +148,6 @@ RUN mamba remove htcondor && \
     jupyter_client==8.1.0 \
     jupyterlab_widgets \
     nodejs \
-    htcondor==10.8.0 \
     ipywidgets==8.0.6 && \
     mamba clean \
         --all \
