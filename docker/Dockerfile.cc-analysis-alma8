@@ -15,7 +15,7 @@ ARG GITHUB_ACTIONS="false"
 #ARG BEARER_TOKEN_FILE="/tmp/.xcache/access_token"
 ARG BEARER_TOKEN_FILE="/tmp/.xcache/access_token"
 ARG SEC_TOKEN_SYSTEM_DIRECTORY="/tmp/.condor"
-ARG XCACHE_HOST="xcache"
+ARG XCACHE_HOST="xcache.cmsaf-dev.flatiron.hollandhpc.org"
 #ARG XCACHE_HOST="red-xcache1.unl.edu"
 
 

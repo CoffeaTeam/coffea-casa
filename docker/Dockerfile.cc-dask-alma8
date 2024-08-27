@@ -25,7 +25,7 @@ ARG UID_DOMAIN="unl.edu"
 ARG SCHEDD_HOST="t3.unl.edu"
 # XCACHE
 #ARG XCACHE_HOST="red-xcache1.unl.edu"
-ARG XCACHE_HOST="xcache"
+ARG XCACHE_HOST="xcache.cmsaf-dev.flatiron.hollandhpc.org"
 # FIX ME AFTER TEST:
 ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets-chown/access_token"
 # Tag

@@ -205,9 +205,9 @@ class CoffeaCasaCluster(HTCondorCluster):
             {"should_transfer_files": "YES"},
             {"Stream_Output": "False"},
             {"Stream_Error": "False"},
-            {"+CoffeaCasaWorkerType": "dask"},
+            {"+CoffeaCasaWorkerType": '"dask"'},
             {"+DaskSchedulerAddress": external_ip_string},
-            #{"+AccountingGroup": "cms.other.coffea.$ENV(HOSTNAME)"},
+            {"+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"'},
             job_kwargs.get(
                 "job_extra_directives", dask.config.get(f"jobqueue.{cls.config_name}.job_extra_directives")
             ),
