@@ -160,3 +160,5 @@ _readthedocs
 **/charts/coffea-casa/charts
 **/Chart.lock
 
+# pyright lsp
+pyrightconfig.json
