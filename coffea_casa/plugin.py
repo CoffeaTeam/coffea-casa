@@ -145,7 +145,7 @@ class PeriodicGC(WorkerPlugin):
     ----------
     freq : datetime.timedelta
         The frequency of garbage collection. Default is 1ms.
-    tresh : int
+    thresh : int
         The threshold memory in bytes. If the process memory exceeds this value, garbage collection is triggered. Default is 100MB.
 
 
@@ -157,15 +157,15 @@ class PeriodicGC(WorkerPlugin):
     def __init__(
         self,
         freq: datetime.timedelta = datetime.timedelta(milliseconds=1),
-        tresh: int = parse_bytes("100 MB"),
+        thresh: int = parse_bytes("100 MB"),
     ) -> None:
         """
         Parameters:
         freq: Frequency of garbage collection in seconds. Default is 1ms.
-        tresh: Threshold memory in bytes. If the process memory exceeds this value, garbage collection is triggered. Default is 100MB.
+        thresh: Threshold memory in bytes. If the process memory exceeds this value, garbage collection is triggered. Default is 100MB.
         """
         self.freq = freq
-        self.tresh = tresh
+        self.thresh = thresh
 
     def setup(self, worker) -> None:
         """
@@ -185,5 +185,5 @@ class PeriodicGC(WorkerPlugin):
         """
         Trigger garbage collection if the process memory exceeds the threshold.
         """
-        if self.worker.monitor.get_process_memory() >= self.tresh:
+        if self.worker.monitor.get_process_memory() >= self.thresh:
             gc.collect()
