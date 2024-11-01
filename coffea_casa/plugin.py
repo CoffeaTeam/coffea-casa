@@ -10,6 +10,8 @@ import datetime
 from distributed.compatibility import PeriodicCallback
 from distributed.diagnostics.plugin import NannyPlugin, WorkerPlugin
 from dask.utils import tmpfile, parse_bytes
+from distributed.utils import log_errors
+
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +180,8 @@ class PeriodicGC(WorkerPlugin):
         worker.periodic_callbacks["coffea_casa_gc_collect"] = pc
         self.worker = worker
 
-    def _gc_collect(self) -> None:
+    @log_errors
+    async def _gc_collect(self) -> None:
         """
         Trigger garbage collection if the process memory exceeds the threshold.
         """
