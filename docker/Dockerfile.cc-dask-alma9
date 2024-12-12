@@ -226,7 +226,8 @@ COPY condor/config.d  /etc/condor/config.d/
 RUN rm -rf /etc/grid-security && \
     ln -s /usr/local/etc/grid-security /etc/grid-security && \
     curl -L https://github.com/opensciencegrid/osg-vo-config/archive/refs/heads/master.tar.gz | tar -xz --strip-components=1 --directory=/etc/grid-security --wildcards */vomses */vomsdir && \
-    mv /etc/grid-security/vomses /etc
+    cp /etc/grid-security/vomses /etc && \
+    mv /etc/grid-security/vomses /opt/conda/etc/vomses
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
