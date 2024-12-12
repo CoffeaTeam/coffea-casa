@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask-almalinux9:latest-py3.10
+FROM coffeateam/coffea-dask-almalinux9:2024.11.0-py3.11
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
