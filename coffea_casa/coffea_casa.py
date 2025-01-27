@@ -17,17 +17,11 @@ DEFAULT_NANNY_PORT = 8001
 # REMOVE ME (backward compatibity for now)
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
 SECRETS_DIR_CHOWN = Path("/etc/cmsaf-secrets-chown")
-# CEPH (Skyhook)
-CEPH_DIR = Path("/opt/ceph")
-CEPH_CONF = CEPH_DIR / "ceph.conf"
-KEYRING_CONF = CEPH_DIR / "keyring"
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
 HOME_DIR = Path.home()
 # XCache
-# REMOVE ME (backward compatibity for now)
-XCACHE_FILE = SECRETS_DIR / "xcache_token"
-XCACHE_SCITOKEN_FILE = SECRETS_DIR_CHOWN / "access_token"
+#XCACHE_SCITOKEN_FILE = SECRETS_DIR_CHOWN / "access_token"
 # pip
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
 # conda, with yml/yaml both supported
@@ -35,6 +29,42 @@ if (HOME_DIR / "environment.yaml").is_file():
     CONDA_ENV = HOME_DIR / "environment.yaml"
 else:
     CONDA_ENV = HOME_DIR / "environment.yml"
+
+# helper functions from htcondor/htcondor-ce/htcondorce/tools.py
+def x509_user_proxy_path():
+    """Return the path to the user's X.509 proxy or raise FileNotFoundError if it doesn't exist on disk
+    """
+    try:
+        path = os.environ['X509_USER_PROXY']
+    except KeyError:
+        path = f'/tmp/x509up_u{os.geteuid()}'
+    if open(path):
+        return path
+    return None  # we shouldn't get here; failure to open should raise OSError
+
+# helper functions from htcondor/htcondor-ce/htcondorce/tools.py
+def bearer_token_path():
+    """Return the path to the user's X.509 proxy or raise FileNotFoundError if it doesn't exist on disk
+    """
+    def check_token_path(path, suffix=''):
+        token_path = f'{path}{suffix}'
+        if open(token_path):
+            return token_path
+        return None  # we shouldn't get here, failure to open should raise OSError
+
+    try:
+        # 2. BEARER_TOKEN_PATH containing the path to the token
+        path = check_token_path(os.environ['BEARER_TOKEN_FILE'])
+    except (KeyError, FileNotFoundError):
+        try:
+            # 3. XDG_RUNTIME_DIR containing the path to the folder containing the token at bt_u$UID
+            path = check_token_path(os.environ['XDG_RUNTIME_DIR'], suffix=f'/bt_u{os.geteuid()}')
+        except (KeyError, FileNotFoundError):
+            # 4. Otherwise, the token is expected at /tmp/bt_u$UID
+            #    Raise FileExceptionError if it doesn't exist
+            path = check_token_path(f'/tmp/bt_u{os.geteuid()}')
+
+    return path
 
 
 def merge_dicts(*dict_args):
@@ -136,8 +166,6 @@ class CoffeaCasaCluster(HTCondorCluster):
                            ):
         job_config = job_kwargs.copy()
         input_files = []
-        if CEPH_CONF.is_file() and KEYRING_CONF.is_file():
-            input_files += [CEPH_CONF, KEYRING_CONF]
         if PIP_REQUIREMENTS.is_file():
             input_files += [PIP_REQUIREMENTS]
         if CONDA_ENV.is_file():
@@ -147,10 +175,9 @@ class CoffeaCasaCluster(HTCondorCluster):
             job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
             input_files += [CA_FILE, CERT_FILE]
+        XCACHE_SCITOKEN_FILE = bearer_token_path()
         if (XCACHE_SCITOKEN_FILE.is_file()):
             input_files += [XCACHE_SCITOKEN_FILE]
-        if (XCACHE_FILE.is_file()):
-            input_files += [XCACHE_FILE]
         else:
             raise KeyError("Please check with system administarator why you do not have a certificate.")
         files = ", ".join(str(path) for path in input_files)
@@ -187,6 +214,14 @@ class CoffeaCasaCluster(HTCondorCluster):
                 dask.config.get(f"jobqueue.{cls.config_name}.scheduler-options"),
             ),
         )
+        # try in case we have x509 proxy
+        try:
+            proxy = x509_user_proxy_path()
+            if (proxy.is_file()):
+                use_proxy = True
+        except:
+            use_proxy = False
+            pass
         ## Job extra settings (HTCondor ClassAd)
         job_config["job_extra_directives"] = merge_dicts(
             {
@@ -198,6 +233,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "dask_container_port": DEFAULT_CONTAINER_PORT,
                 "nanny_container_port": DEFAULT_NANNY_PORT,
             },
+            {"use_x509userproxy": use_proxy},
             {"transfer_input_files": files},
             {"encrypt_input_files": files},
             {"transfer_output_files": ""},
