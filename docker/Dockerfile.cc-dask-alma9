@@ -265,6 +265,7 @@ RUN pip install --no-cache-dir \
     prometheus_client \
     comm>=0.1.2 \
     mlflow \
+    s3fs \
     jupytext \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard

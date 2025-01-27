@@ -143,7 +143,8 @@ RUN pip install --no-cache-dir \
     dask-gateway \
     prometheus_client \
     comm>=0.1.2 \
-    mlflow
+    mlflow \ 
+    s3fs
 
 #RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
 RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
