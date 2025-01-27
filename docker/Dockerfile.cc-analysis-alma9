@@ -1,5 +1,5 @@
 #FROM coffeateam/coffea-base-almalinux8:0.7.22-py3.10
-FROM coffeateam/coffea-dask-almalinux9:2024.11.0-py3.11
+FROM coffeateam/coffea-dask-almalinux9:2025.1.1-py3.12
 
 
 USER root
