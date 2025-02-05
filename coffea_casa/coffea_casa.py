@@ -176,7 +176,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             job_config["security"] = cls.security()
             input_files += [CA_FILE, CERT_FILE]
         XCACHE_SCITOKEN_FILE = bearer_token_path()
-        if (XCACHE_SCITOKEN_FILE.is_file()):
+        if XCACHE_SCITOKEN_FILE:
             input_files += [XCACHE_SCITOKEN_FILE]
         else:
             raise KeyError("Please check with system administarator why you do not have a certificate.")
@@ -217,7 +217,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         # try in case we have x509 proxy
         try:
             proxy = x509_user_proxy_path()
-            if (proxy.is_file()):
+            if proxy:
                 use_proxy = True
         except:
             use_proxy = False
