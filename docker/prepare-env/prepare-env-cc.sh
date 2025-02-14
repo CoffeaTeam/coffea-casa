@@ -2,6 +2,11 @@
 
 set -x
 
+# Enable Bash Git completions
+if [ -f /usr/share/bash-completion/completions/git ]; then
+    . /usr/share/bash-completion/completions/git
+fi
+
 if [[ "$SERVICEX_HOST" ]] && [[ "$SERVICEX_TYPE" ]]; then
     touch $HOME/.servicex
     echo "Tokens: generating ServiceX config file (available only from Jupyterhub notebook)"
