@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask-almalinux9:2025.1.1-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:head-py3.12
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -33,7 +33,7 @@ ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets-chown/access_token"
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
 ARG REGISTRY="hub.opensciencegrid.org"
-ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-alma8"
+ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-alma9"
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
 
@@ -74,6 +74,7 @@ RUN yum -y update \
     bzip2 \
     ca-certificates \
     sudo \
+    gcc \
     langpacks-en \
     glibc-langpack-en \
     glibc-all-langpacks \
@@ -142,7 +143,7 @@ RUN mamba install --quiet --yes \
     -c conda-forge \
     'notebook'==6.5.3 \
     'jupyterhub'==3.1.1 \
-    'jupyterlab'==3.6.1 \
+    'jupyterlab' \
     jupyterlab_widgets==3.0.7 \
     jupyterlab-git==0.41.0 \
     jupyter_client==8.1.0 \
@@ -188,7 +189,7 @@ USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
     mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
-    mkdir -p ${HOME}/.condor/tokens.d && \
+    mkdir -p ${HOME}/.condor/tokens.d \
     mkdir -p /var/lib/condor && \
     mkdir -p /etc/condor/config.d
 
@@ -196,19 +197,8 @@ USER ${NB_UID}
 
 RUN mamba install --yes \
     -c conda-forge \
-    zstandard \
-    xgboost \
-    pyhf \
-    xrootd \
-    scipy>=1.8.1 \
-    cabinetry \
-    vector \
-    hist \
-    mplhep \
-    iminuit \
-    cmake \
-    ndcctools \
-    scikit-hep-testdata \
+    htcondor=10.8.0 \
+    openssl=3.3.1 \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -223,11 +213,11 @@ USER root
 COPY condor/condor_config /etc/condor/
 COPY condor/config.d  /etc/condor/config.d/
 
-RUN rm -rf /etc/grid-security && \
-    ln -s /usr/local/etc/grid-security /etc/grid-security && \
-    curl -L https://github.com/opensciencegrid/osg-vo-config/archive/refs/heads/master.tar.gz | tar -xz --strip-components=1 --directory=/etc/grid-security --wildcards */vomses */vomsdir && \
-    cp /etc/grid-security/vomses /etc && \
-    mv /etc/grid-security/vomses /opt/conda/etc/vomses
+#RUN rm -rf /etc/grid-security && \
+#    ln -s /usr/local/etc/grid-security /etc/grid-security && \
+#    curl -L https://github.com/opensciencegrid/osg-vo-config/archive/refs/heads/master.tar.gz | tar -xz --strip-components=1 --directory=/etc/grid-security --wildcards */vomses */vomsdir && \
+#    cp /etc/grid-security/vomses /etc && \
+#    mv /etc/grid-security/vomses /opt/conda/etc/vomses
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
@@ -251,7 +241,6 @@ RUN mkdir /cvmfs
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
-    correctionlib \
     funcx \
     pyyaml \
     # visualization
@@ -259,9 +248,6 @@ RUN pip install --no-cache-dir \
     descartes==1.1.0 \
     # JSON processor
     jq \
-    # ML packages
-    dask-ml \
-    dask-gateway \
     prometheus_client \
     comm>=0.1.2 \
     mlflow \
@@ -295,8 +281,8 @@ COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
 # Distributed: we need to install patched version of distributed version
-COPY dask/distributed ${CONDA_DIR}/lib/python3.10/site-packages/distributed
-RUN cd ${CONDA_DIR}/lib/python3.10/site-packages/distributed && \
+COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
     # && patch -p2 < 0003-Activate-patch.patch
@@ -307,13 +293,10 @@ RUN cd ${CONDA_DIR}/lib/python3.10/site-packages/distributed && \
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
     && mamba clean --all -f -y \
-    && jupyter lab clean \
-    && jlpm cache clean \
-    && npm cache clean --force \
     && find ${CONDA_DIR} -type f -name '*.a' -delete \
     && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
-    && (find ${CONDA_DIR}/lib/python3.10/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    #&& (find ${CONDA_DIR}/lib/python3.12/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 
 # FIXME: add better layering for preparation of env
