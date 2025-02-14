@@ -1,68 +1,20 @@
 ## Coffea-casa Docker images: UNL-specific and custom
 
 
-### Coffea-casa Dask Base Scheduler image (without UNL specific settings)
+### Coffea-casa Dask Scheduler image (without UNL specific settings)
 
 To build and test locally:
 
 ```
-docker build -t hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:latest  -f Dockerfile.cc-base-ubuntu
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-dask-alma9:latest  -f Dockerfile.cc-dask-alma9
 ```
 
-### Coffea-casa Dask Scheduler (with UNL specific settings)
-
-To build and test locally (with UNL specific settings, and only after was built Dask Base Scheduler image):
-
-```
-docker build -t hub.opensciencegrid.org/coffea-casa/cc-ubuntu:latest  -f Dockerfile.cc-base-ubuntu
-```
-
-### Coffea-casa Dask Base Scheduler CC7 image (without UNL specific settings)
+### Coffea-casa Dask Worker
 
 To build and test locally (with UNL specific settings):
 
 ```
-docker build -t hub.opensciencegrid.org/coffea-casa/cc-base-centos7:latest  -f Dockerfile.cc-base-centos7
-```
-
-### Coffea-casa Dask Scheduler (with UNL specific settings)
-
-To build and test locally (with UNL specific settings and only after was built Dask Base Scheduler CC7 image):
-
-```
-docker build -t hub.opensciencegrid.org/coffea-casa/cc-centos7:latest -f Dockerfile.cc-centos7
-```
-
-### Coffea-casa Dask Worker CC7
-
-To build and test locally (with UNL specific settings):
-
-```
-docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-centos7-skyhook:latest -f Dockerfile.cc-analysis-centos7-skyhook
-```
-
-### Coffea-casa Dask Worker Ubuntu
-
-To build and test locally (with UNL specific settings):
-
-```
-docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:latest -f Dockerfile.cc-analysis-ubuntu-skyhook
-```
-
-### Coffea-casa Dask Worker CC7 (with Skyhook)
-
-To build and test locally (with UNL specific settings and only after was built Dask Worker CC7 image):
-
-```
-docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-centos7-skyhook:latest -f Dockerfile.cc-analysis-centos7-skyhook
-```
-
-### Coffea-casa Dask Worker Ubuntu (with Skyhook)
-
-To build and test locally (with UNL specific settings and only after was built Dask Worker CC7 image):
-
-```
-docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:latest -f Dockerfile.cc-analysis-ubuntu-skyhook
+docker build -t hub.opensciencegrid.org/coffea-casa/cc-analysis-alma9:latest -f Dockerfile.cc-analysis-alma9
 ```
 
 ## How to build images for different cluster
@@ -111,7 +63,7 @@ docker build
 --build-arg COLLECTOR_NAME="Nebraska T2" \
 --build-arg UID_DOMAIN="unl.edu" \
 --build-arg SCHEDD_HOST="t3.unl.edu" \
- -t hub.opensciencegrid.org/coffea-casa/cc-base-ubuntu:$TAG -f Dockerfile.cc-base-ubuntu
+ -t hub.opensciencegrid.org/coffea-casa/cc-dask-alma9:$TAG -f Dockerfile.cc-dask-alma9
 ```
 ### Custom Coffea-casa Dask Scheduler image
 
@@ -131,7 +83,7 @@ docker build
 --build-arg COLLECTOR_NAME="Nebraska T2" \
 --build-arg UID_DOMAIN="unl.edu" \
 --build-arg SCHEDD_HOST="t3.unl.edu" \
--t hub.opensciencegrid.org/coffea-casa/cc-ubuntu:$TAG -f Dockerfile.cc-ubuntu
+-t hub.opensciencegrid.org/coffea-casa/cc-dask-alma9:$TAG -f Dockerfile.cc-dask-alma9
 ```
 
 Other build arguments, which are optional to be changed:
@@ -141,7 +93,7 @@ Other build arguments, which are optional to be changed:
 --build-arg DASK_ROOT_CONFIG="/opt/dask"
 ```
 
-### Custom Coffea-casa Dask Skyhook Scheduler image
+### Custom Coffea-casa Dask Scheduler image
 
 ***Important note:*** please check that TAG values are the same for scheduler and worker image (as well Docker image tags!)
 
@@ -150,10 +102,10 @@ docker build
 --build-arg PROJECT="coffea-casa" \
 --build-arg TAG="2021.10.28" \
 --build-arg REGISTRY="hub.opensciencegrid.org" \
--t hub.opensciencegrid.org/coffea-casa/cc-ubuntu:$TAG -f Dockerfile.cc-ubuntu
+-t hub.opensciencegrid.org/coffea-casa/cc-dask-alma9:$TAG -f Dockerfile.cc-dask-alma9
 ```
 
-###  Custom Coffea-casa Dask Base Worker image
+###  Custom Coffea-casa Dask Worker image
 
 ***Important note:*** please check that TAG values are the same for scheduler and worker image (as well Docker image tags!)
 ```
@@ -163,22 +115,11 @@ docker build
 --build-arg NB_GID="11265" \
 --build-arg XCACHE_HOST="red-xcache1.unl.edu" \
 --build-arg CACHE_PREFIX="red-xcache1.unl.edu" \
--t hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:$TAG -f Dockerfile.cc-analysis-ubuntu
+-t hub.opensciencegrid.org/coffea-casa/cc-analysis-alma9:$TAG -f Dockerfile.cc-analysis-alma9
 ```
 
 Other build arguments, which are optional to be changed:
 ```
 --build-arg CERT_DIR="/etc/cmsaf-secrets"
 --build-arg BEARER_TOKEN_FILE=$CERT_DIR"/xcache_token"
-```
-
-###  Custom Coffea-casa Dask Skyhook Worker image
-
-***Important note:*** please check that TAG values are the same for scheduler and worker image (as well Docker image tags!)
-```
-docker build 
---build-arg PROJECT="coffea-casa" \
---build-arg TAG="2021.10.28" \
---build-arg REGISTRY="hub.opensciencegrid.org" \
--t hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu-skyhook:$TAG -f Dockerfile.cc-analysis-ubuntu-skyhook
 ```
