@@ -1,5 +1,5 @@
 #FROM coffeateam/coffea-base-almalinux8:0.7.22-py3.10
-FROM coffeateam/coffea-dask-almalinux9:2025.1.1-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:head-py3.12
 
 
 USER root
@@ -117,16 +117,9 @@ RUN mkdir $HOME/work && \
 RUN mamba install --yes \
     -c conda-forge \
     xgboost \
-    pyhf \
-    xrootd \
-    scipy>=1.8.1 \
-    cabinetry \
-    vector \
-    hist \
-    mplhep \
-    iminuit \
     cmake \
     ndcctools \
+    openssl=3.3.1 \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -135,12 +128,8 @@ RUN mamba install --yes \
 RUN pip install --no-cache-dir \
     aiostream \
     supervisor \
-    correctionlib \
     funcx \
     pyyaml \
-    # ML packages
-    dask-ml \
-    dask-gateway \
     prometheus_client \
     comm>=0.1.2 \
     mlflow \ 
@@ -181,8 +170,8 @@ RUN groupadd -r condor && \
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY dask/distributed ${CONDA_DIR}/lib/python3.10/site-packages/distributed
-RUN cd ${CONDA_DIR}/lib/python3.10/site-packages/distributed && \
+COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
     # && patch -p2 < 0003-Activate-patch.patch
@@ -201,7 +190,7 @@ RUN rm -rf /tmp/* \
     && find ${CONDA_DIR} -type f -name '*.a' -delete \
     && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
-    && (find ${CONDA_DIR}/lib/python3.10/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && (find ${CONDA_DIR}/lib/python3.12/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 
 # Mkdir CVMFS mount directory.  Mount done upstream in configs. Harmless
