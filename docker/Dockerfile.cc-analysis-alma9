@@ -117,8 +117,10 @@ RUN mkdir $HOME/work && \
 RUN mamba install --yes \
     -c conda-forge \
     xgboost \
+    cabinetry \
+    pyhf \
+    atlas-schema \
     cmake \
-    ndcctools \
     openssl=3.3.1 \
     && mamba clean \
         --all \
@@ -128,7 +130,7 @@ RUN mamba install --yes \
 RUN pip install --no-cache-dir \
     aiostream \
     supervisor \
-    funcx \
+    #funcx \ outdated dependencies
     pyyaml \
     prometheus_client \
     comm>=0.1.2 \

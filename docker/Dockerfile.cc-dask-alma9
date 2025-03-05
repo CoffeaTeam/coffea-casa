@@ -199,6 +199,10 @@ RUN mamba install --yes \
     -c conda-forge \
     htcondor=10.8.0 \
     openssl=3.3.1 \
+    xgboost \
+    cabinetry \
+    pyhf \
+    atlas-schema \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -241,7 +245,7 @@ RUN mkdir /cvmfs
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
-    funcx \
+    #funcx \ outdated dependencies
     pyyaml \
     # visualization
     Shapely==1.8.1.post1 \
