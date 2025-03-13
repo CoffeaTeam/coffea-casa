@@ -310,6 +310,9 @@ RUN chmod g-w /usr/local/etc/grid-security
 RUN chmod g-w /usr/local/etc/grid-security/*
 RUN chmod g-w /usr/local/etc/grid-security/certificates/*
 
+# Fix permission after all packages installations are done
+RUN fix-permissions "${CONDA_DIR}"
+
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}
 WORKDIR $HOME
