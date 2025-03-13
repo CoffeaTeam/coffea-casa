@@ -205,5 +205,8 @@ RUN mkdir /cvmfs
 ADD prepare-env/prepare-env-cc-analysis.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
+# Fix permission after all packages installations are done
+RUN fix-permissions "${CONDA_DIR}"
+
 USER $NB_USER
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
