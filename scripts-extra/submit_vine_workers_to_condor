@@ -1,0 +1,48 @@
+#! /bin/bash
+
+# USE: ./submit_vine_coffea_casa [num of workers]
+
+set -vex
+
+NUM_WORKERS=${1:-1}
+
+IMAGE=hub.opensciencegrid.org/coffea-casa/cc-analysis-alma9:2025.03.17
+MANAGER=${HOST_IP}:8786
+CORES=1
+MEMORY=$((CORES*4))GB
+DISK=$((CORES*8))GB
+
+workdir="${TMPDIR:-/tmp}/${UID:-vine}-workers"
+
+mkdir -p ${workdir}
+
+echo "submitting ${NUM_WORKERS} worker(s) from ${workdir}..."
+
+cd ${workdir}
+
+cat > condor_submit_file << EOF
+universe = docker
+docker_image = ${IMAGE}
+executable = /bin/echo
+arguments = "actual worker binary called from prepare-env-cc-analysis.sh"
+should_transfer_files = yes
+when_to_transfer_output = on_exit
+output = worker.\$(CLUSTER).\$(PROCESS).output
+error = worker.\$(CLUSTER).\$(PROCESS).error
+log = workers.log
++JobMaxSuspendTime = 0
+
++DaskSchedulerAddress = "${MANAGER}"
++CoffeaCasaWorkerType = "taskvine"
+container_service_names = dask,nanny
+dask_container_port = 8786
+nanny_container_port = 8001
+
+getenv = true
+request_cpus = ${CORES}
+request_memory = ${MEMORY}
+request_disk = ${DISK}
+queue ${NUM_WORKERS}
+EOF
+
+exec condor_submit -spool condor_submit_file
