@@ -151,7 +151,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
 	      MANAGER_HOST=${MANAGER_HOST#*tls:\/\/}        # XXX: fix on vine_worker, it should parsing this
 	      MANAGER_PORT=${EXTERNALIP_PORT##*:}
 
-	      HTCONDOR_COMMAND="vine_worker --ssl \
+	      HTCONDOR_COMMAND="vine_worker --ssl -dall \
 	      --contact-hostport $HOST:$PORT \
 	      --transfer-port $CONTAINER_PORT \
 	      --cores $CPUS_PROVISIONED \
