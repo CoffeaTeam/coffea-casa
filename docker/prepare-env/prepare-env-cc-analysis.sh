@@ -166,6 +166,8 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       # Debug print
       echo $HTCONDOR_COMMAND 1>&2
       exec $HTCONDOR_COMMAND
+
+      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
   fi
 else
   exec "$@"

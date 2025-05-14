@@ -1,5 +1,5 @@
 #FROM coffeateam/coffea-base-almalinux8:0.7.22-py3.10
-FROM coffeateam/coffea-dask-almalinux9-noml:head-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:head-py3.10
 
 
 USER root
@@ -21,6 +21,7 @@ ARG XCACHE_HOST="xcache.cmsaf-dev.flatiron.hollandhpc.org"
 
 # Configure environment
 ENV CONDA_DIR /usr/local
+ENV CONDA_PREFIX /usr/local
 ENV CERT_DIR $CERT_DIR
 ENV XCACHE_HOST $XCACHE_HOST
 ENV BEARER_TOKEN_FILE $BEARER_TOKEN_FILE
@@ -78,11 +79,6 @@ RUN chmod +x /usr/bin/tini
 COPY jupyterhub/fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
-RUN rm -rf /etc/grid-security && \
-    ln -s /usr/local/etc/grid-security /etc/grid-security && \
-    chmod 755 /etc/grid-security/certificates && \
-    chmod g-w /etc/grid-security/certificates
-
 # Enable prompt color in the skeleton .bashrc before creating the default NB_USER
 # hadolint ignore=SC2016
 RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashrc && \
@@ -96,6 +92,7 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
     groupadd -r "${NB_USER}" --gid "$NB_GID" && \
     useradd -l -m -s /bin/bash -N -u "${NB_UID}" "${NB_USER}" && \
+    mkdir -p /opt/combine  && chown -R "${NB_USER}:${NB_GID}" /opt/combine && \
     mkdir -p "${CONDA_DIR}" && \
     mkdir -p "${CERT_DIR}" && \
     mkdir -p /var/lib/condor && \
@@ -113,27 +110,28 @@ RUN mkdir $HOME/work && \
     mkdir -p $HOME/.condor/tokens.d && \
     fix-permissions $HOME
 
-#Dask dependencies and HTCondor
 RUN mamba install --yes \
     -c conda-forge \
+    python=3.10 \
     xgboost \
+    cabinetry \
+    pyhf \
+    #atlas-schema \
     cmake \
-    ndcctools \
-    openssl=3.3.1 \
+    #openssl=3.3.1 \
+    root==6.26.04  \
+    gsl  \
+    tbb  \
+    vdt \
+    boost-cpp  \
+    pcre  \
+    eigen  \
     && mamba clean \
-        --all \
-        --force-pkgs-dirs \
-        --yes
-
-RUN pip install --no-cache-dir \
-    aiostream \
-    supervisor \
-    funcx \
-    pyyaml \
-    prometheus_client \
-    comm>=0.1.2 \
-    mlflow \ 
-    s3fs
+    --all \
+    --force-pkgs-dirs \
+    --yes
+ 
+RUN pip install --upgrade --force-reinstall coffea==2025.3.0 dask==2025.3.0 distributed==2025.3.0
 
 #RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
 RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
@@ -150,6 +148,14 @@ RUN cd /tmp && \
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+
+RUN cd /opt/combine && \
+    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
+    cd HiggsAnalysis/CombinedLimit && \
+    make CONDA=1 -j 8
+
+ENV PATH="${PATH}:/opt/combine/HiggsAnalysis/CombinedLimit/build/bin"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
 
 # Include additional CA certificates beyond ca-policy-lcg
 COPY certs/* /etc/grid-security/certificates/
@@ -170,13 +176,25 @@ RUN groupadd -r condor && \
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
-RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
+COPY dask/distributed ${CONDA_DIR}/lib/python3.10/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.10/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
     # && patch -p2 < 0003-Activate-patch.patch
     # && patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
     # && patch -p2 < 0005-Add-nanny-patch.patch
+
+RUN rm -rf /etc/grid-security && \
+    ln -s /usr/local/etc/grid-security /etc/grid-security && \
+    chmod 755 /etc/grid-security/certificates && \
+    chmod g-w /etc/grid-security/certificates
+
+# Make a symbolic link between installation /opt/conda/etc/grid-security and actual directory /etc/grid-security
+RUN ln -s /usr/local/etc/grid-security /etc/grid-security && \
+    curl -L https://github.com/opensciencegrid/osg-vo-config/archive/refs/heads/master.tar.gz | \
+    tar -xz --strip-components=1 --directory=/etc/grid-security --wildcards */vomses */vomsdir && \
+    cp /etc/grid-security/vomses /etc && \
+    mv /etc/grid-security/vomses /usr/local/etc/
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
@@ -190,7 +208,7 @@ RUN rm -rf /tmp/* \
     && find ${CONDA_DIR} -type f -name '*.a' -delete \
     && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
-    && (find ${CONDA_DIR}/lib/python3.12/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && (find ${CONDA_DIR}/lib/python3.10/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 
 # Mkdir CVMFS mount directory.  Mount done upstream in configs. Harmless
@@ -200,8 +218,11 @@ RUN mkdir /cvmfs
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
 # nor and execute dask-worker command
-ADD prepare-env/prepare-env-cc-analysis.sh /usr/local/bin/prepare-env.sh
+COPY prepare-env/prepare-env-cc-analysis.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
+
+# Fix permission after all packages installations are done
+RUN fix-permissions "${CONDA_DIR}"
 
 USER $NB_USER
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
