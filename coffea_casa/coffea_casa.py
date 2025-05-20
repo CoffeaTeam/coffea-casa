@@ -170,12 +170,14 @@ class CoffeaCasaCluster(HTCondorCluster):
             input_files += [PIP_REQUIREMENTS]
         if CONDA_ENV.is_file():
             input_files += [CONDA_ENV]
+        opendata = os.environ['OPENDATA_INSTANCE']
         # If we have certs in env, lets try to use TLS
         if (CA_FILE.is_file() and CERT_FILE.is_file() and cls.security().get_connection_args("scheduler")["require_encryption"]):
             job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
             input_files += [CA_FILE, CERT_FILE]
-        XCACHE_SCITOKEN_FILE = bearer_token_path()
+        if not opendata:
+            XCACHE_SCITOKEN_FILE = bearer_token_path()
         if XCACHE_SCITOKEN_FILE:
             input_files += [XCACHE_SCITOKEN_FILE]
         else:
