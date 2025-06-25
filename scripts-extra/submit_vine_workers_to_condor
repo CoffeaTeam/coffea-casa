@@ -6,7 +6,7 @@ set -vex
 
 NUM_WORKERS=${1:-1}
 
-IMAGE=hub.opensciencegrid.org/coffea-casa/cc-analysis-alma9:2025.03.17
+IMAGE=hub.opensciencegrid.org/coffea-casa/cc-analysis-alma9:2025.06.25
 MANAGER=${HOST_IP}:8786
 CORES=1
 MEMORY=$((CORES*4))GB
@@ -37,6 +37,12 @@ log = workers.log
 container_service_names = dask,nanny
 dask_container_port = 8786
 nanny_container_port = 8001
+transfer_input_files = /etc/cmsaf-secrets-chown/access_token
+encrypt_input_files = /etc/cmsaf-secrets-chown/access_token
+should_transfer_files = YES
+initialdir = /
+environment = "BEARER_TOKEN=access_token"
+environment = "BEARER_TOKEN_FILE=access_token"
 
 getenv = true
 request_cpus = ${CORES}
