@@ -1,8 +1,8 @@
 """CoffeaCasaCluster class
 """
 import os
-import sys
 from pathlib import Path
+import sys
 import dask
 from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
 from distributed.security import Security
@@ -30,41 +30,44 @@ if (HOME_DIR / "environment.yaml").is_file():
 else:
     CONDA_ENV = HOME_DIR / "environment.yml"
 
-# helper functions from htcondor/htcondor-ce/htcondorce/tools.py
-def x509_user_proxy_path():
-    """Return the path to the user's X.509 proxy or raise FileNotFoundError if it doesn't exist on disk
-    """
-    try:
-        path = os.environ['X509_USER_PROXY']
-    except KeyError:
-        path = f'/tmp/x509up_u{os.geteuid()}'
-    if open(path):
-        return path
-    return None  # we shouldn't get here; failure to open should raise OSError
+import os
+from pathlib import Path
 
-# helper functions from htcondor/htcondor-ce/htcondorce/tools.py
 def bearer_token_path():
-    """Return the path to the user's X.509 proxy or raise FileNotFoundError if it doesn't exist on disk
-    """
+    """Return the path to the user's X.509 proxy or None if not found"""
+
     def check_token_path(path, suffix=''):
         token_path = f'{path}{suffix}'
-        if open(token_path):
+        if Path(token_path).is_file():
             return token_path
-        return None  # we shouldn't get here, failure to open should raise OSError
+        return None
 
+    # 1. Check BEARER_TOKEN_FILE env variable
     try:
-        # 2. BEARER_TOKEN_PATH containing the path to the token
         path = check_token_path(os.environ['BEARER_TOKEN_FILE'])
-    except (KeyError, FileNotFoundError):
-        try:
-            # 3. XDG_RUNTIME_DIR containing the path to the folder containing the token at bt_u$UID
-            path = check_token_path(os.environ['XDG_RUNTIME_DIR'], suffix=f'/bt_u{os.geteuid()}')
-        except (KeyError, FileNotFoundError):
-            # 4. Otherwise, the token is expected at /tmp/bt_u$UID
-            #    Raise FileExceptionError if it doesn't exist
-            path = check_token_path(f'/tmp/bt_u{os.geteuid()}')
+        if path:
+            return path
+    except KeyError:
+        pass
 
-    return path
+    # 2. Check XDG_RUNTIME_DIR + /bt_u$UID
+    try:
+        xdg_runtime_dir = os.environ['XDG_RUNTIME_DIR']
+        path = check_token_path(xdg_runtime_dir, suffix=f'/bt_u{os.geteuid()}')
+        if path:
+            return path
+    except KeyError:
+        pass
+
+    # 3. Check /tmp/bt_u$UID
+    try:
+        path = check_token_path(f'/tmp/bt_u{os.geteuid()}')
+        if path:
+            return path
+    except KeyError:
+        pass
+
+    return None
 
 
 def merge_dicts(*dict_args):
@@ -176,12 +179,11 @@ class CoffeaCasaCluster(HTCondorCluster):
             job_config["protocol"] = "tls://"
             job_config["security"] = cls.security()
             input_files += [CA_FILE, CERT_FILE]
-        if opendata is None:
-            XCACHE_SCITOKEN_FILE = bearer_token_path()
-            if XCACHE_SCITOKEN_FILE:
-                input_files += [XCACHE_SCITOKEN_FILE]
-            else:
-                raise KeyError("Please check with system administarator why you do not have a certificate.")
+        XCACHE_SCITOKEN_FILE = bearer_token_path()
+        if XCACHE_SCITOKEN_FILE:
+            input_files += [XCACHE_SCITOKEN_FILE]
+        else:
+            print("Warning: No bearer token found — proceeding without it.")
         files = ", ".join(str(path) for path in input_files)
         ## Networking settings
         try:
