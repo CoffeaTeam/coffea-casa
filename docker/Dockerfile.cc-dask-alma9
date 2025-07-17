@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask-almalinux9-noml:head-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:2025.7.0-py3.12
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -198,10 +198,11 @@ USER ${NB_UID}
 RUN mamba install --yes \
     -c conda-forge \
     htcondor=10.8.0 \
-    openssl=3.3.1 \
     xgboost \
     cabinetry \
     pyhf \
+    ndcctools=7.15.8 \
+    #openssl=3.3.1 \
     atlas-schema \
     && mamba clean \
         --all \
@@ -269,7 +270,7 @@ RUN cd /tmp && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
     make && \
     make install
 
@@ -287,7 +288,7 @@ USER root
 # Distributed: we need to install patched version of distributed version
 COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
-    #patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
     # && patch -p2 < 0003-Activate-patch.patch
     # && patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch

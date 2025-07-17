@@ -1,5 +1,5 @@
 #FROM coffeateam/coffea-base-almalinux8:0.7.22-py3.10
-FROM coffeateam/coffea-dask-almalinux9-noml:head-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:2025.7.0-py3.12
 
 
 USER root
@@ -121,7 +121,8 @@ RUN mamba install --yes \
     pyhf \
     atlas-schema \
     cmake \
-    openssl=3.3.1 \
+    ndcctools=7.15.8 \
+    #openssl=3.3.1 \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -146,7 +147,7 @@ RUN cd /tmp && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
     make && \
     make install
 
@@ -174,7 +175,7 @@ RUN groupadd -r condor && \
 # Distributed: we need to install patched version of distributed version
 COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
-    #patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
     # && patch -p2 < 0003-Activate-patch.patch
     # && patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
