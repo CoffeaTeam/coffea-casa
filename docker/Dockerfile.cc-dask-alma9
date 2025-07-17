@@ -197,13 +197,14 @@ USER ${NB_UID}
 
 RUN mamba install --yes \
     -c conda-forge \
-    htcondor=10.8.0 \
-    openssl=3.3.1 \
+    #htcondor=10.8.0 \
+    #openssl=3.3.1 \
     xgboost \
     cabinetry \
     pyhf \
-    #ndcctools=7.15.8 \
+    ndcctools=7.15.8 \
     numpy>2 \
+    #openssl=3.3.1 \
     atlas-schema \
     && mamba clean \
         --all \
