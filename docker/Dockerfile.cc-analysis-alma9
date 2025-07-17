@@ -121,8 +121,8 @@ RUN mamba install --yes \
     pyhf \
     atlas-schema \
     cmake \
-    #ndcctools=7.15.8 \
-    openssl=3.3.1 \
+    ndcctools=7.15.8 \
+    #openssl=3.3.1 \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
