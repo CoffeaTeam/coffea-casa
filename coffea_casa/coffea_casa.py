@@ -69,6 +69,17 @@ def bearer_token_path():
 
     return None
 
+def x509_user_proxy_path():
+    """Return the path to the user's X.509 proxy or raise FileNotFoundError if it doesn't exist on disk
+    """
+    try:
+        path = os.environ['X509_USER_PROXY']
+    except KeyError:
+        path = f'/tmp/x509up_u{os.geteuid()}'
+
+    if open(path):
+        return path
+    return None  # we shouldn't get here; failure to open should raise OSError
 
 def merge_dicts(*dict_args):
     """
