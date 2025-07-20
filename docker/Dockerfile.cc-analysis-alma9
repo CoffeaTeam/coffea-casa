@@ -78,11 +78,6 @@ RUN chmod +x /usr/bin/tini
 COPY jupyterhub/fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
-RUN rm -rf /etc/grid-security && \
-    ln -s /usr/local/etc/grid-security /etc/grid-security && \
-    chmod 755 /etc/grid-security/certificates && \
-    chmod g-w /etc/grid-security/certificates
-
 # Enable prompt color in the skeleton .bashrc before creating the default NB_USER
 # hadolint ignore=SC2016
 RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashrc && \
@@ -165,6 +160,16 @@ ENV PATH="${CONDA_DIR}/bin/:$PATH"
 USER root
 # Setup supervisord files
 COPY k8s-worker/supervisord.conf  /etc/supervisor/
+
+#TODO please remove this line later: rm -rf /usr/local/etc/grid-security/certificates/*.r0 && \
+RUN rm -rf /etc/grid-security && \
+    rm -rf /usr/local/etc/grid-security/certificates/*.r0 && \
+    cp -R /usr/local/etc/grid-security /etc/grid-security && \
+    chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
+    test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
+    find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
+    test -d /etc/grid-security && chmod -R 755 /etc/grid-security
+
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it
@@ -177,9 +182,6 @@ COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
-    # && patch -p2 < 0003-Activate-patch.patch
-    # && patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
-    # && patch -p2 < 0005-Add-nanny-patch.patch
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
