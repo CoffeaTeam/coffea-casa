@@ -63,9 +63,13 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
+# Terrible bug in all .r0 not allowing to use our xcache
+RUN conda uninstall -y ca-policy-lcg
+
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
-RUN yum -y update \
+RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-latest.rpm \
+ && yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install \
     wget \
@@ -73,6 +77,7 @@ RUN yum -y update \
     gettext \
     bzip2 \
     ca-certificates \
+    osg-ca-certs \
     sudo \
     gcc \
     langpacks-en \
@@ -278,14 +283,14 @@ RUN cd /tmp && \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
-# Include additional CA certificates beyond ca-policy-lcg
-COPY certs/* /etc/grid-security/certificates/
-RUN openssl rehash /etc/grid-security/certificates/
-
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
+
+# Fix permission after all packages installations are done
+RUN fix-permissions "${CONDA_DIR}"
+
 # Distributed: we need to install patched version of distributed version
 COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
@@ -305,17 +310,15 @@ RUN rm -rf /tmp/* \
 ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
-#TODO please remove this line later: rm -rf /usr/local/etc/grid-security/certificates/*.r0 && \
-RUN rm -rf /etc/grid-security && \
-    rm -rf /usr/local/etc/grid-security/certificates/*.r0 && \
-    cp -R /usr/local/etc/grid-security /etc/grid-security && \
-    chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
-    test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
-    find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
-    test -d /etc/grid-security && chmod -R 755 /etc/grid-security
+# Include additional CA certificates beyond ca-policy-lcg
+COPY certs/* /etc/grid-security/certificates/
+RUN openssl rehash /etc/grid-security/certificates/
 
-# Fix permission after all packages installations are done
-RUN fix-permissions "${CONDA_DIR}"
+RUN chmod -R g-w /usr/local/etc/grid-security/ && chmod -R g-w /etc/grid-security/
+    #chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
+    #test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
+    #find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
+    #test -d /etc/grid-security && chmod -R 755 /etc/grid-security
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}

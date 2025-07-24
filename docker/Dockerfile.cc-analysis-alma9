@@ -36,12 +36,17 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
+# Terrible bug in all .r0 not allowing to use our xcache
+RUN conda uninstall -y ca-policy-lcg
+
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
-RUN yum -y update \
+RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-latest.rpm \
+ && yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install \
     wget \
+    osg-ca-certs \
     epel-release \
     gettext \
     bzip2 \
@@ -149,10 +154,6 @@ RUN cd /tmp && \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
-# Include additional CA certificates beyond ca-policy-lcg
-COPY certs/* /etc/grid-security/certificates/
-RUN openssl rehash /etc/grid-security/certificates/
-
 # TODO: RETEST IF WE STILL NEED THIS 
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"
@@ -161,18 +162,22 @@ USER root
 # Setup supervisord files
 COPY k8s-worker/supervisord.conf  /etc/supervisor/
 
-#TODO please remove this line later: rm -rf /usr/local/etc/grid-security/certificates/*.r0 && \
-RUN rm -rf /etc/grid-security && \
-    rm -rf /usr/local/etc/grid-security/certificates/*.r0 && \
-    cp -R /usr/local/etc/grid-security /etc/grid-security && \
-    chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
-    test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
-    find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
-    test -d /etc/grid-security && chmod -R 755 /etc/grid-security
+# Fix permission after all packages installations are done
+RUN fix-permissions "${CONDA_DIR}"
 
+# Include additional CA certificates beyond ca-policy-lcg
+COPY certs/* /etc/grid-security/certificates/
+RUN openssl rehash /etc/grid-security/certificates/
+
+RUN chmod -R g-w /usr/local/etc/grid-security/ && chmod -R g-w /etc/grid-security/
+    #chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
+    #test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
+    #find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
+    #test -d /etc/grid-security && chmod -R 755 /etc/grid-security
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it
+
 RUN groupadd -r condor && \
     useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
@@ -207,9 +212,6 @@ RUN mkdir /cvmfs
 # nor and execute dask-worker command
 ADD prepare-env/prepare-env-cc-analysis.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
-
-# Fix permission after all packages installations are done
-RUN fix-permissions "${CONDA_DIR}"
 
 USER $NB_USER
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
