@@ -213,7 +213,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             external_ip_string = '"' + contact_address + '"'
         # HTCondor logging
         job_config["log_directory"] = "logs"
-        job_config["silence_logs"] = False
+        job_config["silence_logs"] = "DEBUG"
         ## Scheduler settings
         # we need to pass and check protocol for scheduler
         # (format should be not 'tls://'' but 'tls')
@@ -254,9 +254,9 @@ class CoffeaCasaCluster(HTCondorCluster):
             {"transfer_output_files": ""},
             {"when_to_transfer_output": "ON_EXIT"},
             {"should_transfer_files": "YES"},
+            {"Stream_Output": "False"},
+            {"Stream_Error": "False"},
             {"+CoffeaCasaWorkerType": '"dask"'},
-            {"Stream_Output": "True"},
-            {"Stream_Error": "True"},
             {"+DaskSchedulerAddress": external_ip_string},
             {"+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"'},
             job_kwargs.get(
