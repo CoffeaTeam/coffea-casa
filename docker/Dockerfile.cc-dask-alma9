@@ -12,6 +12,8 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
+ARG CONDOR_USER="condor"
+ARG CONDOR_GID="989"
 # Configure Labextention Dask Cluster factory
 ARG DASK_ROOT_CONFIG="/opt/dask"
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -194,8 +196,7 @@ USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
     mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
-    mkdir -p ${HOME}/.condor/tokens.d \
-    mkdir -p /var/lib/condor && \
+    mkdir -p ${HOME}/.condor/tokens.d && chown -R "${NB_USER}:${NB_GID}" ${HOME}/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d
 
 USER ${NB_UID}
@@ -203,6 +204,8 @@ USER ${NB_UID}
 RUN mamba install --yes \
     -c conda-forge \
     htcondor=24.9.2 \
+    # last working version with x509
+    #htcondor=10.8.0 \
     #openssl=3.3.1 \
     xgboost \
     cabinetry \
@@ -223,18 +226,17 @@ USER root
 # Add HTCondor configuration files that not needed to be edited
 COPY condor/condor_config /etc/condor/
 COPY condor/config.d  /etc/condor/config.d/
-
-#RUN rm -rf /etc/grid-security && \
-#    ln -s /usr/local/etc/grid-security /etc/grid-security && \
-#    curl -L https://github.com/opensciencegrid/osg-vo-config/archive/refs/heads/master.tar.gz | tar -xz --strip-components=1 --directory=/etc/grid-security --wildcards */vomses */vomsdir && \
-#    cp /etc/grid-security/vomses /etc && \
-#    mv /etc/grid-security/vomses /opt/conda/etc/vomses
+ 
+RUN sudo groupadd -g 989 condor && \
+    sudo useradd -u 989 -g 989 -d /var/lib/condor -s /sbin/nologin condor && \
+    mkdir -p /var/lib/condor/spool && chown -R "${CONDOR_USER}:${CONDOR_GID}" /var/lib/condor && \
+    chmod -R 755 /var/lib/condor
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it
-RUN groupadd -r condor && \
-    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
+#RUN groupadd -r condor && \
+#    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 # Fix permissions for Dask/Ceph config files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml

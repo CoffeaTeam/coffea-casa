@@ -9,6 +9,8 @@ ARG TAG="development"
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
+ARG CONDOR_USER="condor"
+ARG CONDOR_GID="989"
 ARG CERT_DIR="/etc/cmsaf-secrets"
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
@@ -122,6 +124,9 @@ RUN mamba install --yes \
     atlas-schema \
     cmake \
     ndcctools=7.15.8 \
+    scikit-hep-testdata \
+    # last working version with x509
+    #htcondor=10.8.0 \
     #openssl=3.3.1 \
     && mamba clean \
         --all \
@@ -178,8 +183,10 @@ RUN chmod -R g-w /usr/local/etc/grid-security/ && chmod -R g-w /etc/grid-securit
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it
 
-RUN groupadd -r condor && \
-    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
+RUN sudo groupadd -g 989 condor && \
+    sudo useradd -u 989 -g 989 -d /var/lib/condor -s /sbin/nologin condor && \
+    mkdir -p /var/lib/condor/spool && chown -R "${CONDOR_USER}:${CONDOR_GID}" /var/lib/condor && \
+    chmod -R 755 /var/lib/condor
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
