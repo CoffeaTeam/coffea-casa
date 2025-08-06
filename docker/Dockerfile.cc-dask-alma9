@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask-almalinux9-noml:2025.7.1-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:2025.7.3-py3.12
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -204,13 +204,10 @@ USER ${NB_UID}
 RUN mamba install --yes \
     -c conda-forge \
     htcondor=24.9.2 \
-    # last working version with x509
-    #htcondor=10.8.0 \
-    #openssl=3.3.1 \
     xgboost \
     cabinetry \
     pyhf \
-    ndcctools=7.15.8 \
+    ndcctools \
     numpy>2 \
     atlas-schema \
     && mamba clean \
@@ -255,6 +252,8 @@ RUN mkdir /cvmfs
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
     #funcx \ outdated dependencies
+    pixi-kernel \
+    scikit-hep-testdata \
     pyyaml \
     # visualization
     Shapely==1.8.1.post1 \
