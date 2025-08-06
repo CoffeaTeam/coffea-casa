@@ -36,6 +36,7 @@ echo "CONDOR_HOST = ${CONDOR_HOST}" >> /opt/condor/config.d/schedd
 echo "COLLECTOR_NAME = ${COLLECTOR_NAME}" >> /opt/condor/config.d/schedd
 echo "UID_DOMAIN = ${UID_DOMAIN}" >> /opt/condor/config.d/schedd
 echo "SCHEDD_HOST = ${SCHEDD_HOST}" >> /opt/condor/config.d/schedd
+echo "DELEGATE_JOB_GSI_CREDENTIALS = FALSE" >> /opt/condor/config.d/schedd
 
 # Values should be defined in Helm chart (not in a Docker image)
 if [[ "$SKYHOOK_CEPH_KEYRING" && "$SKYHOOK_CEPH_UUIDGEN" && "$SKYHOOK_CLUSTER_ADDR" && "$SKYHOOK_PUBLIC_ADDR" && "$SKYHOOK_MON_HOST" ]]; then
