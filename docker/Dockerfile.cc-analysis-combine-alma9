@@ -125,6 +125,7 @@ RUN mamba install --yes \
     cmake \
     ndcctools \
     root==6.34.4  \
+    combine \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -159,14 +160,14 @@ ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # -------combine-plugin -------------------------------
-RUN cd /opt/combine && \
-    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
-    cd HiggsAnalysis/CombinedLimit && \
-    make CONDA=1 -j 8
+#RUN cd /opt/combine && \
+#    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
+#    cd HiggsAnalysis/CombinedLimit && \
+#    make CONDA=1 -j 8
 
-ENV PATH="${PATH}:/opt/combine/HiggsAnalysis/CombinedLimit/build/bin"
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
-ENV PYTHONPATH="/opt/combine/CombinedLimit/build/lib/python:${PYTHONPATH}"
+#ENV PATH="${PATH}:/opt/combine/HiggsAnalysis/CombinedLimit/build/bin"
+#ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
+#ENV PYTHONPATH="/opt/combine/CombinedLimit/build/lib/python:${PYTHONPATH}"
 
 # TODO: RETEST IF WE STILL NEED THIS 
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"

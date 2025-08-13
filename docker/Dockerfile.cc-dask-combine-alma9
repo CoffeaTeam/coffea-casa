@@ -211,6 +211,7 @@ RUN mamba install --yes \
     numpy>2 \
     atlas-schema \
     root==6.34.4  \
+    combine \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -286,14 +287,14 @@ ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # -------combine-plugin -------------------------------
-RUN cd /opt/combine && \
-    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
-    cd HiggsAnalysis/CombinedLimit && \
-    make CONDA=1 -j 8
+#RUN cd /opt/combine && \
+#    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
+#    cd HiggsAnalysis/CombinedLimit && \
+#    make CONDA=1 -j 8
 
-ENV PATH="${PATH}:/opt/combine/HiggsAnalysis/CombinedLimit/build/bin"
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
-ENV PYTHONPATH="/opt/combine/CombinedLimit/build/lib/python:${PYTHONPATH}"
+#ENV PATH="${PATH}:/opt/combine/HiggsAnalysis/CombinedLimit/build/bin"
+#ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
+#ENV PYTHONPATH="/opt/combine/CombinedLimit/build/lib/python:${PYTHONPATH}"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
