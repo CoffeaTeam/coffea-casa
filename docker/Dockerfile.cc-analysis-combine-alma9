@@ -125,7 +125,7 @@ RUN mamba install --yes \
     cmake \
     ndcctools \
     root==6.34.4  \
-    combine \
+    cms-combine \
     && mamba clean \
         --all \
         --force-pkgs-dirs \

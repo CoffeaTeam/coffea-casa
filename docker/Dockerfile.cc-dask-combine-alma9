@@ -211,7 +211,7 @@ RUN mamba install --yes \
     numpy>2 \
     atlas-schema \
     root==6.34.4  \
-    combine \
+    cms-combine \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
