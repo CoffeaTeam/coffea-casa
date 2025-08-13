@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask-almalinux9-noml:head-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:2025.7.3-py3.12
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -12,6 +12,8 @@ LABEL maintainer="Oksana Shadura <ksu.shadura@gmail.com>"
 ARG NB_USER="cms-jovyan"
 ARG NB_UID="6440"
 ARG NB_GID="11265"
+ARG CONDOR_USER="condor"
+ARG CONDOR_GID="989"
 # Configure Labextention Dask Cluster factory
 ARG DASK_ROOT_CONFIG="/opt/dask"
 ARG CERT_DIR="/etc/cmsaf-secrets"
@@ -63,9 +65,13 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
+# Terrible bug in all .r0 not allowing to use our xcache
+RUN conda uninstall -y ca-policy-lcg
+
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
-RUN yum -y update \
+RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-latest.rpm \
+ && yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install \
     wget \
@@ -73,6 +79,7 @@ RUN yum -y update \
     gettext \
     bzip2 \
     ca-certificates \
+    osg-ca-certs \
     sudo \
     gcc \
     langpacks-en \
@@ -189,16 +196,22 @@ USER root
 # Preparing directories for Dask conf files, patches and job spool directory for HTCondor
 RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG} && \
     mkdir -p /opt/condor/config.d  && chown -R "${NB_USER}:${NB_GID}" /opt/condor/config.d && \
-    mkdir -p ${HOME}/.condor/tokens.d \
-    mkdir -p /var/lib/condor && \
+    mkdir -p ${HOME}/.condor/tokens.d && chown -R "${NB_USER}:${NB_GID}" ${HOME}/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d
 
 USER ${NB_UID}
 
 RUN mamba install --yes \
     -c conda-forge \
-    htcondor=10.8.0 \
-    openssl=3.3.1 \
+    htcondor=24.9.2 \
+    xgboost \
+    cabinetry \
+    pyhf \
+    ndcctools \
+    numpy>2 \
+    atlas-schema \
+    root==6.34.4  \
+    cms-combine \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -212,18 +225,17 @@ USER root
 # Add HTCondor configuration files that not needed to be edited
 COPY condor/condor_config /etc/condor/
 COPY condor/config.d  /etc/condor/config.d/
-
-#RUN rm -rf /etc/grid-security && \
-#    ln -s /usr/local/etc/grid-security /etc/grid-security && \
-#    curl -L https://github.com/opensciencegrid/osg-vo-config/archive/refs/heads/master.tar.gz | tar -xz --strip-components=1 --directory=/etc/grid-security --wildcards */vomses */vomsdir && \
-#    cp /etc/grid-security/vomses /etc && \
-#    mv /etc/grid-security/vomses /opt/conda/etc/vomses
+ 
+RUN groupadd -g 989 condor && \
+    useradd -u 989 -g 989 -d /var/lib/condor -s /sbin/nologin condor && \
+    mkdir -p /var/lib/condor/spool && chown -R "${CONDOR_USER}:${CONDOR_GID}" /var/lib/condor && \
+    chmod -R 755 /var/lib/condor
 
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it
-RUN groupadd -r condor && \
-    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
+#RUN groupadd -r condor && \
+#    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 # Fix permissions for Dask/Ceph config files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
@@ -241,7 +253,9 @@ RUN mkdir /cvmfs
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
-    funcx \
+    #funcx \ outdated dependencies
+    pixi-kernel \
+    scikit-hep-testdata \
     pyyaml \
     # visualization
     Shapely==1.8.1.post1 \
@@ -265,29 +279,36 @@ RUN cd /tmp && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} && \
+    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
     make && \
     make install
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
-# Include additional CA certificates beyond ca-policy-lcg
-COPY certs/* /etc/grid-security/certificates/
-RUN openssl rehash /etc/grid-security/certificates/
+# -------combine-plugin -------------------------------
+#RUN cd /opt/combine && \
+#    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
+#    cd HiggsAnalysis/CombinedLimit && \
+#    make CONDA=1 -j 8
+
+#ENV PATH="${PATH}:/opt/combine/HiggsAnalysis/CombinedLimit/build/bin"
+#ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
+#ENV PYTHONPATH="/opt/combine/CombinedLimit/build/lib/python:${PYTHONPATH}"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
+
+# Fix permission after all packages installations are done
+RUN fix-permissions "${CONDA_DIR}"
+
 # Distributed: we need to install patched version of distributed version
 COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
-    # && patch -p2 < 0003-Activate-patch.patch
-    # && patch -p2 < 0004-Add-possibility-to-setup-external_adress-for-schedul.patch
-    # && patch -p2 < 0005-Add-nanny-patch.patch
 
 # Cleanup
 RUN rm -rf /tmp/* \
@@ -299,12 +320,18 @@ RUN rm -rf /tmp/* \
     #&& (find ${CONDA_DIR}/lib/python3.12/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 
-# FIXME: add better layering for preparation of env
-ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
+ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
-RUN chmod g-w /usr/local/etc/grid-security
-RUN chmod g-w /usr/local/etc/grid-security/*
-RUN chmod g-w /usr/local/etc/grid-security/certificates/*
+
+# Include additional CA certificates beyond ca-policy-lcg
+COPY certs/* /etc/grid-security/certificates/
+RUN openssl rehash /etc/grid-security/certificates/
+
+RUN chmod -R g-w /usr/local/etc/grid-security/ && chmod -R g-w /etc/grid-security/
+    #chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
+    #test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
+    #find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
+    #test -d /etc/grid-security && chmod -R 755 /etc/grid-security
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}

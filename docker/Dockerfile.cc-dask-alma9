@@ -225,8 +225,8 @@ USER root
 COPY condor/condor_config /etc/condor/
 COPY condor/config.d  /etc/condor/config.d/
  
-RUN sudo groupadd -g 989 condor && \
-    sudo useradd -u 989 -g 989 -d /var/lib/condor -s /sbin/nologin condor && \
+RUN groupadd -g 989 condor && \
+    useradd -u 989 -g 989 -d /var/lib/condor -s /sbin/nologin condor && \
     mkdir -p /var/lib/condor/spool && chown -R "${CONDOR_USER}:${CONDOR_GID}" /var/lib/condor && \
     chmod -R 755 /var/lib/condor
 
