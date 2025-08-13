@@ -7,11 +7,11 @@ labextension:
   default:
     workers: null
     adapt:
-      minimum: 0
+      minimum: 1
       maximum: 50
   initial:
   - name: "Local Cluster"
     workers: null
     adapt:
-      minimum: 0
+      minimum: 1
       maximum: 50
