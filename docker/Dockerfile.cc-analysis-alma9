@@ -1,5 +1,5 @@
 #FROM coffeateam/coffea-base-almalinux8:0.7.22-py3.10
-FROM coffeateam/coffea-dask-almalinux9-noml:2025.7.1-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:2025.7.3-py3.12
 
 
 USER root
@@ -57,6 +57,7 @@ RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-
     langpacks-en \
     glibc-langpack-en \
     glibc-all-langpacks \
+    glibc-headers \
     liberation-fonts \
     wget \
     nss_wrapper \

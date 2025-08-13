@@ -85,6 +85,7 @@ RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-
     langpacks-en \
     glibc-langpack-en \
     glibc-all-langpacks \
+    glibc-headers \
     liberation-fonts \
     wget \
     nss_wrapper \
