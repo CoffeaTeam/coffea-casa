@@ -124,7 +124,7 @@ RUN mamba install --yes \
     atlas-schema \
     cmake \
     ndcctools \
-    root==6.26.04  \
+    root==6.34.4  \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
