@@ -65,9 +65,6 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-# Terrible bug in all .r0 not allowing to use our xcache
-RUN conda uninstall -y ca-policy-lcg
-
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
 RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-latest.rpm \
@@ -139,6 +136,13 @@ WORKDIR $HOME
 # Setup work directory for backward-compatibility
 RUN mkdir "/home/${NB_USER}/work" && \
     fix-permissions "/home/${NB_USER}"
+
+# FIXME:
+# Terrible bug in all .r0 not allowing to use our xcache +
+# + wrongly activated conda base environment in base image
+RUN conda init && \
+    source /home/cms-jovyan/.bashrc && \
+    mamba uninstall -y ca-policy-lcg
 
 # Install Jupyter Notebook, Lab, and Hub
 # Generate a notebook server config
