@@ -13,9 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set CalVer base tag (date)
+      - name: Set CalVer date
         id: calver
         run: |
+          # Get current date in YYYY.MM.DD format
           date_tag=$(date +'%Y.%m.%d')
           echo "base_tag=$date_tag" >> $GITHUB_OUTPUT
 
@@ -27,12 +28,15 @@ jobs:
         id: next_tag
         run: |
           base=${{ steps.calver.outputs.base_tag }}
+          # List all existing tags that match today's date
           existing=$(git tag --list "${base}*")
 
           if ! echo "$existing" | grep -q "^$base$"; then
+            # No base tag exists yet, use the base tag (no suffix)
             new_tag="$base"
           else
-            max=1
+            # Base tag exists, find the highest numbered suffix
+            max=1  # because base tag is already used
             for tag in $existing; do
               suffix=$(echo $tag | sed -n "s/^$base\.//p")
               if [[ "$suffix" =~ ^[0-9]+$ && "$suffix" -gt "$max" ]]; then
@@ -44,18 +48,6 @@ jobs:
 
           echo "New tag: $new_tag"
           echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
-
-      - name: Delete old tags for today (local + remote)
-        run: |
-          base=${{ steps.calver.outputs.base_tag }}
-          current=${{ steps.next_tag.outputs.new_tag }}
-          tags_to_delete=$(git tag --list "${base}*" | grep -v "^$current$")
-
-          for tag in $tags_to_delete; do
-            echo "Deleting tag: $tag"
-            git tag -d "$tag" || true
-            git push origin ":refs/tags/$tag" || true
-          done
 
       - name: Create and push new tag
         run: |
