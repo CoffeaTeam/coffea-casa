@@ -1,0 +1,65 @@
+name: Auto CalVer Tag on Master Push
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  calver-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set CalVer base tag (date)
+        id: calver
+        run: |
+          date_tag=$(date +'%Y.%m.%d')
+          echo "base_tag=$date_tag" >> $GITHUB_OUTPUT
+
+      - name: Fetch all tags
+        run: |
+          git fetch --tags
+
+      - name: Determine next CalVer tag
+        id: next_tag
+        run: |
+          base=${{ steps.calver.outputs.base_tag }}
+          existing=$(git tag --list "${base}*")
+
+          if ! echo "$existing" | grep -q "^$base$"; then
+            new_tag="$base"
+          else
+            max=1
+            for tag in $existing; do
+              suffix=$(echo $tag | sed -n "s/^$base\.//p")
+              if [[ "$suffix" =~ ^[0-9]+$ && "$suffix" -gt "$max" ]]; then
+                max=$suffix
+              fi
+            done
+            new_tag="$base.$((max + 1))"
+          fi
+
+          echo "New tag: $new_tag"
+          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+
+      - name: Delete old tags for today (local + remote)
+        run: |
+          base=${{ steps.calver.outputs.base_tag }}
+          current=${{ steps.next_tag.outputs.new_tag }}
+          tags_to_delete=$(git tag --list "${base}*" | grep -v "^$current$")
+
+          for tag in $tags_to_delete; do
+            echo "Deleting tag: $tag"
+            git tag -d "$tag" || true
+            git push origin ":refs/tags/$tag" || true
+          done
+
+      - name: Create and push new tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag ${{ steps.next_tag.outputs.new_tag }}
+          git push origin ${{ steps.next_tag.outputs.new_tag }}
