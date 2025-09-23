@@ -15,9 +15,11 @@ jobs:
       - name: Get latest base image tag from Docker Hub
         id: latest
         run: |
-          LATEST_TAG=$
-          ( curl -s https://registry.hub.docker.com/v2/repositories/coffeateam/coffea-dask-almalinux9-noml/tags |  
-          jq -r '.results[].name' | grep 'py3.12$' | sort -V | head -n 1)
+          LATEST_TAG=$(curl -s https://registry.hub.docker.com/v2/repositories/coffeateam/coffea-dask-almalinux9-noml/tags |  
+          jq -r '.results[].name' | 
+          grep 'py3.12$' | 
+          sort -V | 
+          head -n 1 )
           echo "Found latest tag: $LATEST_TAG"
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
@@ -54,7 +56,6 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN  }}
           commit-message: "chore: update base image to coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}"
           title: "chore: update base image to coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}"
-          reviewers: "oshadura"
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           branch: "update-coffea-base-image"
           body: |
