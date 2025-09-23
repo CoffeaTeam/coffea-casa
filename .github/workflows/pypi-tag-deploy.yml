@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - uses: hynek/build-and-inspect-python-package@v4
+      - uses: hynek/build-and-inspect-python-package@v2
 
   pypi-publish:
     name: Upload release to PyPI
