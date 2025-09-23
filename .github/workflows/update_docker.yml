@@ -1,0 +1,68 @@
+name: Auto Update Base Docker Images
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Every day at 6am UTC
+  workflow_dispatch:
+
+jobs:
+  update-base-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Get latest base image tag from Docker Hub
+        id: latest
+        run: |
+          LATEST_TAG=$
+          ( curl -s https://registry.hub.docker.com/v2/repositories/coffeateam/coffea-dask-almalinux9-noml/tags |  
+          jq -r '.results[].name' | grep 'py3.12$' | sort -V | head -n 1)
+          echo "Found latest tag: $LATEST_TAG"
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Find and update all Dockerfiles
+        id: update
+        run: |
+          set -e
+
+          UPDATED=false
+          LATEST_TAG=${{ steps.latest.outputs.latest_tag }}
+          IMAGE_NAME="coffeateam/coffea-dask-almalinux9-noml"
+
+          for dockerfile in $(find . -name "Dockerfile"); do
+            echo "Checking $dockerfile..."
+
+            # Extract current tag
+            CURRENT_TAG=$(grep -E "^FROM $IMAGE_NAME:" "$dockerfile" | sed "s|FROM $IMAGE_NAME:||")
+
+            if [ -n "$CURRENT_TAG" ] && [ "$CURRENT_TAG" != "$LATEST_TAG" ]; then
+              echo "Updating $dockerfile: $CURRENT_TAG → $LATEST_TAG"
+              sed -i "s|$IMAGE_NAME:$CURRENT_TAG|$IMAGE_NAME:$LATEST_TAG|" "$dockerfile"
+              UPDATED=true
+            else
+              echo "No update needed in $dockerfile"
+            fi
+          done
+
+          echo "UPDATED=$UPDATED" >> $GITHUB_ENV
+
+      - name: Commit and push changes
+        if: env.UPDATED == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git checkout -b update-coffea-base-image
+          git add .
+          git commit -m "chore: update coffea base image to ${{ steps.latest.outputs.latest_tag }}"
+          git push origin update-coffea-base-image
+
+      - name: Create Pull Request
+        if: env.UPDATED == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          base: main
+          head: update-coffea-base-image
+          title: "chore: update base image to coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}"
+          body: |
+            This PR updates all Dockerfiles that use `coffeateam/coffea-dask-almalinux9-noml:<old>` to `coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}`.
