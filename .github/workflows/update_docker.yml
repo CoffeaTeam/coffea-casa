@@ -47,22 +47,17 @@ jobs:
 
           echo "UPDATED=$UPDATED" >> $GITHUB_ENV
 
-      - name: Commit and push changes
-        if: env.UPDATED == 'true'
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git checkout -b update-coffea-base-image
-          git add .
-          git commit -m "chore: update coffea base image to ${{ steps.latest.outputs.latest_tag }}"
-          git push origin update-coffea-base-image
-
       - name: Create Pull Request
         if: env.UPDATED == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
-          base: main
-          head: update-coffea-base-image
+          token: ${{ secrets.REPO_ACCESS_TOKEN  }}
+          commit-message: "chore: update base image to coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}"
           title: "chore: update base image to coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}"
+          reviewers: "oshadura"
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          branch: "update-coffea-base-image"
           body: |
+            A new Coffea image version has been detected.
+
             This PR updates all Dockerfiles that use `coffeateam/coffea-dask-almalinux9-noml:<old>` to `coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}`.
