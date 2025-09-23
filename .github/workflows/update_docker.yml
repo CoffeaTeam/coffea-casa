@@ -30,7 +30,7 @@ jobs:
           LATEST_TAG=${{ steps.latest.outputs.latest_tag }}
           IMAGE_NAME="coffeateam/coffea-dask-almalinux9-noml"
 
-          for dockerfile in $(find . -name "Dockerfile"); do
+          for dockerfile in $(find . -name "Dockerfile*"); do
             echo "Checking $dockerfile..."
 
             # Extract current tag
