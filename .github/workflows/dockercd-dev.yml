@@ -1,9 +1,10 @@
 name: Push tag of docker images
 
 on:
+  release:
+    types:
+      - published
   push:
-    tags:
-      - "*"
     paths:
       - docker/**
     branches:
@@ -20,25 +21,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #image: [cc-base-ubuntu, cc-analysis-ubuntu, cc-dask-alma8, cc-analysis-alma8, cc-dask-alma9, cc-analysis-alma9]
-        image: [cc-dask-alma9, cc-analysis-alma9, cc-dask-combine-alma9, cc-analysis-combine-alma9]
-        # Keep this line in sync with gh actions @ coffea-dask repo
-        # python: [3.8, 3.9, '3.10']
-        #exclude:
-        #  - image: cc7
-        #    python: 3.8           
+        image: [cc-dask-alma9, cc-analysis-alma9, cc-dask-combine-alma9, cc-analysis-combine-alma9]        
     name: ${{ matrix.image }}
     runs-on: ubuntu-latest
     steps:
+
+      - name: Identify event type
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          
       - name: Generate tags
         id: tags
         env:
           image: ${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}
-          #python: ${{ matrix.python }}
-          release: ${{ github.ref_name }}
-          stable: ${{ startsWith(github.ref, 'refs/tags') }}
+          release: ${{ github.event.release.tag_name }}
         run: |
-          if [ "$stable" == "true" ]; then
+          if ${{ github.event_name }} == 'release'; then
             tag="${image}:${release}"
             tags=$tag
             releasetag=${release}
@@ -73,7 +71,6 @@ jobs:
         with:
           context: docker/
           file: docker/Dockerfile.${{ matrix.image }}
-          push: ${{  github.event_name == 'push' }}
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
