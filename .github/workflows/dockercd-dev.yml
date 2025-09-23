@@ -29,14 +29,14 @@ jobs:
       - name: Identify event type
         run: |
           echo "Triggered by: ${{ github.event_name }}"
-          
+
       - name: Generate tags
         id: tags
         env:
           image: ${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}
           release: ${{ github.event.release.tag_name }}
         run: |
-          if ${{ github.event_name }} == 'release'; then
+          if [ "${{ github.event_name }}" == 'release']; then
             tag="${image}:${release}"
             tags=$tag
             releasetag=${release}
