@@ -49,8 +49,13 @@ jobs:
           echo "tag=$tag"
           echo "tags=$tags"
           echo "releasetag=$releasetag"
+
+          # Set outputs using the environment file
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+          echo "releasetag=$releasetag" >> "$GITHUB_OUTPUT"
+
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
