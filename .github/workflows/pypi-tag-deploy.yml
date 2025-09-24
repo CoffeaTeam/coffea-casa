@@ -7,40 +7,28 @@ on:
       - published
 
 jobs:
-  dist:
-    name: Distribution build
+  build-and-inspect-package:
+    name: Build & inspect package.
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: hynek/build-and-inspect-python-package@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: '3.x'
-
-      - name: Build
-        uses: hynek/build-and-inspect-python-package@v2
-
-      - name: Download built artifact to dist/
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ steps.build.outputs.artifact-name }}
-          path: dist
-
-  pypi-publish:
-    name: Upload release to PyPI
-    runs-on: ubuntu-latest
-    needs: dist
+  upload-to-pypi:
+    name: Upload package to PyPI
+    needs: build-and-inspect-package
     environment:
       name: pypi
       url: https://pypi.org/project/coffea-casa/
+    runs-on: ubuntu-latest
     permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      # IMPORTANT: this permission is mandatory for trusted publishing, but
+      # should NOT be granted anywhere else!
+      id-token: write
     steps:
-    # retrieve your distributions here
-
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Download built artifact to dist/
+        uses: actions/download-artifact@v4
+        with:
+          name: Packages
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
