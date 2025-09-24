@@ -73,6 +73,7 @@ jobs:
           file: docker/Dockerfile.${{ matrix.image }}
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.tags }}
+          push: true
           build-args: |
             TAG=${{ steps.tags.outputs.releasetag }}
             PROJECT=${{ env.PROJECT }} 
