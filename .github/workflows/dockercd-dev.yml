@@ -35,20 +35,20 @@ jobs:
         env:
           image: ${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}
           release: ${{ github.event.release.tag_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "${{ github.event_name }}" == 'release']; then
+          if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
             tag="${image}:${release}"
             tags=$tag
-            releasetag=${release}
+            releasetag=$release
           else
             tag="${image}:development"
             tags=$tag
             releasetag="development"
           fi
-
-          echo "::set-output name=tags::${tags}"
-          echo "::set-output name=tag::${tag}"
-          echo "::set-output name=releasetag::${releasetag}"
+          echo "tag=$tag"
+          echo "tags=$tags"
+          echo "releasetag=$releasetag"
       - name: Check out code
         uses: actions/checkout@v2
       - name: Set up QEMU
