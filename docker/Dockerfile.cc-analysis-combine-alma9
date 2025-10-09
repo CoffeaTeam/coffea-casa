@@ -112,12 +112,8 @@ RUN mkdir $HOME/work && \
     mkdir -p $HOME/.condor/tokens.d && \
     fix-permissions $HOME
 
-# FIXME:
-# Terrible bug in all .r0 not allowing to use our xcache +
-# + wrongly activated conda base environment in base image
-RUN conda init && \
-    source /home/cms-jovyan/.bashrc && \
-    mamba uninstall -y ca-policy-lcg
+# FIXME: # Remove outdated CRLs (packaged in ca-policy-lcg)
+RUN rm /etc/grid-security/certificates/*.r*
 
 #Dask dependencies and HTCondor
 RUN mamba install --yes \
