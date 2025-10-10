@@ -139,12 +139,8 @@ WORKDIR $HOME
 RUN mkdir "/home/${NB_USER}/work" && \
     fix-permissions "/home/${NB_USER}"
 
-# FIXME:
-# Terrible bug in all .r0 not allowing to use our xcache +
-# + wrongly activated conda base environment in base image
-RUN conda init && \
-    source /home/cms-jovyan/.bashrc && \
-    mamba uninstall -y ca-policy-lcg
+# FIXME: # Remove outdated CRLs (packaged in ca-policy-lcg)
+RUN rm /etc/grid-security/certificates/*.r*
 
 # Install Jupyter Notebook, Lab, and Hub
 # Generate a notebook server config
