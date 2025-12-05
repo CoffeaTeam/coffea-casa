@@ -105,6 +105,18 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     fix-permissions "${HOME}" && \
     fix-permissions "${CONDA_DIR}"
 
+# ------- mimalloc build -------------------------------
+# Clone mimalloc
+RUN cd /opt && \
+    git clone https://github.com/microsoft/mimalloc.git /opt/mimalloc && \
+    cd mimalloc && mkdir build && cd build && \
+    cmake .. \
+      -DMI_SECURE=ON \
+      -DMI_BUILD_SHARED=ON \
+      -DMI_BUILD_STATIC=ON && \
+    make && \
+    make install
+
 USER $NB_USER
 WORKDIR $HOME
 # Setup work directory for backward-compatibility
@@ -155,18 +167,6 @@ RUN cd /tmp && \
     mkdir build && \
     cd  build && \
     cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
-    make && \
-    make install
-
-# ------- mimalloc build -------------------------------
-# Clone mimalloc
-RUN cd /opt && \
-    git clone https://github.com/microsoft/mimalloc.git /opt/mimalloc && \
-    cd mimalloc && mkdir build && cd build && \
-    cmake .. \
-      -DMI_SECURE=ON \
-      -DMI_BUILD_SHARED=ON \
-      -DMI_BUILD_STATIC=ON && \
     make && \
     make install
 
