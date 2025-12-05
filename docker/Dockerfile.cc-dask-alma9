@@ -284,8 +284,23 @@ RUN cd /tmp && \
     make && \
     make install
 
+# ------- mimalloc build -------------------------------
+# Clone mimalloc
+RUN cd /opt && \
+    git clone https://github.com/microsoft/mimalloc.git /opt/mimalloc && \
+    cd mimalloc && mkdir build && cd build && \
+    cmake .. \
+      -DMI_SECURE=ON \
+      -DMI_BUILD_SHARED=ON \
+      -DMI_BUILD_STATIC=ON && \
+    make && \
+    make install
+
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+
+# Mimalloc
+ENV LD_PRELOAD=/usr/local/lib/libmimalloc.so
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/

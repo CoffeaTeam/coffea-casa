@@ -158,12 +158,27 @@ RUN cd /tmp && \
     make && \
     make install
 
+# ------- mimalloc build -------------------------------
+# Clone mimalloc
+RUN cd /opt && \
+    git clone https://github.com/microsoft/mimalloc.git /opt/mimalloc && \
+    cd mimalloc && mkdir build && cd build && \
+    cmake .. \
+      -DMI_SECURE=ON \
+      -DMI_BUILD_SHARED=ON \
+      -DMI_BUILD_STATIC=ON && \
+    make && \
+    make install
+
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # TODO: RETEST IF WE STILL NEED THIS 
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"
+
+# Mimalloc
+ENV LD_PRELOAD=/usr/local/lib/libmimalloc.so
 
 USER root
 # Setup supervisord files
