@@ -203,15 +203,17 @@ RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT
 
 # ------- mimalloc build -------------------------------
 # Clone mimalloc
-RUN cd /opt && \
-    git clone https://github.com/microsoft/mimalloc.git /opt/mimalloc && \
-    cd mimalloc && mkdir build && cd build && \
-    cmake .. \
-    #  -DMI_SECURE=ON \
-      -DMI_BUILD_SHARED=ON \
-      -DMI_BUILD_STATIC=ON && \
-    make && \
-    make install
+#RUN cd /opt && \
+#    git clone https://github.com/microsoft/mimalloc.git /opt/mimalloc && \
+#    cd mimalloc && mkdir build && cd build && \
+#    cmake .. \
+#    #  -DMI_SECURE=ON \
+#      -DMI_BUILD_SHARED=ON \
+#      -DMI_BUILD_STATIC=ON && \
+#    make && \
+#    make install
+# ------- tcmalloc build -------------------------------
+
 
 USER ${NB_UID}
 
@@ -224,6 +226,7 @@ RUN mamba install --yes \
     ndcctools \
     numpy>2 \
     atlas-schema \
+    gperftools \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -298,9 +301,6 @@ RUN cd /tmp && \
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
-
-# Mimalloc
-ENV LD_PRELOAD=/usr/local/lib64/libmimalloc.so
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
