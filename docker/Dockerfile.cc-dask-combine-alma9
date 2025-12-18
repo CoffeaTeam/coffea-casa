@@ -155,6 +155,9 @@ RUN mamba install --quiet --yes \
     jupyterlab-git==0.41.0 \
     jupyter_client==8.1.0 \
     jupyterlab_widgets \
+    jupyter-server-proxy \
+    jupyter-vscode-proxy \
+    code-server \
     nodejs \
     ipywidgets==8.0.6 && \
     mamba clean \
@@ -164,6 +167,7 @@ RUN mamba install --quiet --yes \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
     jupyter lab clean && \
+    code-server --install-extension ms-python.python && \
     rm -rf "/home/${NB_USER}/.cache/yarn"
     #fix-permissions "${CONDA_DIR}" && \
     #fix-permissions "/home/${NB_USER}"
