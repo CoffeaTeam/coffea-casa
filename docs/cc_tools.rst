@@ -38,11 +38,10 @@ Tips and recommendations
 - To run a script interactively, open a terminal in VS Code and execute it there (the terminal starts in your home directory by default).
 - If you prefer the classic notebook UI for interactive data exploration, you can switch back to JupyterHub without losing files.
 - You may not have any more Dask labextension functionality in VS Code; use the JupyterHub interface for Dask dashboard access or use directly in code:
-```
-from dask.distributed import Client
-client = Client("tls://localhost:8786")
-```
-- Keep long-running jobs on cluster resources rather than in a browser terminal to avoid losing progress when the browser disconnects.
+
+.. code-block:: python
+    from dask.distributed import Client
+    client = Client("tls://localhost:8786")
 
 Troubleshooting
 ---------------
