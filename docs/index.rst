@@ -49,6 +49,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    cc_user.rst
    cc_user_ssl.rst
    cc_packages.rst
+   cc_tools.rst
    cc_metrics.rst
    cc_condor.rst
    cc_issues.rst
