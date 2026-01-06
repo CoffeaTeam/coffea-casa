@@ -37,7 +37,6 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
-    "nbsphinx",
     "IPython.sphinxext.ipython_console_highlighting",
     "nextstrain.sphinx.theme",
 ]
