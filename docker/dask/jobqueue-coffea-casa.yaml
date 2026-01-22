@@ -3,7 +3,7 @@ jobqueue:
     name: dask-worker
     # Dask worker options, taken from https://github.com/dask/dask-jobqueue/tree/master/dask_jobqueue
     cores: 1                 # Total number of cores per job
-    memory: "3GiB"                # Total amount of memory per job
+    memory: "4GiB"                # Total amount of memory per job
     processes: 1                # Number of Python processes per jobs
     worker-image: "hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:development"
 
