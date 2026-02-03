@@ -223,6 +223,7 @@ USER ${NB_UID}
 
 RUN mamba install --yes \
     -c conda-forge \
+    jupyter-ai \
     htcondor=24.9.2 \
     xgboost \
     cabinetry \
