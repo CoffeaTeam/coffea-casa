@@ -1,6 +1,6 @@
 distributed:
   scheduler:
-    allowed-failures: 10
+    allowed-failures: 3
     bandwidth: 1000000000
     work-stealing: False
   worker:
@@ -20,8 +20,8 @@ distributed:
 
   version: 2
   
-  dashboard:
-    link: "/user/{JUPYTERHUB_USER}/proxy/{port}/status"
+  #dashboard:
+  #  link: "/user/{JUPYTERHUB_USER}/proxy/{port}/status"
 
   admin:
     system-monitor:
