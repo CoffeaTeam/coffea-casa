@@ -84,7 +84,7 @@
       }
     },
     "dask-dashboard-launcher": {
-      "url": "proxy/8787",
+      "url": "proxy/8785",
       "cluster": ""
     }
   },

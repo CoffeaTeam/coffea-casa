@@ -108,7 +108,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
       #HOST=`cat $_CONDOR_JOB_AD | grep RemoteHost | tr -d '"' | tr '@' ' ' | awk '{print $NF;}'`
       HOST=`cat $_CONDOR_JOB_AD | grep StartdIpAddr | sed 's/StartdIpAddr = \"<\([^:]*\).*/\1/'`
       NAME=`cat $_CONDOR_JOB_AD | grep "DaskWorkerName "  | tr -d '"' | awk '{print $NF;}'`
-      # Requirement: to add to Condor job decription "+DaskSchedulerAddress": '"tcp://129.93.183.34:8787"',
+      # Requirement: to add to Condor job decription "+DaskSchedulerAddress": '"tcp://129.93.183.34:8785"',
       EXTERNALIP_PORT=`cat $_CONDOR_JOB_AD | grep DaskSchedulerAddress | tr -d '"' | awk '{print $NF;}'`
       # From jthiltges 
       #WORKER_LIFETIME=${WORKER_LIFETIME:-1 hour}

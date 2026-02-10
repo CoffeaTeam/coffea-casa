@@ -75,7 +75,7 @@ The default :class:`CoffeaCasaCluster` constructor settings:
   'log_directory': 'logs',
   'silence_logs': 'DEBUG',
   'scheduler_options': {'port': 8786,
-  'dashboard_address': '8787',
+  'dashboard_address': '8785',
   'protocol': 'tls',
   'external_address': 'tls://oksana-2eshadura-40cern-2ech.dask.coffea.casa:8786'},
   'job_extra': {'universe': 'docker',

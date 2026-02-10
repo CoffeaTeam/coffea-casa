@@ -66,7 +66,7 @@ def test_scheduler():
                            disk="100MB",
                            worker_image="coffeateam/coffea-casa-analysis:0.2.26",
                            scheduler_options={
-                               "dashboard_address": 8787,
+                               "dashboard_address": 8785,
                                "port": 8788,
                                "protocol": 'tls'}
                            ) as cluster:

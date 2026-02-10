@@ -9,7 +9,7 @@ from distributed.security import Security
 
 # Port settings
 DEFAULT_SCHEDULER_PORT = 8786
-DEFAULT_DASHBOARD_PORT = 8787
+DEFAULT_DASHBOARD_PORT = 8785
 DEFAULT_CONTAINER_PORT = 8786
 DEFAULT_NANNY_PORT = 8001
 
@@ -128,7 +128,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         scheduler_port:
             Defaults to 8786.
         dashboard_port:
-            Defaults to 8787.
+            Defaults to 8785.
         container_port:
             Defaults to 8786.
         nanny_port:
