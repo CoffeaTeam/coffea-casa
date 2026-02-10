@@ -220,7 +220,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         job_config["scheduler_options"] = merge_dicts(
             {
                 "port": scheduler_port,
-                "dashboard_port": dashboard_port,
+                "dashboard_address": str(dashboard_port),
                 "protocol": scheduler_protocol.replace("://", ""),
                 "contact_address": contact_address,
             },
