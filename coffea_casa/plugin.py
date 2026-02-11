@@ -64,7 +64,7 @@ class DistributedEnvironmentPlugin(NannyPlugin):
                         z.write(filename, archive_name)
                 for fpath in extra_inputs:
                     fname = os.path.split(fpath)[-1]
-                    z.write(fpath,fname)
+                    z.write(fpath, fname)
 
             with open(fn, "rb") as f:
                 self.data = f.read()
@@ -72,9 +72,10 @@ class DistributedEnvironmentPlugin(NannyPlugin):
     def setup(self, nanny):
         # Copy the package to the worker machine
         logger.info("Entering plugin setup")
-        logger.info("nanny.local_directory: %s",nanny.local_directory)
-        logger.info("nanny.worker_dir: %s",nanny.worker_dir)
-        fn = os.path.join(nanny.local_directory, f"tmp-{str(uuid.uuid4())}.zip")
+        logger.info("nanny.local_directory: %s", nanny.local_directory)
+        logger.info("nanny.worker_dir: %s", nanny.worker_dir)
+        fn = os.path.join(nanny.local_directory,
+                          f"tmp-{str(uuid.uuid4())}.zip")
         with open(fn, "wb") as f:
             f.write(self.data)
 
@@ -89,8 +90,8 @@ class DistributedEnvironmentPlugin(NannyPlugin):
                 sys.path.insert(0, path)
 
         # Now try to pip install the package
-        package_path = os.path.join(nanny.local_directory,self.package)
-        logger.info("Installing the package: %s",self.package)
+        package_path = os.path.join(nanny.local_directory, self.package)
+        logger.info("Installing the package: %s", self.package)
         proc = subprocess.Popen(
             [sys.executable, "-m", "pip", "install"] + self.pip_options + [package_path],
             stdout=subprocess.PIPE,
@@ -100,11 +101,13 @@ class DistributedEnvironmentPlugin(NannyPlugin):
         returncode = proc.wait()
 
         if returncode:
-            logger.error("Pip install failed with '%s'",stderr.decode().strip())
+            logger.error(
+                "Pip install failed with '%s'",
+                stderr.decode().strip())
             return
 
         # Cleanup the zip file
-        logger.info("Cleaning up temporary directory: %s",fn)
+        logger.info("Cleaning up temporary directory: %s", fn)
         os.remove(fn)
 
         return
@@ -112,9 +115,9 @@ class DistributedEnvironmentPlugin(NannyPlugin):
     def teardown(self, nanny):
         for fname in self.extra_inputs:
             logger.info(f"Removing: {fname}")
-            path = os.path.join(nanny.local_directory,fname)
+            path = os.path.join(nanny.local_directory, fname)
             os.remove(path)
-        logger.info("Uninstalling the package: %s",self.package)
+        logger.info("Uninstalling the package: %s", self.package)
         proc = subprocess.Popen(
             [sys.executable, "-m", "pip", "uninstall", self.package],
             stdout=subprocess.PIPE,
@@ -124,7 +127,9 @@ class DistributedEnvironmentPlugin(NannyPlugin):
         returncode = proc.wait()
 
         if returncode:
-            logger.error("Pip uninstall failed with '%s'",stderr.decode().strip())
+            logger.error(
+                "Pip uninstall failed with '%s'",
+                stderr.decode().strip())
             return
 
         return
