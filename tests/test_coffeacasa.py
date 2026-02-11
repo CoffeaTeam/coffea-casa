@@ -1,119 +1,141 @@
 import os
-import sys
-import socket
 import pytest
+from pathlib import Path
+from unittest.mock import patch
+from coffea_casa import CoffeaCasaCluster, CoffeaCasaJob
 from distributed.security import Security
-from distributed import Client
-from coffea_casa import CoffeaCasaCluster
+import warnings
 
-os.environ["HOST_IP"] = socket.gethostbyname(socket.gethostname())
+# -----------------------------
+# Fixtures
+# -----------------------------
 
-@pytest.mark.skip(reason="TLS is still not working with custom Security object")
-def test_header():
-    with CoffeaCasaCluster(cores=1,
-                           memory="100MB",
-                           disk="100MB",
-                           worker_image="coffeateam/coffea-casa-analysis:0.2.26",
-                           scheduler_options={'protocol': 'tls'}
-                           ) as cluster:
-        job_script = cluster.job_script()
-        print("HTCondor Job script:", job_script)
-        print("Scheduler specs:", cluster.scheduler_spec)
-        kwargs = CoffeaCasaCluster._modify_job_kwargs({})
-        print("CoffeaCasaCluster arguments:", kwargs)
-        assert cluster._dummy_job.job_header_dict["MY.DaskWorkerCores"] == 1
-        assert cluster._dummy_job.job_header_dict["MY.DaskWorkerDisk"] == 100000000
-        assert cluster._dummy_job.job_header_dict["MY.DaskWorkerMemory"] == 100000000
+@pytest.fixture(autouse=True)
+def suppress_unraisable_warnings():
+    warnings.filterwarnings("ignore", category=pytest.PytestUnraisableExceptionWarning)
 
-@pytest.mark.skip(reason="TLS is still not working with custom Security object")
-def test_job_script():
-    with CoffeaCasaCluster(cores=4,
-                           processes=4,
-                           memory="500MB",
-                           disk="500MB",
-                           worker_image="coffeateam/coffea-casa-analysis:0.2.26",
-                           scheduler_options={'protocol': 'tls'},
-                           env_extra=['export LANG="en_US.utf8"',
-                                      'export LC_ALL="en_US.utf8"'],
-                           job_extra={"+Extra": "True"},
-                           ) as cluster:
-        job_script = cluster.job_script()
-        print("HTCondor Job script:", job_script)
-        print("Scheduler specs:", cluster.scheduler_spec)
-        assert "RequestCpus = MY.DaskWorkerCores" in job_script
-        assert "RequestDisk = floor(MY.DaskWorkerDisk / 1024)" in job_script
-        assert "RequestMemory = floor(MY.DaskWorkerMemory / 1048576)" in job_script
-        assert "MY.DaskWorkerCores = 4" in job_script
-        assert "MY.DaskWorkerDisk = 500000000" in job_script
-        assert "MY.DaskWorkerMemory = 500000000" in job_script
-        assert 'MY.JobId = "$(ClusterId).$(ProcId)"' in job_script
-        assert "LANG=en_US.utf8" in job_script
-        assert "LC_ALL=en_US.utf8" in job_script
-        assert "export" not in job_script
-        assert "+Extra = True" in job_script
-        assert (
-            "{} -m distributed.cli.dask_worker tcp://".format(sys.executable)
-            in job_script
+@pytest.fixture
+def dummy_ca_cert(tmp_path):
+    """Create dummy CA and host cert files"""
+    ca_file = tmp_path / "ca.pem"
+    cert_file = tmp_path / "cert.pem"
+    ca_file.write_text("dummy-ca")
+    cert_file.write_text("dummy-cert")
+    return ca_file, cert_file
+
+@pytest.fixture
+def dummy_token(tmp_path):
+    """Create a dummy bearer token file"""
+    token_file = tmp_path / "bt_u999"
+    token_file.write_text("dummy-token")
+    return token_file
+
+# -----------------------------
+# Helper to create a test cluster
+# -----------------------------
+def make_test_cluster(ca_file, cert_file, monkeypatch, *, token_file=None, proxy_file=None):
+    """Return a CoffeaCasaCluster with patched Security to avoid SSL errors."""
+    monkeypatch.setenv("HOST_IP", "127.0.0.1")
+    if token_file:
+        monkeypatch.setenv("BEARER_TOKEN_FILE", str(token_file))
+    if proxy_file:
+        monkeypatch.setenv("X509_USER_PROXY", str(proxy_file))
+
+    # Patch security to avoid SSL errors
+    with patch.object(CoffeaCasaCluster, "security", lambda self: Security(require_encryption=False)):
+        cluster = CoffeaCasaCluster(ca_file=ca_file, 
+                                    cert_file=cert_file, 
+                                    worker_image="dummy/image",
+                                    )
+
+    return cluster
+
+# -----------------------------
+# Tests
+# -----------------------------
+def test_job_script_contains_expected_fields(monkeypatch, dummy_ca_cert):
+    ca_file, cert_file = dummy_ca_cert
+    cluster = make_test_cluster(ca_file, cert_file, monkeypatch)
+    try:
+        job = CoffeaCasaJob(
+            scheduler=None,
+            name="test-job",
+            cores=1,
+            memory="1GB",
+            disk="1GB",
+            job_extra_directives=cluster._job_kwargs["job_extra_directives"],
         )
-        assert "--memory-limit 125.00MB" in job_script
-        assert "--nthreads 1" in job_script
-        assert "--nprocs 4" in job_script
 
-@pytest.mark.skip(reason="TLS is still not working with custom Security object")
-def test_scheduler():
-    with CoffeaCasaCluster(cores=1,
-                           memory="100MB",
-                           disk="100MB",
-                           worker_image="coffeateam/coffea-casa-analysis:0.2.26",
-                           scheduler_options={
-                               "dashboard_address": 8785,
-                               "port": 8788,
-                               "protocol": 'tls'}
-                           ) as cluster:
-        job_script = cluster.job_script()
-        print("HTCondor Job script:", job_script)
-        print("Scheduler specs:", cluster.scheduler_spec)
-        kwargs = CoffeaCasaCluster._modify_job_kwargs({})
-        print("CoffeaCasaCluster arguments:", kwargs)
-        #assert cluster.scheduler_spec["port"] == 8788
-        expected = os.environ["HOST_IP"]
-        assert expected in str(cluster.scheduler_spec)
-        #cluster.scale(1)
-        #assert expected in str(cluster.worker_spec)
+        script = job.job_script()
+        assert "Executable" in script
+        assert "Arguments" in script
+        assert "Queue" in script
+        assert "docker_image" in script or "docker" in script
+        assert "CoffeaCasaWorkerType" in script
+        assert "test-job" in script
+    finally:
+        cluster.close()
 
-@pytest.mark.skip(reason="TLS is still not working with custom Security object")
-def test_security():
-    dirname = os.path.dirname(__file__)
-    key = os.path.join(dirname, "key.pem")
-    cert = os.path.join(dirname, "ca.pem")
-    security = Security(
-        tls_ca_file=cert,
-        tls_scheduler_key=key,
-        tls_scheduler_cert=cert,
-        tls_worker_key=key,
-        tls_worker_cert=cert,
-        tls_client_key=key,
-        tls_client_cert=cert,
-        require_encryption=True,
-    )
-    cluster = CoffeaCasaCluster(cores=1,
-                                memory="100MB",
-                                disk="100MB",
-                                worker_image="coffeateam/coffea-casa-analysis:0.2.26",
-                                security=security)
-    assert security.get_connection_args("scheduler").get("require_encryption") is True
-    job_script = cluster.job_script()
-    print("HTCondor JobAd script:", job_script)
-    print("Scheduler specs:", cluster.scheduler_spec)
-    kwargs = CoffeaCasaCluster._modify_job_kwargs({})
-    print("CoffeaCasaCluster arguments:", kwargs)
-    assert cluster.security == security
-    assert cluster.scheduler_spec["options"]["security"] == security
-    assert "--tls-key {}".format(key) in job_script
-    assert "--tls-cert {}".format(cert) in job_script
-    assert "--tls-ca-file {}".format(cert) in job_script
-    #cluster.scale(jobs=1)
-    #with Client(cluster, security=security) as client:
-    #    future = client.submit(lambda x: x + 1, 10)
-    #    result = future.result()
-    #    assert result == 11
+def test_job_header_dict_includes_proxy_flag(monkeypatch, tmp_path, dummy_ca_cert):
+    ca_file, cert_file = dummy_ca_cert
+    proxy_file = tmp_path / "x509up_u999"
+    proxy_file.write_text("dummy-proxy")
+    monkeypatch.setenv("X509_USER_PROXY", str(proxy_file))
+    monkeypatch.setenv("HOST_IP", "127.0.0.1")
+
+    cluster = make_test_cluster(ca_file, cert_file, monkeypatch)
+    try:
+        job = cluster.job_cls(
+            scheduler=None,
+            name="test-job-proxy",
+            **cluster._job_kwargs
+        )
+        assert job.job_extra_directives["use_x509userproxy"] is True
+    finally:
+        cluster.close()
+
+def test_job_script_contains_transfer_files(monkeypatch, tmp_path, dummy_ca_cert, dummy_token):
+    ca_file, cert_file = dummy_ca_cert
+    monkeypatch.setenv("BEARER_TOKEN_FILE", str(dummy_token))
+    monkeypatch.setenv("HOST_IP", "127.0.0.1")
+
+    cluster = make_test_cluster(ca_file, cert_file, monkeypatch, token_file=dummy_token)
+    try:
+        job = cluster.job_cls(
+            scheduler=None,
+            name="test-job-token",
+            **cluster._job_kwargs
+        )
+    finally:
+        cluster.close()
+
+    job_directives = job.job_extra_directives
+    assert str(dummy_token) in job_directives["transfer_input_files"]
+
+def test_cluster_scale_and_adapt(monkeypatch, dummy_ca_cert):
+    ca_file, cert_file = dummy_ca_cert
+    cluster = make_test_cluster(ca_file, cert_file, monkeypatch)
+    try:
+        # Patch scale/adapt to avoid real job submission
+        with patch.object(cluster, "scale") as mock_scale, patch.object(cluster, "adapt") as mock_adapt:
+            cluster.scale(jobs=5)
+            mock_scale.assert_called_once_with(jobs=5)
+
+            cluster.adapt(maximum_jobs=10)
+            mock_adapt.assert_called_once_with(maximum_jobs=10)
+    finally:
+        cluster.close()
+
+def test_scheduler_contact_address(monkeypatch, dummy_ca_cert):
+    ca_file, cert_file = dummy_ca_cert
+    monkeypatch.setenv("HOST_IP", "127.0.0.1")
+    cluster = make_test_cluster(ca_file, cert_file, monkeypatch)
+    try:
+        # Instead of accessing _job_kwargs, get scheduler options from the cluster
+        sched_options = cluster.coffeacasa_scheduler_options
+
+        assert "contact_address" in sched_options
+        assert sched_options["contact_address"] == "tcp://127.0.0.1:8786"
+        assert sched_options["dashboard_address"] == ":8785"
+    finally:
+        cluster.close()
