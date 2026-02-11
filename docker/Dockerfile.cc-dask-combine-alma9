@@ -271,6 +271,7 @@ RUN pip install --no-cache-dir \
     mlflow \
     s3fs \
     jupytext \
+    servicex \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard
 
