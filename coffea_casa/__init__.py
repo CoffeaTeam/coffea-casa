@@ -6,6 +6,7 @@ import yaml
 import os
 from .coffea_casa import CoffeaCasaCluster
 from .plugin import DistributedEnvironmentPlugin
+from .remote_debug import start_remote_debugger
 from . import config
 
 from ._version import version as __version__
