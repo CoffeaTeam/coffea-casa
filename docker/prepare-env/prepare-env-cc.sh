@@ -96,16 +96,25 @@ fi
 # Environment installation
 ########################################
 
-for f in environment.yml environment.yaml; do
-    if [[ -f "$HOME/$f" ]]; then
-        echo "Updating conda environment from $f"
-        "$CONDA_BIN/mamba" env update -f "$HOME/$f"
-        break
-    fi
-done
+# Check for environment.yaml or environment.yml and update the environment
+# Determine which environment file to use
+ENV_FILE=""
+if [ -s "$HOME/environment.yaml" ]; then
+    ENV_FILE="$HOME/environment.yaml"
+elif [ -s "$HOME/environment.yml" ]; then
+    ENV_FILE="$HOME/environment.yml"
+fi
 
-[[ -f "$HOME/requirements.txt" ]] && \
+# Update conda environment if a valid YAML was found
+if [ -n "$ENV_FILE" ]; then
+    echo "Updating conda environment from $(basename "$ENV_FILE")"
+    "$CONDA_BIN/mamba" env update -f "$ENV_FILE"
+fi
+
+# Install Python packages from requirements.txt if it exists
+if [ -f "$HOME/requirements.txt" ]; then
     "$CONDA_BIN/python" -m pip install -r "$HOME/requirements.txt"
+fi
 
 ########################################
 # Extra packages
