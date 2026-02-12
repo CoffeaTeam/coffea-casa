@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 [[ "${DEBUG:-}" == "1" ]] && set -x
 
-CONDA_BIN="/opt/conda/bin"
+CONDA_BIN="/usr/local/bin"
 SCHEdd_CONF="/opt/condor/config.d/schedd"
 
 ########################################
