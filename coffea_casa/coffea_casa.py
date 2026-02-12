@@ -1,30 +1,25 @@
 """CoffeaCasaCluster class"""
-
 import os
 from pathlib import Path
 import socket
-
 import dask
 from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
 from distributed.security import Security
 
-# Port defaults
+# Default ports
 DEFAULT_SCHEDULER_PORT = 8786
 DEFAULT_DASHBOARD_PORT = 8785
-DEFAULT_CONTAINER_PORT = 8786
 DEFAULT_NANNY_PORT = 8001
+DEFAULT_CONTAINER_PORT = 8786
 
-# Internal paths
+# Default cert paths
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
+
 HOME_DIR = Path.home()
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
-CONDA_ENV = (
-    HOME_DIR / "environment.yaml"
-    if (HOME_DIR / "environment.yaml").is_file()
-    else HOME_DIR / "environment.yml"
-)
+CONDA_ENV = HOME_DIR / "environment.yaml" if (HOME_DIR / "environment.yaml").is_file() else HOME_DIR / "environment.yml"
 
 
 def bearer_token_path() -> Path | None:
@@ -68,9 +63,9 @@ class CoffeaCasaCluster(HTCondorCluster):
 
     def __init__(self,
                  *,
+                 worker_image=None,
                  security=None,
                  force_tcp: bool = False,
-                 worker_image=None,
                  scheduler_port=DEFAULT_SCHEDULER_PORT,
                  dashboard_port=DEFAULT_DASHBOARD_PORT,
                  nanny_port=DEFAULT_NANNY_PORT,
@@ -78,23 +73,19 @@ class CoffeaCasaCluster(HTCondorCluster):
                  cert_file=None,
                  **job_kwargs):
 
-        # Use passed certs, or default module-level ones
+        # Assign cert paths
         self.ca_file = Path(ca_file) if ca_file else CA_FILE
         self.cert_file = Path(cert_file) if cert_file else CERT_FILE
 
         self._force_tcp = force_tcp
         self._security = security
 
-        # check ports
-        import socket
-        def check_port(port):
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                if s.connect_ex(("0.0.0.0", port)) == 0:
-                    raise RuntimeError(f"Port {port} already in use.")
-
-        if scheduler_port: check_port(scheduler_port)
-        if dashboard_port: check_port(dashboard_port)
-        if nanny_port: check_port(nanny_port)
+        # Check ports
+        for port in (scheduler_port, dashboard_port, nanny_port):
+            if port:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    if s.connect_ex(("0.0.0.0", port)) == 0:
+                        raise RuntimeError(f"Port {port} already in use.")
 
         # Prepare job kwargs and scheduler options
         job_kwargs, scheduler_opts = self._modify_job_kwargs(
@@ -113,13 +104,13 @@ class CoffeaCasaCluster(HTCondorCluster):
         )
 
     # -----------------------------
-    # Security property (TLS by default)
+    # Security property
     # -----------------------------
     @property
     def security(self):
         if self._security is None:
             if self._force_tcp or not (self.ca_file.is_file() and self.cert_file.is_file()):
-                # fallback to TCP
+                # Fallback to TCP if forced or certs missing
                 self._security = None
             else:
                 # TLS enabled
@@ -139,45 +130,41 @@ class CoffeaCasaCluster(HTCondorCluster):
     def security(self, value):
         self._security = value
 
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
+    # -----------------------------
+    # Collect input files
+    # -----------------------------
     def _collect_input_files(self):
-        """Collect environment files, certs, and tokens"""
         files = []
 
-        for f in (PIP_REQUIREMENTS, CONDA_ENV):
+        # Environment files
+        for f in [PIP_REQUIREMENTS, CONDA_ENV]:
             if f.is_file():
                 files.append(f)
 
-        if (
-            self.ca_file.is_file()
-            and self.cert_file.is_file()
-            and self.security.get_connection_args("scheduler")["require_encryption"]
-        ):
+        # TLS certs
+        sec = self.security
+        if sec and self.ca_file.is_file() and self.cert_file.is_file() and sec.get_connection_args("scheduler")["require_encryption"]:
             files += [self.ca_file, self.cert_file]
 
+        # XCache bearer token
         token_path = bearer_token_path()
         if token_path:
             files.append(token_path)
 
         return files
 
+    # -----------------------------
+    # Scheduler options
+    # -----------------------------
     @property
     def coffeacasa_scheduler_options(self):
         return getattr(self, "_coffeacasa_scheduler_options", {})
 
-    def _prepare_scheduler_options(
-        self,
-        job_kwargs,
-        scheduler_port,
-        dashboard_port,
-    ):
+    def _prepare_scheduler_options(self, job_kwargs, scheduler_port, dashboard_port):
         external_ip = os.environ.get("HOST_IP", "127.0.0.1")
         scheduler_protocol = job_kwargs.get("protocol", "tcp://")
         contact_address = f"{scheduler_protocol}{external_ip}:{scheduler_port}"
         dash_address = f":{dashboard_port}"
-
         return merge_dicts(
             {
                 "port": scheduler_port,
@@ -188,18 +175,14 @@ class CoffeaCasaCluster(HTCondorCluster):
             job_kwargs.get("scheduler_options", {}),
         )
 
-    def _prepare_job_extra_directives(
-        self,
-        job_kwargs,
-        worker_image,
-        input_files,
-        scheduler_options,
-    ):
-        proxy_env = os.environ.get("X509_USER_PROXY")
+    # -----------------------------
+    # Job extra directives
+    # -----------------------------
+    def _prepare_job_extra_directives(self, job_kwargs, worker_image, input_files, scheduler_options):
+        # Determine if X.509 proxy exists
         use_proxy = False
-
+        proxy_env = os.environ.get("X509_USER_PROXY")
         if proxy_env and Path(proxy_env).is_file():
-            proxy_path = Path(proxy_env)
             use_proxy = True
         else:
             try:
@@ -209,15 +192,13 @@ class CoffeaCasaCluster(HTCondorCluster):
                 use_proxy = False
 
         files_str = ", ".join(str(p) for p in input_files)
+        external_ip = os.environ["HOST_IP"]
         contact_address = scheduler_options["contact_address"]
 
         return merge_dicts(
             {
                 "universe": "docker",
-                "docker_image": worker_image
-                or dask.config.get(
-                    f"jobqueue.{self.config_name}.worker-image"
-                ),
+                "docker_image": worker_image or dask.config.get(f"jobqueue.{self.config_name}.worker-image"),
                 "container_service_names": "dask,nanny",
                 "dask_container_port": DEFAULT_CONTAINER_PORT,
                 "nanny_container_port": DEFAULT_NANNY_PORT,
@@ -236,33 +217,25 @@ class CoffeaCasaCluster(HTCondorCluster):
             job_kwargs.get("job_extra_directives", {}),
         )
 
-    def _modify_job_kwargs(
-        self,
-        job_kwargs,
-        *,
-        worker_image,
-        scheduler_port,
-        dashboard_port,
-        nanny_port,
-    ):
+    # -----------------------------
+    # Orchestrate job kwargs
+    # -----------------------------
+    def _modify_job_kwargs(self, job_kwargs, *, worker_image=None, scheduler_port=DEFAULT_SCHEDULER_PORT, dashboard_port=DEFAULT_DASHBOARD_PORT, nanny_port=DEFAULT_NANNY_PORT):
         job_config = job_kwargs.copy()
 
+        # Input files
         input_files = self._collect_input_files()
 
-        scheduler_opts = self._prepare_scheduler_options(
-            job_config,
-            scheduler_port,
-            dashboard_port,
-        )
+        # Scheduler options
+        scheduler_opts = self._prepare_scheduler_options(job_config, scheduler_port, dashboard_port)
 
+        # Job extra directives
         job_config["job_extra_directives"] = self._prepare_job_extra_directives(
-            job_config,
-            worker_image,
-            input_files,
-            scheduler_opts,
+            job_config, worker_image, input_files, scheduler_opts
         )
 
-        for k in ("scheduler_port", "dashboard_port"):
+        # Remove cluster-level keys
+        for k in ["scheduler_port", "dashboard_port", "security"]:
             job_config.pop(k, None)
 
         return job_config, scheduler_opts
