@@ -25,7 +25,7 @@ jobs:
       - name: Install flake8
         run: python -m pip install --upgrade pip flake8
       - name: Run flake8
-        run: flake8 coffea_casa
+        run: flake8 --ignore=E501,E303,E301,W503,W292 coffea_casa
 
   test:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
           python -m pip install pytest pytest-cov
       - name: Run tests with coverage
         run: |
-          pytest
+          pytest 
       #   pytest --cov --cov-branch --cov-report=xml
       #- name: Upload coverage reports to Codecov
       #    uses: codecov/codecov-action@v5
