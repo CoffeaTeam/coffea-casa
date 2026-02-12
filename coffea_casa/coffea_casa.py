@@ -66,30 +66,37 @@ class CoffeaCasaCluster(HTCondorCluster):
     job_cls = CoffeaCasaJob
     config_name = "coffea-casa"
 
-    def __init__(
-        self,
-        *,
-        worker_image=None,
-        scheduler_port=DEFAULT_SCHEDULER_PORT,
-        dashboard_port=DEFAULT_DASHBOARD_PORT,
-        nanny_port=DEFAULT_NANNY_PORT,
-        **job_kwargs,
-    ):
-        # --- internal security ownership ---
-        self._security: Security | None = None
-        self.ca_file = CA_FILE
-        self.cert_file = CERT_FILE
+    def __init__(self,
+                 *,
+                 security=None,
+                 force_tcp: bool = False,
+                 worker_image=None,
+                 scheduler_port=DEFAULT_SCHEDULER_PORT,
+                 dashboard_port=DEFAULT_DASHBOARD_PORT,
+                 nanny_port=DEFAULT_NANNY_PORT,
+                 ca_file=None,
+                 cert_file=None,
+                 **job_kwargs):
 
-        # --- port availability check ---
-        def check_port(port: int):
+        # Use passed certs, or default module-level ones
+        self.ca_file = Path(ca_file) if ca_file else CA_FILE
+        self.cert_file = Path(cert_file) if cert_file else CERT_FILE
+
+        self._force_tcp = force_tcp
+        self._security = security
+
+        # check ports
+        import socket
+        def check_port(port):
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 if s.connect_ex(("0.0.0.0", port)) == 0:
-                    raise RuntimeError(f"Port {port} already in use")
+                    raise RuntimeError(f"Port {port} already in use.")
 
-        for port in (scheduler_port, dashboard_port, nanny_port):
-            if port:
-                check_port(port)
+        if scheduler_port: check_port(scheduler_port)
+        if dashboard_port: check_port(dashboard_port)
+        if nanny_port: check_port(nanny_port)
 
+        # Prepare job kwargs and scheduler options
         job_kwargs, scheduler_opts = self._modify_job_kwargs(
             job_kwargs,
             worker_image=worker_image,
@@ -105,30 +112,32 @@ class CoffeaCasaCluster(HTCondorCluster):
             **job_kwargs,
         )
 
-    # ------------------------------------------------------------------
-    # Security (auto-created, no user control)
-    # ------------------------------------------------------------------
+    # -----------------------------
+    # Security property (TLS by default)
+    # -----------------------------
     @property
-    def security(self) -> Security:
+    def security(self):
         if self._security is None:
-            self._security = Security(
-                tls_ca_file=str(self.ca_file),
-                tls_worker_cert=str(self.cert_file),
-                tls_worker_key=str(self.cert_file),
-                tls_client_cert=str(self.cert_file),
-                tls_client_key=str(self.cert_file),
-                tls_scheduler_cert=str(self.cert_file),
-                tls_scheduler_key=str(self.cert_file),
-                require_encryption=True,
-            )
+            if self._force_tcp or not (self.ca_file.is_file() and self.cert_file.is_file()):
+                # fallback to TCP
+                self._security = None
+            else:
+                # TLS enabled
+                self._security = Security(
+                    tls_ca_file=str(self.ca_file),
+                    tls_worker_cert=str(self.cert_file),
+                    tls_worker_key=str(self.cert_file),
+                    tls_client_cert=str(self.cert_file),
+                    tls_client_key=str(self.cert_file),
+                    tls_scheduler_cert=str(self.cert_file),
+                    tls_scheduler_key=str(self.cert_file),
+                    require_encryption=True,
+                )
         return self._security
-
 
     @security.setter
     def security(self, value):
-        # Allow Dask to set this during SpecCluster.__init__
         self._security = value
-
 
     # ------------------------------------------------------------------
     # Helpers
