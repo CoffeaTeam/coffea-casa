@@ -162,17 +162,25 @@ class CoffeaCasaCluster(HTCondorCluster):
 
     def _prepare_scheduler_options(self, job_kwargs, scheduler_port, dashboard_port):
         external_ip = os.environ.get("HOST_IP", "127.0.0.1")
+
         sec = self.security
-        if sec and sec.get_connection_args("scheduler").get("require_encryption", False):
-            scheduler_protocol = "tls://"
-        else:
-            scheduler_protocol = "tcp://"
-        contact_address = f"{scheduler_protocol}{external_ip}:{scheduler_port}"
+        use_tls = (
+            sec is not None
+            and sec.get_connection_args("scheduler").get("require_encryption", False)
+        )
+
+        protocol = "tls" if use_tls else "tcp"
+
+        contact_address = f"{protocol}://{external_ip}:{scheduler_port}"
+
+        dashboard_address = None
+        if dashboard_port:
+            dashboard_address = f":{dashboard_port}"
         return merge_dicts(
             {
             "port": scheduler_port,
-            "dashboard_address": f":{dashboard_port}",
-            "protocol": scheduler_protocol.replace("://", ""),
+            "dashboard_address": dashboard_address,
+            "protocol": protocol.replace("://", ""),
             "contact_address": contact_address,
             },
             job_kwargs.get("scheduler_options", {}),
