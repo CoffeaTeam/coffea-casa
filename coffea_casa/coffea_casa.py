@@ -160,23 +160,69 @@ class CoffeaCasaCluster(HTCondorCluster):
     def coffeacasa_scheduler_options(self):
         return getattr(self, "_coffeacasa_scheduler_options", {})
 
-    def _prepare_scheduler_options(self, job_kwargs, scheduler_port, dashboard_port):
-        external_ip = os.environ.get("HOST_IP", "127.0.0.1")
-        sec = self.security
-        if sec and sec.get_connection_args("scheduler").get("require_encryption", False):
-            scheduler_protocol = "tls://"
-        else:
-            scheduler_protocol = "tcp://"
-        contact_address = f"{scheduler_protocol}{external_ip}:{scheduler_port}"
-        return merge_dicts(
-            {
-            "port": scheduler_port,
-            "dashboard_address": f":{dashboard_port}",
-            "protocol": scheduler_protocol.replace("://", ""),
-            "contact_address": contact_address,
-            },
-            job_kwargs.get("scheduler_options", {}),
+    def _prepare_scheduler_options(
+        self,
+        job_kwargs,
+        scheduler_port,
+        dashboard_port,
+    ):
+        import socket
+
+        # Determine externally reachable IP
+        external_ip = (
+            os.environ.get("POD_IP")
+            or os.environ.get("HOST_IP")
+            or socket.getfqdn()
         )
+
+        # Determine protocol
+        sec = self.security
+        use_tls = (
+            sec is not None
+            and sec.get_connection_args("scheduler").get("require_encryption", False)
+        )
+
+        protocol = "tls" if use_tls else "tcp"
+        contact_address = f"{protocol}://{external_ip}:{scheduler_port}"
+
+        # Default dashboard address
+        default_dashboard_address = f":{dashboard_port}" if dashboard_port else None
+
+        # Extract user scheduler options (e.g. from Labextension)
+        user_opts = job_kwargs.get("scheduler_options", {}).copy()
+
+        # --- Critical Fix ---
+        # Labextension may send:
+        #   "dashboard_address": true
+        # which breaks the scheduler
+        if "dashboard_address" in user_opts:
+            val = user_opts["dashboard_address"]
+
+            if isinstance(val, bool):
+                # Convert boolean to proper string or disable
+                if val:
+                    user_opts["dashboard_address"] = default_dashboard_address
+                else:
+                    user_opts["dashboard_address"] = None
+
+            elif not isinstance(val, (str, type(None))):
+                # Any unexpected type → fallback safely
+                user_opts["dashboard_address"] = default_dashboard_address
+
+        # Merge defaults with sanitized user options
+        scheduler_opts = merge_dicts(
+            {
+                "port": scheduler_port,
+                "dashboard_address": default_dashboard_address,
+                "protocol": protocol,
+                "contact_address": contact_address,
+            },
+            user_opts,
+        )
+
+        return scheduler_opts
+
+
 
     # -----------------------------
     # Job extra directives
