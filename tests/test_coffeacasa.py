@@ -83,7 +83,9 @@ def make_test_cluster(
     # FIX 3: Patch at "coffea_casa.coffea_casa.Security" — the submodule
     # where Security is actually imported and used. The original code used
     # the same path, which is correct given the package layout in __init__.py.
-    with patch(_SECURITY_PATH, return_value=mock_security):
+    # Also patch dask.config.set to prevent the test from mutating global
+    # dask config state (require-encryption) between tests.
+    with patch(_SECURITY_PATH, return_value=mock_security),          patch("coffea_casa.coffea_casa.dask.config.set"):
         cluster = CoffeaCasaCluster(**kwargs)
 
     return cluster

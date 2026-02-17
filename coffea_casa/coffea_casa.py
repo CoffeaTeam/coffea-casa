@@ -16,10 +16,15 @@ DEFAULT_CONTAINER_PORT = 8786
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
+KEY_FILE = SECRETS_DIR / "hostkey.pem"   # private key — may be separate from cert
 
 HOME_DIR = Path.home()
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
-CONDA_ENV = HOME_DIR / "environment.yaml" if (HOME_DIR / "environment.yaml").is_file() else HOME_DIR / "environment.yml"
+CONDA_ENV = (
+    HOME_DIR / "environment.yaml"
+    if (HOME_DIR / "environment.yaml").is_file()
+    else HOME_DIR / "environment.yml"
+)
 
 
 def bearer_token_path() -> Path | None:
@@ -71,11 +76,16 @@ class CoffeaCasaCluster(HTCondorCluster):
                  nanny_port=DEFAULT_NANNY_PORT,
                  ca_file=None,
                  cert_file=None,
+                 key_file=None,
                  **job_kwargs):
 
-        # Assign cert paths
+        # Assign cert paths.
+        # key_file defaults to hostkey.pem if it exists, otherwise falls back
+        # to cert_file (for combined cert+key PEM bundles).
         self.ca_file = Path(ca_file) if ca_file else CA_FILE
         self.cert_file = Path(cert_file) if cert_file else CERT_FILE
+        _key_default = KEY_FILE if KEY_FILE.is_file() else self.cert_file
+        self.key_file = Path(key_file) if key_file else _key_default
         self._force_tcp = force_tcp
 
         # Sanitize dask.config before the scheduler reads it.
@@ -86,18 +96,40 @@ class CoffeaCasaCluster(HTCondorCluster):
         if isinstance(raw_dashboard_link, bool):
             dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
 
-        # Resolve security once upfront and pass it directly into super().__init__().
-        #
-        # We deliberately do NOT override the parent's `security` property.
-        # SpecCluster (grandparent) manages `security` as a plain instance
-        # attribute that it sets during its own __init__. Overriding it with a
-        # @property caused the Labextension worker startup to receive
-        # ssl_context=None, crashing with:
-        #   TypeError: TLS expects a `ssl_context` argument of type ssl.SSLContext
-        # because our property returned a Security() object the parent hadn't
-        # wired into its own TLS machinery. Passing `security=` into super()
-        # lets the parent handle all TLS context setup correctly.
+        # Resolve security before sanitizing dask.config so we know the
+        # actual encryption state. We do this early (before _modify_job_kwargs)
+        # because _prepare_scheduler_options also reads resolved_security.
         resolved_security = self._resolve_security(security)
+
+        # Align dask.config with our resolved security state.
+        #
+        # Problem 1: dask.yaml (mounted as a k8s ConfigMap) has
+        #   distributed.comm.require-encryption: true
+        # SpecCluster reads this independently of the security= kwarg, so even
+        # with security=None it refuses tcp:// with:
+        #   RuntimeError: encryption required by Dask configuration,
+        #   refusing communication from/to 'tcp://:8786'
+        #
+        # Problem 2: dask.yaml may have worker TLS cert/key set to null:
+        #   distributed.comm.tls.worker.cert: null
+        #   distributed.comm.tls.worker.key: null
+        # This causes ssl_context=None at worker bind time even though the
+        # scheduler and client sections are correctly populated. The worker
+        # reads this config independently of the --tls-cert CLI flag when
+        # building its listening socket.
+        #
+        # We patch both issues here so the config always matches reality.
+        if resolved_security is not None:
+            worker_cert = dask.config.get("distributed.comm.tls.worker.cert", None)
+            worker_key = dask.config.get("distributed.comm.tls.worker.key", None)
+            if not worker_cert or not worker_key:
+                dask.config.set({
+                    "distributed.comm.tls.worker.cert": str(self.cert_file),
+                    "distributed.comm.tls.worker.key": str(self.key_file),
+                })
+        dask.config.set({
+            "distributed.comm.require-encryption": resolved_security is not None
+        })
 
         # Check ports by attempting to bind rather than connect.
         # connect_ex("0.0.0.0", port) checks reachability, not availability.
@@ -125,7 +157,9 @@ class CoffeaCasaCluster(HTCondorCluster):
         self._coffeacasa_scheduler_options = scheduler_opts
 
         super().__init__(
-            security=resolved_security,
+            # security=None: do not let dask-jobqueue inject --tls-* flags into
+            # the worker Arguments — the startup script handles TLS correctly.
+            security=None,
             scheduler_options=scheduler_opts,
             **job_kwargs,
         )
@@ -135,31 +169,67 @@ class CoffeaCasaCluster(HTCondorCluster):
     # -----------------------------
     def _resolve_security(self, security) -> Security | None:
         """
-        Resolve the Security object to use for this cluster.
+        Resolve and validate the Security object for this cluster.
 
         If security is explicitly passed in, use it as-is.
-        Otherwise, build a TLS Security from the cert files if they exist,
-        or return None to fall back to unencrypted TCP.
+        Otherwise, attempt to build a TLS Security from the cert files,
+        probing ssl.SSLContext to ensure they are actually loadable.
+        Falls back to None (TCP) with a warning if loading fails.
         """
+        import logging
+        import ssl
+        logger = logging.getLogger(__name__)
+
         if security is not None:
             return security
 
         if self._force_tcp:
+            logger.info("CoffeaCasaCluster: force_tcp=True, using unencrypted TCP")
             return None
 
-        if self.ca_file.is_file() and self.cert_file.is_file():
-            return Security(
-                tls_ca_file=str(self.ca_file),
-                tls_worker_cert=str(self.cert_file),
-                tls_worker_key=str(self.cert_file),
-                tls_client_cert=str(self.cert_file),
-                tls_client_key=str(self.cert_file),
-                tls_scheduler_cert=str(self.cert_file),
-                tls_scheduler_key=str(self.cert_file),
-                require_encryption=True,
+        if not (self.ca_file.is_file() and self.cert_file.is_file()):
+            logger.warning(
+                "CoffeaCasaCluster: TLS cert files not found at %s and %s -- "
+                "falling back to unencrypted TCP.",
+                self.ca_file, self.cert_file,
             )
+            return None
 
-        return None
+        # Probe: verify ssl.SSLContext can actually load the certs.
+        # Security() constructor always succeeds even with unloadable certs --
+        # the ssl_context=None crash only surfaces later at worker bind time.
+        try:
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ctx.load_verify_locations(cafile=str(self.ca_file))
+            ctx.load_cert_chain(
+                certfile=str(self.cert_file),
+                keyfile=str(self.key_file),
+            )
+        except ssl.SSLError as e:
+            logger.warning(
+                "CoffeaCasaCluster: TLS cert files exist but ssl.SSLContext "
+                "could not load them (%s) -- falling back to TCP. "
+                "cert=%s key=%s",
+                e, self.cert_file, self.key_file,
+            )
+            return None
+        except Exception as e:
+            logger.warning(
+                "CoffeaCasaCluster: unexpected error loading TLS certs (%s) "
+                "-- falling back to TCP.", e,
+            )
+            return None
+
+        return Security(
+            tls_ca_file=str(self.ca_file),
+            tls_worker_cert=str(self.cert_file),
+            tls_worker_key=str(self.key_file),
+            tls_client_cert=str(self.cert_file),
+            tls_client_key=str(self.key_file),
+            tls_scheduler_cert=str(self.cert_file),
+            tls_scheduler_key=str(self.key_file),
+            require_encryption=True,
+        )
 
     # -----------------------------
     # Collect input files
@@ -172,7 +242,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             if f.is_file():
                 files.append(f)
 
-        # TLS certs — only include if security is active and encryption required
+        # TLS certs — transfer into worker container so startup script can use them
         if (
             resolved_security is not None
             and self.ca_file.is_file()
@@ -180,6 +250,9 @@ class CoffeaCasaCluster(HTCondorCluster):
             and resolved_security.get_connection_args("scheduler").get("require_encryption", False)
         ):
             files += [self.ca_file, self.cert_file]
+            # Also transfer key file if it's separate from the cert
+            if self.key_file != self.cert_file and self.key_file.is_file():
+                files.append(self.key_file)
 
         # XCache bearer token
         token_path = bearer_token_path()
@@ -224,8 +297,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         # Extract user scheduler options (e.g. from Labextension)
         user_opts = job_kwargs.get("scheduler_options", {}).copy()
 
-        # Sanitize dashboard_address in user_opts: the Labextension may send
-        # "dashboard_address": true (a boolean), which breaks the scheduler.
+        # Sanitize dashboard_address: the Labextension may send True (a boolean)
         if "dashboard_address" in user_opts:
             val = user_opts["dashboard_address"]
             if isinstance(val, bool):
@@ -233,9 +305,8 @@ class CoffeaCasaCluster(HTCondorCluster):
             elif not isinstance(val, (str, type(None))):
                 user_opts["dashboard_address"] = default_dashboard_address
 
-        # Merge defaults with sanitized user options (user_opts wins).
-        # nanny_port is intentionally excluded — Dask's Server.__init__() does
-        # not accept it. It is handled via HTCondor job directives instead.
+        # nanny_port intentionally excluded — Dask's Server.__init__() does not
+        # accept it. It is handled via HTCondor job directives instead.
         scheduler_opts = merge_dicts(
             {
                 "port": scheduler_port,
@@ -246,7 +317,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             user_opts,
         )
 
-        # Hard post-merge guard: ensure dashboard_address is always str or None.
+        # Hard post-merge guard: ensure dashboard_address is always str or None
         if not isinstance(scheduler_opts.get("dashboard_address"), (str, type(None))):
             scheduler_opts["dashboard_address"] = default_dashboard_address
 
@@ -255,7 +326,7 @@ class CoffeaCasaCluster(HTCondorCluster):
     # -----------------------------
     # Job extra directives
     # -----------------------------
-    def _prepare_job_extra_directives(self, job_kwargs, worker_image, input_files, scheduler_options):
+    def _prepare_job_extra_directives(self, job_kwargs, worker_image, input_files, scheduler_options, resolved_security):
         # Determine if X.509 proxy exists
         use_proxy = False
         proxy_env = os.environ.get("X509_USER_PROXY")
@@ -269,14 +340,6 @@ class CoffeaCasaCluster(HTCondorCluster):
                 use_proxy = False
 
         files_str = ", ".join(str(p) for p in input_files)
-
-        # Safe IP fallback — avoids KeyError if HOST_IP is not set
-        external_ip = (
-            os.environ.get("HOST_IP")
-            or os.environ.get("POD_IP")
-            or socket.getfqdn()
-        )
-
         contact_address = scheduler_options["contact_address"]
 
         return merge_dicts(
@@ -288,7 +351,9 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "nanny_container_port": DEFAULT_NANNY_PORT,
                 "use_x509userproxy": use_proxy,
                 "transfer_input_files": files_str,
-                "encrypt_input_files": files_str,
+                # Note: encrypt_input_files removed — HTCondor encryption requires
+                # matching daemon keys and can cause silent cert corruption.
+                # Certs are already protected by TLS in transit.
                 "transfer_output_files": "",
                 "when_to_transfer_output": "ON_EXIT",
                 "should_transfer_files": "YES",
@@ -307,7 +372,7 @@ class CoffeaCasaCluster(HTCondorCluster):
     def _modify_job_kwargs(self, job_kwargs, *, worker_image=None, resolved_security=None, scheduler_port=DEFAULT_SCHEDULER_PORT, dashboard_port=DEFAULT_DASHBOARD_PORT, nanny_port=DEFAULT_NANNY_PORT):
         job_config = job_kwargs.copy()
 
-        # Input files — pass resolved_security directly to avoid re-evaluation
+        # Input files
         input_files = self._collect_input_files(resolved_security)
 
         # Scheduler options
@@ -317,7 +382,7 @@ class CoffeaCasaCluster(HTCondorCluster):
 
         # Job extra directives
         job_config["job_extra_directives"] = self._prepare_job_extra_directives(
-            job_config, worker_image, input_files, scheduler_opts
+            job_config, worker_image, input_files, scheduler_opts, resolved_security
         )
 
         # Remove cluster-level keys that don't belong in job kwargs
