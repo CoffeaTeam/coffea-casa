@@ -8,8 +8,8 @@ distributed:
         cert: "/etc/cmsaf-secrets/hostcert.pem"    # Path to certificate file for scheduler.
         key: "/etc/cmsaf-secrets/hostcert.pem"     # Path to key file for scheduler.
       worker:
-        key: null
-        cert: null
+        cert: /etc/cmsaf-secrets/hostcert.pem
+        key: /etc/cmsaf-secrets/hostcert.pem
       client:
-        key: "/etc/cmsaf-secrets/hostcert.pem"  # Path to certificate file for client.
         cert: "/etc/cmsaf-secrets/hostcert.pem"  # Path to key file for client.
+        key: "/etc/cmsaf-secrets/hostcert.pem"  # Path to certificate file for client.
