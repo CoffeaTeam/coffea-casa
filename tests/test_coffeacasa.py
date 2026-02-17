@@ -202,6 +202,6 @@ def test_scheduler_contact_address(monkeypatch, dummy_ca_cert):
         # FIX 2: With mock_security returning require_encryption=False,
         # the protocol resolves to "tcp" consistently.
         assert sched_options["contact_address"] == "tcp://127.0.0.1:8786"
-        assert sched_options["dashboard_address"] == ":8785"
+        assert sched_options["dashboard_address"] == ":8787"
     finally:
         cluster.close()

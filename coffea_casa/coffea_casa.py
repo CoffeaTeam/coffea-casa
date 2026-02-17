@@ -8,7 +8,7 @@ from distributed.security import Security
 
 # Default ports
 DEFAULT_SCHEDULER_PORT = 8786
-DEFAULT_DASHBOARD_PORT = 8785
+DEFAULT_DASHBOARD_PORT = 8787
 DEFAULT_NANNY_PORT = 8001
 DEFAULT_CONTAINER_PORT = 8786
 
@@ -20,10 +20,6 @@ CERT_FILE = SECRETS_DIR / "hostcert.pem"
 HOME_DIR = Path.home()
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
 CONDA_ENV = HOME_DIR / "environment.yaml" if (HOME_DIR / "environment.yaml").is_file() else HOME_DIR / "environment.yml"
-
-# Sentinel to cache the "no TLS" decision in the security property,
-# distinguishing "not yet evaluated" (None) from "evaluated: no TLS" (_NO_SECURITY).
-_NO_SECURITY = object()
 
 
 def bearer_token_path() -> Path | None:
@@ -80,11 +76,9 @@ class CoffeaCasaCluster(HTCondorCluster):
         # Assign cert paths
         self.ca_file = Path(ca_file) if ca_file else CA_FILE
         self.cert_file = Path(cert_file) if cert_file else CERT_FILE
-
         self._force_tcp = force_tcp
-        self._security = security
 
-        # FIX 1: Sanitize dask.config before the scheduler reads it.
+        # Sanitize dask.config before the scheduler reads it.
         # The Labextension can inject dashboard_address=True (a boolean) into
         # dask config, which causes format_dashboard_link() to crash with:
         #   AttributeError: 'bool' object has no attribute 'format'
@@ -92,12 +86,23 @@ class CoffeaCasaCluster(HTCondorCluster):
         if isinstance(raw_dashboard_link, bool):
             dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
 
+        # Resolve security once upfront and pass it directly into super().__init__().
+        #
+        # We deliberately do NOT override the parent's `security` property.
+        # SpecCluster (grandparent) manages `security` as a plain instance
+        # attribute that it sets during its own __init__. Overriding it with a
+        # @property caused the Labextension worker startup to receive
+        # ssl_context=None, crashing with:
+        #   TypeError: TLS expects a `ssl_context` argument of type ssl.SSLContext
+        # because our property returned a Security() object the parent hadn't
+        # wired into its own TLS machinery. Passing `security=` into super()
+        # lets the parent handle all TLS context setup correctly.
+        resolved_security = self._resolve_security(security)
+
         # Check ports by attempting to bind rather than connect.
-        # connect_ex("0.0.0.0", port) is unreliable — it checks reachability,
-        # not whether something is already listening. A bind attempt is the
-        # correct way to detect a port conflict. SO_REUSEADDR is set so that
-        # recently-closed sockets in TIME_WAIT don't trigger false positives
-        # between back-to-back test runs.
+        # connect_ex("0.0.0.0", port) checks reachability, not availability.
+        # A bind attempt is the correct way to detect a port conflict.
+        # SO_REUSEADDR prevents TIME_WAIT false positives in back-to-back tests.
         for port in (scheduler_port, dashboard_port, nanny_port):
             if port:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -111,6 +116,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         job_kwargs, scheduler_opts = self._modify_job_kwargs(
             job_kwargs,
             worker_image=worker_image,
+            resolved_security=resolved_security,
             scheduler_port=scheduler_port,
             dashboard_port=dashboard_port,
             nanny_port=nanny_port,
@@ -119,49 +125,46 @@ class CoffeaCasaCluster(HTCondorCluster):
         self._coffeacasa_scheduler_options = scheduler_opts
 
         super().__init__(
+            security=resolved_security,
             scheduler_options=scheduler_opts,
             **job_kwargs,
         )
 
     # -----------------------------
-    # Security property
+    # Security resolution
     # -----------------------------
-    @property
-    def security(self):
-        # FIX 3: Use _NO_SECURITY sentinel to cache the "no TLS" decision.
-        # Previously, setting self._security = None in the no-TLS branch meant
-        # every subsequent call re-entered the branch and re-checked the cert
-        # files on disk. Now we distinguish:
-        #   None        → not yet evaluated
-        #   _NO_SECURITY → evaluated, no TLS available
-        #   Security()  → evaluated, TLS enabled
-        if self._security is _NO_SECURITY:
-            return None
-        if self._security is None:
-            if self._force_tcp or not (self.ca_file.is_file() and self.cert_file.is_file()):
-                self._security = _NO_SECURITY
-                return None
-            else:
-                self._security = Security(
-                    tls_ca_file=str(self.ca_file),
-                    tls_worker_cert=str(self.cert_file),
-                    tls_worker_key=str(self.cert_file),
-                    tls_client_cert=str(self.cert_file),
-                    tls_client_key=str(self.cert_file),
-                    tls_scheduler_cert=str(self.cert_file),
-                    tls_scheduler_key=str(self.cert_file),
-                    require_encryption=True,
-                )
-        return self._security
+    def _resolve_security(self, security) -> Security | None:
+        """
+        Resolve the Security object to use for this cluster.
 
-    @security.setter
-    def security(self, value):
-        self._security = value
+        If security is explicitly passed in, use it as-is.
+        Otherwise, build a TLS Security from the cert files if they exist,
+        or return None to fall back to unencrypted TCP.
+        """
+        if security is not None:
+            return security
+
+        if self._force_tcp:
+            return None
+
+        if self.ca_file.is_file() and self.cert_file.is_file():
+            return Security(
+                tls_ca_file=str(self.ca_file),
+                tls_worker_cert=str(self.cert_file),
+                tls_worker_key=str(self.cert_file),
+                tls_client_cert=str(self.cert_file),
+                tls_client_key=str(self.cert_file),
+                tls_scheduler_cert=str(self.cert_file),
+                tls_scheduler_key=str(self.cert_file),
+                require_encryption=True,
+            )
+
+        return None
 
     # -----------------------------
     # Collect input files
     # -----------------------------
-    def _collect_input_files(self):
+    def _collect_input_files(self, resolved_security):
         files = []
 
         # Environment files
@@ -169,9 +172,13 @@ class CoffeaCasaCluster(HTCondorCluster):
             if f.is_file():
                 files.append(f)
 
-        # TLS certs
-        sec = self.security
-        if sec and self.ca_file.is_file() and self.cert_file.is_file() and sec.get_connection_args("scheduler")["require_encryption"]:
+        # TLS certs — only include if security is active and encryption required
+        if (
+            resolved_security is not None
+            and self.ca_file.is_file()
+            and self.cert_file.is_file()
+            and resolved_security.get_connection_args("scheduler").get("require_encryption", False)
+        ):
             files += [self.ca_file, self.cert_file]
 
         # XCache bearer token
@@ -191,6 +198,7 @@ class CoffeaCasaCluster(HTCondorCluster):
     def _prepare_scheduler_options(
         self,
         job_kwargs,
+        resolved_security,
         scheduler_port,
         dashboard_port,
     ):
@@ -201,11 +209,10 @@ class CoffeaCasaCluster(HTCondorCluster):
             or socket.getfqdn()
         )
 
-        # Determine protocol
-        sec = self.security
+        # Determine protocol from the already-resolved security object
         use_tls = (
-            sec is not None
-            and sec.get_connection_args("scheduler").get("require_encryption", False)
+            resolved_security is not None
+            and resolved_security.get_connection_args("scheduler").get("require_encryption", False)
         )
 
         protocol = "tls" if use_tls else "tcp"
@@ -227,9 +234,8 @@ class CoffeaCasaCluster(HTCondorCluster):
                 user_opts["dashboard_address"] = default_dashboard_address
 
         # Merge defaults with sanitized user options (user_opts wins).
-        # NOTE: nanny_port is intentionally excluded here — Dask's Server.__init__()
-        # does not accept it as a scheduler option. It is handled via the HTCondor
-        # job directives (nanny_container_port) in _prepare_job_extra_directives.
+        # nanny_port is intentionally excluded — Dask's Server.__init__() does
+        # not accept it. It is handled via HTCondor job directives instead.
         scheduler_opts = merge_dicts(
             {
                 "port": scheduler_port,
@@ -240,9 +246,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             user_opts,
         )
 
-        # FIX 1 (second layer): Hard post-merge guard.
-        # Even if user_opts slips through with a non-string dashboard_address,
-        # this ensures the scheduler always receives a str or None.
+        # Hard post-merge guard: ensure dashboard_address is always str or None.
         if not isinstance(scheduler_opts.get("dashboard_address"), (str, type(None))):
             scheduler_opts["dashboard_address"] = default_dashboard_address
 
@@ -266,9 +270,7 @@ class CoffeaCasaCluster(HTCondorCluster):
 
         files_str = ", ".join(str(p) for p in input_files)
 
-        # FIX 2: Use safe .get() with fallback instead of os.environ["HOST_IP"],
-        # which raises a hard KeyError if the variable is not set.
-        # This is consistent with the fallback chain in _prepare_scheduler_options.
+        # Safe IP fallback — avoids KeyError if HOST_IP is not set
         external_ip = (
             os.environ.get("HOST_IP")
             or os.environ.get("POD_IP")
@@ -302,15 +304,15 @@ class CoffeaCasaCluster(HTCondorCluster):
     # -----------------------------
     # Orchestrate job kwargs
     # -----------------------------
-    def _modify_job_kwargs(self, job_kwargs, *, worker_image=None, scheduler_port=DEFAULT_SCHEDULER_PORT, dashboard_port=DEFAULT_DASHBOARD_PORT, nanny_port=DEFAULT_NANNY_PORT):
+    def _modify_job_kwargs(self, job_kwargs, *, worker_image=None, resolved_security=None, scheduler_port=DEFAULT_SCHEDULER_PORT, dashboard_port=DEFAULT_DASHBOARD_PORT, nanny_port=DEFAULT_NANNY_PORT):
         job_config = job_kwargs.copy()
 
-        # Input files
-        input_files = self._collect_input_files()
+        # Input files — pass resolved_security directly to avoid re-evaluation
+        input_files = self._collect_input_files(resolved_security)
 
-        # Scheduler options — nanny_port is handled in job directives, not here
+        # Scheduler options
         scheduler_opts = self._prepare_scheduler_options(
-            job_config, scheduler_port, dashboard_port
+            job_config, resolved_security, scheduler_port, dashboard_port
         )
 
         # Job extra directives
@@ -318,7 +320,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             job_config, worker_image, input_files, scheduler_opts
         )
 
-        # Remove cluster-level keys
+        # Remove cluster-level keys that don't belong in job kwargs
         for k in ["scheduler_port", "dashboard_port", "security"]:
             job_config.pop(k, None)
 
