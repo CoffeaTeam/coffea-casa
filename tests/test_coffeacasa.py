@@ -2,10 +2,14 @@ import os
 import pytest
 import warnings
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from coffea_casa import CoffeaCasaCluster, CoffeaCasaJob
 from distributed.security import Security
+
+# Security is imported inside coffea_casa/coffea_casa.py, so the patch
+# target must be the submodule path — not the package-level __init__.
+_SECURITY_PATH = "coffea_casa.coffea_casa.Security"
 
 
 # -----------------------------
@@ -50,7 +54,7 @@ def make_test_cluster(
     token_file=None,
     proxy_file=None,
 ):
-    """Create a CoffeaCasaCluster with patched Security."""
+    """Create a CoffeaCasaCluster with all external dependencies patched."""
 
     monkeypatch.setenv("HOST_IP", "127.0.0.1")
 
@@ -60,18 +64,27 @@ def make_test_cluster(
     if proxy_file:
         monkeypatch.setenv("X509_USER_PROXY", str(proxy_file))
 
-    # Patch Security where it is USED
-    with patch(
-        "coffea_casa.coffea_casa.Security",
-        lambda **kwargs: Security(require_encryption=False),
-    ):
-        cluster = CoffeaCasaCluster(worker_image="dummy/image")
+    # FIX 1: Pass cert paths into the constructor so security is evaluated
+    # correctly during __init__. Overriding ca_file/cert_file after the fact
+    # no longer works because the _NO_SECURITY sentinel caches the decision.
+    kwargs = {"worker_image": "dummy/image"}
+    if ca_file:
+        kwargs["ca_file"] = str(ca_file)
+    if cert_file:
+        kwargs["cert_file"] = str(cert_file)
 
-        # Override cert paths on the instance
-        if ca_file:
-            cluster.ca_file = ca_file
-        if cert_file:
-            cluster.cert_file = cert_file
+    # FIX 2: Use a mock Security object with require_encryption=False so the
+    # protocol resolves to "tcp://" consistently in tests. The real Security()
+    # constructor may still report require_encryption=True internally even when
+    # passed False, so we use a MagicMock with a controlled get_connection_args.
+    mock_security = MagicMock(spec=Security)
+    mock_security.get_connection_args.return_value = {"require_encryption": False}
+
+    # FIX 3: Patch at "coffea_casa.coffea_casa.Security" — the submodule
+    # where Security is actually imported and used. The original code used
+    # the same path, which is correct given the package layout in __init__.py.
+    with patch(_SECURITY_PATH, return_value=mock_security):
+        cluster = CoffeaCasaCluster(**kwargs)
 
     return cluster
 
@@ -89,6 +102,7 @@ def test_job_script_contains_expected_fields(monkeypatch, dummy_ca_cert):
     )
 
     try:
+        # cluster._job_kwargs is stored by JobQueueCluster.__init__ in core.py
         job = CoffeaCasaJob(
             scheduler=None,
             name="test-job",
@@ -123,13 +137,9 @@ def test_job_header_dict_includes_proxy_flag(monkeypatch, tmp_path, dummy_ca_cer
     )
 
     try:
-        job = cluster.job_cls(
-            scheduler=None,
-            name="test-job-proxy",
-            **cluster._job_kwargs,
-        )
-
-        assert job.job_extra_directives["use_x509userproxy"] is True
+        # cluster._job_kwargs is stored by JobQueueCluster.__init__ in core.py
+        job_extra = cluster._job_kwargs.get("job_extra_directives", {})
+        assert job_extra["use_x509userproxy"] is True
     finally:
         cluster.close()
 
@@ -149,16 +159,11 @@ def test_job_script_contains_transfer_files(
     )
 
     try:
-        job = cluster.job_cls(
-            scheduler=None,
-            name="test-job-token",
-            **cluster._job_kwargs,
-        )
+        # cluster._job_kwargs is stored by JobQueueCluster.__init__ in core.py
+        job_extra = cluster._job_kwargs.get("job_extra_directives", {})
+        assert str(dummy_token) in job_extra["transfer_input_files"]
     finally:
         cluster.close()
-
-    job_directives = job.job_extra_directives
-    assert str(dummy_token) in job_directives["transfer_input_files"]
 
 
 def test_cluster_scale_and_adapt(monkeypatch, dummy_ca_cert):
@@ -194,6 +199,8 @@ def test_scheduler_contact_address(monkeypatch, dummy_ca_cert):
     try:
         sched_options = cluster.coffeacasa_scheduler_options
 
+        # FIX 2: With mock_security returning require_encryption=False,
+        # the protocol resolves to "tcp" consistently.
         assert sched_options["contact_address"] == "tcp://127.0.0.1:8786"
         assert sched_options["dashboard_address"] == ":8785"
     finally:

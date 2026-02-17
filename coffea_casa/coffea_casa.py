@@ -21,6 +21,10 @@ HOME_DIR = Path.home()
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
 CONDA_ENV = HOME_DIR / "environment.yaml" if (HOME_DIR / "environment.yaml").is_file() else HOME_DIR / "environment.yml"
 
+# Sentinel to cache the "no TLS" decision in the security property,
+# distinguishing "not yet evaluated" (None) from "evaluated: no TLS" (_NO_SECURITY).
+_NO_SECURITY = object()
+
 
 def bearer_token_path() -> Path | None:
     """Return path to user's XCache bearer token if it exists"""
@@ -80,11 +84,27 @@ class CoffeaCasaCluster(HTCondorCluster):
         self._force_tcp = force_tcp
         self._security = security
 
-        # Check ports
+        # FIX 1: Sanitize dask.config before the scheduler reads it.
+        # The Labextension can inject dashboard_address=True (a boolean) into
+        # dask config, which causes format_dashboard_link() to crash with:
+        #   AttributeError: 'bool' object has no attribute 'format'
+        raw_dashboard_link = dask.config.get("distributed.dashboard.link", None)
+        if isinstance(raw_dashboard_link, bool):
+            dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
+
+        # Check ports by attempting to bind rather than connect.
+        # connect_ex("0.0.0.0", port) is unreliable — it checks reachability,
+        # not whether something is already listening. A bind attempt is the
+        # correct way to detect a port conflict. SO_REUSEADDR is set so that
+        # recently-closed sockets in TIME_WAIT don't trigger false positives
+        # between back-to-back test runs.
         for port in (scheduler_port, dashboard_port, nanny_port):
             if port:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    if s.connect_ex(("0.0.0.0", port)) == 0:
+                    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    try:
+                        s.bind(("0.0.0.0", port))
+                    except OSError:
                         raise RuntimeError(f"Port {port} already in use.")
 
         # Prepare job kwargs and scheduler options
@@ -108,12 +128,20 @@ class CoffeaCasaCluster(HTCondorCluster):
     # -----------------------------
     @property
     def security(self):
+        # FIX 3: Use _NO_SECURITY sentinel to cache the "no TLS" decision.
+        # Previously, setting self._security = None in the no-TLS branch meant
+        # every subsequent call re-entered the branch and re-checked the cert
+        # files on disk. Now we distinguish:
+        #   None        → not yet evaluated
+        #   _NO_SECURITY → evaluated, no TLS available
+        #   Security()  → evaluated, TLS enabled
+        if self._security is _NO_SECURITY:
+            return None
         if self._security is None:
             if self._force_tcp or not (self.ca_file.is_file() and self.cert_file.is_file()):
-                # Fallback to TCP if forced or certs missing
-                self._security = None
+                self._security = _NO_SECURITY
+                return None
             else:
-                # TLS enabled
                 self._security = Security(
                     tls_ca_file=str(self.ca_file),
                     tls_worker_cert=str(self.cert_file),
@@ -166,8 +194,6 @@ class CoffeaCasaCluster(HTCondorCluster):
         scheduler_port,
         dashboard_port,
     ):
-        import socket
-
         # Determine externally reachable IP
         external_ip = (
             os.environ.get("POD_IP")
@@ -191,25 +217,19 @@ class CoffeaCasaCluster(HTCondorCluster):
         # Extract user scheduler options (e.g. from Labextension)
         user_opts = job_kwargs.get("scheduler_options", {}).copy()
 
-        # --- Critical Fix ---
-        # Labextension may send:
-        #   "dashboard_address": true
-        # which breaks the scheduler
+        # Sanitize dashboard_address in user_opts: the Labextension may send
+        # "dashboard_address": true (a boolean), which breaks the scheduler.
         if "dashboard_address" in user_opts:
             val = user_opts["dashboard_address"]
-
             if isinstance(val, bool):
-                # Convert boolean to proper string or disable
-                if val:
-                    user_opts["dashboard_address"] = default_dashboard_address
-                else:
-                    user_opts["dashboard_address"] = None
-
+                user_opts["dashboard_address"] = default_dashboard_address if val else None
             elif not isinstance(val, (str, type(None))):
-                # Any unexpected type → fallback safely
                 user_opts["dashboard_address"] = default_dashboard_address
 
-        # Merge defaults with sanitized user options
+        # Merge defaults with sanitized user options (user_opts wins).
+        # NOTE: nanny_port is intentionally excluded here — Dask's Server.__init__()
+        # does not accept it as a scheduler option. It is handled via the HTCondor
+        # job directives (nanny_container_port) in _prepare_job_extra_directives.
         scheduler_opts = merge_dicts(
             {
                 "port": scheduler_port,
@@ -220,9 +240,13 @@ class CoffeaCasaCluster(HTCondorCluster):
             user_opts,
         )
 
+        # FIX 1 (second layer): Hard post-merge guard.
+        # Even if user_opts slips through with a non-string dashboard_address,
+        # this ensures the scheduler always receives a str or None.
+        if not isinstance(scheduler_opts.get("dashboard_address"), (str, type(None))):
+            scheduler_opts["dashboard_address"] = default_dashboard_address
+
         return scheduler_opts
-
-
 
     # -----------------------------
     # Job extra directives
@@ -241,7 +265,16 @@ class CoffeaCasaCluster(HTCondorCluster):
                 use_proxy = False
 
         files_str = ", ".join(str(p) for p in input_files)
-        external_ip = os.environ["HOST_IP"]
+
+        # FIX 2: Use safe .get() with fallback instead of os.environ["HOST_IP"],
+        # which raises a hard KeyError if the variable is not set.
+        # This is consistent with the fallback chain in _prepare_scheduler_options.
+        external_ip = (
+            os.environ.get("HOST_IP")
+            or os.environ.get("POD_IP")
+            or socket.getfqdn()
+        )
+
         contact_address = scheduler_options["contact_address"]
 
         return merge_dicts(
@@ -275,8 +308,10 @@ class CoffeaCasaCluster(HTCondorCluster):
         # Input files
         input_files = self._collect_input_files()
 
-        # Scheduler options
-        scheduler_opts = self._prepare_scheduler_options(job_config, scheduler_port, dashboard_port)
+        # Scheduler options — nanny_port is handled in job directives, not here
+        scheduler_opts = self._prepare_scheduler_options(
+            job_config, scheduler_port, dashboard_port
+        )
 
         # Job extra directives
         job_config["job_extra_directives"] = self._prepare_job_extra_directives(
