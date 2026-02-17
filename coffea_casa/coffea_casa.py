@@ -346,6 +346,18 @@ class CoffeaCasaCluster(HTCondorCluster):
             {
                 "universe": "docker",
                 "docker_image": worker_image or dask.config.get(f"jobqueue.{self.config_name}.worker-image"),
+                # Override Executable + Arguments so the container runs its own
+                # startup script (dask_startup.sh) instead of the dask_worker
+                # command that dask-jobqueue generates. The startup script:
+                #   - Waits for ClassAd fields (dask_HostPort, nanny_HostPort)
+                #   - Reads cert paths from ${JOB_IWD} (where HTCondor drops
+                #     transferred files) and passes --tls-ca-file etc. correctly
+                #   - Handles conda/pip env setup and bearer token placement
+                # Without this override, dask-jobqueue calls dask_worker directly
+                # with no --tls-* flags, so the worker binds without TLS and the
+                # scheduler (require-encryption=true) rejects it.
+                "executable": "/usr/local/bin/prepare-env.sh",
+                "arguments": "",
                 "container_service_names": "dask,nanny",
                 "dask_container_port": DEFAULT_CONTAINER_PORT,
                 "nanny_container_port": DEFAULT_NANNY_PORT,
