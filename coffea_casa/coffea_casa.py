@@ -16,7 +16,8 @@ DEFAULT_CONTAINER_PORT = 8786
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
-KEY_FILE = SECRETS_DIR / "hostkey.pem"   # private key — may be separate from cert
+# private key — may be separate from cert
+KEY_FILE = SECRETS_DIR / "hostkey.pem"
 
 HOME_DIR = Path.home()
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
@@ -43,7 +44,8 @@ def bearer_token_path() -> Path | None:
 
 def x509_user_proxy_path() -> Path:
     """Return path to user's X.509 proxy, raise if missing"""
-    path = Path(os.environ.get("X509_USER_PROXY", f"/tmp/x509up_u{os.geteuid()}"))
+    path = Path(os.environ.get("X509_USER_PROXY",
+                f"/tmp/x509up_u{os.geteuid()}"))
     if path.is_file():
         return path
     raise FileNotFoundError(f"X.509 proxy not found at {path}")
@@ -66,7 +68,8 @@ class CoffeaCasaJob(HTCondorJob):
         lines = script.strip().split('\n')
         filtered = []
         for line in lines:
-            if line.startswith('Arguments = "-c ') or line.startswith("Arguments = '-c "):
+            if line.startswith(
+                    'Arguments = "-c ') or line.startswith("Arguments = '-c "):
                 continue
             if line.strip() == 'Executable = /bin/sh':
                 continue
@@ -74,8 +77,6 @@ class CoffeaCasaJob(HTCondorJob):
         if filtered and filtered[-1].strip() != 'Queue':
             filtered.append('Queue')
         return '\n'.join(filtered) + '\n'
-
-
 
 
 class CoffeaCasaCluster(HTCondorCluster):
@@ -108,9 +109,11 @@ class CoffeaCasaCluster(HTCondorCluster):
         # The Labextension can inject dashboard_address=True (a boolean) into
         # dask config, which causes format_dashboard_link() to crash with:
         #   AttributeError: 'bool' object has no attribute 'format'
-        raw_dashboard_link = dask.config.get("distributed.dashboard.link", None)
+        raw_dashboard_link = dask.config.get(
+            "distributed.dashboard.link", None)
         if isinstance(raw_dashboard_link, bool):
-            dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
+            dask.config.set(
+                {"distributed.dashboard.link": "http://{host}:{port}/status"})
 
         # Resolve security before sanitizing dask.config so we know the
         # actual encryption state. We do this early (before _modify_job_kwargs)
@@ -136,8 +139,10 @@ class CoffeaCasaCluster(HTCondorCluster):
         #
         # We patch both issues here so the config always matches reality.
         if resolved_security is not None:
-            worker_cert = dask.config.get("distributed.comm.tls.worker.cert", None)
-            worker_key = dask.config.get("distributed.comm.tls.worker.key", None)
+            worker_cert = dask.config.get(
+                "distributed.comm.tls.worker.cert", None)
+            worker_key = dask.config.get(
+                "distributed.comm.tls.worker.key", None)
             if not worker_cert or not worker_key:
                 dask.config.set({
                     "distributed.comm.tls.worker.cert": str(self.cert_file),
@@ -150,7 +155,8 @@ class CoffeaCasaCluster(HTCondorCluster):
         # Check ports by attempting to bind rather than connect.
         # connect_ex("0.0.0.0", port) checks reachability, not availability.
         # A bind attempt is the correct way to detect a port conflict.
-        # SO_REUSEADDR prevents TIME_WAIT false positives in back-to-back tests.
+        # SO_REUSEADDR prevents TIME_WAIT false positives in back-to-back
+        # tests.
         for port in (scheduler_port, dashboard_port, nanny_port):
             if port:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -200,7 +206,8 @@ class CoffeaCasaCluster(HTCondorCluster):
             return security
 
         if self._force_tcp:
-            logger.info("CoffeaCasaCluster: force_tcp=True, using unencrypted TCP")
+            logger.info(
+                "CoffeaCasaCluster: force_tcp=True, using unencrypted TCP")
             return None
 
         if not (self.ca_file.is_file() and self.cert_file.is_file()):
@@ -258,7 +265,8 @@ class CoffeaCasaCluster(HTCondorCluster):
             if f.is_file():
                 files.append(f)
 
-        # TLS certs — transfer into worker container so startup script can use them
+        # TLS certs — transfer into worker container so startup script can use
+        # them
         if (
             resolved_security is not None
             and self.ca_file.is_file()
@@ -299,21 +307,21 @@ class CoffeaCasaCluster(HTCondorCluster):
         )
 
         # Determine protocol from the already-resolved security object
-        use_tls = (
-            resolved_security is not None
-            and resolved_security.get_connection_args("scheduler").get("require_encryption", False)
-        )
+        use_tls = (resolved_security is not None and resolved_security.get_connection_args(
+            "scheduler").get("require_encryption", False))
 
         protocol = "tls" if use_tls else "tcp"
         contact_address = f"{protocol}://{external_ip}:{scheduler_port}"
 
         # Default dashboard address
-        default_dashboard_address = f":{dashboard_port}" if dashboard_port else None
+        default_dashboard_address = f":{
+            dashboard_port}" if dashboard_port else None
 
         # Extract user scheduler options (e.g. from Labextension)
         user_opts = job_kwargs.get("scheduler_options", {}).copy()
 
-        # Sanitize dashboard_address: the Labextension may send True (a boolean)
+        # Sanitize dashboard_address: the Labextension may send True (a
+        # boolean)
         if "dashboard_address" in user_opts:
             val = user_opts["dashboard_address"]
             if isinstance(val, bool):
@@ -334,7 +342,8 @@ class CoffeaCasaCluster(HTCondorCluster):
         )
 
         # Hard post-merge guard: ensure dashboard_address is always str or None
-        if not isinstance(scheduler_opts.get("dashboard_address"), (str, type(None))):
+        if not isinstance(scheduler_opts.get(
+                "dashboard_address"), (str, type(None))):
             scheduler_opts["dashboard_address"] = default_dashboard_address
 
         return scheduler_opts
@@ -342,7 +351,13 @@ class CoffeaCasaCluster(HTCondorCluster):
     # -----------------------------
     # Job extra directives
     # -----------------------------
-    def _prepare_job_extra_directives(self, job_kwargs, worker_image, input_files, scheduler_options, resolved_security):
+    def _prepare_job_extra_directives(
+            self,
+            job_kwargs,
+            worker_image,
+            input_files,
+            scheduler_options,
+            resolved_security):
         # Determine if X.509 proxy exists
         use_proxy = False
         proxy_env = os.environ.get("X509_USER_PROXY")
@@ -397,7 +412,15 @@ class CoffeaCasaCluster(HTCondorCluster):
     # -----------------------------
     # Orchestrate job kwargs
     # -----------------------------
-    def _modify_job_kwargs(self, job_kwargs, *, worker_image=None, resolved_security=None, scheduler_port=DEFAULT_SCHEDULER_PORT, dashboard_port=DEFAULT_DASHBOARD_PORT, nanny_port=DEFAULT_NANNY_PORT):
+    def _modify_job_kwargs(
+            self,
+            job_kwargs,
+            *,
+            worker_image=None,
+            resolved_security=None,
+            scheduler_port=DEFAULT_SCHEDULER_PORT,
+            dashboard_port=DEFAULT_DASHBOARD_PORT,
+            nanny_port=DEFAULT_NANNY_PORT):
         job_config = job_kwargs.copy()
 
         # Input files
@@ -410,8 +433,7 @@ class CoffeaCasaCluster(HTCondorCluster):
 
         # Job extra directives
         job_config["job_extra_directives"] = self._prepare_job_extra_directives(
-            job_config, worker_image, input_files, scheduler_opts, resolved_security
-        )
+            job_config, worker_image, input_files, scheduler_opts, resolved_security)
 
         # Remove cluster-level keys that don't belong in job kwargs
         for k in ["scheduler_port", "dashboard_port", "security"]:
