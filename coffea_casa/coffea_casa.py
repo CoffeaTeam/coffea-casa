@@ -324,10 +324,10 @@ class CoffeaCasaCluster(HTCondorCluster):
             "nanny_container_port": DEFAULT_NANNY_PORT,
             "use_x509userproxy": use_proxy,
             "transfer_input_files": files_str,
-            "output": "worker-$(ClusterId).$(ProcId).out",
-            "error": "worker-$(ClusterId).$(ProcId).err",
-            "transfer_output_files": "worker-$(ClusterId).$(ProcId).out,worker-$(ClusterId).$(ProcId).err",
-            "when_to_transfer_output": "ON_EXIT_OR_EVICT",
+            # Output/error files: let HTCondor manage these automatically
+            # Explicit transfer causes jobs to hold if files don't exist
+            "transfer_output_files": "",
+            "when_to_transfer_output": "ON_EXIT",
             "should_transfer_files": "YES",
             "Stream_Output": "False",
             "Stream_Error": "False",
