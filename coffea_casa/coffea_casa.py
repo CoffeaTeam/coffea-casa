@@ -44,7 +44,8 @@ def bearer_token_path() -> Path | None:
 
 def x509_user_proxy_path() -> Path:
     """Return path to user's X.509 proxy, raise if missing"""
-    path = Path(os.environ.get("X509_USER_PROXY", f"/tmp/x509up_u{os.geteuid()}"))
+    path = Path(os.environ.get("X509_USER_PROXY",
+                f"/tmp/x509up_u{os.geteuid()}"))
     if path.is_file():
         return path
     raise FileNotFoundError(f"X.509 proxy not found at {path}")
@@ -89,17 +90,21 @@ class CoffeaCasaCluster(HTCondorCluster):
         self._force_tcp = force_tcp
 
         # Sanitize dask.config before scheduler reads it
-        raw_dashboard_link = dask.config.get("distributed.dashboard.link", None)
+        raw_dashboard_link = dask.config.get(
+            "distributed.dashboard.link", None)
         if isinstance(raw_dashboard_link, bool):
-            dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
+            dask.config.set(
+                {"distributed.dashboard.link": "http://{host}:{port}/status"})
 
         # Resolve security early
         resolved_security = self._resolve_security(security)
 
         # Align dask.config with resolved security state
         if resolved_security is not None:
-            worker_cert = dask.config.get("distributed.comm.tls.worker.cert", None)
-            worker_key = dask.config.get("distributed.comm.tls.worker.key", None)
+            worker_cert = dask.config.get(
+                "distributed.comm.tls.worker.cert", None)
+            worker_key = dask.config.get(
+                "distributed.comm.tls.worker.key", None)
             if not worker_cert or not worker_key:
                 dask.config.set({
                     "distributed.comm.tls.worker.cert": str(self.cert_file),
@@ -153,7 +158,8 @@ class CoffeaCasaCluster(HTCondorCluster):
             return security
 
         if self._force_tcp:
-            logger.info("CoffeaCasaCluster: force_tcp=True, using unencrypted TCP")
+            logger.info(
+                "CoffeaCasaCluster: force_tcp=True, using unencrypted TCP")
             return None
 
         if not (self.ca_file.is_file() and self.cert_file.is_file()):
@@ -244,14 +250,13 @@ class CoffeaCasaCluster(HTCondorCluster):
             or socket.getfqdn()
         )
 
-        use_tls = (
-            resolved_security is not None
-            and resolved_security.get_connection_args("scheduler").get("require_encryption", False)
-        )
+        use_tls = (resolved_security is not None and resolved_security.get_connection_args(
+            "scheduler").get("require_encryption", False))
 
         protocol = "tls" if use_tls else "tcp"
         contact_address = f"{protocol}://{external_ip}:{scheduler_port}"
-        default_dashboard_address = f":{dashboard_port}" if dashboard_port else None
+        default_dashboard_address = f":{
+            dashboard_port}" if dashboard_port else None
 
         user_opts = job_kwargs.get("scheduler_options", {}).copy()
 
@@ -274,12 +279,19 @@ class CoffeaCasaCluster(HTCondorCluster):
         )
 
         # Post-merge guard
-        if not isinstance(scheduler_opts.get("dashboard_address"), (str, type(None))):
+        if not isinstance(scheduler_opts.get(
+                "dashboard_address"), (str, type(None))):
             scheduler_opts["dashboard_address"] = default_dashboard_address
 
         return scheduler_opts
 
-    def _prepare_job_extra_directives(self, job_kwargs, worker_image, input_files, scheduler_options, resolved_security):
+    def _prepare_job_extra_directives(
+            self,
+            job_kwargs,
+            worker_image,
+            input_files,
+            scheduler_options,
+            resolved_security):
         """Prepare HTCondor job directives"""
         # Check for X.509 proxy
         use_proxy = False
@@ -314,7 +326,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                 f"DASK_DISTRIBUTED__COMM__TLS__CLIENT__KEY={scratch}/{key_name}",
                 f"DASK_DISTRIBUTED__COMM__REQUIRE__ENCRYPTION=True",
             ]
-        
+
         env_str = " ".join(env_vars) if env_vars else ""
 
         directives = {
@@ -329,19 +341,29 @@ class CoffeaCasaCluster(HTCondorCluster):
             "transfer_output_files": "",
             "when_to_transfer_output": "ON_EXIT",
             "should_transfer_files": "YES",
-            "Stream_Output": "False",
-            "Stream_Error": "False",
+            "stream_output": "False",
+            "stream_error": "False",
             "+CoffeaCasaWorkerType": '"dask"',
             "+DaskSchedulerAddress": f'"{contact_address}"',
             "+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"',
         }
-        
+
         if env_str:
             directives["environment"] = f'"{env_str}"'
 
-        return merge_dicts(directives, job_kwargs.get("job_extra_directives", {}))
+        return merge_dicts(
+            directives, job_kwargs.get(
+                "job_extra_directives", {}))
 
-    def _modify_job_kwargs(self, job_kwargs, *, worker_image=None, resolved_security=None, scheduler_port=DEFAULT_SCHEDULER_PORT, dashboard_port=DEFAULT_DASHBOARD_PORT, nanny_port=DEFAULT_NANNY_PORT):
+    def _modify_job_kwargs(
+            self,
+            job_kwargs,
+            *,
+            worker_image=None,
+            resolved_security=None,
+            scheduler_port=DEFAULT_SCHEDULER_PORT,
+            dashboard_port=DEFAULT_DASHBOARD_PORT,
+            nanny_port=DEFAULT_NANNY_PORT):
         """Orchestrate job kwargs preparation"""
         job_config = job_kwargs.copy()
 
@@ -352,8 +374,7 @@ class CoffeaCasaCluster(HTCondorCluster):
         )
 
         job_config["job_extra_directives"] = self._prepare_job_extra_directives(
-            job_config, worker_image, input_files, scheduler_opts, resolved_security
-        )
+            job_config, worker_image, input_files, scheduler_opts, resolved_security)
 
         # Remove cluster-level keys
         for k in ["scheduler_port", "dashboard_port", "security"]:
