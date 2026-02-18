@@ -61,6 +61,22 @@ class CoffeaCasaJob(HTCondorJob):
     submit_command = "condor_submit -spool"
     config_name = "coffea-casa"
 
+    def job_script(self):
+        script = super().job_script()
+        lines = script.strip().split('\n')
+        filtered = []
+        for line in lines:
+            if line.startswith('Arguments = "-c ') or line.startswith("Arguments = '-c "):
+                continue
+            if line.strip() == 'Executable = /bin/sh':
+                continue
+            filtered.append(line)
+        if filtered and filtered[-1].strip() != 'Queue':
+            filtered.append('Queue')
+        return '\n'.join(filtered) + '\n'
+
+
+
 
 class CoffeaCasaCluster(HTCondorCluster):
     job_cls = CoffeaCasaJob
