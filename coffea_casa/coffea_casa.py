@@ -32,6 +32,7 @@ def bearer_token_path() -> Path | None:
     uid = os.geteuid()
     candidates = [
         os.environ.get("BEARER_TOKEN_FILE"),
+        "/etc/cmsaf-secrets-chown/access_token",  # CMS AF mounted token
         os.path.join(os.environ.get("XDG_RUNTIME_DIR", ""), f"bt_u{uid}"),
         f"/tmp/bt_u{uid}",
     ]
@@ -324,8 +325,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             "nanny_container_port": DEFAULT_NANNY_PORT,
             "use_x509userproxy": use_proxy,
             "transfer_input_files": files_str,
-            # Output/error files: let HTCondor manage these automatically
-            # Explicit transfer causes jobs to hold if files don't exist
+            "encrypt_input_files": files_str,  # Required for HTCondor to start jobs
             "transfer_output_files": "",
             "when_to_transfer_output": "ON_EXIT",
             "should_transfer_files": "YES",
