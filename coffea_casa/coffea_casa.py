@@ -61,6 +61,22 @@ class CoffeaCasaJob(HTCondorJob):
     submit_command = "condor_submit -spool"
     config_name = "coffea-casa"
 
+    def job_script(self):
+        script = super().job_script()
+        lines = script.strip().split('\n')
+        filtered = []
+        for line in lines:
+            if line.startswith('Arguments = "-c ') or line.startswith("Arguments = '-c "):
+                continue
+            if line.strip() == 'Executable = /bin/sh':
+                continue
+            filtered.append(line)
+        if filtered and filtered[-1].strip() != 'Queue':
+            filtered.append('Queue')
+        return '\n'.join(filtered) + '\n'
+
+
+
 
 class CoffeaCasaCluster(HTCondorCluster):
     job_cls = CoffeaCasaJob
@@ -347,7 +363,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "universe": "docker",
                 "docker_image": worker_image or dask.config.get(f"jobqueue.{self.config_name}.worker-image"),
                 # Override Executable + Arguments so the container runs its own
-                # startup script (dask_startup.sh) instead of the dask_worker
+                # startup script (prepare-env.sh) instead of the dask_worker
                 # command that dask-jobqueue generates. The startup script:
                 #   - Waits for ClassAd fields (dask_HostPort, nanny_HostPort)
                 #   - Reads cert paths from ${JOB_IWD} (where HTCondor drops
