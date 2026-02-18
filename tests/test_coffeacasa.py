@@ -98,9 +98,11 @@ def test_job_script_contains_expected_fields(monkeypatch, dummy_ca_cert):
         assert "CoffeaCasaWorkerType" in script
         assert "test-job" in script
         
-        # The key fix: uppercase Executable = /bin/sh should NOT be present
-        assert "Executable = /bin/sh" not in script, \
-            "job_script() should have stripped dask-jobqueue's Executable line"
+        # The key fix: Arguments should call prepare-env.sh, not dask_worker
+        assert "prepare-env.sh" in script, \
+            "Arguments should call prepare-env.sh startup script"
+        assert "distributed.cli.dask_worker" not in script, \
+            "Arguments should NOT contain direct dask_worker invocation"
     finally:
         cluster.close()
 
@@ -246,7 +248,7 @@ def test_security_none_passed_to_parent():
 
 
 def test_job_script_strips_dask_jobqueue_executable(monkeypatch, dummy_ca_cert):
-    """Test that job_script() removes dask-jobqueue's broken lines"""
+    """Test that job_script() replaces dask_worker command with startup script"""
     ca_file, cert_file = dummy_ca_cert
     cluster = make_test_cluster(
         monkeypatch,
@@ -266,10 +268,11 @@ def test_job_script_strips_dask_jobqueue_executable(monkeypatch, dummy_ca_cert):
         
         script = job.job_script()
         
-        # Should NOT contain dask-jobqueue's generated lines
-        assert 'Arguments = "-c' not in script
-        assert "Arguments = '-c" not in script
-        assert 'Executable = /bin/sh' not in script
+        # Should contain our startup script in Arguments
+        assert '/usr/local/bin/prepare-env.sh' in script,             "Arguments should invoke prepare-env.sh"
+        
+        # Should NOT contain the direct dask_worker python invocation
+        assert 'python -m distributed.cli.dask_worker' not in script,             "Should not call dask_worker directly"
     finally:
         cluster.close()
 
