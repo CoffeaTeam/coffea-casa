@@ -305,9 +305,8 @@ class CoffeaCasaCluster(HTCondorCluster):
             "use_x509userproxy": use_proxy,
             "transfer_input_files": files_str,
             "encrypt_input_files": files_str,
-            "output": "logs/worker-$(ClusterId).$(ProcId).out",
-            "error": "logs/worker-$(ClusterId).$(ProcId).err",
-            "log": "logs/worker-$(ClusterId).log",
+            # Use default output names (_condor_stdout/_condor_stderr)
+            # HTCondor can't create subdirectories in the execution sandbox
             "when_to_transfer_output": "ON_EXIT_OR_EVICT",
             "should_transfer_files": "YES",
             "stream_output": True,
