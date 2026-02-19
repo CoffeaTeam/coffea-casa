@@ -206,6 +206,9 @@ class CoffeaCasaCluster(HTCondorCluster):
         for f in [PIP_REQUIREMENTS, CONDA_ENV]:
             if f.is_file():
                 files.append(f)
+
+        # TLS certs - transferred via HTCondor to $_CONDOR_SCRATCH_DIR
+        # (worker containers don't have /etc/cmsaf-secrets/ mounted)
         if (
             resolved_security is not None
             and self.ca_file.is_file()
@@ -293,27 +296,6 @@ class CoffeaCasaCluster(HTCondorCluster):
         files_str = ", ".join(str(p) for p in input_files)
         contact_address = scheduler_options["contact_address"]
 
-        # Build environment variables for TLS configuration
-        # HTCondor transfers files flat to $_CONDOR_SCRATCH_DIR, so we tell
-        # dask where to find them via environment variables (these override
-        # command-line flags and config files).
-        env_vars = []
-        if resolved_security is not None:
-            scratch = "$_CONDOR_SCRATCH_DIR"
-            ca_name = Path(str(self.ca_file)).name
-            cert_name = Path(str(self.cert_file)).name
-            key_name = Path(str(self.key_file)).name
-            env_vars = [
-                f"DASK_DISTRIBUTED__COMM__TLS__CA_FILE={scratch}/{ca_name}",
-                f"DASK_DISTRIBUTED__COMM__TLS__WORKER__CERT={scratch}/{cert_name}",
-                f"DASK_DISTRIBUTED__COMM__TLS__WORKER__KEY={scratch}/{key_name}",
-                f"DASK_DISTRIBUTED__COMM__TLS__CLIENT__CERT={scratch}/{cert_name}",
-                f"DASK_DISTRIBUTED__COMM__TLS__CLIENT__KEY={scratch}/{key_name}",
-                f"DASK_DISTRIBUTED__COMM__REQUIRE__ENCRYPTION=True",
-            ]
-        
-        env_str = " ".join(env_vars) if env_vars else ""
-
         directives = {
             "universe": "docker",
             "docker_image": worker_image or dask.config.get(f"jobqueue.{self.config_name}.worker-image"),
@@ -323,11 +305,10 @@ class CoffeaCasaCluster(HTCondorCluster):
             "use_x509userproxy": use_proxy,
             "transfer_input_files": files_str,
             "encrypt_input_files": files_str,
-            "output": "worker.$(ClusterId).$(ProcId).out",
-            "error": "worker.$(ClusterId).$(ProcId).err",
-            "log": "worker.$(ClusterId).$(ProcId).log",
-            "transfer_output_files": "",
-            "when_to_transfer_output": "ON_EXIT",
+            "output": "logs/worker-$(ClusterId).$(ProcId).out",
+            "error": "logs/worker-$(ClusterId).$(ProcId).err",
+            "log": "logs/worker-$(ClusterId).log",
+            "when_to_transfer_output": "ON_EXIT_OR_EVICT",
             "should_transfer_files": "YES",
             "stream_output": True,
             "stream_error": True,
@@ -335,9 +316,6 @@ class CoffeaCasaCluster(HTCondorCluster):
             "+DaskSchedulerAddress": f'"{contact_address}"',
             "+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"',
         }
-        
-        if env_str:
-            directives["environment"] = f'"{env_str}"'
 
         return merge_dicts(directives, job_kwargs.get("job_extra_directives", {}))
 
