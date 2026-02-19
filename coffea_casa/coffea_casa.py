@@ -132,10 +132,19 @@ class CoffeaCasaCluster(HTCondorCluster):
         """
         self._force_tcp = force_tcp
 
+        # FIX 1: Sanitize dashboard_address boolean from Labextension
+        # The Labextension can inject dashboard_address=True (a boolean) into
+        # dask config, which causes format_dashboard_link() to crash with:
+        #   AttributeError: 'bool' object has no attribute 'format'
         raw_dashboard_link = dask.config.get("distributed.dashboard.link", None)
         if isinstance(raw_dashboard_link, bool):
             dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
 
+        # FIX 2: Patch worker TLS config in dask.yaml if it's null
+        # Some dask.yaml files have:
+        #   distributed.comm.tls.worker.cert: null
+        #   distributed.comm.tls.worker.key: null
+        # This causes ssl_context=None at worker bind time
         if not force_tcp:
             worker_cert = dask.config.get("distributed.comm.tls.worker.cert", None)
             worker_key = dask.config.get("distributed.comm.tls.worker.key", None)
@@ -145,6 +154,9 @@ class CoffeaCasaCluster(HTCondorCluster):
                     "distributed.comm.tls.worker.key": str(KEY_FILE if KEY_FILE.is_file() else CERT_FILE),
                 })
 
+        # FIX 3: Align dask.config require-encryption with actual TLS state
+        # dask.yaml may have require-encryption: true even when force_tcp=True
+        # SpecCluster reads this independently and refuses tcp:// connections
         will_use_tls = (
             not force_tcp 
             and CA_FILE.is_file() 
