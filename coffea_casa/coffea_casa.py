@@ -1,60 +1,89 @@
 """CoffeaCasaCluster class"""
 import os
 from pathlib import Path
+import sys
 import socket
 import dask
 from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
 from distributed.security import Security
 
-# Default ports
+# Port settings
 DEFAULT_SCHEDULER_PORT = 8786
 DEFAULT_DASHBOARD_PORT = 8785
-DEFAULT_NANNY_PORT = 8001
 DEFAULT_CONTAINER_PORT = 8786
+DEFAULT_NANNY_PORT = 8001
 
-# Default cert paths
+# Security settings for Dask scheduler
 SECRETS_DIR = Path("/etc/cmsaf-secrets")
+SECRETS_DIR_CHOWN = Path("/etc/cmsaf-secrets-chown")
 CA_FILE = SECRETS_DIR / "ca.pem"
 CERT_FILE = SECRETS_DIR / "hostcert.pem"
 KEY_FILE = SECRETS_DIR / "hostkey.pem"
-
 HOME_DIR = Path.home()
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
-CONDA_ENV = (
-    HOME_DIR / "environment.yaml"
-    if (HOME_DIR / "environment.yaml").is_file()
-    else HOME_DIR / "environment.yml"
-)
+
+# conda, with yml/yaml both supported
+if (HOME_DIR / "environment.yaml").is_file():
+    CONDA_ENV = HOME_DIR / "environment.yaml"
+else:
+    CONDA_ENV = HOME_DIR / "environment.yml"
 
 
-def bearer_token_path() -> Path | None:
-    """Return path to user's XCache bearer token if it exists"""
-    uid = os.geteuid()
-    candidates = [
-        os.environ.get("BEARER_TOKEN_FILE"),
-        "/etc/cmsaf-secrets-chown/access_token",  # CMS AF mounted token
-        os.path.join(os.environ.get("XDG_RUNTIME_DIR", ""), f"bt_u{uid}"),
-        f"/tmp/bt_u{uid}",
-    ]
-    for path in candidates:
-        if path and Path(path).is_file():
-            return Path(path)
+def bearer_token_path():
+    """Return the path to the bearer token or None if not found"""
+    def check_token_path(path, suffix=''):
+        token_path = f'{path}{suffix}'
+        if Path(token_path).is_file():
+            return token_path
+        return None
+
+    # 1. Check BEARER_TOKEN_FILE env variable
+    try:
+        path = check_token_path(os.environ['BEARER_TOKEN_FILE'])
+        if path:
+            return path
+    except KeyError:
+        pass
+
+    # 2. Check /etc/cmsaf-secrets-chown/access_token (CMS AF mounted token)
+    path = check_token_path('/etc/cmsaf-secrets-chown/access_token')
+    if path:
+        return path
+
+    # 3. Check XDG_RUNTIME_DIR + /bt_u$UID
+    try:
+        xdg_runtime_dir = os.environ['XDG_RUNTIME_DIR']
+        path = check_token_path(xdg_runtime_dir, suffix=f'/bt_u{os.geteuid()}')
+        if path:
+            return path
+    except KeyError:
+        pass
+
+    # 4. Check /tmp/bt_u$UID
+    path = check_token_path(f'/tmp/bt_u{os.geteuid()}')
+    if path:
+        return path
+
     return None
 
 
-def x509_user_proxy_path() -> Path:
-    """Return path to user's X.509 proxy, raise if missing"""
-    path = Path(os.environ.get("X509_USER_PROXY", f"/tmp/x509up_u{os.geteuid()}"))
-    if path.is_file():
+def x509_user_proxy_path():
+    """Return the path to the user's X.509 proxy or None if not found"""
+    try:
+        path = os.environ['X509_USER_PROXY']
+    except KeyError:
+        path = f'/tmp/x509up_u{os.geteuid()}'
+
+    if Path(path).is_file():
         return path
-    raise FileNotFoundError(f"X.509 proxy not found at {path}")
+    return None
 
 
-def merge_dicts(*dicts):
-    """Shallow merge dictionaries (latter dicts override earlier ones)"""
+def merge_dicts(*dict_args):
+    """Merge dictionaries, precedence goes to latter dictionaries"""
     result = {}
-    for d in dicts:
-        result.update(d)
+    for dictionary in dict_args:
+        result.update(dictionary)
     return result
 
 
@@ -64,53 +93,67 @@ class CoffeaCasaJob(HTCondorJob):
 
 
 class CoffeaCasaCluster(HTCondorCluster):
+    """
+    Subclass for launching Dask via HTCondor in CMS facilities.
+    """
     job_cls = CoffeaCasaJob
     config_name = "coffea-casa"
 
     def __init__(self,
                  *,
-                 worker_image=None,
                  security=None,
-                 force_tcp: bool = False,
+                 force_tcp=False,
+                 worker_image=None,
+                 scheduler_options=None,
                  scheduler_port=DEFAULT_SCHEDULER_PORT,
                  dashboard_port=DEFAULT_DASHBOARD_PORT,
                  nanny_port=DEFAULT_NANNY_PORT,
-                 ca_file=None,
-                 cert_file=None,
-                 key_file=None,
                  check_ports=False,
                  **job_kwargs):
-
-        # Assign cert paths
-        self.ca_file = Path(ca_file) if ca_file else CA_FILE
-        self.cert_file = Path(cert_file) if cert_file else CERT_FILE
-        _key_default = KEY_FILE if KEY_FILE.is_file() else self.cert_file
-        self.key_file = Path(key_file) if key_file else _key_default
+        """
+        Parameters
+        ----------
+        security : distributed.Security, optional
+            Security object for TLS configuration
+        force_tcp : bool, default False
+            Force TCP instead of TLS
+        worker_image : str, optional
+            Docker image for workers
+        scheduler_port : int, default 8786
+            Scheduler port
+        dashboard_port : int, default 8785
+            Dashboard port
+        nanny_port : int, default 8001
+            Nanny port
+        check_ports : bool, default False
+            Check if ports are available before starting
+        **job_kwargs
+            Additional job configuration
+        """
         self._force_tcp = force_tcp
 
-        # Sanitize dask.config before scheduler reads it
         raw_dashboard_link = dask.config.get("distributed.dashboard.link", None)
         if isinstance(raw_dashboard_link, bool):
             dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
 
-        # Resolve security early
-        resolved_security = self._resolve_security(security)
-
-        # Align dask.config with resolved security state
-        if resolved_security is not None:
+        if not force_tcp:
             worker_cert = dask.config.get("distributed.comm.tls.worker.cert", None)
             worker_key = dask.config.get("distributed.comm.tls.worker.key", None)
             if not worker_cert or not worker_key:
                 dask.config.set({
-                    "distributed.comm.tls.worker.cert": str(self.cert_file),
-                    "distributed.comm.tls.worker.key": str(self.key_file),
+                    "distributed.comm.tls.worker.cert": str(CERT_FILE),
+                    "distributed.comm.tls.worker.key": str(KEY_FILE if KEY_FILE.is_file() else CERT_FILE),
                 })
-        dask.config.set({
-            "distributed.comm.require-encryption": resolved_security is not None
-        })
 
-        # Optional port conflict check (disabled by default to avoid blocking Labextension)
-        # The scheduler will fail with a clear error if ports are in use anyway
+        will_use_tls = (
+            not force_tcp 
+            and CA_FILE.is_file() 
+            and CERT_FILE.is_file()
+            and security_obj().get_connection_args("scheduler").get("require_encryption", False)
+        )
+        dask.config.set({"distributed.comm.require-encryption": will_use_tls})
+
+        # FIX 4: Optional port conflict check (disabled by default)
         if check_ports:
             for port in (scheduler_port, dashboard_port, nanny_port):
                 if port:
@@ -121,219 +164,131 @@ class CoffeaCasaCluster(HTCondorCluster):
                         except OSError:
                             raise RuntimeError(f"Port {port} already in use.")
 
-        # Prepare job kwargs and scheduler options
-        job_kwargs, scheduler_opts = self._modify_job_kwargs(
+        if security:
+            self.security = security
+
+        job_kwargs = self._modify_job_kwargs(
             job_kwargs,
+            security=security,
+            force_tcp=force_tcp,
             worker_image=worker_image,
-            resolved_security=resolved_security,
             scheduler_port=scheduler_port,
             dashboard_port=dashboard_port,
             nanny_port=nanny_port,
         )
 
-        self._coffeacasa_scheduler_options = scheduler_opts
+        super().__init__(**job_kwargs)
 
-        super().__init__(
-            # Pass security=None so dask-jobqueue doesn't inject --tls-* flags
-            # with scheduler-side paths (/etc/cmsaf-secrets/ca.pem).
-            # We set TLS config via environment variables pointing to
-            # $_CONDOR_SCRATCH_DIR where HTCondor drops transferred files.
-            security=None,
-            scheduler_options=scheduler_opts,
-            **job_kwargs,
-        )
+    @classmethod
+    def _modify_job_kwargs(cls,
+                           job_kwargs,
+                           *,
+                           security=None,
+                           force_tcp=False,
+                           worker_image=None,
+                           scheduler_options=None,
+                           scheduler_port=DEFAULT_SCHEDULER_PORT,
+                           dashboard_port=DEFAULT_DASHBOARD_PORT,
+                           nanny_port=DEFAULT_NANNY_PORT):
+        job_config = job_kwargs.copy()
+        input_files = []
 
-    def _resolve_security(self, security) -> Security | None:
-        """Resolve and validate Security object"""
-        import logging
-        import ssl
-        logger = logging.getLogger(__name__)
+        if PIP_REQUIREMENTS.is_file():
+            input_files.append(PIP_REQUIREMENTS)
+        if CONDA_ENV.is_file():
+            input_files.append(CONDA_ENV)
 
-        if security is not None:
-            return security
+        # If we have certs and not forcing TCP, use TLS
+        if (not force_tcp 
+            and CA_FILE.is_file() 
+            and CERT_FILE.is_file() 
+            and security_obj().get_connection_args("scheduler")["require_encryption"]):
+            job_config["protocol"] = "tls://"
+            job_config["security"] = security_obj()
+            input_files += [CA_FILE, CERT_FILE]
+            # Add separate key file if it exists
+            if KEY_FILE.is_file() and KEY_FILE != CERT_FILE:
+                input_files.append(KEY_FILE)
+        else:
+            job_config["protocol"] = "tcp://"
 
-        if self._force_tcp:
-            logger.info("CoffeaCasaCluster: force_tcp=True, using unencrypted TCP")
-            return None
+        # Add bearer token if found
+        token_file = bearer_token_path()
+        if token_file:
+            input_files.append(token_file)
 
-        if not (self.ca_file.is_file() and self.cert_file.is_file()):
-            logger.warning(
-                "CoffeaCasaCluster: TLS cert files not found at %s and %s -- "
-                "falling back to unencrypted TCP.",
-                self.ca_file, self.cert_file,
-            )
-            return None
+        files = ", ".join(str(path) for path in input_files)
 
-        # Verify ssl.SSLContext can load the certs
+        # Networking settings
         try:
-            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            ctx.load_verify_locations(cafile=str(self.ca_file))
-            ctx.load_cert_chain(
-                certfile=str(self.cert_file),
-                keyfile=str(self.key_file),
-            )
-        except ssl.SSLError as e:
-            logger.warning(
-                "CoffeaCasaCluster: TLS certs exist but ssl.SSLContext "
-                "could not load them (%s) -- falling back to TCP. "
-                "cert=%s key=%s",
-                e, self.cert_file, self.key_file,
-            )
-            return None
-        except Exception as e:
-            logger.warning(
-                "CoffeaCasaCluster: unexpected error loading TLS certs (%s) "
-                "-- falling back to TCP.", e,
-            )
-            return None
+            external_ip = os.environ.get("POD_IP") or os.environ.get("HOST_IP") or socket.getfqdn()
+        except Exception:
+            print("Warning: Could not determine external IP")
+            external_ip = "127.0.0.1"
 
-        return Security(
-            tls_ca_file=str(self.ca_file),
-            tls_worker_cert=str(self.cert_file),
-            tls_worker_key=str(self.key_file),
-            tls_client_cert=str(self.cert_file),
-            tls_client_key=str(self.key_file),
-            tls_scheduler_cert=str(self.cert_file),
-            tls_scheduler_key=str(self.key_file),
-            require_encryption=True,
-        )
+        scheduler_protocol = job_config["protocol"]
+        address_list = [external_ip, str(scheduler_port)]
+        external_address_short = ":".join(address_list)
+        full_address_list = [scheduler_protocol, external_address_short]
+        contact_address = "".join(full_address_list)
+        external_ip_string = f'"{contact_address}"'
 
-    def _collect_input_files(self, resolved_security):
-        """Collect files to transfer to worker container"""
-        files = []
+        dash_port = f":{dashboard_port}"
 
-        # Environment files
-        for f in [PIP_REQUIREMENTS, CONDA_ENV]:
-            if f.is_file():
-                files.append(f)
-
-        # TLS certs - transferred via HTCondor to $_CONDOR_SCRATCH_DIR
-        # (worker containers don't have /etc/cmsaf-secrets/ mounted)
-        if (
-            resolved_security is not None
-            and self.ca_file.is_file()
-            and self.cert_file.is_file()
-            and resolved_security.get_connection_args("scheduler").get("require_encryption", False)
-        ):
-            files += [self.ca_file, self.cert_file]
-            if self.key_file != self.cert_file and self.key_file.is_file():
-                files.append(self.key_file)
-
-        # XCache bearer token
-        token_path = bearer_token_path()
-        if token_path:
-            files.append(token_path)
-
-        return files
-
-    @property
-    def coffeacasa_scheduler_options(self):
-        return getattr(self, "_coffeacasa_scheduler_options", {})
-
-    def _prepare_scheduler_options(
-        self,
-        job_kwargs,
-        resolved_security,
-        scheduler_port,
-        dashboard_port,
-    ):
-        """Prepare scheduler options dict"""
-        external_ip = (
-            os.environ.get("POD_IP")
-            or os.environ.get("HOST_IP")
-            or socket.getfqdn()
-        )
-
-        use_tls = (
-            resolved_security is not None
-            and resolved_security.get_connection_args("scheduler").get("require_encryption", False)
-        )
-
-        protocol = "tls" if use_tls else "tcp"
-        contact_address = f"{protocol}://{external_ip}:{scheduler_port}"
-        default_dashboard_address = f":{dashboard_port}" if dashboard_port else None
-
-        user_opts = job_kwargs.get("scheduler_options", {}).copy()
-
-        # Sanitize dashboard_address
-        if "dashboard_address" in user_opts:
-            val = user_opts["dashboard_address"]
-            if isinstance(val, bool):
-                user_opts["dashboard_address"] = default_dashboard_address if val else None
-            elif not isinstance(val, (str, type(None))):
-                user_opts["dashboard_address"] = default_dashboard_address
-
-        scheduler_opts = merge_dicts(
+        # Scheduler settings
+        job_config["scheduler_options"] = merge_dicts(
             {
                 "port": scheduler_port,
-                "dashboard_address": default_dashboard_address,
-                "protocol": protocol,
+                "dashboard_address": dash_port,
+                "protocol": scheduler_protocol.replace("://", ""),
                 "contact_address": contact_address,
             },
-            user_opts,
+            job_kwargs.get("scheduler_options", 
+                         dask.config.get(f"jobqueue.{cls.config_name}.scheduler-options", {})),
         )
 
-        # Post-merge guard
-        if not isinstance(scheduler_opts.get("dashboard_address"), (str, type(None))):
-            scheduler_opts["dashboard_address"] = default_dashboard_address
+        # Check for x509 proxy
+        proxy = x509_user_proxy_path()
+        use_proxy = proxy is not None
 
-        return scheduler_opts
-
-    def _prepare_job_extra_directives(self, job_kwargs, worker_image, input_files, scheduler_options, resolved_security):
-        """Prepare HTCondor job directives"""
-        # Check for X.509 proxy
-        use_proxy = False
-        proxy_env = os.environ.get("X509_USER_PROXY")
-        if proxy_env and Path(proxy_env).is_file():
-            use_proxy = True
-        else:
-            try:
-                proxy_path = x509_user_proxy_path()
-                use_proxy = proxy_path.is_file()
-            except FileNotFoundError:
-                use_proxy = False
-
-        files_str = ", ".join(str(p) for p in input_files)
-        contact_address = scheduler_options["contact_address"]
-
-        directives = {
-            "universe": "docker",
-            "docker_image": worker_image or dask.config.get(f"jobqueue.{self.config_name}.worker-image"),
-            "container_service_names": "dask,nanny",
-            "dask_container_port": DEFAULT_CONTAINER_PORT,
-            "nanny_container_port": DEFAULT_NANNY_PORT,
-            "use_x509userproxy": use_proxy,
-            "transfer_input_files": files_str,
-            "encrypt_input_files": files_str,
-            # Use default output names (_condor_stdout/_condor_stderr)
-            # HTCondor can't create subdirectories in the execution sandbox
-            "when_to_transfer_output": "ON_EXIT_OR_EVICT",
-            "should_transfer_files": "YES",
-            "stream_output": True,
-            "stream_error": True,
-            "+CoffeaCasaWorkerType": '"dask"',
-            "+DaskSchedulerAddress": f'"{contact_address}"',
-            "+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"',
-        }
-
-        return merge_dicts(directives, job_kwargs.get("job_extra_directives", {}))
-
-    def _modify_job_kwargs(self, job_kwargs, *, worker_image=None, resolved_security=None, scheduler_port=DEFAULT_SCHEDULER_PORT, dashboard_port=DEFAULT_DASHBOARD_PORT, nanny_port=DEFAULT_NANNY_PORT):
-        """Orchestrate job kwargs preparation"""
-        job_config = job_kwargs.copy()
-
-        input_files = self._collect_input_files(resolved_security)
-
-        scheduler_opts = self._prepare_scheduler_options(
-            job_config, resolved_security, scheduler_port, dashboard_port
+        # Job extra settings (HTCondor ClassAd)
+        job_config["job_extra_directives"] = merge_dicts(
+            {
+                "universe": "docker",
+                "docker_image": worker_image or dask.config.get(f"jobqueue.{cls.config_name}.worker-image"),
+                "container_service_names": "dask,nanny",
+                "dask_container_port": DEFAULT_CONTAINER_PORT,
+                "nanny_container_port": DEFAULT_NANNY_PORT,
+                "use_x509userproxy": use_proxy,
+                "transfer_input_files": files,
+                "encrypt_input_files": files,
+                "transfer_output_files": "",
+                "when_to_transfer_output": "ON_EXIT",
+                "should_transfer_files": "YES",
+                "+CoffeaCasaWorkerType": '"dask"',
+                "+DaskSchedulerAddress": external_ip_string,
+                "+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"',
+            },
+            job_kwargs.get("job_extra_directives",
+                         dask.config.get(f"jobqueue.{cls.config_name}.job_extra_directives", {})),
         )
 
-        job_config["job_extra_directives"] = self._prepare_job_extra_directives(
-            job_config, worker_image, input_files, scheduler_opts, resolved_security
-        )
+        return job_config
 
-        # Remove cluster-level keys
-        for k in ["scheduler_port", "dashboard_port", "security"]:
-            job_config.pop(k, None)
 
-        return job_config, scheduler_opts
+def security_obj():
+    """Return the Dask Security object used by CoffeaCasa"""
+    ca_file = str(CA_FILE)
+    cert_file = str(CERT_FILE)
+    key_file = str(KEY_FILE if KEY_FILE.is_file() else CERT_FILE)
+    
+    return Security(
+        tls_ca_file=ca_file,
+        tls_worker_cert=cert_file,
+        tls_worker_key=key_file,
+        tls_client_cert=cert_file,
+        tls_client_key=key_file,
+        tls_scheduler_cert=cert_file,
+        tls_scheduler_key=key_file,
+        require_encryption=True,
+    )
