@@ -148,18 +148,18 @@ RUN rm /etc/grid-security/certificates/*.r*
 # files across image layers when the permissions change
 RUN mamba install --quiet --yes \
     -c conda-forge \
-    'notebook'==6.5.3 \
-    'jupyterhub'==3.1.1 \
-    'jupyterlab' \
-    jupyterlab_widgets==3.0.7 \
-    jupyterlab-git==0.41.0 \
-    jupyter_client==8.1.0 \
+    notebook \
+    jupyterhub \
+    jupyterlab \
+    jupyterlab_widgets \
+    jupyterlab-git \
+    jupyter_client \
     jupyterlab_widgets \
     jupyter-server-proxy \
     jupyter-vscode-proxy \
     code-server \
     nodejs \
-    ipywidgets==8.0.6 && \
+    ipywidgets && \
     mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -169,8 +169,6 @@ RUN mamba install --quiet --yes \
     jupyter lab clean && \
     code-server --install-extension ms-python.python && \
     rm -rf "/home/${NB_USER}/.cache/yarn"
-    #fix-permissions "${CONDA_DIR}" && \
-    #fix-permissions "/home/${NB_USER}"
 
 EXPOSE 8888
 
