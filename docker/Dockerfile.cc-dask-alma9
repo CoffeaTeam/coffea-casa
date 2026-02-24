@@ -189,7 +189,7 @@ RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
 
 # Enable the serverextensions that do not use the conf.d approach and
 # build JupyterLab.
-RUN jupyter serverextension enable dask_labextension jupyterlab_git && \ 
+RUN jupyter server extension enable dask_labextension jupyterlab_git && \ 
     jupyter server extension list && \
     jupyter lab build --debug --dev-build=False --minimize=False && jupyter lab clean && \
     npm cache clean --force && \
