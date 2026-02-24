@@ -133,18 +133,23 @@ RUN mamba install --yes \
         --force-pkgs-dirs \
         --yes
 
-RUN pip install --no-cache-dir \
-    jupyter-ai \
+RUN pip install --upgrade --no-cache-dir \
+    mt2 \
     aiostream \
     supervisor \
-    #funcx \ outdated dependencies
+    servicex \
     pixi-kernel \
     scikit-hep-testdata \
     pyyaml \
     prometheus_client \
     comm>=0.1.2 \
     mlflow \
-    s3fs
+    s3fs \
+    # something is keep on pushing wrong version of numpy
+    numpy \
+    numba   
+    
+
 
 # FIXME
 #RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
