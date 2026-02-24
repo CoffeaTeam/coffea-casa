@@ -137,7 +137,7 @@ RUN pip install --upgrade --no-cache-dir \
     mt2 \
     aiostream \
     supervisor \
-    servicex
+    servicex \ßß
     pixi-kernel \
     scikit-hep-testdata \
     pyyaml \
