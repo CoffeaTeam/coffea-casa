@@ -134,6 +134,7 @@ RUN mamba install --yes \
         --yes
 
 RUN pip install --upgrade --no-cache-dir \
+    mt2 \
     aiostream \
     supervisor \
     servicex

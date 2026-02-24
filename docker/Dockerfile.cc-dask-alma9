@@ -272,6 +272,7 @@ RUN mkdir /cvmfs
 
 USER ${NB_USER}    
 RUN pip install --upgrade --no-cache-dir \
+    mt2 \
     pixi-kernel \
     scikit-hep-testdata \
     pyyaml \
