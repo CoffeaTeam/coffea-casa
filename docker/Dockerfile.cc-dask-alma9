@@ -229,7 +229,6 @@ RUN mamba install --yes \
     cabinetry \
     pyhf \
     ndcctools \
-    numpy>2 \
     atlas-schema \
     gperftools \
     && mamba clean \
@@ -272,15 +271,10 @@ RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 RUN mkdir /cvmfs
 
 USER ${NB_USER}    
-RUN pip install --no-cache-dir \
-    #funcx \ outdated dependencies
+RUN pip install --upgrade --no-cache-dir \
     pixi-kernel \
     scikit-hep-testdata \
     pyyaml \
-    # visualization
-    Shapely==1.8.1.post1 \
-    descartes==1.1.0 \
-    # JSON processor
     jq \
     prometheus_client \
     comm>=0.1.2 \
@@ -288,6 +282,9 @@ RUN pip install --no-cache-dir \
     s3fs \
     jupytext \
     servicex \
+    # something is keep on pushing wrong version of numpy
+    numpy \
+    numba \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard
 
