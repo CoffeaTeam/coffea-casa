@@ -1,24 +1,108 @@
 distributed:
-  scheduler:
-    work-stealing: False
-  worker:
-    memory:
-      target: 0.7  # Data spilling to disk
-      spill: 0.8  # Data spilling to disk
-      pause: 0.85  # fraction at which we pause worker threads
-      terminate: 0.98  # fraction at which we terminate the worker
-  diagnostics:
-    nvml: False
-
-  version: 2
   
-  dashboard:
-    link: "{JUPYTERHUB_SERVICE_PREFIX}proxy/{port}/status"
+  # Adaptive Scaling Configuration
+  # Workers will scale down after 6 seconds (3 checks × 2s) of idleness
+  adaptive:
+    interval: "2s"          # Check worker utilization every 2 seconds
+    wait-count: 3           # Wait 3 intervals before scaling down (total: 6s)
+    target-duration: "5s"   # Target 5 seconds of work per worker
+    minimum: 1              # Always keep at least 1 worker
+    maximum: 50             # Never exceed 50 workers
+  
+  # Scheduler Configuration
+  scheduler:
+    work-stealing: false        # Disable work stealing (can cause issues with HTCondor)
+    idle-timeout: null          # Don't timeout idle scheduler
+    default-task-durations: {}  # Let scheduler learn task durations
+  
+  # Worker Configuration
+  worker:
+    # Memory management - prevent OOM kills
+    memory:
+      target: 0.70      # Start spilling data to disk at 70% memory usage
+      spill: 0.80       # Aggressively spill at 80%
+      pause: 0.85       # Pause worker threads at 85%
+      terminate: 0.98   # Terminate worker at 98% (last resort)
+    
+    # Diagnostics
+    diagnostics:
+      nvml: false  # Disable NVIDIA GPU monitoring (not needed for most CMS analysis)
+    
+    # Connection settings
+    heartbeat: "5s"     # Send heartbeat every 5 seconds
+    connections:
+      outgoing: 50      # Max outgoing connections per worker
+      incoming: 10      # Max incoming connections per worker
+  
+  # Client Configuration  
+  client:
+    heartbeat: "5s"
+  
+  # Version
+  version: 2
 
-  admin:
-    pdb-on-error: True
-    system-monitor:
-      gil:
-        enabled: true
-    tick:
-      limit: 5s # time allowed before triggering a warning
+# ----------------------------------------------------------------------------
+# Dashboard Configuration
+# ----------------------------------------------------------------------------
+dashboard:
+  link: "{JUPYTERHUB_SERVICE_PREFIX}proxy/{port}/status"
+  export-tool: false
+
+# ----------------------------------------------------------------------------
+# Admin Settings
+# ----------------------------------------------------------------------------
+admin:
+  pdb-on-error: false  # Set to true for debugging
+  log-format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# ----------------------------------------------------------------------------
+# System Monitor
+# ----------------------------------------------------------------------------
+system-monitor:
+  gil:
+    enabled: true
+  tick:
+    limit: "5s"
+
+# ----------------------------------------------------------------------------
+# Logging
+# ----------------------------------------------------------------------------
+logging:
+  distributed: "info"
+  distributed.client: "warning"
+  distributed.worker: "info"
+  distributed.scheduler: "info"
+
+# ----------------------------------------------------------------------------
+# Temporary Directory Configuration
+# ----------------------------------------------------------------------------
+temporary-directory: null  # Let system choose (usually /tmp)
+
+# ----------------------------------------------------------------------------
+# Array Configuration (for NumPy/Pandas operations)
+# ----------------------------------------------------------------------------
+array:
+  chunk-size: "128MiB"
+  slicing:
+    split-large-chunks: true
+
+# ----------------------------------------------------------------------------
+# Dataframe Configuration
+# ----------------------------------------------------------------------------
+dataframe:
+  shuffle:
+    method: "tasks"  # Use task-based shuffle (more stable with HTCondor)
+
+# ----------------------------------------------------------------------------
+# Optimization Configuration
+# ----------------------------------------------------------------------------
+optimization:
+  fuse:
+    active: true
+    ave-width: 1
+    max-width: null
+    max-height: inf
+    max-depth-new-edges: null
+    subgraphs: null
+    rename-fused-keys: true
+
