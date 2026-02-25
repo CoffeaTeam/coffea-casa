@@ -139,6 +139,18 @@ class CoffeaCasaCluster(HTCondorCluster):
         raw_dashboard_link = dask.config.get("distributed.dashboard.link", None)
         if isinstance(raw_dashboard_link, bool):
             dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
+        
+        # FIX: Set dashboard link for external access
+        # The pod IP (192.168.x.x) isn't accessible from browser
+        # Use the external hostname if available
+        try:
+            external_hostname = os.environ.get("EXTERNAL_HOSTNAME") or os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "").split("/")[2]
+            if external_hostname:
+                # Use the k8s service DNS name pattern: username.dask.coffea-casa.domain
+                dashboard_link = f"https://{external_hostname}:8785/status"
+                dask.config.set({"distributed.dashboard.link": dashboard_link})
+        except:
+            pass  # Fall back to default if external hostname not available
 
         # FIX 2: Patch worker TLS config in dask.yaml if it's null
         # Some dask.yaml files have:
@@ -188,6 +200,10 @@ class CoffeaCasaCluster(HTCondorCluster):
             dashboard_port=dashboard_port,
             nanny_port=nanny_port,
         )
+        
+        # Prevent dask-jobqueue from creating a local worker
+        # We only want HTCondor workers, not local workers
+        job_kwargs['n_workers'] = 0
 
         super().__init__(**job_kwargs)
 
@@ -246,6 +262,21 @@ class CoffeaCasaCluster(HTCondorCluster):
         external_ip_string = f'"{contact_address}"'
 
         dash_port = f":{dashboard_port}"
+        
+        # Set dashboard link for Labextension
+        # Priority: DASK_DASHBOARD_LINK env > construct from EXTERNAL_HOSTNAME > use pod IP
+        dashboard_link = os.environ.get("DASK_DASHBOARD_LINK")
+        if not dashboard_link:
+            # Try to construct from EXTERNAL_HOSTNAME (set by admin in k8s deployment)
+            external_hostname = os.environ.get("EXTERNAL_HOSTNAME")
+            if external_hostname:
+                dashboard_link = f"http://{external_hostname}:{dashboard_port}/status"
+            else:
+                # Fall back to pod IP (may not be accessible from browser)
+                dashboard_link = f"http://{external_ip}:{dashboard_port}/status"
+        
+        dask.config.set({"distributed.dashboard.link": dashboard_link})
+        print(f"Dashboard will be available at: {dashboard_link}")
 
         # Scheduler settings
         job_config["scheduler_options"] = merge_dicts(
