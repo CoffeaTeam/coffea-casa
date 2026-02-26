@@ -27,6 +27,7 @@ jobqueue:
     # Worker command
     worker-command: "distributed.cli.dask_worker"
     worker-extra-args: []
+    extra: null # deprecated: use worker-extra-args
     
     # HTCondor-specific options
     env-extra: null
