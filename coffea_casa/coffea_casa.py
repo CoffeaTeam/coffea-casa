@@ -139,18 +139,6 @@ class CoffeaCasaCluster(HTCondorCluster):
         raw_dashboard_link = dask.config.get("distributed.dashboard.link", None)
         if isinstance(raw_dashboard_link, bool):
             dask.config.set({"distributed.dashboard.link": "http://{host}:{port}/status"})
-        
-        # FIX: Set dashboard link for external access
-        # The pod IP (192.168.x.x) isn't accessible from browser
-        # Use the external hostname if available
-        try:
-            external_hostname = os.environ.get("EXTERNAL_HOSTNAME") or os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "").split("/")[2]
-            if external_hostname:
-                # Use the k8s service DNS name pattern: username.dask.coffea-casa.domain
-                dashboard_link = f"https://{external_hostname}:8785/status"
-                dask.config.set({"distributed.dashboard.link": dashboard_link})
-        except:
-            pass  # Fall back to default if external hostname not available
 
         # FIX 2: Patch worker TLS config in dask.yaml if it's null
         # Some dask.yaml files have:
@@ -264,16 +252,28 @@ class CoffeaCasaCluster(HTCondorCluster):
         dash_port = f":{dashboard_port}"
         
         # Set dashboard link for Labextension
-        # Priority: DASK_DASHBOARD_LINK env > construct from EXTERNAL_HOSTNAME > use pod IP
+        # Priority: DASK_DASHBOARD_LINK env > JupyterHub proxy > direct access
         dashboard_link = os.environ.get("DASK_DASHBOARD_LINK")
+        
         if not dashboard_link:
-            # Try to construct from EXTERNAL_HOSTNAME (set by admin in k8s deployment)
-            external_hostname = os.environ.get("EXTERNAL_HOSTNAME")
-            if external_hostname:
-                dashboard_link = f"http://{external_hostname}:{dashboard_port}/status"
+            # Check if running in JupyterHub (has JUPYTERHUB_SERVICE_PREFIX)
+            jupyterhub_prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX")
+            if jupyterhub_prefix:
+                # JupyterHub proxy pattern: /user/<username>/proxy/<port>/status
+                # JUPYTERHUB_SERVICE_PREFIX typically ends with / (e.g., "/user/name/")
+                # Ensure it ends with / before appending
+                if not jupyterhub_prefix.endswith('/'):
+                    jupyterhub_prefix += '/'
+                dashboard_link = f"{jupyterhub_prefix}proxy/{dashboard_port}/status"
             else:
-                # Fall back to pod IP (may not be accessible from browser)
-                dashboard_link = f"http://{external_ip}:{dashboard_port}/status"
+                # Try to construct direct access URL
+                external_hostname = os.environ.get("EXTERNAL_HOSTNAME")
+                if external_hostname:
+                    # Direct access with hostname (no port in URL for https)
+                    dashboard_link = f"https://{external_hostname}/status"
+                else:
+                    # Fall back to pod IP (may not be accessible from browser)
+                    dashboard_link = f"http://{external_ip}:{dashboard_port}/status"
         
         dask.config.set({"distributed.dashboard.link": dashboard_link})
         print(f"Dashboard will be available at: {dashboard_link}")
