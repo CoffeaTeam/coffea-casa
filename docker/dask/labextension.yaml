@@ -9,9 +9,7 @@ labextension:
     module: "coffea_casa"
     class: "CoffeaCasaCluster"
     args: []
-    kwargs:
-      # Default worker image for all clusters
-      worker_image: "hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:development"
+    kwargs: {}
   
   # Default settings when creating new cluster
   default:
