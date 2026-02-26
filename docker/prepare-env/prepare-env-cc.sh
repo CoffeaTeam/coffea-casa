@@ -37,6 +37,14 @@ EOF
     echo "ServiceX config generated."
 fi
 
+#######################################
+
+JUPYTER_CONFIG=$(jupyter --config-dir)
+ln -sf $DASK_ROOT_CONFIG/labextension.yaml "$JUPYTER_CONFIG/dask_labextension.yaml"
+
+# Verify symlink
+ls -la "$JUPYTER_CONFIG/dask_labextension.yaml"
+
 ########################################
 # Dask configuration templating
 ########################################
@@ -104,6 +112,7 @@ if [ -s "$HOME/environment.yaml" ]; then
 elif [ -s "$HOME/environment.yml" ]; then
     ENV_FILE="$HOME/environment.yml"
 fi
+
 
 # Update conda environment if a valid YAML was found
 if [ -n "$ENV_FILE" ]; then

@@ -22,12 +22,8 @@ labextension:
   
   # Pre-configured cluster templates in Labextension sidebar
   initial:
-    # Template 1: Small fixed cluster for quick tests
-    - name: "Small Test Cluster"
-      workers: 2
-      adapt: null
-    
-    # Template 2: Auto-scaling cluster for analysis (recommended)
+ 
+    # Template 1: Auto-scaling cluster for analysis (recommended)
     - name: "Auto-Scaling Cluster (Recommended)"
       workers: null
       adapt:
@@ -35,6 +31,11 @@ labextension:
         maximum: 50
         interval: "2s"
         wait_count: 3
+
+    # Template 2: Small fixed cluster for quick tests
+    - name: "Small Test Cluster"
+      workers: 2
+      adapt: null
     
     # Template 3: Medium fixed cluster
     - name: "Medium Cluster (10 workers)"
