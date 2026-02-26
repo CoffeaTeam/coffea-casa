@@ -1,17 +1,53 @@
 labextension:
+  # ----------------------------------------------------------------------------
+  # Dask Labextension Configuration
+  # ----------------------------------------------------------------------------
+  
+  # Factory: How to create clusters from Labextension
+  # This prevents LocalCluster from being used
   factory:
-    module: 'dask.distributed'
-    class: 'LocalCluster'
+    module: "coffea_casa"
+    class: "CoffeaCasaCluster"
     args: []
-    kwargs: {}
+    kwargs:
+      # Default worker image for all clusters
+      worker_image: "hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:development"
+  
+  # Default settings when creating new cluster
   default:
-    workers: null
+    workers: null  # Use adaptive scaling by default
     adapt:
       minimum: 1
       maximum: 50
+      interval: "2s"
+      wait_count: 3
+  
+  # Pre-configured cluster templates in Labextension sidebar
   initial:
-  - name: "Local Cluster"
-    workers: null
-    adapt:
-      minimum: 1
-      maximum: 50
+    # Template 1: Small fixed cluster for quick tests
+    - name: "Small Test Cluster"
+      workers: 2
+      adapt: null
+    
+    # Template 2: Auto-scaling cluster for analysis (recommended)
+    - name: "Auto-Scaling Cluster (Recommended)"
+      workers: null
+      adapt:
+        minimum: 1
+        maximum: 50
+        interval: "2s"
+        wait_count: 3
+    
+    # Template 3: Medium fixed cluster
+    - name: "Medium Cluster (10 workers)"
+      workers: 10
+      adapt: null
+    
+    # Template 4: Large auto-scaling for production
+    - name: "Large Production Cluster"
+      workers: null
+      adapt:
+        minimum: 5
+        maximum: 100
+        interval: "2s"
+        wait_count: 5

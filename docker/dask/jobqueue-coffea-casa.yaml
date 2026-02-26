@@ -1,33 +1,60 @@
+# ----------------------------------------------------------------------------
+# HTCondor Jobqueue Configuration
+# ----------------------------------------------------------------------------
 jobqueue:
+  
+  # CoffeaCasa Cluster Configuration
   coffea-casa:
-    name: dask-worker
-    # Dask worker options, taken from https://github.com/dask/dask-jobqueue/tree/master/dask_jobqueue
-    cores: 1                 # Total number of cores per job
-    memory: "4GiB"                # Total amount of memory per job
-    processes: 1                # Number of Python processes per jobs
+    # Job naming
+    name: "dask-worker"
+    
+    # Resource allocation per worker
+    cores: 1                  # 1 CPU core per worker
+    memory: "4GiB"            # 4 GB RAM per worker
+    disk: "2GiB"              # 2 GB disk per worker
+    processes: 1              # 1 Python process per worker
+    
+    # Worker container image
     worker-image: "hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:development"
-
-    # Comunication settings
-    python: null                # Python executable
-    interface: null             # Network interface to use like eth0 or ib0
-    death-timeout: 60           # Number of seconds to wait if a worker can not find a scheduler
-    local-directory: null       # Location of fast local storage like /scratch or $TMPDIR
-    shared-temp-directory: null       # Shared directory currently used to dump temporary security objects for workers
-    extra: null                 # deprecated: use worker-extra-args
-    worker-command: "distributed.cli.dask_worker" # Command to launch a worker
+    
+    # Communication settings
+    python: null
+    interface: null
+    death-timeout: 60         # Wait 60s for scheduler before giving up
+    local-directory: null
+    shared-temp-directory: null
+    
+    # Worker command
+    worker-command: "distributed.cli.dask_worker"
     worker-extra-args: []
-
-    # HTCondor Resource Manager options
-    disk: "2 GiB"          # Amount of disk per worker job
+    
+    # HTCondor-specific options
     env-extra: null
     job-script-prologue: []
-    job-extra: null             # Extra submit attributes
-    job-extra-directives: {}    # Extra submit attributes
+    job-extra: null
+    
+    # Additional HTCondor submit directives
+    job-extra-directives:
+      # Set accounting group for usage tracking
+      "+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"'
+      
+      # Request encrypted file transfer
+      encrypt_input_files: ""
+      
+      # File transfer settings
+      should_transfer_files: "YES"
+      when_to_transfer_output: "ON_EXIT_OR_EVICT"
+      transfer_output_files: ""
+    
+    # Directives to skip (if any default ones cause issues)
     job-directives-skip: []
-    submit-command-extra: [ "-spool" ]    # Extra condor_submit arguments
-    cancel-command-extra: []    # Extra condor_rm arguments
+    
+    # HTCondor submit command options
+    submit-command-extra: ["-spool"]
+    cancel-command-extra: []
+    
+    # Logging
     log-directory: null
+    
+    # Submit file shebang
     shebang: "#!/usr/bin/env condor_submit"
-
-    # Scheduler options
-    scheduler-options: {}
