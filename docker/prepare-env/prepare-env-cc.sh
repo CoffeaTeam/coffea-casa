@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+#FIX: /usr/local/etc/conda/activate.d/activate-binutils_linux-64.sh: line 68: ADDR2LINE: unbound variable
+# e.g. “unbound variable” ERROR when conda invoked within bash scripts containing command “set -u”
+#set -Eeuo pipefail
 
 [[ "${DEBUG:-}" == "1" ]] && set -x
 
