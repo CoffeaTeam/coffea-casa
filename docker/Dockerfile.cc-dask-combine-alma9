@@ -157,6 +157,7 @@ RUN mamba install --quiet --yes \
     jupyterlab_widgets \
     jupyter-server-proxy \
     jupyter-vscode-proxy \
+    jupyterlab-s3-browser \
     code-server \
     nodejs \
     ipywidgets && \
@@ -187,7 +188,7 @@ RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
 
 # Enable the serverextensions that do not use the conf.d approach and
 # build JupyterLab.
-RUN jupyter server extension enable dask_labextension jupyterlab_git && \ 
+RUN jupyter server extension enable dask_labextension jupyterlab_git jupyterlab-s3-browser && \
     jupyter server extension list && \
     jupyter lab build --debug --dev-build=False --minimize=False && jupyter lab clean && \
     npm cache clean --force && \
@@ -255,14 +256,10 @@ RUN mkdir /cvmfs
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
-    #funcx \ outdated dependencies
+    mt2 \
     pixi-kernel \
     scikit-hep-testdata \
     pyyaml \
-    # visualization
-    Shapely==1.8.1.post1 \
-    descartes==1.1.0 \
-    # JSON processor
     jq \
     prometheus_client \
     comm>=0.1.2 \
@@ -270,6 +267,9 @@ RUN pip install --no-cache-dir \
     s3fs \
     jupytext \
     servicex \
+    # something is keep on pushing wrong version of numpy
+    numpy>2 \
+    numba \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard
 
