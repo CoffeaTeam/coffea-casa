@@ -211,7 +211,6 @@ RUN mamba install --yes \
     cabinetry \
     pyhf \
     ndcctools \
-    numpy>2 \
     atlas-schema \
     root  \
     cms-combine \
@@ -268,7 +267,7 @@ RUN pip install --no-cache-dir \
     jupytext \
     servicex \
     # something is keep on pushing wrong version of numpy
-    numpy>2 \
+    numpy==2.4.2 \
     numba \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard

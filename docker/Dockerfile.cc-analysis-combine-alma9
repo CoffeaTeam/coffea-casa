@@ -124,24 +124,29 @@ RUN mamba install --yes \
     atlas-schema \
     cmake \
     ndcctools \
-    root==6.34.4  \
+    root \
     cms-combine \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
         --yes
 
-RUN pip install --no-cache-dir \
+
+RUN pip install --upgrade --no-cache-dir \
+    mt2 \
     aiostream \
     supervisor \
-    #funcx \ outdated dependencies
+    servicex \
     pixi-kernel \
     scikit-hep-testdata \
     pyyaml \
     prometheus_client \
     comm>=0.1.2 \
-    mlflow \ 
-    s3fs
+    mlflow \
+    s3fs \
+    # something is keep on pushing wrong version of numpy
+    numpy==2.4.2 \
+    numba  
 
 #RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
 RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
