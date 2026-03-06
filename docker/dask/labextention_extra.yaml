@@ -1,0 +1,154 @@
+# ~/.config/dask/labextension.yaml
+#
+# Dask JupyterLab extension — backend configuration
+#
+# This file is read by the dask config system at startup.
+# Place it at:
+#   ~/.config/dask/labextension.yaml          (per-user)
+#   /etc/dask/labextension.yaml               (system-wide, e.g. Docker image)
+#   $DASK_LABEXTENSION__... env vars          (Kubernetes ConfigMap / Helm)
+#
+# Include only the backends available at your facility.
+# The "New Cluster" dialog shows exactly this list.
+# ─────────────────────────────────────────────────────────────────────────────
+
+labextension:
+
+  # ── Direct backends ─────────────────────────────────────────────────────────
+  # The Python cluster object lives in the same process as the notebook server.
+  # No gateway server required.
+
+  backends:
+
+    # ── 1. Local ──────────────────────────────────────────────────────────────
+    # Default upstream behaviour.
+    # Workers run as threads/processes on the same machine.
+    # Good for: laptops, single-node testing.
+    - id: "local"
+      display_name: "Local"
+      # gateway_style absent → direct ClusterClass(**kwargs)
+      factory:
+        module: 'dask.distributed'
+        class: 'LocalCluster'
+        args: []
+        kwargs: {}
+      default:
+        workers: null          # null → use LocalCluster's own default
+        adapt: null
+        # adapt:
+        #   minimum: 0
+        #   maximum: 4
+
+    # ── 2. HTCondor (direct, no gateway) ──────────────────────────────────────
+    # dask-jobqueue submits workers as HTCondor jobs.
+    # The Dask scheduler runs inside the notebook server process.
+    # Requires: pip install dask-jobqueue
+    # Good for: facilities with HTCondor but no Dask Gateway.
+    - id: "htcondor"
+      display_name: "HTCondor"
+      factory:
+        module: 'coffea_casa'
+        class: 'CoffeaCasaCluster'
+        args: []
+        kwargs: {}
+
+      # Default settings when creating new cluster
+      default:
+        workers: null
+        adapt:
+          minimum: 1
+          maximum: 50
+          interval: "2s"
+          wait_count: 3
+
+
+  # ── Dask Gateway backends ────────────────────────────────────────────────────
+  # All of the below route through a Dask Gateway server.
+  # The gateway server's backend (what actually runs the workers) is set by
+  # the facility admin in dask-gateway-server config — not here.
+  #
+  # Two client-side patterns:
+  #   gateway_style: "direct"   →  GatewayCluster(address=..., cluster_options=...)
+  #   gateway_style: "factory"  →  GatewaySubclass(**kw).new_cluster(**mkw)
+  #                                (used by HTCGateway)
+
+    # ── 6. Dask Gateway → any server-side backend ─────────────────────────────
+    # Standard dask-gateway client. Works with any gateway server backend
+    # (Kubernetes, SLURM, PBS, YARN, …).
+    # Requires: pip install dask-gateway
+    - id: "gateway"
+      display_name: "Gateway"
+      gateway_style: "direct"
+      factory:
+        module: 'dask_gateway'
+        class: 'GatewayCluster'
+        args: []
+        kwargs:
+          address: "http://api-dask-gateway.dask-gateway:8000"
+          proxy_address: "gateway://api-dask-gateway:8000"
+          public_address: "/services/dask-gateway/"
+          shutdown_on_close: true
+          # auth: jupyterhub   # string shorthand, or use the dict form below:
+          # auth:
+          #   type: jupyterhub
+          # cluster_options exposed by the gateway admin:
+          # cluster_options:
+          #   worker_cores: 1
+          #   worker_memory: "2 G"
+          #   image: "ghcr.io/dask/dask:latest"
+          #   environment: "my-conda-env"
+      default:
+        workers: null
+        adapt:
+          minimum: 0
+          maximum: 20
+
+    # ── 7. HTCGateway (Kubernetes scheduler + HTCondor workers) ───────────────
+    # Heterogeneous mode: scheduler pod on Kubernetes, workers on HTCondor.
+    # Server: custom HTCondor gateway backend
+    #         https://github.com/mapsacosta/htcdaskgateway
+    # Client: HTCGateway — a Gateway subclass, NOT a cluster constructor.
+    #         Must use gateway_style: "factory" so the extension calls
+    #         HTCGateway(**kwargs).new_cluster(**method_kwargs).
+    # Requires: pip install htcdaskgateway
+    - id: "gateway-htcondor"
+      display_name: "HTCondor (Gateway)"
+      gateway_style: "factory"
+      factory:
+        module: 'htcdaskgateway'
+        class: 'HTCGateway'
+        factory_method: 'new_cluster'
+        args: []
+        kwargs:
+          # Passed to HTCGateway() constructor.
+          # Usually auto-detected from env vars set by JupyterHub:
+          #   DASK_GATEWAY__ADDRESS, JUPYTERHUB_SERVICE_PREFIX
+          # Uncomment only if you need to override:
+          # address: "http://api-dask-gateway.dask-gateway:8000"
+          # proxy_address: "gateway://api-dask-gateway:8000"
+          # public_address: "/services/dask-gateway/"
+        method_kwargs:
+          # Passed to .new_cluster() → become server-side cluster_options.
+          # Available keys depend on what the gateway admin has configured.
+          {}
+          # image: "coffeateam/coffea-dask-cc7-gateway:0.7.12-fastjet-3.3.4.0rc9-g8a990fa"
+          # worker_cores: 1
+          # worker_memory: "2 G"
+          # shutdown_on_close: true
+      default:
+        workers: null
+        adapt: null
+
+
+  # ── Clusters started automatically at notebook-server launch ─────────────────
+  # Each entry creates a cluster before the user opens the sidebar.
+  initial: []
+  # initial:
+  #   - name: "My Gateway Cluster"
+  #     backend: "gateway"
+  #     adapt:
+  #       minimum: 0
+  #       maximum: 20
+  #   - name: "Local Dev"
+  #     backend: "local"
+  #     workers: 4
