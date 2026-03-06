@@ -307,6 +307,13 @@ ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
 
+# ------- dask-labextention -------------------------------
+RUN git clone https://github.com/oshadura/dask-labextension -b dev && \
+    cd dask-labextension && \
+    pip install -e ".[dev]" && \
+    jlpm install && jlpm build && \
+    jupyter labextension develop . --overwrite
+
 USER root
 
 # Fix permission after all packages installations are done

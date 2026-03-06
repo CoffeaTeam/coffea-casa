@@ -125,9 +125,6 @@ RUN mamba install --yes \
     atlas-schema \
     cmake \
     ndcctools \
-    # last working version with x509
-    #htcondor=10.8.0 \
-    #openssl=3.3.1 \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
