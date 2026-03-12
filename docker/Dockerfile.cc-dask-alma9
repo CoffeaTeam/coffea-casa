@@ -280,6 +280,7 @@ RUN pip install --no-cache-dir \
     comm>=0.1.2 \
     mlflow \
     s3fs \
+    pyroscope-io \
     jupytext \
     servicex \
     # something is keep on pushing wrong version of numpy
