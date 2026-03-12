@@ -326,6 +326,9 @@ RUN rm -rf /tmp/* \
 ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
+# Periscope
+COPY prepare-env/sitecustomize.py ${CONDA_DIR}/lib/python3.12/site-packages/sitecustomize.py
+
 # Include additional CA certificates beyond ca-policy-lcg
 COPY certs/* /etc/grid-security/certificates/
 RUN openssl rehash /etc/grid-security/certificates/
