@@ -309,7 +309,8 @@ ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 COPY dask/jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
 
 # ------- dask-labextention -------------------------------
-RUN export YARN_CACHE_FOLDER=/tmp/yarn-cache && \
+RUN mkdir -p /home/cms-jovyan/.yarn/berry/cache && \
+    chmod -R 777 /home/cms-jovyan/.yarn && \
     git clone https://github.com/oshadura/dask-labextension -b dev && \
     cd dask-labextension && \
     pip install -e ".[dev]" && \
