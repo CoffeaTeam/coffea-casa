@@ -237,7 +237,8 @@ RUN mamba install --yes \
 
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
-COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
+#COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
+COPY dask/dask.yaml dask/dask_tls.yaml  ${DASK_ROOT_CONFIG}/
 
 USER root
 # Add HTCondor configuration files that not needed to be edited
@@ -306,7 +307,18 @@ ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
-COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
+COPY dask/jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
+
+# ------- dask-labextention -------------------------------
+RUN mkdir -p /home/cms-jovyan/.yarn/berry/cache && \
+    chmod -R 777 /home/cms-jovyan/.yarn && \
+    git clone https://github.com/oshadura/dask-labextension -b dev && \
+    cd dask-labextension && \
+    pip install -e ".[dev]" && \
+    jlpm install && jlpm build && \
+    jupyter labextension develop . --overwrite
+
+COPY dask/labextension_extra.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
 
