@@ -237,7 +237,8 @@ RUN mamba install --yes \
 
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
-COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
+#COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
+COPY dask/dask.yaml dask/dask_tls.yaml  ${DASK_ROOT_CONFIG}/
 
 USER root
 # Add HTCondor configuration files that not needed to be edited
@@ -259,6 +260,12 @@ RUN groupadd -g 989 condor && \
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"
+
+# Fix yarn cache ownership as root BEFORE switching user
+RUN mkdir -p /home/cms-jovyan/.yarn/berry/cache && \
+    chown -R ${NB_USER}:${NB_USER} /home/cms-jovyan/.yarn && \
+    pip uninstall -y dask_labextension || true && \
+    rm -rf /usr/local/lib/python3.12/site-packages/dask_labextension*
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
@@ -306,8 +313,17 @@ ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
-COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
+COPY dask/jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
 
+# ------- dask-labextention -------------------------------
+USER ${NB_USER}
+RUN git clone https://github.com/oshadura/dask-labextension -b dev && \
+    cd dask-labextension && \
+    pip install --user -e ".[dev]" && \
+    jlpm install && jlpm build && \
+    jupyter labextension develop . --overwrite
+
+COPY dask/labextension_extra.yaml ${DASK_ROOT_CONFIG}/
 USER root
 
 # Fix permission after all packages installations are done

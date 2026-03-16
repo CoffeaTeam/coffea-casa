@@ -56,6 +56,10 @@ jobs:
         with:
           version: latest
           driver-opts: network=host
+      - name: Install dependencies
+        env:
+          YARN_CACHE_FOLDER: /tmp/yarn-cache
+        run: yarn install
       - name: Login to Harbor Hub
         if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v2
