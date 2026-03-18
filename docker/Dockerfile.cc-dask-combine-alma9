@@ -153,6 +153,7 @@ RUN mamba install --quiet --yes \
     jupyterlab \
     jupyterlab_widgets \
     jupyterlab-git \
+    jupyterlab-latex \
     jupyterlab-lsp \
     jupytext \
     jupyterlab-system-monitor \
