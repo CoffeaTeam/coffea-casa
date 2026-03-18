@@ -153,6 +153,9 @@ RUN mamba install --quiet --yes \
     jupyterlab \
     jupyterlab_widgets \
     jupyterlab-git \
+    jupyterlab-lsp \
+    jupytext \
+    jupyterlab-system-monitor \
     jupyter_client \
     jupyterlab_widgets \
     jupyter-server-proxy \
@@ -255,6 +258,8 @@ RUN mkdir /cvmfs
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
+    jupyter-ai \
+    ipywidgets \
     mt2 \
     pixi-kernel \
     scikit-hep-testdata \
