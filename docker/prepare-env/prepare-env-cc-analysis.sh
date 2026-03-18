@@ -2,6 +2,18 @@
 
 set -x
 
+########################################
+# Conda init
+########################################
+
+if [[ -f "$CONDA_BIN/conda" ]]; then
+    eval "$("$CONDA_BIN/conda" shell.bash hook)"
+else
+    echo "Conda not found at $CONDA_BIN/conda"
+fi
+
+#########################################
+
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found.  Installing."
     /opt/conda/bin/mamba install -y $EXTRA_CONDA_PACKAGES
