@@ -133,6 +133,8 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     fix-permissions "${HOME}" && \
     fix-permissions "${CONDA_DIR}"
 
+RUN echo "source /usr/local/etc/profile.d/conda.sh" >> /etc/bash.bashrc
+
 USER $NB_USER
 WORKDIR $HOME
 # Setup work directory for backward-compatibility
