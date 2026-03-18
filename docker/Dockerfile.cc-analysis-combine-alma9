@@ -191,10 +191,6 @@ COPY certs/* /etc/grid-security/certificates/
 RUN openssl rehash /etc/grid-security/certificates/
 
 RUN chmod -R g-w /usr/local/etc/grid-security/ && chmod -R g-w /etc/grid-security/
-    #chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
-    #test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
-    #find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
-    #test -d /etc/grid-security && chmod -R 755 /etc/grid-security
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it

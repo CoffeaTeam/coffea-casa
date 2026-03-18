@@ -155,6 +155,10 @@ RUN mamba install --quiet --yes \
     jupyterlab \
     jupyterlab_widgets \
     jupyterlab-git \
+    jupyterlab-latex \
+    jupyterlab-lsp \
+    jupytext \
+    jupyterlab-system-monitor \
     jupyter_client \
     jupyterlab_widgets \
     jupyter-server-proxy \
@@ -204,25 +208,13 @@ RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT
     mkdir -p ${HOME}/.condor/tokens.d && chown -R "${NB_USER}:${NB_GID}" ${HOME}/.condor/tokens.d && \
     mkdir -p /etc/condor/config.d
 
-# ------- mimalloc build -------------------------------
-# Clone mimalloc
-#RUN cd /opt && \
-#    git clone https://github.com/microsoft/mimalloc.git /opt/mimalloc && \
-#    cd mimalloc && mkdir build && cd build && \
-#    cmake .. \
-#    #  -DMI_SECURE=ON \
-#      -DMI_BUILD_SHARED=ON \
-#      -DMI_BUILD_STATIC=ON && \
-#    make && \
-#    make install
-# ------- tcmalloc build -------------------------------
-
-
 USER ${NB_UID}
 
 RUN mamba install --yes \
     -c conda-forge \
     jupyter-ai \
+    ipywidgets \
+    nbdime \
     htcondor=24.9.2 \
     xgboost \
     cabinetry \
@@ -237,8 +229,7 @@ RUN mamba install --yes \
 
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
-#COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
-COPY dask/dask.yaml dask/dask_tls.yaml  ${DASK_ROOT_CONFIG}/
+COPY dask/dask.yaml  dask/dask_tls.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
 # Add HTCondor configuration files that not needed to be edited
@@ -249,12 +240,6 @@ RUN groupadd -g 989 condor && \
     useradd -u 989 -g 989 -d /var/lib/condor -s /sbin/nologin condor && \
     mkdir -p /var/lib/condor/spool && chown -R "${CONDOR_USER}:${CONDOR_GID}" /var/lib/condor && \
     chmod -R 755 /var/lib/condor
-
-# Setup HTCondor user/group and change group for user $NB_USER
-# Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
-# it configured from kubernetes side and updated in docker container to match it
-#RUN groupadd -r condor && \
-#    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
 
 # Fix permissions for Dask/Ceph config files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
@@ -296,7 +281,6 @@ RUN pip install --no-cache-dir \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard
 
-#RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
 RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
 
 # ------- xrootd-xcache-plugin -------------------------------
@@ -342,7 +326,6 @@ RUN rm -rf /tmp/* \
     && find ${CONDA_DIR} -type f -name '*.a' -delete \
     && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
-    #&& (find ${CONDA_DIR}/lib/python3.12/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 
 ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
@@ -356,10 +339,6 @@ COPY certs/* /etc/grid-security/certificates/
 RUN openssl rehash /etc/grid-security/certificates/
 
 RUN chmod -R g-w /usr/local/etc/grid-security/ && chmod -R g-w /etc/grid-security/
-    #chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
-    #test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
-    #find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
-    #test -d /etc/grid-security && chmod -R 755 /etc/grid-security
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}
