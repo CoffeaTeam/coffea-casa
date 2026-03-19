@@ -28,4 +28,4 @@ RUN mamba install -y python=${PYTHON_VERSION} \
     && rm -rf /usr/local/pkgs
 
 RUN pip install --upgrade pip && \
-    pip install --upgrade git+https://github.com/pfackeldey/haas@main#egg=haas
+    pip install --upgrade histserv h5py
