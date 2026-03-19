@@ -156,9 +156,7 @@ RUN mamba install --quiet --yes \
     jupyterlab_widgets \
     jupyterlab-git \
     jupytext \
-    jupyterlab-system-monitor \
     jupyter_client \
-    jupyterlab_widgets \
     jupyter-server-proxy \
     jupyter-vscode-proxy \
     jupyterlab-s3-browser \
