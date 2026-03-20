@@ -20,4 +20,10 @@ labextension:
       interval: "2s"
       wait_count: 3
 
-  initial: []  # Don't auto-start clusters!
+  initial:
+    - name: "Coffea Casa Adaptive Cluster"
+      adapt:
+        minimum: 0
+        maximum: 50
+        interval: "2s"
+        wait_count: 3
