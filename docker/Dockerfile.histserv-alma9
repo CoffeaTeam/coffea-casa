@@ -28,4 +28,4 @@ RUN mamba install -y python=${PYTHON_VERSION} \
     && rm -rf /usr/local/pkgs
 
 RUN pip install --upgrade pip && \
-    pip install --upgrade histserv h5py
+    pip install histserv==0.1.3 h5py
