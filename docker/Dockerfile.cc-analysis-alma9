@@ -145,7 +145,7 @@ RUN pip install --upgrade --no-cache-dir \
     mlflow \
     s3fs \
     pyroscope-io \
-    histserv==0.1.8 \
+    histserv==0.1.9 \
     # something is keep on pushing wrong version of numpy
     numpy==2.4.2 \
     numba   
