@@ -305,7 +305,7 @@ COPY dask/jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
 #    jlpm install && jlpm build && \
 #    jupyter labextension develop . --overwrite
 
-COPY dask/labextension_extra.yaml ${DASK_ROOT_CONFIG}/
+#COPY dask/labextension_extra.yaml ${DASK_ROOT_CONFIG}/
 USER root
 
 # Fix permission after all packages installations are done
