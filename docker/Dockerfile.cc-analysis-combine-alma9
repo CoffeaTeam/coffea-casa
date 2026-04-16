@@ -149,7 +149,8 @@ RUN pip install --upgrade --no-cache-dir \
     pyroscope-io \
     # something is keep on pushing wrong version of numpy
     numpy==2.4.2 \
-    numba  
+    nbstripout \
+    numba
 
 #RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
 RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
