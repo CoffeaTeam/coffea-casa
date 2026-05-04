@@ -18,3 +18,11 @@ labextension:
         maximum: 50
         interval: "2s"
         wait_count: 3
+
+  default:
+    - name: "Coffea Casa Adaptive Cluster"
+      adapt:
+        minimum: 1
+        maximum: 50
+        interval: "2s"
+        wait_count: 3
