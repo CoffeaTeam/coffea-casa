@@ -77,7 +77,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 .. toctree::
   :maxdepth: 1
   :hidden:
-  :caption: Deeper Look Into ``Coffea-Casa`` Internals
+  :caption: Deeper Look Into Coffea-Casa Internals
 
   cc_setup.rst
   cc_configuration.rst

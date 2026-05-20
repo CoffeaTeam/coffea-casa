@@ -17,7 +17,7 @@ There are two access points to the Coffea-casa AF @ T2 Nebraska. The site at `ht
 
 .. image:: _static/cc-login.png
    :alt: Access to Opendata Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
    
 .. important::
@@ -28,14 +28,14 @@ The other at `https://coffea.casa <https://coffea.casa>`_ is for CMS data and ca
 
 .. image:: _static/coffea-casa-enter.png
    :alt: Access to Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
    
 Another coffea-casa instance exists for the AF @ UChicago, which is meant to be used with ATLAS data. You can accesss it at `https://coffea.af.uchicago.edu`_.
 
 .. image:: _static/coffea.af.uchicago.edu_hub_login.png
    :alt: Access to Coffea-casa Analysis Facility @ UChicago
-   :width: 50%
+   :width: 65%
    :align: center
 
 See the appropriate section below if you need help going through the registration process for either access point.
@@ -50,28 +50,28 @@ Currently Opendata Coffea-Casa supports any CILogon identity provider. Select yo
 
 .. image:: _static/cc-cilogon.png
    :alt: Select your identity provider for CILogon Authz authentification to access Opendata Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
 
 For accessing Opendata Coffea-Casa, we are offering a self-signup registration form with approval.
 
 .. image:: _static/cc-reg1.png
    :alt: Fill out the registration form for access to Opendata Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
 
 Click to proceed to the next stage:
 
 .. image:: _static/cc-reg2.png
    :alt: Check the information in the registration form is correct (form should already be prefilled).
-   :width: 50%
+   :width: 65%
    :align: center
 
 Click to proceed to the next stage:
 
 .. image:: _static/cc-request.png
    :alt: Request for approval was sent.
-   :width: 50%
+   :width: 65%
    :align: center
 
 If you see the next window, it means that the registration request was sent succesfully!
@@ -83,14 +83,14 @@ After your request is approved, you will receive an email, where you will simply
 
 .. image:: _static/cc-email.png
    :alt:  Example of email you should receive after registration.
-   :width: 50%
+   :width: 65%
    :align: center
 
 Voila! Now you can login to Opendata Coffea-Casa. Click on "Authorized Users Only: Sign in with OAuth 2.0" to do so:
 
 .. image:: _static/cc-enter.png
    :alt:  Start directly use Opendata Coffea-Casa: click here to "Authorized Users Only: Sign in with OAuth 2.0".
-   :width: 50%
+   :width: 65%
    :align: center
 
 CMS AuthZ Authentication Instance
@@ -104,13 +104,13 @@ To access it please sign in or sign up using ``Apply for an account``.
 
 .. image:: _static/coffea-casa-authz.png
    :alt: CMS Authz authentification to Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
 
 
 .. image:: _static/coffea-casa-authz-approval.png
    :alt: Approval required for CMS Authz authentification to Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
    
 ATLAS AuthZ Authentication Instance
@@ -121,13 +121,13 @@ Sign in with your ATLAS CERN credential:
 
 .. image:: _static/atlas-auth.web.cern.ch_login.png
    :alt: ATLAS Authz authentification to Coffea-casa Analysis Facility @ UChicago
-   :width: 50%
+   :width: 65%
    :align: center
 
 
 .. image:: _static/coffea-casa-authz-approval.png
    :alt: Approval required for CMS Authz authentification to Coffea-casa Analysis Facility @ UChicago
-   :width: 50%
+   :width: 65%
    :align: center
 
 
@@ -138,7 +138,7 @@ The default image is preloaded with *coffea*, *Dask*, and *HTCondor* and you sho
 
 .. image:: _static/coffea-casa-image.png
     :alt:  Coffea Casa analysis image available at Coffea-casa Analysis Facility @ T2 Nebraska
-    :width: 50%
+    :width: 65%
     :align: center
 
 
@@ -156,7 +156,7 @@ By default, the Coffea-casa Dask cluster should provide you with a scheduler and
 
 .. image:: _static/coffea-casa-startr.png
    :alt: Default Dask Labextention powered cluster available Opendata Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
 
 As soon as you start your computations, you will notice that available resources at the Opendata Coffea-Casa Analysis Facility @ T2 Nebraska autoscale depending on the resources available in the HTCondor pool at Nebraska Tier 2.
@@ -164,8 +164,27 @@ As soon as you start your computations, you will notice that available resources
 
 .. image:: _static/coffea-casa-labext.png
    :alt: Autoscaling with Dask Labextention powered cluster available at Opendata Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
+
+Cluster Hardware Specifications
+````````````````````````````````
+
+The Coffea-Casa Analysis Facility @ T2 Nebraska runs on the following infrastructure:
+
+.. list-table::
+   :widths: 30 70
+   :header-rows: 0
+
+   * - **Operating System**
+     - AlmaLinux 9.7
+   * - **Kubernetes Version**
+     - 1.34.5
+   * - **GPU Resources**
+     - 2× NVIDIA L40S (available for GPU-accelerated workloads)
+
+.. note::
+   GPU resources (NVIDIA L40S) are available for users who require accelerated computing. Contact the facility administrators if you would like to make use of GPU nodes in your analysis.
    
 
 Opening a New Console or File
@@ -174,7 +193,7 @@ There are three ways by which you can open a new tab within coffea-casa. Two are
 
 .. image:: _static/coffea-casa-newtab.png
    :alt: The File menu of the coffea-casa JupyterLab interface.
-   :width: 50%
+   :width: 65%
    :align: center
    
 The *New* dropdown menu allows you to open the console or a file of a specified format directly. The *New Launcher* option creates a new tab with buttons that permit you to launch a console or a new file, exactly like the interface you are shown when you first open coffea-casa.
@@ -183,7 +202,7 @@ The final way is specific to the **File Browser** tab of the sidebar.
 
 .. image:: _static/coffea-casa-newlauncher.png
    :alt: The File Browser tab of the coffea-casa JupyterLab interface, showcasing the New Launcher button.
-   :width: 50%
+   :width: 65%
    :align: center
 
 This behaves exactly like the *New Launcher* option above.
@@ -202,14 +221,14 @@ In order to clone a repository, first go to the Git tab. It should look like thi
 
 .. image:: _static/git.png
    :alt: The Git tab at Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
 
 Simply click the appropriate button (initialize a repository, or clone a repository) and you'll be hooked up to GitHub. This should then take you to the *File Browser* tab, which is where you can see all of the repositories you have cloned in your JupyterLab instance. The File Browser should look like this:
 
 .. image:: _static/browser.png
    :alt: The File Browser tab at Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
 
 If you wish to change repositories, simply click the folder button to enter the root directory. If you are in the root directory, the Git tab will reset and allow you to clone another repository.
@@ -218,7 +237,7 @@ If you wish to commit, push, or pull from the repository you currently have acti
 
 .. image:: _static/git2.png
    :alt: The Git tab at Coffea-casa Analysis Facility @ T2 Nebraska, after a repository is activated
-   :width: 50%
+   :width: 65%
    :align: center
 
 The buttons in the top right allow for pulling and pushing respectively. When you have edited files in a directory, they will show up under the *Changed* category, at which point you can hit the **+** to add them to a commit (at which point they will show up under *Staged*). Filling out the box at the bottom of the sidebar will file your commit, and prepare it for you to push.
@@ -259,7 +278,7 @@ ServiceX transformations produce their output as an Awkward Array. The array can
 
 .. image:: _static/servicex-coffea-workflow.png
    :alt: ServiceX and Coffea-Casa workflow schema.
-   :width: 80%
+   :width: 65%
    :align: center
 
 There are two different UC AF-deployed ServiceX instances. The only difference between them is the type of input data they are capable of processing.
@@ -269,21 +288,21 @@ To use them one has to register and get approved. Sign in will lead you to a Glo
 
 .. image:: _static/servicex-registration.png
    :alt: ServiceX registration.
-   :width: 80%
+   :width: 65%
    :align: center
 
 Once approved, you will be able to see the status of your requests in the dashboard:
 
 .. image:: _static/servicex-dashboard.png
    :alt: ServiceX dashboard.
-   :width: 80%
+   :width: 65%
    :align: center
 
 For your code to be able to authenticate your requests you need to download a servicex.yaml file, which should be placed in your working directory. The file is downloaded from your profile page:
 
 .. image:: _static/servicex-profile.png
    :alt: ServiceX profile.
-   :width: 80%
+   :width: 65%
    :align: center
 
 For an example analysis using ServiceX and Coffea look `here. <https://github.com/iris-hep/analysis-grand-challenge/blob/main/workshops/agctools2021/HZZ_analysis_pipeline/HZZ_analysis_pipeline.ipynb>`_
@@ -381,7 +400,7 @@ As a result you should see the following plot:
 
 .. image:: _static/example1-plot.png
    :alt: Final plot that you should see at the end of example
-   :width: 50%
+   :width: 65%
    :align: center
 
 CMS Example
@@ -472,7 +491,7 @@ As a result you should see the following plot:
 
 .. image:: _static/examplezpeak-plot.png
    :alt: Final plot that you should see at the end of example
-   :width: 50%
+   :width: 65%
    :align: center
    
 ATLAS Examples

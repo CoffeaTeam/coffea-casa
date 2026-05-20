@@ -66,7 +66,7 @@ To get an address of scheduler that will be used during client connection, try r
 
 .. image:: _static/dask-labextention-address.png
    :alt: Dask Labextention powered cluster, with right-click menu
-   :width: 50%
+   :width: 65%
    :align: center
 
 And then pressing *Inject Dask Client Connection Code*, as is shown in example below:
