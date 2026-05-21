@@ -1,36 +1,14 @@
 # Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
-import coffea_casa
 
 # -- Project information -----------------------------------------------------
 
 project = 'coffea-casa'
-copyright = '2020, coffea-casa'
+copyright = '2026, coffea-casa'
 author = 'coffea-casa, UNL'
-
-# The full version, including alpha/beta/rc tags
-release = coffea_casa.__version__
-
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
@@ -39,17 +17,32 @@ extensions = [
     "sphinx.ext.viewcode",
 ]
 
-# Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-#html_theme = 'nextstrain-sphinx-theme'
+html_theme = 'sphinx_rtd_theme'
+
+html_title = "Coffea-Casa Documentation"
+
+html_theme_options = {
+    # Sidebar behaviour
+    "navigation_depth": 4,
+    "collapse_navigation": False,   # keep all sections expanded like Ceph
+    "sticky_navigation": True,
+    "includehidden": True,
+    "titles_only": False,
+    # Style
+    "style_nav_header_background": "#1a1f2e",   # dark navy header (Ceph-like)
+    "prev_next_buttons_location": "both",
+    "style_external_links": True,
+}
+
+html_show_sphinx = True
+html_show_sourcelink = True
+
+html_static_path = ['_static']
+html_css_files = ['custom.css']
+
+html_logo = "_static/coffea-casa-logo.png"

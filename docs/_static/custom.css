@@ -1,0 +1,280 @@
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Global typography ── */
+body,
+.wy-body-for-nav {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── Content area: centred with breathing room on both sides ── */
+.wy-nav-content {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 2rem 6rem;
+  background: #ffffff;
+}
+
+.wy-nav-content-wrap {
+  background: #ffffff;
+}
+
+/* ── Images: rounded, shadowed ── */
+.rst-content img {
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.06);
+  display: block;
+  margin: 1.5rem auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Sidebar logo */
+.wy-side-nav-search > a img.logo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 92% !important;
+  max-width: 92% !important;
+  height: auto !important;
+  margin: 0.6rem auto 0.4rem !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+/* ═══════════════════════════════════════
+   SIDEBAR – colours only, don't fight RTD
+   padding/margin via targeted overrides
+   ═══════════════════════════════════════ */
+
+.wy-nav-side {
+  background: #1e2433;
+  width: 320px;         /* slightly wider than RTD default 300px */
+}
+
+.wy-nav-content-wrap {
+  margin-left: 320px;   /* must match sidebar width */
+}
+
+@media screen and (max-width: 768px) {
+  .wy-nav-side  { width: 300px; }
+  .wy-nav-content-wrap { margin-left: 0; }
+}
+
+/* ── Search block ── */
+.wy-side-nav-search {
+  background-color: #1a1f2e !important;
+  padding: 1rem 0.75rem 0.9rem;
+}
+
+.wy-side-nav-search > a {
+  color: #fff !important;
+  font-weight: 700;
+}
+
+.wy-side-nav-search input[type=text] {
+  border-radius: 6px;
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+/* ── Section caption labels ("GETTING STARTED" etc.) ──
+   RTD forces: height:32px; line-height:32px; padding:0; white-space:nowrap
+   Override every one of those so the caption can breathe.
+   Captions are intentionally LARGER than the nav items below them. */
+.wy-menu-vertical p.caption,
+.wy-menu-vertical header {
+  height: auto !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;   /* allow long names to wrap */
+  color: #c9d1d9 !important;        /* brighter than items so they stand out */
+  font-size: 0.82rem !important;    /* bigger than L1 items (0.855rem normal → ~0.78rem effective uppercase) */
+  font-weight: 800 !important;
+  letter-spacing: 0.07em;
+  text-transform: uppercase !important;
+  padding: 1.4rem 1.1rem 0.5rem 1.1rem !important;
+  margin: 0 !important;
+  border-top: 1px solid #2d3748 !important;
+  display: block !important;
+}
+
+/* no divider on the very first caption */
+.wy-menu-vertical p.caption:first-child {
+  border-top: none !important;
+  padding-top: 0.75rem !important;
+}
+
+/* L1 items slightly smaller than captions */
+.wy-menu-vertical li.toctree-l1 > a {
+  font-size: 0.845rem;
+}
+
+/* ── All sidebar links: base colour ── */
+.wy-menu-vertical a {
+  color: #c9d1d9 !important;
+}
+
+/* ── L1 items (top-level pages) ── */
+.wy-menu-vertical li.toctree-l1 > a {
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
+  border-left: 3px solid transparent;
+}
+
+.wy-menu-vertical li.toctree-l1 > a:hover {
+  background: #293044;
+  color: #fff !important;
+}
+
+/* active L1 */
+.wy-menu-vertical li.toctree-l1.current > a {
+  background: #293044;
+  border-left-color: #3b82f6 !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* the sub-list background under the active L1 */
+.wy-menu-vertical li.toctree-l1.current > ul {
+  background: #19202e;
+}
+
+/* ── L2 items (sub-pages) ── */
+.wy-menu-vertical li.toctree-l2 > a {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  color: #8b98a9 !important;
+  font-size: 0.855rem;
+  border-left: 3px solid transparent;
+}
+
+.wy-menu-vertical li.toctree-l2 > a:hover {
+  background: #222b3c;
+  color: #c9d1d9 !important;
+}
+
+.wy-menu-vertical li.toctree-l2.current > a {
+  color: #93c5fd !important;
+  border-left-color: #60a5fa !important;
+  background: #222b3c;
+}
+
+/* ── L3 items ── */
+.wy-menu-vertical li.toctree-l3 > a {
+  font-size: 0.83rem;
+  color: #6b7280 !important;
+}
+
+/* ── Expand/collapse toggle icons ── */
+.wy-menu-vertical .toctree-expand {
+  color: #4b5563 !important;
+}
+
+.wy-menu-vertical li.current .toctree-expand {
+  color: #6b7280 !important;
+}
+
+/* ═══════════════
+   MAIN CONTENT
+   ═══════════════ */
+
+/* Headings */
+.rst-content h1 {
+  font-size: 1.95rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.rst-content h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 2.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.3rem;
+}
+
+.rst-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.8rem;
+}
+
+/* Code blocks */
+.rst-content div[class^="highlight"],
+.rst-content div[class*=" highlight"] {
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.rst-content code.literal,
+.rst-content tt.literal {
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.85em;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+/* Admonitions */
+.rst-content .note,
+.rst-content .important,
+.rst-content .warning,
+.rst-content .tip,
+.rst-content .admonition {
+  border-radius: 6px;
+  border-left-width: 4px;
+}
+
+/* Tables */
+.rst-content table.docutils {
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.rst-content table.docutils thead th {
+  background: #f3f4f6;
+  font-weight: 600;
+  border-bottom: 2px solid #d1d5db;
+}
+
+/* Footer */
+footer {
+  font-size: 0.82rem;
+  color: #6b7280;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  margin-top: 2rem;
+}
+
+footer a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+footer a:hover { text-decoration: underline; }
+
+/* Prev/Next buttons */
+.rst-footer-buttons .btn-neutral {
+  background: #f9fafb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.rst-footer-buttons .btn-neutral:hover {
+  background: #f3f4f6;
+  color: #111827;
+}

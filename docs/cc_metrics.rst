@@ -28,7 +28,7 @@ The Dask interactive dashboard can be accessed in the same side-pane where your 
 
 .. image:: _static/coffea-casa-dashboard.png
    :alt: Demonstration of Dask Dashboard buttons, which can be clicked to access various metrics of interest.
-   :width: 50%
+   :width: 65%
    :align: center
    
 

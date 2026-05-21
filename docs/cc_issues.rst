@@ -4,7 +4,7 @@ In general, it is advised that you restart your coffea-casa server before doing 
 
 .. image:: _static/coffea-casa-server_stop.png
    :alt: A demonstration of the "Stop My Server" button.
-   :width: 50%
+   :width: 65%
    :align: center
 
 After the server is shut down, you will get a series of linear prompts to start it back up again. If the problem persists, then it's time for a deeper investigation!

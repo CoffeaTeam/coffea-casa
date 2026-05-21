@@ -15,7 +15,7 @@ Please shut down ``UNL HTCondor Cluster`` (powered by Dask Labextention and avai
 
 .. image:: _static/coffea-casa-labext.png
    :alt: Default Dask Labextention powered cluster available Coffea-casa Analysis Facility @ T2 Nebraska
-   :width: 50%
+   :width: 65%
    :align: center
 
 
