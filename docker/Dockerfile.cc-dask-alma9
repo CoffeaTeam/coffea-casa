@@ -314,8 +314,8 @@ USER root
 RUN fix-permissions "${CONDA_DIR}"
 
 # Distributed: we need to install patched version of distributed version
-COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
-RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
+COPY dask/distributed ${CONDA_DIR}/lib/python3.13/site-packages/distributed
+RUN cd ${CONDA_DIR}/lib/python3.13/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
 
@@ -332,7 +332,7 @@ ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Periscope
-COPY prepare-env/sitecustomize.py ${CONDA_DIR}/lib/python3.12/site-packages/sitecustomize.py
+COPY prepare-env/sitecustomize.py ${CONDA_DIR}/lib/python3.13/site-packages/sitecustomize.py
 
 # Include additional CA certificates beyond ca-policy-lcg
 COPY certs/* /etc/grid-security/certificates/
