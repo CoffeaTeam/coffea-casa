@@ -121,7 +121,6 @@ RUN rm /etc/grid-security/certificates/*.r*
 #Dask dependencies and HTCondor
 RUN mamba install --yes \
     -c conda-forge \
-    xgboost \
     cabinetry \
     pyhf \
     atlas-schema \
@@ -168,7 +167,7 @@ RUN cd /tmp && \
     make install
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-6.so"
 
 # TODO: RETEST IF WE STILL NEED THIS 
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"

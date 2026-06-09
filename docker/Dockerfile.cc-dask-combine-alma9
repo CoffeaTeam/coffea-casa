@@ -208,8 +208,6 @@ USER ${NB_UID}
 
 RUN mamba install --yes \
     -c conda-forge \
-    htcondor=24.9.2 \
-    xgboost \
     cabinetry \
     pyhf \
     ndcctools \
@@ -292,7 +290,7 @@ RUN cd /tmp && \
     make install
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-6.so"
 
 # -------combine-plugin -------------------------------
 #RUN cd /opt/combine && \
