@@ -202,7 +202,7 @@ RUN groupadd -g 989 condor && \
 
 # FIXME: merge PRs open in distributed.git (oshadura)
 # Distributed: we need to install patched version of distributed version
-COPY dask/distributed ${CONDA_DIR}/lib//site-packages/distributed
+COPY dask/distributed ${CONDA_DIR}/lib/python3.13/site-packages/distributed
 RUN cd ${CONDA_DIR}/lib/python3.13/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
