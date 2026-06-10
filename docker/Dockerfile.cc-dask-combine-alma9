@@ -211,6 +211,7 @@ RUN mamba install --yes \
     cabinetry \
     pyhf \
     ndcctools \
+    xrootd==5.9.2 \
     atlas-schema \
     root  \
     cms-combine \
@@ -290,7 +291,7 @@ RUN cd /tmp && \
     make install
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-6.so"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # -------combine-plugin -------------------------------
 #RUN cd /opt/combine && \
