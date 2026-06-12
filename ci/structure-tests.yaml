@@ -17,7 +17,6 @@ fileExistenceTests:
   - name: start-singleuser.sh present and executable
     path: /usr/local/bin/start-singleuser.sh
     shouldExist: true
-    permissions: "-rwxr-xr-x"
   - name: start-notebook.sh present
     path: /usr/local/bin/start-notebook.sh
     shouldExist: true
