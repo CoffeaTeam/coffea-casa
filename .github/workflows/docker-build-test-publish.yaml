@@ -90,9 +90,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Lint Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: docker/Dockerfile.${{ matrix.image }}
+        run: |
+          curl -fsSLo hadolint \
+            https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+          chmod +x hadolint
+          ./hadolint docker/Dockerfile.${{ matrix.image }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
