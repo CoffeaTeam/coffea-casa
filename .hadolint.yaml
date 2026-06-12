@@ -1,0 +1,6 @@
+ignored:
+  - DL3013   # pip pins: handled selectively (numpy, histserv) by design
+  - DL3033   # yum pins impractical with OSG/EPEL rolling repos
+  - DL3003   # cd inside single RUN blocks is intentional
+  - DL3059   # layer consolidation deferred; better cache granularity while iterating
+failure-threshold: error
