@@ -61,10 +61,8 @@ jobs:
       # ---------------------------------------------------------------
       - name: Run pytest smoke tests inside the image
         run: |
-          docker run --rm \
-            -v "$PWD/tests:/tests:ro" \
-            "$IMAGE" \
-            python -m pytest /tests -v --color=yes
+          docker run --rm -v "$PWD/tests:/tests:ro" "$IMAGE" \
+            bash -c "pip install --no-cache-dir --quiet --user pytest && python -m pytest /tests -v --color=yes"
 
       # ---------------------------------------------------------------
       # Layer 4: standalone runtime test — does the server actually start
