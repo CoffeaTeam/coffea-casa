@@ -318,7 +318,7 @@ RUN rm -rf /tmp/* \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
     && rm -rf ${CONDA_DIR}/pkgs
 
-ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
+COPY prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Periscope
