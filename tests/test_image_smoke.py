@@ -19,7 +19,7 @@ CRITICAL_IMPORTS = [
     "distributed",
     "dask_labextension",
     "coffea_casa",
-    "htcondor",
+    #"htcondor",
     "uproot",
     "awkward",
     "numpy",
@@ -53,6 +53,10 @@ def test_python_version():
         "python3.13 paths for the patched distributed package"
     )
 
+def test_condor_cli_available():
+    assert shutil.which("condor_submit"), (
+        "condor_submit missing — HTCondorCluster scaling will fail at runtime"
+    )
 
 def test_patched_distributed_is_the_imported_one():
     import distributed
