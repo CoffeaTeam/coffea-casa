@@ -233,7 +233,7 @@ RUN mkdir /cvmfs
 # Prepare HTCondor spec. environment and execute dask-worker command
 # If we using this container as a sidecar, we don't setup any HTCondor spec. environment
 # nor and execute dask-worker command
-ADD prepare-env/prepare-env-cc-analysis.sh /usr/local/bin/prepare-env.sh
+COPY prepare-env/prepare-env-cc-analysis.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 USER $NB_USER
