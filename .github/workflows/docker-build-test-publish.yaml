@@ -1,0 +1,216 @@
+name: Build, test and publish docker images
+
+# One workflow, three behaviors:
+#   pull_request      -> build + test, never push
+#   push to master    -> build + test + push :development
+#   release published -> build + test + push :<release tag>
+#   workflow_dispatch -> build + test, never push (safe manual run)
+on:
+  pull_request:
+    paths:
+      - docker/**
+    branches:
+      - master
+  push:
+    paths:
+      - docker/**
+    branches:
+      - master
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+env:
+  PROJECT: 'coffea-casa'
+  REGISTRY: 'hub.opensciencegrid.org'
+
+jobs:
+  matrix-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [cc-dask-alma9, cc-analysis-alma9, cc-dask-combine-alma9, cc-analysis-combine-alma9]
+        include:
+          - image: cc-dask-alma9
+            singleuser: true
+            spawntest: true
+          - image: cc-dask-combine-alma9
+            singleuser: true
+            spawntest: false
+          - image: cc-analysis-alma9
+            singleuser: false
+            spawntest: false
+          - image: cc-analysis-combine-alma9
+            singleuser: false
+            spawntest: false
+    name: ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      # ----------------------------------------------------------------
+      # Tag generation, unified for all event types
+      # ----------------------------------------------------------------
+      - name: Generate tags
+        id: tags
+        env:
+          image: ${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}
+          release: ${{ github.event.release.tag_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
+            releasetag="${release}"
+            push="true"
+          elif [ "${GITHUB_EVENT_NAME}" == "push" ]; then
+            releasetag="development"
+            push="true"
+          else
+            # pull_request / workflow_dispatch: test-only, never published
+            releasetag="ci-${GITHUB_SHA::12}"
+            push="false"
+          fi
+          tags="${image}:${releasetag}"
+          echo "Event=${GITHUB_EVENT_NAME} tags=${tags} push=${push}"
+          echo "tags=${tags}" >> "$GITHUB_OUTPUT"
+          echo "releasetag=${releasetag}" >> "$GITHUB_OUTPUT"
+          echo "push=${push}" >> "$GITHUB_OUTPUT"
+
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: docker/Dockerfile.${{ matrix.image }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+          driver-opts: network=host
+
+      - name: Install dependencies
+        env:
+          YARN_CACHE_FOLDER: /tmp/yarn-cache
+        run: yarn install
+
+      # ----------------------------------------------------------------
+      # Build ONCE into the local daemon, under the final tag.
+      # Everything below tests exactly the bytes that get published.
+      # ----------------------------------------------------------------
+      - name: Build image (load locally for testing)
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/
+          file: docker/Dockerfile.${{ matrix.image }}
+          load: true
+          platforms: linux/amd64
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+          build-args: |
+            TAG=${{ steps.tags.outputs.releasetag }}
+            PROJECT=${{ env.PROJECT }}
+            GITHUB_ACTIONS=true
+            REGISTRY=${{ env.REGISTRY }}
+
+      # ----------------------------------------------------------------
+      # Test layers (singleuser images only)
+      # ----------------------------------------------------------------
+      - name: Install container-structure-test
+        if: matrix.singleuser
+        run: |
+          curl -fsSLo container-structure-test \
+            https://github.com/GoogleContainerTools/container-structure-test/releases/latest/download/container-structure-test-linux-amd64
+          chmod +x container-structure-test
+          sudo mv container-structure-test /usr/local/bin/container-structure-test
+
+      - name: Run structure tests
+        if: matrix.singleuser
+        run: |
+          container-structure-test test \
+            --image "${{ steps.tags.outputs.tags }}" \
+            --config ci/structure-tests.yaml
+
+      - name: Run pytest smoke tests inside the image
+        if: matrix.singleuser
+        run: |
+          docker run --rm -v "$PWD/tests:/tests:ro" "${{ steps.tags.outputs.tags }}" \
+            bash -c "pip install --no-cache-dir --quiet --user pytest && \
+                     python -m pytest /tests -v --color=yes -p no:cacheprovider"
+
+      - name: Boot notebook server and probe it
+        if: matrix.singleuser
+        run: |
+          docker run -d --name nb -p 8888:8888 "${{ steps.tags.outputs.tags }}" \
+            start-notebook.sh --ServerApp.token='' --ServerApp.ip=0.0.0.0
+          for i in $(seq 1 60); do
+            curl -fsS http://localhost:8888/api > /dev/null && { echo "Server is up"; break; }
+            [ "$i" = 60 ] && { echo "Server never came up"; docker logs nb; exit 1; }
+            sleep 5
+          done
+          docker logs nb
+          docker rm -f nb
+
+      - name: Create kind cluster
+        if: matrix.spawntest
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: cc-test
+
+      - name: Run z2jh spawn test
+        if: matrix.spawntest
+        run: |
+          kind load docker-image "${{ steps.tags.outputs.tags }}" --name cc-test
+          ./ci/spawn-test.sh "${{ steps.tags.outputs.tags }}"
+
+      - name: Dump cluster state on failure
+        if: failure() && matrix.spawntest
+        run: |
+          kubectl get pods -A -o wide || true
+          kubectl describe pods -l component=singleuser-server -A || true
+          kubectl logs -l component=hub -A --tail=300 || true
+          kubectl logs -l component=singleuser-server -A --all-containers --tail=300 || true
+
+      # ----------------------------------------------------------------
+      # Publish: only for push/release events, only if all tests passed.
+      # Instant: every layer already in the GHA cache from the build above.
+      # ----------------------------------------------------------------
+      - name: Login to Harbor Hub
+        if: success() && steps.tags.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: hub.opensciencegrid.org
+          username: ${{ secrets.HARBOR_USER }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Push tested image
+        if: success() && steps.tags.outputs.push == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/
+          file: docker/Dockerfile.${{ matrix.image }}
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          build-args: |
+            TAG=${{ steps.tags.outputs.releasetag }}
+            PROJECT=${{ env.PROJECT }}
+            GITHUB_ACTIONS=true
+            REGISTRY=${{ env.REGISTRY }}
