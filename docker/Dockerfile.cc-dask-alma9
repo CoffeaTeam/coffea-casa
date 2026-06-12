@@ -153,7 +153,7 @@ RUN rm /etc/grid-security/certificates/*.r*
 RUN mamba install --quiet --yes \
     -c conda-forge \
     notebook \
-    jupyterhub==3.1.1 \
+    jupyterhub-singleuser==5.4.0 \
     jupyterlab \
     jupyterlab_widgets \
     jupyterlab-git \
@@ -243,15 +243,6 @@ RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"
 
-# Fix yarn cache ownership as root BEFORE switching user
-#RUN mkdir -p /home/cms-jovyan/.yarn/berry/cache && \
-#    chown -R ${NB_USER}:${NB_USER} /home/cms-jovyan/.yarn && \
-#    pip uninstall -y dask_labextension || true && \
-#    rm -rf /usr/local/lib/python3.12/site-packages/dask_labextension*
-
-# FIXME: we have a wrong path, let's make a link.
-# cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
-# ${CONDA_DIR}/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 
 # Mkdir CVMFS mount directory.  Mount done upstream in configs. Harmless
@@ -327,7 +318,7 @@ RUN rm -rf /tmp/* \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
     && rm -rf ${CONDA_DIR}/pkgs
 
-ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
+COPY prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Periscope

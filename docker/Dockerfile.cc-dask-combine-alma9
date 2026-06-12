@@ -151,7 +151,7 @@ RUN rm /etc/grid-security/certificates/*.r*
 RUN mamba install --quiet --yes \
     -c conda-forge \
     notebook \
-    jupyterhub==3.1.1 \
+    jupyterhub-singleuser==5.4.0 \
     jupyterlab \
     jupyterlab_widgets \
     jupyterlab-git \
@@ -327,7 +327,7 @@ RUN rm -rf /tmp/* \
     #&& (find ${CONDA_DIR}/lib/python3.12/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 
-ADD prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
+COPY prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Periscope

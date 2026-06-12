@@ -1,0 +1,62 @@
+schemaVersion: "2.0.0"
+
+# Static checks: cheap, fast, and they pinpoint exactly what's missing.
+
+metadataTest:
+  exposedPorts: ["8888"]
+  entrypoint: ["tini", "-g", "--", "/usr/local/bin/prepare-env.sh"]
+  cmd: ["start-notebook.sh"]
+  user: "6440"
+  envVars:
+    - key: NB_USER
+      value: cms-jovyan
+    - key: DASK_ROOT_CONFIG
+      value: /opt/dask
+
+fileExistenceTests:
+  - name: start-singleuser.sh present and executable
+    path: /usr/local/bin/start-singleuser.sh
+    shouldExist: true
+  - name: start-notebook.sh present
+    path: /usr/local/bin/start-notebook.sh
+    shouldExist: true
+  - name: prepare-env entrypoint present and executable
+    path: /usr/local/bin/prepare-env.sh
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: tini present
+    path: /usr/bin/tini
+    shouldExist: true
+  - name: jupyter server config generated
+    path: /etc/jupyter/jupyter_server_config.py
+    shouldExist: true
+  - name: dask config installed
+    path: /opt/dask/dask.yaml
+    shouldExist: true
+  - name: coffea-casa jobqueue config installed
+    path: /opt/dask/jobqueue-coffea-casa.yaml
+    shouldExist: true
+  - name: condor config installed
+    path: /etc/condor/condor_config
+    shouldExist: true
+  - name: xcache xrootd plugin built
+    path: /usr/local/lib/libXrdClXcachePlugin-5.so
+    shouldExist: true
+
+commandTests:
+  - name: jupyterhub-singleuser is on PATH and runs
+    command: "jupyterhub-singleuser"
+    args: ["--version"]
+    exitCode: 0
+  - name: jupyter lab is installed
+    command: "jupyter"
+    args: ["lab", "--version"]
+    exitCode: 0
+  - name: required server extensions are enabled
+    command: "bash"
+    args: ["-c", "jupyter server extension list 2>&1 | grep -E 'dask_labextension.*enabled'"]
+    exitCode: 0
+  - name: home directory owned by NB_USER
+    command: "bash"
+    args: ["-c", "stat -c '%u:%g' /home/cms-jovyan | grep -q '6440:11265'"]
+    exitCode: 0
