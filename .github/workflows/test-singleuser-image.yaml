@@ -48,8 +48,10 @@ jobs:
       # ---------------------------------------------------------------
       - name: Install container-structure-test
         run: |
-          curl -sLo cst https://github.com/GoogleContainerTools/container-structure-test/releases/latest/download/container-structure-test-linux-amd64
-          chmod +x cst && sudo mv cst /usr/local/bin/
+          curl -fsSLo container-structure-test \
+            https://github.com/GoogleContainerTools/container-structure-test/releases/latest/download/container-structure-test-linux-amd64
+          chmod +x container-structure-test
+          sudo mv container-structure-test /usr/local/bin/container-structure-test
 
       - name: Run structure tests
         run: container-structure-test test --image "$IMAGE" --config ci/structure-tests.yaml
