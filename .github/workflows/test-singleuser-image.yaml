@@ -1,0 +1,107 @@
+name: Test singleuser image
+
+on:
+  pull_request:
+    paths:
+      - "docker/**"
+      - ".github/workflows/test-singleuser-image.yml"
+  workflow_dispatch:
+
+env:
+  IMAGE: cc-dask-alma9:ci-${{ github.sha }}
+
+jobs:
+  test-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      # ---------------------------------------------------------------
+      # Layer 0: lint the Dockerfile (catches DL/SC issues before build)
+      # ---------------------------------------------------------------
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: docker/Dockerfile.cc-dask-alma9
+          failure-threshold: error
+
+      # ---------------------------------------------------------------
+      # Layer 1: build the image (with layer cache so CI is bearable)
+      # ---------------------------------------------------------------
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: docker
+          file: docker/Dockerfile.cc-dask-alma9
+          tags: ${{ env.IMAGE }}
+          load: true            # load into local docker so we can run it
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GITHUB_ACTIONS=true
+
+      # ---------------------------------------------------------------
+      # Layer 2: static container checks (files, user, entrypoint, env)
+      # ---------------------------------------------------------------
+      - name: Install container-structure-test
+        run: |
+          curl -sLo cst https://github.com/GoogleContainerTools/container-structure-test/releases/latest/download/container-structure-test-linux-amd64
+          chmod +x cst && sudo mv cst /usr/local/bin/
+
+      - name: Run structure tests
+        run: container-structure-test test --image "$IMAGE" --config ci/structure-tests.yaml
+
+      # ---------------------------------------------------------------
+      # Layer 3: in-container smoke tests (imports, versions, jupyter)
+      # ---------------------------------------------------------------
+      - name: Run pytest smoke tests inside the image
+        run: |
+          docker run --rm \
+            -v "$PWD/tests:/tests:ro" \
+            "$IMAGE" \
+            python -m pytest /tests -v --color=yes
+
+      # ---------------------------------------------------------------
+      # Layer 4: standalone runtime test — does the server actually start
+      # and answer HTTP, using the same entrypoint the spawner will use?
+      # ---------------------------------------------------------------
+      - name: Boot notebook server and probe it
+        run: |
+          docker run -d --name nb -p 8888:8888 "$IMAGE" \
+            start-notebook.sh --ServerApp.token='' --ServerApp.ip=0.0.0.0
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8888/api > /dev/null; then
+              echo "Server is up"; break
+            fi
+            if [ "$i" = 60 ]; then
+              echo "Server never came up"; docker logs nb; exit 1
+            fi
+            sleep 5
+          done
+          docker logs nb
+
+      # ---------------------------------------------------------------
+      # Layer 5: real spawn test — kind cluster + zero-to-jupyterhub,
+      # spawn a user server via the Hub REST API with THIS image.
+      # ---------------------------------------------------------------
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: cc-test
+
+      - name: Load image into kind
+        run: kind load docker-image "$IMAGE" --name cc-test
+
+      - name: Run z2jh spawn test
+        run: ./ci/spawn-test.sh "$IMAGE"
+
+      - name: Dump cluster state on failure
+        if: failure()
+        run: |
+          kubectl get pods -A -o wide || true
+          kubectl describe pods -l component=singleuser-server || true
+          kubectl logs -l component=hub --tail=300 || true
+          kubectl logs -l component=singleuser-server --all-containers --tail=300 || true

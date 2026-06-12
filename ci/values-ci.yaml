@@ -1,0 +1,46 @@
+# Minimal zero-to-jupyterhub values for CI spawn testing.
+# The image name/tag and the API token are injected via --set in spawn-test.sh.
+
+hub:
+  config:
+    JupyterHub:
+      authenticator_class: dummy
+    DummyAuthenticator:
+      password: ci-password
+  services:
+    ci:
+      admin: true
+      # apiToken injected via --set hub.services.ci.apiToken=...
+
+proxy:
+  service:
+    type: ClusterIP
+
+prePuller:
+  hook:
+    enabled: false
+  continuous:
+    enabled: false
+
+scheduling:
+  userScheduler:
+    enabled: false
+
+singleuser:
+  # IMPORTANT: must match the image. The chart defaults to uid 1000 and
+  # the jovyan user; this image uses cms-jovyan with uid 6440 / gid 11265.
+  uid: 6440
+  fsGid: 11265
+  # The chart mounts the home volume at /home/jovyan by default, which for
+  # this image would shadow nothing useful and leave /home/cms-jovyan
+  # unpersisted. In CI we skip storage entirely; in production set
+  # storage.homeMountPath: /home/cms-jovyan instead.
+  storage:
+    type: none
+  startTimeout: 600
+  # Leave cmd at the chart default (jupyterhub-singleuser); the image
+  # ENTRYPOINT (tini -> prepare-env.sh) must exec it. If your spawn dies
+  # instantly, test with `cmd: null` to fall back to the image CMD and
+  # compare the logs.
+  networkPolicy:
+    enabled: false
