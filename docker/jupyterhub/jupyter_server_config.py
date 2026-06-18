@@ -12,6 +12,7 @@ c = get_config()  # noqa: F821
 # Listen on all interfaces (ipv4 and ipv6)
 c.ServerApp.ip = ""
 c.ServerApp.open_browser = False
+c.ServerApp.port = 8888
 
 # to output both image/svg+xml and application/pdf plot formats in the notebook file
 c.InlineBackend.figure_formats = {"png", "jpeg", "svg", "pdf"}
