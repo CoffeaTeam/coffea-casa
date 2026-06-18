@@ -172,9 +172,8 @@ jobs:
 
           docker run -d --name nb -p 8888:8888 \
             -v "$PWD/ci-secrets:/etc/cmsaf-secrets:ro" \
-            -v "$PWD/ci-secrets:/etc/cmsaf-secrets-chown:ro" \
             "${{ steps.tags.outputs.tags }}" \
-            start-notebook.sh --ServerApp.token='' --ServerApp.ip=0.0.0.0
+            start-notebook.py --IdentityProvider.token='' --ServerApp.ip='0.0.0.0'
           for i in $(seq 1 60); do
             curl -fsS http://localhost:8888/api > /dev/null && { echo "Server is up"; break; }
             [ "$i" = 60 ] && { echo "Server never came up"; docker logs nb; exit 1; }
