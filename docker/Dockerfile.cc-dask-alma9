@@ -186,16 +186,12 @@ RUN mamba install --yes \
 EXPOSE 8888
 
 # Copy local files as late as possible to avoid cache busting
-COPY start-notebook.py start-notebook.sh start-singleuser.py start-singleuser.sh /usr/local/bin/
-COPY jupyter_server_config.py /etc/jupyter/
+COPY jupyterhub/start-notebook.py jupyterhub/start-notebook.sh jupyterhub/start-singleuser.py jupyterhub/start-singleuser.sh /usr/local/bin/
+COPY jupyterhub/jupyter_server_config.py /etc/jupyter/
 
 # Fix permissions on /etc/jupyter as root
 USER root
-
-# Prepare upgrade to JupyterLab V3.0 #1205
-RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
-    /etc/jupyter/jupyter_notebook_config.py > /etc/jupyter/jupyter_server_config.py && \
-    fix-permissions /etc/jupyter/
+RUN fix-permissions /etc/jupyter/
 
 # Enable the serverextensions that do not use the conf.d approach and
 # build JupyterLab.
