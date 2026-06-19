@@ -48,9 +48,9 @@ def test_python_version():
     # Dockerfile copies the patched distributed into .../python3.13/...
     # If the base image silently moves to another Python, those COPYs
     # land in a dead directory and the patches are not applied.
-    assert sys.version_info[:2] == (3, 13), (
+    assert sys.version_info[:2] == (3, 12), (
         f"Python is {sys.version.split()[0]} but the Dockerfile hardcodes "
-        "python3.13 paths for the patched distributed package"
+        "python3.12 paths for the patched distributed package"
     )
 
 def test_condor_cli_available():
@@ -60,7 +60,7 @@ def test_condor_cli_available():
 
 def test_patched_distributed_is_the_imported_one():
     import distributed
-    expected = "/usr/local/lib/python3.13/site-packages/distributed"
+    expected = "/usr/local/lib/python3.12/site-packages/distributed"
     actual = os.path.dirname(distributed.__file__)
     assert actual == expected, (
         f"distributed imported from {actual}, not the patched copy at {expected}"
