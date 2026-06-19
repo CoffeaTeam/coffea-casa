@@ -159,8 +159,15 @@ jobs:
       - name: Boot notebook server and probe it
         if: matrix.singleuser
         run: |
-          docker run -d --name nb -p 8888:8888 "${{ steps.tags.outputs.tags }}" \
-            start-notebook.sh --ServerApp.token='' --ServerApp.ip=0.0.0.0
+          mkdir -p ci-dask
+          # Disable the auto-started default cluster; we test HTTP serving only.
+          # Cluster startup is covered by the kind spawn test with real secrets.
+          printf 'labextension:\n  factory:\n    default: null\n' > ci-dask/zz-ci.yaml
+          docker run -d --name nb -p 8888:8888 \
+            -e DASK_CONFIG=/etc/dask \
+            -v "$PWD/ci-dask:/etc/dask-ci:ro" \
+            "${{ steps.tags.outputs.tags }}" \
+            start-notebook.py --IdentityProvider.token='' --ServerApp.ip='0.0.0.0'
           for i in $(seq 1 60); do
             curl -fsS http://localhost:8888/api > /dev/null && { echo "Server is up"; break; }
             [ "$i" = 60 ] && { echo "Server never came up"; docker logs nb; exit 1; }
@@ -175,6 +182,10 @@ jobs:
         with:
           cluster_name: cc-test
 
+      - name: Install helm
+        if: matrix.spawntest
+        uses: azure/setup-helm@v4
+
       - name: Run z2jh spawn test
         if: matrix.spawntest
         run: |
@@ -185,10 +196,10 @@ jobs:
         if: failure() && matrix.spawntest
         run: |
           kubectl get pods -A -o wide || true
-          kubectl describe pods -l component=singleuser-server -A || true
-          kubectl logs -l component=hub -A --tail=300 || true
-          kubectl logs -l component=singleuser-server -A --all-containers --tail=300 || true
-
+          kubectl describe pods -n jhub-ci || true
+          kubectl logs -n jhub-ci -l component=hub --tail=300 || true
+          kubectl logs -n jhub-ci -l component=singleuser-server --all-containers --tail=300 || true
+          helm -n jhub-ci status jhub-ci || true
       # ----------------------------------------------------------------
       # Publish: only for push/release events, only if all tests passed.
       # Instant: every layer already in the GHA cache from the build above.

@@ -150,11 +150,15 @@ RUN rm /etc/grid-security/certificates/*.r*
 # Correct permissions
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
-RUN mamba install --quiet --yes \
-    -c conda-forge \
-    notebook \
-    jupyterhub-singleuser==5.4.0 \
-    jupyterlab \
+RUN mamba install --yes \
+    'jupyterhub-singleuser' \
+    'jupyterlab' \
+    'nbclassic' \
+    # Sometimes, when the new version of `jupyterlab` is released, latest `notebook` might not support it for some time
+    # Old versions of `notebook` (<v7) didn't have a restriction on the `jupyterlab` version, and old `notebook` is getting installed
+    # That's why we have to pin the minimum notebook version
+    # More info: https://github.com/jupyter/docker-stacks/pull/2167
+    'notebook>=7.2.2' \
     jupyterlab_widgets \
     jupyterlab-git \
     jupytext \
@@ -170,25 +174,24 @@ RUN mamba install --quiet --yes \
         --force-pkgs-dirs \
         --yes && \
     npm cache clean --force && \
-    jupyter notebook --generate-config && \
+    jupyter server --generate-config && \
+    mamba clean --all -f -y && \
     jupyter lab clean && \
+    rm -rf "/home/${NB_USER}/.cache/yarn" && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}" && \
     code-server --install-extension ms-python.python && \
     rm -rf "/home/${NB_USER}/.cache/yarn"
 
 EXPOSE 8888
 
 # Copy local files as late as possible to avoid cache busting
-COPY jupyterhub/start.sh jupyterhub/start-notebook.sh jupyterhub/start-singleuser.sh /usr/local/bin/
-# Currently need to have both jupyter_notebook_config and jupyter_server_config to support classic and lab
-COPY jupyterhub/jupyter_notebook_config.py /etc/jupyter/
+COPY jupyterhub/start-notebook.py jupyterhub/start-notebook.sh jupyterhub/start-singleuser.py jupyterhub/start-singleuser.sh /usr/local/bin/
+COPY jupyterhub/jupyter_server_config.py /etc/jupyter/
 
 # Fix permissions on /etc/jupyter as root
 USER root
-
-# Prepare upgrade to JupyterLab V3.0 #1205
-RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
-    /etc/jupyter/jupyter_notebook_config.py > /etc/jupyter/jupyter_server_config.py && \
-    fix-permissions /etc/jupyter/
+RUN fix-permissions /etc/jupyter/
 
 # Enable the serverextensions that do not use the conf.d approach and
 # build JupyterLab.
