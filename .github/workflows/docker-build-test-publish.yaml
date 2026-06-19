@@ -215,7 +215,8 @@ jobs:
       - name: Check Hub/singleuser version skew
         if: matrix.singleuser
         env:
-          CHART_VERSION: "4.2.0"   # the z2jh version you deploy / intend to deploy
+          #CHART_VERSION: "4.2.0"   # the z2jh version you deploy / intend to deploy
+          CHART_VERSION: "0.11.1-n259.h74abbb81"
         run: ./ci/check-version-skew.sh "${{ steps.tags.outputs.tags }}" "$CHART_VERSION"
 
 
