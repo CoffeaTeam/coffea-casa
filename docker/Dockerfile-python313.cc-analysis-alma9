@@ -1,5 +1,5 @@
 #FROM coffeateam/coffea-base-almalinux8:0.7.22-py3.10
-FROM coffeateam/coffea-dask-almalinux9-noml:2026.5.0-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:2026.5.0-py3.13
 
 
 USER root
@@ -54,6 +54,7 @@ RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-
     langpacks-en \
     glibc-langpack-en \
     glibc-all-langpacks \
+    glibc-headers \
     liberation-fonts \
     wget \
     nss_wrapper \
@@ -123,16 +124,13 @@ RUN mamba install --yes \
     cabinetry \
     pyhf \
     atlas-schema \
-    xrootd==5.9.2 \
     cmake \
     ndcctools \
-    root \
-    cms-combine \
+    xrootd==5.9.2 \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
         --yes
-
 
 RUN pip install --upgrade --no-cache-dir \
     mt2 \
@@ -147,11 +145,15 @@ RUN pip install --upgrade --no-cache-dir \
     mlflow \
     s3fs \
     pyroscope-io \
+    histserv==0.1.9 \
+    nbstripout \
     # something is keep on pushing wrong version of numpy
     numpy==2.4.2 \
-    nbstripout \
-    numba
+    numba   
+    
 
+
+# FIXME
 #RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
 RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
 
@@ -167,16 +169,6 @@ RUN cd /tmp && \
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
-
-# -------combine-plugin -------------------------------
-#RUN cd /opt/combine && \
-#    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
-#    cd HiggsAnalysis/CombinedLimit && \
-#    make CONDA=1 -j 8
-
-#ENV PATH="${PATH}:/opt/combine/HiggsAnalysis/CombinedLimit/build/bin"
-#ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
-#ENV PYTHONPATH="/opt/combine/CombinedLimit/build/lib/python:${PYTHONPATH}"
 
 # TODO: RETEST IF WE STILL NEED THIS 
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
@@ -194,6 +186,10 @@ COPY certs/* /etc/grid-security/certificates/
 RUN openssl rehash /etc/grid-security/certificates/
 
 RUN chmod -R g-w /usr/local/etc/grid-security/ && chmod -R g-w /etc/grid-security/
+    #chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
+    #test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
+    #find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
+    #test -d /etc/grid-security && chmod -R 755 /etc/grid-security
 # Setup HTCondor user/group and change group for user $NB_USER
 # Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
 # it configured from kubernetes side and updated in docker container to match it

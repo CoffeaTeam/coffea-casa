@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask-almalinux9-noml:2026.5.0-py3.13
+FROM coffeateam/coffea-dask-almalinux9-noml:2026.5.0-py3.12
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -148,15 +148,11 @@ RUN rm /etc/grid-security/certificates/*.r*
 # Correct permissions
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
-RUN mamba install --yes \
-    'jupyterhub-singleuser' \
-    'jupyterlab' \
-    'nbclassic' \
-    # Sometimes, when the new version of `jupyterlab` is released, latest `notebook` might not support it for some time
-    # Old versions of `notebook` (<v7) didn't have a restriction on the `jupyterlab` version, and old `notebook` is getting installed
-    # That's why we have to pin the minimum notebook version
-    # More info: https://github.com/jupyter/docker-stacks/pull/2167
-    'notebook>=7.2.2' \
+RUN mamba install --quiet --yes \
+    -c conda-forge \
+    notebook \
+    jupyterhub==3.1.1 \
+    jupyterlab \
     jupyterlab_widgets \
     jupyterlab-git \
     jupytext \

@@ -1,4 +1,4 @@
-FROM coffeateam/coffea-dask-almalinux9-noml:2026.5.0-py3.12
+FROM coffeateam/coffea-dask-almalinux9-noml:2026.5.0-py3.13
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -35,7 +35,7 @@ ARG BEARER_TOKEN_FILE="/etc/cmsaf-secrets-chown/access_token"
 ARG TAG="development"
 ARG PROJECT="coffea-casa"
 ARG REGISTRY="hub.opensciencegrid.org"
-ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-alma9"
+ARG WORKER_IMAGE="${REGISTRY}/${PROJECT}/cc-analysis-combine-alma9"
 # Hack for GH Actions
 ARG GITHUB_ACTIONS="false"
 
@@ -65,7 +65,6 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-
 # Install all OS dependencies for notebook server that starts but lacks all
 # features (e.g., download as all possible file formats)
 RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-latest.rpm \
@@ -83,7 +82,6 @@ RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-
     langpacks-en \
     glibc-langpack-en \
     glibc-all-langpacks \
-    glibc-headers \
     liberation-fonts \
     wget \
     nss_wrapper \
@@ -150,11 +148,15 @@ RUN rm /etc/grid-security/certificates/*.r*
 # Correct permissions
 # Do all this in a single RUN command to avoid duplicating all of the
 # files across image layers when the permissions change
-RUN mamba install --quiet --yes \
-    -c conda-forge \
-    notebook \
-    jupyterhub==3.1.1 \
-    jupyterlab \
+RUN mamba install --yes \
+    'jupyterhub-singleuser' \
+    'jupyterlab' \
+    'nbclassic' \
+    # Sometimes, when the new version of `jupyterlab` is released, latest `notebook` might not support it for some time
+    # Old versions of `notebook` (<v7) didn't have a restriction on the `jupyterlab` version, and old `notebook` is getting installed
+    # That's why we have to pin the minimum notebook version
+    # More info: https://github.com/jupyter/docker-stacks/pull/2167
+    'notebook>=7.2.2' \
     jupyterlab_widgets \
     jupyterlab-git \
     jupytext \
@@ -209,15 +211,13 @@ USER ${NB_UID}
 
 RUN mamba install --yes \
     -c conda-forge \
-    jupyter-ai \
-    ipywidgets \
-    nbdime \
     cabinetry \
     pyhf \
     ndcctools \
     xrootd==5.9.2 \
     atlas-schema \
-    gperftools \
+    root  \
+    cms-combine \
     && mamba clean \
         --all \
         --force-pkgs-dirs \
@@ -225,7 +225,7 @@ RUN mamba install --yes \
 
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
-COPY dask/dask.yaml  dask/dask_tls.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
+COPY dask/dask.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
 
 USER root
 # Add HTCondor configuration files that not needed to be edited
@@ -237,11 +237,20 @@ RUN groupadd -g 989 condor && \
     mkdir -p /var/lib/condor/spool && chown -R "${CONDOR_USER}:${CONDOR_GID}" /var/lib/condor && \
     chmod -R 755 /var/lib/condor
 
+# Setup HTCondor user/group and change group for user $NB_USER
+# Fix error (submitting jobs as user/group 0 (root) is not allowed for security reasons) and
+# it configured from kubernetes side and updated in docker container to match it
+#RUN groupadd -r condor && \
+#    useradd -r -g condor -d /var/lib/condor -s /sbin/nologin condor
+
 # Fix permissions for Dask/Ceph config files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"
 
+# FIXME: we have a wrong path, let's make a link.
+# cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
+# ${CONDA_DIR}/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 
 # Mkdir CVMFS mount directory.  Mount done upstream in configs. Harmless
@@ -250,6 +259,8 @@ RUN mkdir /cvmfs
 
 USER ${NB_USER}    
 RUN pip install --no-cache-dir \
+    jupyter-ai \
+    ipywidgets \
     mt2 \
     pixi-kernel \
     scikit-hep-testdata \
@@ -262,7 +273,6 @@ RUN pip install --no-cache-dir \
     pyroscope-io \
     jupytext \
     servicex \
-    histserv==0.1.9 \
     # something is keep on pushing wrong version of numpy
     numpy==2.4.2 \
     numba \
@@ -270,6 +280,7 @@ RUN pip install --no-cache-dir \
     # https://github.com/ssl-hep/servicex-labextension.git
     servicex-dashboard
 
+#RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
 RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
 
 # ------- xrootd-xcache-plugin -------------------------------
@@ -285,18 +296,19 @@ RUN cd /tmp && \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
+# -------combine-plugin -------------------------------
+#RUN cd /opt/combine && \
+#    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit && \
+#    cd HiggsAnalysis/CombinedLimit && \
+#    make CONDA=1 -j 8
+
+#ENV PATH="${PATH}:/opt/combine/HiggsAnalysis/CombinedLimit/build/bin"
+#ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/combine/CombinedLimit/build/lib"
+#ENV PYTHONPATH="/opt/combine/CombinedLimit/build/lib/python:${PYTHONPATH}"
+
 # Coffea_casa - > jobqueue-coffea-casa.yaml
-COPY dask/jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
+COPY dask/jobqueue-coffea-casa.yaml dask/dask_tls.yaml ${DASK_ROOT_CONFIG}/
 
-## ------- dask-labextention -------------------------------
-#USER ${NB_USER}
-#RUN git clone https://github.com/oshadura/dask-labextension -b dev && \
-#    cd dask-labextension && \
-#    pip install --user -e ".[dev]" && \
-#    jlpm install && jlpm build && \
-#    jupyter labextension develop . --overwrite
-
-#COPY dask/labextension_extra.yaml ${DASK_ROOT_CONFIG}/
 USER root
 
 # Fix permission after all packages installations are done
@@ -315,9 +327,10 @@ RUN rm -rf /tmp/* \
     && find ${CONDA_DIR} -type f -name '*.a' -delete \
     && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
+    #&& (find ${CONDA_DIR}/lib/python3.12/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 
-COPY prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
+COPY prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh 
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Periscope
@@ -328,6 +341,10 @@ COPY certs/* /etc/grid-security/certificates/
 RUN openssl rehash /etc/grid-security/certificates/
 
 RUN chmod -R g-w /usr/local/etc/grid-security/ && chmod -R g-w /etc/grid-security/
+    #chown -h "${NB_USER}:${NB_GID}" /etc/grid-security && \
+    #test -d /usr/local/etc/grid-security && chmod -R 755 /usr/local/etc/grid-security && \
+    #find /usr/local/etc/grid-security -type f -exec chmod g-w {} + && \
+    #test -d /etc/grid-security && chmod -R 755 /etc/grid-security
 
 # Switch back to cms-jovyan to avoid accidental container runs as root
 USER ${NB_UID}
