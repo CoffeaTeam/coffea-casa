@@ -212,6 +212,13 @@ jobs:
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
+      - name: Check Hub/singleuser version skew
+        if: matrix.singleuser
+        env:
+          CHART_VERSION: "4.2.0"   # the z2jh version you deploy / intend to deploy
+        run: ./ci/check-version-skew.sh "${{ steps.tags.outputs.tags }}" "$CHART_VERSION"
+
+
       - name: Push tested image
         if: success() && steps.tags.outputs.push == 'true'
         uses: docker/build-push-action@v6
