@@ -316,6 +316,12 @@ RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
     patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
     patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
 
+ADD https://github.com/ContainerSSH/agent/releases/download/v0.10.0/agent_0.10.0_linux_amd64.tar.gz /tmp/containerssh-agent.tgz
+RUN tar -xzf /tmp/containerssh-agent.tgz -C /usr/bin/ containerssh-agent && \
+    chmod +x /usr/bin/containerssh-agent && \
+    rm /tmp/containerssh-agent.tgz && \
+    ln -s /usr/local/bin/jupyterhub-singleuser /usr/bin/jupyterhub-singleuser
+
 # Cleanup
 RUN rm -rf /tmp/* \
     && rm -rf $HOME/.cache/.pip/* \
