@@ -15,13 +15,13 @@ jobs:
       - name: Get latest base image tag from Docker Hub
         id: latest
         run: |
-          LATEST_TAG=$(curl -s https://registry.hub.docker.com/v2/repositories/coffeateam/coffea-dask-almalinux9-noml/tags |  
-          jq -r '.results[].name' | 
-          grep 'py3.12$' | 
-          sort -V | 
-          head -n 1 )
+          LATEST_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/coffeateam/coffea-dask-almalinux9-noml/tags?page_size=100" |
+            jq -r '.results[].name' |
+            grep -E '^[0-9]{4}\.[0-9]+\.[0-9]+-py3\.12$' |
+            sort -V |
+            tail -n 1 )
           echo "Found latest tag: $LATEST_TAG"
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Find and update all Dockerfiles
         id: update
