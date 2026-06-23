@@ -1,0 +1,26 @@
+name: Test prepare-env worker args
+ 
+on:
+  push:
+    paths:
+      - 'docker/prepare-env/worker-args.sh'
+      - 'docker/prepare-env/*.bats'
+      - '.github/workflows/test-prepare-env.yml'
+  pull_request:
+    paths:
+      - 'docker/prepare-env/worker-args.sh'
+      - 'docker/prepare-env/*.bats'
+  workflow_dispatch:
+ 
+jobs:
+  bats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+ 
+      - name: Set up bats
+        uses: bats-core/bats-action@3.0.0
+ 
+      - name: Run worker-args tests
+        run: bats docker/prepare-env/worker-args.bats
