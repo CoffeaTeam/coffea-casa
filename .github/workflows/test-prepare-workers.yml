@@ -4,12 +4,12 @@ on:
   push:
     paths:
       - 'docker/prepare-env/worker-args.sh'
-      - 'docker/prepare-env/*.bats'
+      - 'tests/*.bats'
       - '.github/workflows/test-prepare-env.yml'
   pull_request:
     paths:
       - 'docker/prepare-env/worker-args.sh'
-      - 'docker/prepare-env/*.bats'
+      - 'tests/*.bats'
   workflow_dispatch:
  
 jobs:
@@ -23,4 +23,4 @@ jobs:
         uses: bats-core/bats-action@3.0.0
  
       - name: Run worker-args tests
-        run: bats docker/prepare-env/worker-args.bats
+        run: bats tests/worker-args.bats
