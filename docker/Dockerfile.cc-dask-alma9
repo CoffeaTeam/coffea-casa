@@ -161,7 +161,7 @@ RUN mamba install --quiet --yes \
     jupyter_client \
     jupyter-server-proxy \
     jupyter-vscode-proxy \
-    jupyterlab-s3-browser \
+    #jupyterlab-s3-browser \
     code-server \
     nodejs \
     ipywidgets && \
