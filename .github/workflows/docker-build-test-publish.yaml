@@ -111,6 +111,14 @@ jobs:
           YARN_CACHE_FOLDER: /tmp/yarn-cache
         run: yarn install
 
+      - name: Free up disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true        # ~8-10 GB of preinstalled language runtimes
+          docker-images: false    # keep your built image!
+          large-packages: true
+          swap-storage: true
+
       # ----------------------------------------------------------------
       # Build ONCE into the local daemon, under the final tag.
       # Everything below tests exactly the bytes that get published.
