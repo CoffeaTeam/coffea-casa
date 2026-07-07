@@ -12,6 +12,18 @@ import sys
 
 import pytest
 
+# These tests only make sense inside the built singleuser image (they assert on
+# the HEP stack, condor CLIs, the cms-jovyan UID, /opt/dask, patched
+# distributed, etc.). A bare ``pytest`` on a dev box or the unit-test CI runner
+# would collect and fail all of them, so skip unless explicitly enabled. The
+# in-image CI step sets COFFEA_CASA_IMAGE_TESTS=1 (see
+# .github/workflows/docker-build-test-publish.yaml).
+pytestmark = pytest.mark.skipif(
+    os.environ.get("COFFEA_CASA_IMAGE_TESTS") != "1",
+    reason="image smoke tests: set COFFEA_CASA_IMAGE_TESTS=1 and run inside the "
+    "coffea-casa singleuser image",
+)
+
 # --- packages that MUST import cleanly for the image to be usable ---------
 CRITICAL_IMPORTS = [
     "coffea",

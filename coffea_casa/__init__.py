@@ -9,7 +9,10 @@ from .coffea_casa import (
 )
 from .plugin import DistributedEnvironmentPlugin
 from .remote_debug import start_remote_debugger
-from ._version import version as __version__
+try:
+    from ._version import version as __version__
+except ImportError:  # package not built with hatch-vcs (e.g. raw checkout)
+    __version__ = "0.0.0+unknown"
 
 __all__ = [
     'CoffeaCasaCluster',
@@ -20,5 +23,3 @@ __all__ = [
     "DistributedEnvironmentPlugin",
     "start_remote_debugger",
 ]
-
-__version__ = '2026.02.19'

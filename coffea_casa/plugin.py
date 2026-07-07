@@ -31,7 +31,7 @@ class DistributedEnvironmentPlugin(NannyPlugin):
         update_path=False,
         skip_words=(".git", ".github", ".pytest_cache", "tests", "docs"),
         skip=(lambda fn: os.path.splitext(fn)[1] == ".pyc",),
-        extra_inputs=[],
+        extra_inputs=None,
     ):
         """
         Initialize the plugin by reading in the data from the given file.
@@ -43,6 +43,8 @@ class DistributedEnvironmentPlugin(NannyPlugin):
         if pip_options is None:
             pip_options = []
         self.pip_options = pip_options
+        if extra_inputs is None:
+            extra_inputs = []
         self.extra_inputs = [os.path.split(x)[-1] for x in extra_inputs]
 
         self.name = "upload-directory-" + self.package
@@ -54,8 +56,8 @@ class DistributedEnvironmentPlugin(NannyPlugin):
                         filename = os.path.join(root, file)
                         if any(predicate(filename) for predicate in skip):
                             continue
-                        dirs = filename.split(os.sep)
-                        if any(word in dirs for word in skip_words):
+                        path_parts = filename.split(os.sep)
+                        if any(word in path_parts for word in skip_words):
                             continue
 
                         archive_name = os.path.relpath(
@@ -119,7 +121,7 @@ class DistributedEnvironmentPlugin(NannyPlugin):
             os.remove(path)
         logger.info("Uninstalling the package: %s", self.package)
         proc = subprocess.Popen(
-            [sys.executable, "-m", "pip", "uninstall", self.package],
+            [sys.executable, "-m", "pip", "uninstall", "-y", self.package],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
