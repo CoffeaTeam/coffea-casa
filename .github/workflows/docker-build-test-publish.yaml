@@ -160,7 +160,7 @@ jobs:
       - name: Run pytest smoke tests inside the image
         if: matrix.singleuser
         run: |
-          docker run --rm -v "$PWD/tests:/tests:ro" "${{ steps.tags.outputs.tags }}" \
+          docker run --rm -e COFFEA_CASA_IMAGE_TESTS=1 -v "$PWD/tests:/tests:ro" "${{ steps.tags.outputs.tags }}" \
             bash -c "pip install --no-cache-dir --quiet --user pytest && \
                      python -m pytest /tests -v --color=yes -p no:cacheprovider"
 
