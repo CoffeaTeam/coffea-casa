@@ -1,7 +1,6 @@
 """CoffeaCasaCluster class"""
 import os
 from pathlib import Path
-import sys
 import socket
 import dask
 from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
@@ -114,7 +113,12 @@ class CoffeaCasaCluster(HTCondorCluster):
         Parameters
         ----------
         security : distributed.Security, optional
-            Security object for TLS configuration
+            Security object for TLS configuration. If provided, it is used
+            for the scheduler/worker/client TLS setup instead of the
+            facility default certificates.
+        scheduler_options : dict, optional
+            Extra options merged into the Dask scheduler configuration
+            (takes precedence over the jobqueue config defaults).
         force_tcp : bool, default False
             Force TCP instead of TLS
         worker_image : str, optional
@@ -128,7 +132,9 @@ class CoffeaCasaCluster(HTCondorCluster):
         check_ports : bool, default False
             Check if ports are available before starting
         **job_kwargs
-            Additional job configuration
+            Additional job configuration. ``n_workers`` defaults to 0
+            (no jobs submitted at construction; call ``.scale()``), but an
+            explicit value is respected.
         """
         self._force_tcp = force_tcp
 
@@ -157,11 +163,16 @@ class CoffeaCasaCluster(HTCondorCluster):
         # FIX 3: Align dask.config require-encryption with actual TLS state
         # dask.yaml may have require-encryption: true even when force_tcp=True
         # SpecCluster reads this independently and refuses tcp:// connections
+        if security is not None:
+            _sec = security
+        elif CA_FILE.is_file() and CERT_FILE.is_file():
+            _sec = security_obj()
+        else:
+            _sec = None
         will_use_tls = (
-            not force_tcp 
-            and CA_FILE.is_file() 
-            and CERT_FILE.is_file()
-            and security_obj().get_connection_args("scheduler").get("require_encryption", False)
+            not force_tcp
+            and _sec is not None
+            and _sec.get_connection_args("scheduler").get("require_encryption", False)
         )
         dask.config.set({"distributed.comm.require-encryption": will_use_tls})
 
@@ -176,22 +187,21 @@ class CoffeaCasaCluster(HTCondorCluster):
                         except OSError:
                             raise RuntimeError(f"Port {port} already in use.")
 
-        if security:
-            self.security = security
-
         job_kwargs = self._modify_job_kwargs(
             job_kwargs,
             security=security,
             force_tcp=force_tcp,
             worker_image=worker_image,
+            scheduler_options=scheduler_options,
             scheduler_port=scheduler_port,
             dashboard_port=dashboard_port,
             nanny_port=nanny_port,
         )
-        
-        # Prevent dask-jobqueue from creating a local worker
-        # We only want HTCondor workers, not local workers
-        job_kwargs['n_workers'] = 0
+
+        # By default do not submit any HTCondor jobs at construction time;
+        # users are expected to call .scale()/.adapt(). An explicit
+        # n_workers=N is respected.
+        job_kwargs.setdefault('n_workers', 0)
 
         super().__init__(**job_kwargs)
 
@@ -214,17 +224,37 @@ class CoffeaCasaCluster(HTCondorCluster):
         if CONDA_ENV.is_file():
             input_files.append(CONDA_ENV)
 
-        # If we have certs and not forcing TCP, use TLS
-        if (not force_tcp 
-            and CA_FILE.is_file() 
-            and CERT_FILE.is_file() 
-            and security_obj().get_connection_args("scheduler")["require_encryption"]):
+        # If we have a Security object (user-provided, or built from the
+        # default facility certs) and are not forcing TCP, use TLS.
+        user_security = security is not None
+        if user_security:
+            sec = security
+        elif CA_FILE.is_file() and CERT_FILE.is_file():
+            sec = security_obj()
+        else:
+            sec = None
+
+        if (not force_tcp
+                and sec is not None
+                and sec.get_connection_args("scheduler").get("require_encryption", False)):
             job_config["protocol"] = "tls://"
-            job_config["security"] = security_obj()
-            input_files += [CA_FILE, CERT_FILE]
-            # Add separate key file if it exists
-            if KEY_FILE.is_file() and KEY_FILE != CERT_FILE:
-                input_files.append(KEY_FILE)
+            job_config["security"] = sec
+            if user_security:
+                # Ship the TLS material referenced by the user's Security
+                # object so custom certs are transferred to workers too.
+                tls_files = {
+                    getattr(sec, attr, None)
+                    for attr in ("tls_ca_file", "tls_worker_cert", "tls_worker_key")
+                }
+                input_files += sorted(
+                    Path(f) for f in tls_files
+                    if isinstance(f, (str, os.PathLike)) and Path(f).is_file()
+                )
+            else:
+                input_files += [CA_FILE, CERT_FILE]
+                # Add separate key file if it exists
+                if KEY_FILE.is_file() and KEY_FILE != CERT_FILE:
+                    input_files.append(KEY_FILE)
         else:
             job_config["protocol"] = "tcp://"
 
@@ -250,11 +280,11 @@ class CoffeaCasaCluster(HTCondorCluster):
         external_ip_string = f'"{contact_address}"'
 
         dash_port = f":{dashboard_port}"
-        
+
         # Set dashboard link for Labextension
         # Priority: DASK_DASHBOARD_LINK env > JupyterHub proxy > direct access
         dashboard_link = os.environ.get("DASK_DASHBOARD_LINK")
-        
+
         if not dashboard_link:
             # Check if running in JupyterHub (has JUPYTERHUB_SERVICE_PREFIX)
             jupyterhub_prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX")
@@ -274,7 +304,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                 else:
                     # Fall back to pod IP (may not be accessible from browser)
                     dashboard_link = f"http://{external_ip}:{dashboard_port}/status"
-        
+
         dask.config.set({"distributed.dashboard.link": dashboard_link})
         print(f"Dashboard will be available at: {dashboard_link}")
 
@@ -286,8 +316,12 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "protocol": scheduler_protocol.replace("://", ""),
                 "contact_address": contact_address,
             },
-            job_kwargs.get("scheduler_options", 
-                         dask.config.get(f"jobqueue.{cls.config_name}.scheduler-options", {})),
+            scheduler_options
+            if scheduler_options is not None
+            else job_kwargs.get(
+                "scheduler_options",
+                dask.config.get(f"jobqueue.{cls.config_name}.scheduler-options", {}),
+            ),
         )
 
         # Check for x509 proxy
@@ -312,8 +346,10 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "+DaskSchedulerAddress": external_ip_string,
                 "+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"',
             },
-            job_kwargs.get("job_extra_directives",
-                         dask.config.get(f"jobqueue.{cls.config_name}.job_extra_directives", {})),
+            job_kwargs.get(
+                "job_extra_directives",
+                dask.config.get(f"jobqueue.{cls.config_name}.job_extra_directives", {}),
+            ),
         )
 
         return job_config
@@ -324,7 +360,7 @@ def security_obj():
     ca_file = str(CA_FILE)
     cert_file = str(CERT_FILE)
     key_file = str(KEY_FILE if KEY_FILE.is_file() else CERT_FILE)
-    
+
     return Security(
         tls_ca_file=ca_file,
         tls_worker_cert=cert_file,
