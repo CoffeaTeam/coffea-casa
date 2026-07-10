@@ -114,7 +114,7 @@ jobs:
       - name: Free up disk space
         uses: jlumbroso/free-disk-space@main
         with:
-          tool-cache: true        # ~8-10 GB of preinstalled language runtimes
+          tool-cache: false       # ~8-10 GB of preinstalled language runtimes
           docker-images: false    # keep your built image!
           large-packages: true
           swap-storage: true
