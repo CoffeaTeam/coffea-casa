@@ -186,9 +186,23 @@ jobs:
 
       - name: Create kind cluster
         if: matrix.spawntest
-        uses: helm/kind-action@v1
+        uses: helm/kind-action@v1.13.0
         with:
           cluster_name: cc-test
+          verbosity: 3
+
+      - name: Dump kind logs
+        if: failure() && matrix.spawntest
+        run: |
+          df -h
+          docker ps -a
+          kind export logs ./kind-logs --name cc-test || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure() && matrix.spawntest
+        with:
+          name: kind-logs
+          path: ./kind-logs
 
       - name: Install helm
         if: matrix.spawntest
