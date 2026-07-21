@@ -141,7 +141,7 @@ RUN test -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" || \
 
 # ------- xrootd-xcache-plugin -------------------------------
 RUN cd /tmp && \
-    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+    git clone -b xcache6 https://github.com/jthiltges/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
