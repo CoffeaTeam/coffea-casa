@@ -1,5 +1,14 @@
-#FROM coffeateam/coffea-base-almalinux8:0.7.22-py3.10
-FROM coffeateam/coffea-dask-almalinux9-noml:2026.5.0-py3.12
+# Generic across coffea base flavours. See Dockerfile.cc-dask-alma9 header.
+#   --build-arg BASE_IMAGE=coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12
+#   --build-arg FLAVOUR=dak
+#   --build-arg PYVER=3.12
+# Package sets live in env/casa-{common,analysis,flavour-<FLAVOUR>}.yaml.
+ARG BASE_IMAGE=coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12
+FROM ${BASE_IMAGE}
+
+# Re-declared after FROM so they are usable in the build stage below.
+ARG FLAVOUR=noml
+ARG PYVER=3.12
 
 
 USER root
@@ -118,44 +127,14 @@ RUN mkdir $HOME/work && \
 # FIXME: # Remove outdated CRLs (packaged in ca-policy-lcg)
 RUN rm /etc/grid-security/certificates/*.r*
 
-#Dask dependencies and HTCondor
-RUN mamba install --yes \
-    -c conda-forge \
-    cabinetry \
-    pyhf \
-    atlas-schema \
-    cmake \
-    ndcctools \
-    xrootd==5.9.2 \
-    && mamba clean \
-        --all \
-        --force-pkgs-dirs \
-        --yes
-
-RUN pip install --upgrade --no-cache-dir \
-    mt2 \
-    aiostream \
-    supervisor \
-    servicex \
-    pixi-kernel \
-    scikit-hep-testdata \
-    pyyaml \
-    prometheus_client \
-    comm>=0.1.2 \
-    mlflow \
-    s3fs \
-    pyroscope-io \
-    histserv==0.1.9 \
-    nbstripout \
-    # something is keep on pushing wrong version of numpy
-    numpy==2.4.2 \
-    numba   
-    
-
-
-# FIXME
-#RUN if [ "${TAG:-}" == "development" ]; then pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa ; else pip install --no-cache-dir coffea_casa -U ; fi
-RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
+# Install the analysis role + shared + flavour package sets from env files.
+# Flavour is applied LAST so its pins (numpy, xrootd, numba) win.
+COPY env/casa-common.yaml env/casa-analysis.yaml env/casa-flavour-${FLAVOUR}.yaml /tmp/casa-env/
+RUN mamba env update -n base -f "/tmp/casa-env/casa-analysis.yaml" && \
+    mamba env update -n base -f "/tmp/casa-env/casa-common.yaml" && \
+    mamba env update -n base -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" && \
+    mamba clean --all --force-pkgs-dirs --yes && \
+    rm -rf /tmp/casa-env
 
 # ------- xrootd-xcache-plugin -------------------------------
 RUN cd /tmp && \
@@ -201,11 +180,17 @@ RUN groupadd -g 989 condor && \
     chmod -R 755 /var/lib/condor
 
 # FIXME: merge PRs open in distributed.git (oshadura)
-# Distributed: we need to install patched version of distributed version
-COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
-RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
-    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
-    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
+# Distributed: install our vendored, patched distributed on top of the base's.
+# CalVer-only; skipped on the legacy coffea 0.7 flavour (see cc-dask Dockerfile).
+COPY dask/distributed /tmp/distributed-src
+RUN if [ "${FLAVOUR}" != "0.7" ]; then \
+      cp -a /tmp/distributed-src/. "${CONDA_DIR}/lib/python${PYVER}/site-packages/distributed/" && \
+      cd "${CONDA_DIR}/lib/python${PYVER}/site-packages/distributed" && \
+      patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+      patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch ; \
+    else \
+      echo "FLAVOUR=0.7: skipping vendored distributed patch (CalVer-only)" ; \
+    fi && rm -rf /tmp/distributed-src
 
 # FIXME: we have a wrong path, let's make a link.
 # cms-jovyan@jupyter-oksana-2eshadura-40cern-2ech:~$ echo $PATH
@@ -219,7 +204,7 @@ RUN rm -rf /tmp/* \
     && find ${CONDA_DIR} -type f -name '*.a' -delete \
     && find ${CONDA_DIR} -type f -name '*.pyc' -delete \
     && find ${CONDA_DIR} -type f -name '*.js.map' -delete \
-    && (find ${CONDA_DIR}/lib/python3.12/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
+    && (find ${CONDA_DIR}/lib/python${PYVER}/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete || echo "no bokeh static files to cleanup") \
     && rm -rf ${CONDA_DIR}/pkgs
 
 # Mkdir CVMFS mount directory.  Mount done upstream in configs. Harmless

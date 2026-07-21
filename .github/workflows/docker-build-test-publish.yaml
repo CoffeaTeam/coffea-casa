@@ -2,9 +2,15 @@ name: Build, test and publish docker images
 
 # One workflow, three behaviors:
 #   pull_request      -> build + test, never push
-#   push to master    -> build + test + push :development
-#   release published -> build + test + push :<release tag>
+#   push to master    -> build + test + push :development[-<flavour>]
+#   release published -> build + test + push :<release tag>[-<flavour>]
 #   workflow_dispatch -> build + test, never push (safe manual run)
+#
+# cc-dask-alma9 and cc-analysis-alma9 are each built against every coffea base
+# flavour (noml / dak / full / 0.7). The base image, its flavour label and the
+# base's python minor version are passed as build-args; package sets live in
+# docker/env/casa-*.yaml. The "canonical" flavour additionally publishes the
+# bare, un-suffixed tag so existing consumers keep resolving.
 on:
   pull_request:
     paths:
@@ -30,21 +36,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [cc-dask-alma9, cc-analysis-alma9, cc-dask-combine-alma9, cc-analysis-combine-alma9]
+        # Enumerated (not a cartesian product) so combine images can stay
+        # single-base and so spawntest can be enabled per-entry.
         include:
-          - image: cc-dask-alma9
-            singleuser: true
-            spawntest: true
-          - image: cc-dask-combine-alma9
-            singleuser: true
-            spawntest: false
-          - image: cc-analysis-alma9
-            singleuser: false
-            spawntest: false
-          - image: cc-analysis-combine-alma9
-            singleuser: false
-            spawntest: false
-    name: ${{ matrix.image }}
+          # ---- cc-dask-alma9 across all coffea flavours -----------------
+          - { image: cc-dask-alma9, flavour: noml, base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: true,  spawntest: true  }
+          - { image: cc-dask-alma9, flavour: dak,  base_image: "coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12",  pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
+          - { image: cc-dask-alma9, flavour: full, base_image: "coffeateam/coffea-almalinux9:2026.7.0-py3.12",      pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
+          - { image: cc-dask-alma9, flavour: "0.7", base_image: "coffeateam/coffea-0.7-almalinux9:0.7.31-py3.11",   pyver: "3.11", canonical: false, singleuser: true,  spawntest: false }
+          # ---- cc-analysis-alma9 (slim) across all coffea flavours ------
+          - { image: cc-analysis-alma9, flavour: noml, base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: false, spawntest: false }
+          - { image: cc-analysis-alma9, flavour: dak,  base_image: "coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12",  pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
+          - { image: cc-analysis-alma9, flavour: full, base_image: "coffeateam/coffea-almalinux9:2026.7.0-py3.12",      pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
+          - { image: cc-analysis-alma9, flavour: "0.7", base_image: "coffeateam/coffea-0.7-almalinux9:0.7.31-py3.11",   pyver: "3.11", canonical: false, singleuser: false, spawntest: false }
+          # ---- combine images: single base baked into their Dockerfile --
+          - { image: cc-dask-combine-alma9,     flavour: "", base_image: "", pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
+          - { image: cc-analysis-combine-alma9, flavour: "", base_image: "", pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
+    name: ${{ matrix.image }} ${{ matrix.flavour }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -60,7 +68,10 @@ jobs:
           swap-storage: true
 
       # ----------------------------------------------------------------
-      # Tag generation, unified for all event types
+      # Tag generation, unified for all event types.
+      # Flavoured images get a -<flavour> suffix; the canonical flavour
+      # additionally gets the bare tag. Combine images (empty flavour) get
+      # the bare tag only.
       # ----------------------------------------------------------------
       - name: Generate tags
         id: tags
@@ -68,6 +79,8 @@ jobs:
           image: ${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}
           release: ${{ github.event.release.tag_name }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
+          FLAVOUR: ${{ matrix.flavour }}
+          CANONICAL: ${{ matrix.canonical }}
         run: |
           if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
             releasetag="${release}"
@@ -80,9 +93,21 @@ jobs:
             releasetag="ci-${GITHUB_SHA::12}"
             push="false"
           fi
-          tags="${image}:${releasetag}"
-          echo "Event=${GITHUB_EVENT_NAME} tags=${tags} push=${push}"
+
+          if [ -n "${FLAVOUR}" ]; then
+            primarytag="${releasetag}-${FLAVOUR}"
+            tags="${image}:${primarytag}"
+            if [ "${CANONICAL}" == "true" ]; then
+              tags="${tags},${image}:${releasetag}"
+            fi
+          else
+            primarytag="${releasetag}"
+            tags="${image}:${releasetag}"
+          fi
+
+          echo "Event=${GITHUB_EVENT_NAME} flavour=${FLAVOUR:-<none>} tags=${tags} push=${push}"
           echo "tags=${tags}" >> "$GITHUB_OUTPUT"
+          echo "primarytag=${primarytag}" >> "$GITHUB_OUTPUT"
           echo "releasetag=${releasetag}" >> "$GITHUB_OUTPUT"
           echo "push=${push}" >> "$GITHUB_OUTPUT"
 
@@ -122,6 +147,7 @@ jobs:
       # ----------------------------------------------------------------
       # Build ONCE into the local daemon, under the final tag.
       # Everything below tests exactly the bytes that get published.
+      # Cache scope keys on image+flavour so flavours don't share layers.
       # ----------------------------------------------------------------
       - name: Build image (load locally for testing)
         uses: docker/build-push-action@v6
@@ -131,16 +157,20 @@ jobs:
           load: true
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.tags }}
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.flavour }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.flavour }}
           build-args: |
+            BASE_IMAGE=${{ matrix.base_image }}
+            FLAVOUR=${{ matrix.flavour }}
+            PYVER=${{ matrix.pyver }}
             TAG=${{ steps.tags.outputs.releasetag }}
             PROJECT=${{ env.PROJECT }}
             GITHUB_ACTIONS=true
             REGISTRY=${{ env.REGISTRY }}
 
       # ----------------------------------------------------------------
-      # Test layers (singleuser images only)
+      # Test layers (singleuser images only). Uses the primary (possibly
+      # flavoured) tag so the right build is exercised.
       # ----------------------------------------------------------------
       - name: Install container-structure-test
         if: matrix.singleuser
@@ -154,13 +184,14 @@ jobs:
         if: matrix.singleuser
         run: |
           container-structure-test test \
-            --image "${{ steps.tags.outputs.tags }}" \
+            --image "${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.tags.outputs.primarytag }}" \
             --config ci/structure-tests.yaml
 
       - name: Run pytest smoke tests inside the image
         if: matrix.singleuser
         run: |
-          docker run --rm -e COFFEA_CASA_IMAGE_TESTS=1 -v "$PWD/tests:/tests:ro" "${{ steps.tags.outputs.tags }}" \
+          docker run --rm -e COFFEA_CASA_IMAGE_TESTS=1 -v "$PWD/tests:/tests:ro" \
+            "${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.tags.outputs.primarytag }}" \
             bash -c "pip install --no-cache-dir --quiet --user pytest && \
                      python -m pytest /tests -v --color=yes -p no:cacheprovider"
 
@@ -174,7 +205,7 @@ jobs:
           docker run -d --name nb -p 8888:8888 \
             -e DASK_CONFIG=/etc/dask \
             -v "$PWD/ci-dask:/etc/dask-ci:ro" \
-            "${{ steps.tags.outputs.tags }}" \
+            "${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.tags.outputs.primarytag }}" \
             start-notebook.py --IdentityProvider.token='' --ServerApp.ip='0.0.0.0'
           for i in $(seq 1 60); do
             curl -fsS http://localhost:8888/api > /dev/null && { echo "Server is up"; break; }
@@ -197,8 +228,8 @@ jobs:
       - name: Run z2jh spawn test
         if: matrix.spawntest
         run: |
-          kind load docker-image "${{ steps.tags.outputs.tags }}" --name cc-test
-          ./ci/spawn-test.sh "${{ steps.tags.outputs.tags }}"
+          kind load docker-image "${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.tags.outputs.primarytag }}" --name cc-test
+          ./ci/spawn-test.sh "${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.tags.outputs.primarytag }}"
 
       - name: Dump cluster state on failure
         if: failure() && matrix.spawntest
@@ -220,14 +251,6 @@ jobs:
           username: ${{ secrets.HARBOR_USER }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
-      #- name: Check Hub/singleuser version skew
-      #  if: matrix.singleuser
-      #  env:
-      #    #CHART_VERSION: "4.2.0"   # the z2jh version you deploy / intend to deploy
-      #    CHART_VERSION: "0.11.1-n259.h74abbb81"
-      #  run: ./ci/check-version-skew.sh "${{ steps.tags.outputs.tags }}" "$CHART_VERSION"
-
-
       - name: Push tested image
         if: success() && steps.tags.outputs.push == 'true'
         uses: docker/build-push-action@v6
@@ -237,8 +260,11 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.tags }}
-          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.flavour }}
           build-args: |
+            BASE_IMAGE=${{ matrix.base_image }}
+            FLAVOUR=${{ matrix.flavour }}
+            PYVER=${{ matrix.pyver }}
             TAG=${{ steps.tags.outputs.releasetag }}
             PROJECT=${{ env.PROJECT }}
             GITHUB_ACTIONS=true

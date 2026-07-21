@@ -1,4 +1,15 @@
-FROM coffeateam/coffea-dask-almalinux9-noml:2026.5.0-py3.12
+# Generic across coffea base flavours. The base, the flavour env file, and the
+# base's python minor version are all supplied at build time:
+#   --build-arg BASE_IMAGE=coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12
+#   --build-arg FLAVOUR=dak
+#   --build-arg PYVER=3.12
+# Package sets live in env/casa-{common,dask,flavour-<FLAVOUR>}.yaml.
+ARG BASE_IMAGE=coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12
+FROM ${BASE_IMAGE}
+
+# Re-declared after FROM so they are usable in the build stage below.
+ARG FLAVOUR=noml
+ARG PYVER=3.12
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -144,40 +155,23 @@ RUN mkdir "/home/${NB_USER}/work" && \
 # FIXME: # Remove outdated CRLs (packaged in ca-policy-lcg)
 RUN rm /etc/grid-security/certificates/*.r*
 
-# Install Jupyter Notebook, Lab, and Hub
-# Generate a notebook server config
-# Cleanup temporary files
-# Correct permissions
-# Do all this in a single RUN command to avoid duplicating all of the
-# files across image layers when the permissions change
-RUN mamba install --quiet --yes \
-    -c conda-forge \
-    notebook \
-    jupyterhub==3.1.1 \
-    jupyterlab \
-    jupyterlab_widgets \
-    jupyterlab-git \
-    jupytext \
-    jupyter_client \
-    jupyter-server-proxy \
-    jupyter-vscode-proxy \
-    #jupyterlab-s3-browser \
-    code-server \
-    nodejs \
-    ipywidgets && \
-    mamba clean \
-        --all \
-        --force-pkgs-dirs \
-        --yes && \
+# Install the notebook role + shared + flavour package sets from env files.
+# Done in a single layer, BEFORE `jupyter lab build`, so every lab extension is
+# present at build time. Flavour is applied LAST so its pins (numpy, xrootd,
+# numba) win over anything pulled in transitively.
+COPY env/casa-common.yaml env/casa-dask.yaml env/casa-flavour-${FLAVOUR}.yaml /tmp/casa-env/
+RUN mamba env update -n base -f "/tmp/casa-env/casa-dask.yaml" && \
+    mamba env update -n base -f "/tmp/casa-env/casa-common.yaml" && \
+    mamba env update -n base -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" && \
+    mamba clean --all --force-pkgs-dirs --yes && \
     npm cache clean --force && \
     jupyter server --generate-config && \
-    mamba clean --all -f -y && \
     jupyter lab clean && \
     rm -rf "/home/${NB_USER}/.cache/yarn" && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
     code-server --install-extension ms-python.python && \
-    rm -rf "/home/${NB_USER}/.cache/yarn"
+    rm -rf "/tmp/casa-env" "/home/${NB_USER}/.cache/yarn"
 
 EXPOSE 8888
 
@@ -206,24 +200,6 @@ RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT
     mkdir -p /etc/condor/config.d
 
 USER ${NB_UID}
-
-RUN mamba install --yes \
-    -c conda-forge \
-    jupyter-ai \
-    ipywidgets \
-    nbdime \
-    cabinetry \
-    pyhf \
-    ndcctools \
-    xrootd==5.9.2 \
-    atlas-schema \
-    gperftools \
-    && mamba clean \
-        --all \
-        --force-pkgs-dirs \
-        --yes
-
-USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
 COPY dask/dask.yaml  dask/dask_tls.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
 
@@ -248,31 +224,8 @@ RUN rm -rf ${CONDA_DIR}/condabin && ln -s ${CONDA_DIR}/bin ${CONDA_DIR}/condabin
 # if not utilized, crucial if CVMFS is desired
 RUN mkdir /cvmfs
 
-USER ${NB_USER}    
-RUN pip install --no-cache-dir \
-    mt2 \
-    pixi-kernel \
-    scikit-hep-testdata \
-    pyyaml \
-    jq \
-    prometheus_client \
-    comm>=0.1.2 \
-    mlflow \
-    s3fs \
-    pyroscope-io \
-    jupytext \
-    servicex \
-    histserv==0.1.9 \
-    # something is keep on pushing wrong version of numpy
-    numpy==2.4.2 \
-    numba \
-    nbstripout \
-    # https://github.com/ssl-hep/servicex-labextension.git
-    servicex-dashboard
-
-RUN pip install --no-cache-dir git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa
-
 # ------- xrootd-xcache-plugin -------------------------------
+USER ${NB_USER}
 RUN cd /tmp && \
     git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
@@ -302,11 +255,19 @@ USER root
 # Fix permission after all packages installations are done
 RUN fix-permissions "${CONDA_DIR}"
 
-# Distributed: we need to install patched version of distributed version
-COPY dask/distributed ${CONDA_DIR}/lib/python3.12/site-packages/distributed
-RUN cd ${CONDA_DIR}/lib/python3.12/site-packages/distributed && \
-    patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
-    patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch
+# Distributed: install our vendored, patched distributed on top of the base's.
+# This is the ONLY genuinely flavour-specific step: the vendored copy and the
+# two patches track the CalVer dask/distributed generation, so they are skipped
+# on the legacy coffea 0.7 flavour (older distributed the patches don't fit).
+COPY dask/distributed /tmp/distributed-src
+RUN if [ "${FLAVOUR}" != "0.7" ]; then \
+      cp -a /tmp/distributed-src/. "${CONDA_DIR}/lib/python${PYVER}/site-packages/distributed/" && \
+      cd "${CONDA_DIR}/lib/python${PYVER}/site-packages/distributed" && \
+      patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
+      patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch ; \
+    else \
+      echo "FLAVOUR=0.7: skipping vendored distributed patch (CalVer-only)" ; \
+    fi && rm -rf /tmp/distributed-src
 
 ADD https://github.com/ContainerSSH/agent/releases/download/v0.10.0/agent_0.10.0_linux_amd64.tar.gz /tmp/containerssh-agent.tgz
 RUN tar -xzf /tmp/containerssh-agent.tgz -C /usr/bin/ containerssh-agent && \
@@ -327,7 +288,7 @@ COPY prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
 # Periscope
-COPY prepare-env/sitecustomize.py ${CONDA_DIR}/lib/python3.12/site-packages/sitecustomize.py
+COPY prepare-env/sitecustomize.py ${CONDA_DIR}/lib/python${PYVER}/site-packages/sitecustomize.py
 
 # Include additional CA certificates beyond ca-policy-lcg
 COPY certs/* /etc/grid-security/certificates/
