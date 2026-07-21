@@ -1,0 +1,32 @@
+# Packages common to BOTH coffea-casa roles (dask notebook and slim analysis).
+# Version-sensitive pins that must differ between coffea flavours (numpy, numba,
+# xrootd) live in casa-flavour-*.yaml, NOT here. Applied with:
+#   mamba env update -n base -f casa-common.yaml
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - cabinetry
+  - pyhf
+  - atlas-schema
+  - ndcctools
+  # cmake is needed to build the xrdcl-authz-plugin in both images. The slim
+  # image installed it explicitly; the dask image previously relied on it being
+  # present in the base. Pinning it here makes both robust to the base changing.
+  - cmake
+  - pip
+  - pip:
+      - mt2
+      - pixi-kernel
+      - scikit-hep-testdata
+      - pyyaml
+      - prometheus_client
+      - comm>=0.1.2
+      - mlflow
+      - s3fs
+      - pyroscope-io
+      - histserv==0.1.9
+      - nbstripout
+      - servicex
+      # coffea-casa itself is installed from git in both images.
+      - git+https://github.com/CoffeaTeam/coffea-casa.git#egg=coffea_casa

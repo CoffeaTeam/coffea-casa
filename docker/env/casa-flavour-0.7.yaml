@@ -1,0 +1,19 @@
+# Flavour: 0.7 (legacy coffea 0.7.x base, Python 3.11).
+# coffea 0.7 constrains the old numpy ABI, so it CANNOT take numpy 2.x like the
+# CalVer flavours. These pins are deliberately different from casa-flavour-*.yaml.
+#
+# TODO(verify on first build): the exact bounds below are best-guess starting
+# points, not confirmed against coffea 0.7.31. Adjust once the build solves:
+#   - numpy upper bound (coffea 0.7 typically wants numpy<2; may need <1.25)
+#   - whether numba is needed / which numba is compatible with the chosen numpy
+#   - whether xrootd 5.9.2 is available/compatible on the 0.7 base, or a
+#     different XRootD is required
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - xrootd            # TODO: confirm version for the 0.7 base (unpinned for now)
+  - pip
+  - pip:
+      - "numpy<2"     # TODO: confirm exact upper bound for coffea 0.7
+      - numba         # TODO: confirm compatibility with the chosen numpy
