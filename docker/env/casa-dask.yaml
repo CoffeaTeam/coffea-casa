@@ -1,0 +1,27 @@
+# Role: full single-user notebook / dask scheduler image (cc-dask-alma9).
+# The Jupyter/Lab/code-server stack plus dask-notebook extras. Must be applied
+# BEFORE the `jupyter lab build` step in the Dockerfile so all lab extensions
+# are present at build time.
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - notebook
+  - jupyterhub==3.1.1
+  - jupyterlab
+  - jupyterlab_widgets
+  - jupyterlab-git
+  - jupytext
+  - jupyter_client
+  - jupyter-server-proxy
+  - jupyter-vscode-proxy
+  - code-server
+  - nodejs
+  - ipywidgets
+  - jupyter-ai
+  - nbdime
+  - gperftools
+  - pip
+  - pip:
+      - jq
+      - servicex-dashboard

@@ -1,0 +1,11 @@
+# Role: slim analysis / dask-worker image (cc-analysis-alma9).
+# No Jupyter/Lab stack; just the worker-side extras. Everything shared with the
+# dask image is in casa-common.yaml.
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - pip:
+      - aiostream
+      - supervisor
