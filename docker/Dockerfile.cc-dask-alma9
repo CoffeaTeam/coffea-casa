@@ -101,6 +101,7 @@ RUN yum install -y https://repo.osg-htc.org/osg/24-main/osg-24-main-el9-release-
     openssl \
     emacs \
     git \
+    cmake \
     unzip \
     nano \
     vim  \
