@@ -7,7 +7,7 @@ name: base
 channels:
   - conda-forge
 dependencies:
-  - xrootd==5.9.2
+  - xrootd
   - pip
   - pip:
       # something keeps pulling in the wrong numpy; pin it explicitly.
