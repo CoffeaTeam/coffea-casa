@@ -129,8 +129,10 @@ RUN rm /etc/grid-security/certificates/*.r*
 
 # Install the analysis role + shared + flavour package sets from env files.
 # Flavour is applied LAST so its pins (numpy, xrootd, numba) win.
-COPY env/casa-common.yaml env/casa-analysis.yaml env/casa-flavour-${FLAVOUR}.yaml /tmp/casa-env/
-RUN mamba env update -n base -f "/tmp/casa-env/casa-analysis.yaml" && \
+COPY env/ /tmp/casa-env/
+RUN test -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" || \
+      { echo "No env file for FLAVOUR=${FLAVOUR} (expected /tmp/casa-env/casa-flavour-${FLAVOUR}.yaml)"; exit 1; } && \
+    mamba env update -n base -f "/tmp/casa-env/casa-analysis.yaml" && \
     mamba env update -n base -f "/tmp/casa-env/casa-common.yaml" && \
     mamba env update -n base -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" && \
     mamba clean --all --force-pkgs-dirs --yes && \

@@ -159,8 +159,10 @@ RUN rm /etc/grid-security/certificates/*.r*
 # Done in a single layer, BEFORE `jupyter lab build`, so every lab extension is
 # present at build time. Flavour is applied LAST so its pins (numpy, xrootd,
 # numba) win over anything pulled in transitively.
-COPY env/casa-common.yaml env/casa-dask.yaml env/casa-flavour-${FLAVOUR}.yaml /tmp/casa-env/
-RUN mamba env update -n base -f "/tmp/casa-env/casa-dask.yaml" && \
+COPY env/ /tmp/casa-env/
+RUN test -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" || \
+      { echo "No env file for FLAVOUR=${FLAVOUR} (expected /tmp/casa-env/casa-flavour-${FLAVOUR}.yaml)"; exit 1; } && \
+    mamba env update -n base -f "/tmp/casa-env/casa-dask.yaml" && \
     mamba env update -n base -f "/tmp/casa-env/casa-common.yaml" && \
     mamba env update -n base -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" && \
     mamba clean --all --force-pkgs-dirs --yes && \
