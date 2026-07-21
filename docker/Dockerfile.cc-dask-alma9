@@ -234,7 +234,8 @@ RUN cd /tmp && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
-    cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
+    /usr/bin/cmake /tmp/xrdcl-authz-plugin -DCMAKE_INSTALL_PREFIX=${CONDA_DIR} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+      -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ && \
     make && \
     make install
 
