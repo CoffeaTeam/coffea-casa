@@ -1,0 +1,9 @@
+# Overlay applied ONLY when COMBINE=1 (cc-*-combine-alma9 images), on top of the
+# role + common + flavour sets. The sole difference between a combine image and
+# its non-combine counterpart is these two packages.
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - root
+  - cms-combine
