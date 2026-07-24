@@ -220,9 +220,10 @@ jobs:
             -e CASA_FLAVOUR=${{ matrix.flavour }} \
             -e CASA_PYVER=${{ matrix.pyver }} \
             -e CASA_COMBINE=${{ matrix.combine }} \
+            --entrypoint bash \
             -v "$PWD/tests:/tests:ro" \
             "${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.tags.outputs.primarytag }}" \
-            bash -c "pip install --no-cache-dir --quiet --user pytest && \
+            -c "pip install --no-cache-dir --quiet --user pytest && \
                      python -m pytest /tests/test_analysis_smoke.py -v --color=yes -p no:cacheprovider"
 
       - name: Boot notebook server and probe it
