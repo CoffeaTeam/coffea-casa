@@ -9,6 +9,8 @@ FROM ${BASE_IMAGE}
 # Re-declared after FROM so they are usable in the build stage below.
 ARG FLAVOUR=noml
 ARG PYVER=3.12
+# COMBINE=1 overlays root + cms-combine (produces cc-analysis-combine-alma9).
+ARG COMBINE=0
 
 
 USER root
@@ -136,12 +138,13 @@ RUN test -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" || \
     mamba env update -n base -f "/tmp/casa-env/casa-analysis.yaml" && \
     mamba env update -n base -f "/tmp/casa-env/casa-common.yaml" && \
     mamba env update -n base -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" && \
+    if [ "${COMBINE}" = "1" ]; then mamba env update -n base -f "/tmp/casa-env/casa-combine.yaml"; fi && \
     mamba clean --all --force-pkgs-dirs --yes && \
     rm -rf /tmp/casa-env
 
 # ------- xrootd-xcache-plugin -------------------------------
 RUN cd /tmp && \
-    git clone -b xcache6 https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
@@ -151,7 +154,7 @@ RUN cd /tmp && \
     make install
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-6.so"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # TODO: RETEST IF WE STILL NEED THIS 
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"

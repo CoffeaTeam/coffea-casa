@@ -10,6 +10,8 @@ FROM ${BASE_IMAGE}
 # Re-declared after FROM so they are usable in the build stage below.
 ARG FLAVOUR=noml
 ARG PYVER=3.12
+# COMBINE=1 overlays root + cms-combine (produces cc-dask-combine-alma9).
+ARG COMBINE=0
 
 # https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile
 
@@ -166,6 +168,7 @@ RUN test -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" || \
     mamba env update -n base -f "/tmp/casa-env/casa-dask.yaml" && \
     mamba env update -n base -f "/tmp/casa-env/casa-common.yaml" && \
     mamba env update -n base -f "/tmp/casa-env/casa-flavour-${FLAVOUR}.yaml" && \
+    if [ "${COMBINE}" = "1" ]; then mamba env update -n base -f "/tmp/casa-env/casa-combine.yaml"; fi && \
     mamba clean --all --force-pkgs-dirs --yes && \
     npm cache clean --force && \
     jupyter server --generate-config && \
@@ -230,7 +233,7 @@ RUN mkdir /cvmfs
 # ------- xrootd-xcache-plugin -------------------------------
 USER ${NB_USER}
 RUN cd /tmp && \
-    git clone -b xcache6 https://github.com/jthiltges/xrdcl-authz-plugin.git && \
+    git clone -b xcache https://github.com/jthiltges/xrdcl-authz-plugin.git && \
     cd xrdcl-authz-plugin && \
     mkdir build && \
     cd  build && \
@@ -240,7 +243,7 @@ RUN cd /tmp && \
     make install
 
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
-ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-6.so"
+ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-5.so"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/

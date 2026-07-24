@@ -39,19 +39,23 @@ jobs:
         # Enumerated (not a cartesian product) so combine images can stay
         # single-base and so spawntest can be enabled per-entry.
         include:
+          # dockerfile = which Dockerfile to build; image = published repo name.
+          # combine=1 overlays root + cms-combine on the same Dockerfile.
           # ---- cc-dask-alma9 across all coffea flavours -----------------
-          - { image: cc-dask-alma9, flavour: noml, base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: true,  spawntest: true  }
-          - { image: cc-dask-alma9, flavour: dak,  base_image: "coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12",  pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
-          - { image: cc-dask-alma9, flavour: full, base_image: "coffeateam/coffea-almalinux9:2026.7.0-py3.12",      pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
-          - { image: cc-dask-alma9, flavour: "0.7", base_image: "coffeateam/coffea-0.7-almalinux9:0.7.31-py3.11",   pyver: "3.11", canonical: false, singleuser: true,  spawntest: false }
+          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: noml, combine: "0", base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: true,  spawntest: true  }
+          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: dak,  combine: "0", base_image: "coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12",  pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
+          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: full, combine: "0", base_image: "coffeateam/coffea-almalinux9:2026.7.0-py3.12",      pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
+          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: "0.7", combine: "0", base_image: "coffeateam/coffea-0.7-almalinux9:0.7.31-py3.11",   pyver: "3.11", canonical: false, singleuser: true,  spawntest: false }
           # ---- cc-analysis-alma9 (slim) across all coffea flavours ------
-          - { image: cc-analysis-alma9, flavour: noml, base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: false, spawntest: false }
-          - { image: cc-analysis-alma9, flavour: dak,  base_image: "coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12",  pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
-          - { image: cc-analysis-alma9, flavour: full, base_image: "coffeateam/coffea-almalinux9:2026.7.0-py3.12",      pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
-          - { image: cc-analysis-alma9, flavour: "0.7", base_image: "coffeateam/coffea-0.7-almalinux9:0.7.31-py3.11",   pyver: "3.11", canonical: false, singleuser: false, spawntest: false }
-          # ---- combine images: single base baked into their Dockerfile --
-          - { image: cc-dask-combine-alma9,     flavour: "", base_image: "", pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
-          - { image: cc-analysis-combine-alma9, flavour: "", base_image: "", pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: noml, combine: "0", base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: false, spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: dak,  combine: "0", base_image: "coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12",  pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: full, combine: "0", base_image: "coffeateam/coffea-almalinux9:2026.7.0-py3.12",      pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: "0.7", combine: "0", base_image: "coffeateam/coffea-0.7-almalinux9:0.7.31-py3.11",   pyver: "3.11", canonical: false, singleuser: false, spawntest: false }
+          # ---- combine: same Dockerfiles + root/cms-combine overlay -----
+          # Canonical (noml) base only, to match current scope. Add flavour
+          # rows here later if flavoured combine images are needed.
+          - { dockerfile: cc-dask-alma9,     image: cc-dask-combine-alma9,     flavour: noml, combine: "1", base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: true,  spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-combine-alma9, flavour: noml, combine: "1", base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: false, spawntest: false }
     name: ${{ matrix.image }} ${{ matrix.flavour }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -81,7 +85,16 @@ jobs:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           FLAVOUR: ${{ matrix.flavour }}
           CANONICAL: ${{ matrix.canonical }}
+          COMBINE: ${{ matrix.combine }}
         run: |
+          # A dask notebook spawns workers from the matching analysis image;
+          # combine notebooks want combine workers.
+          if [ "${COMBINE}" == "1" ]; then
+            worker_image="${{ env.REGISTRY }}/coffea-casa/cc-analysis-combine-alma9"
+          else
+            worker_image="${{ env.REGISTRY }}/coffea-casa/cc-analysis-alma9"
+          fi
+          echo "worker_image=${worker_image}" >> "$GITHUB_OUTPUT"
           if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
             releasetag="${release}"
             push="true"
@@ -119,7 +132,7 @@ jobs:
           curl -fsSLo hadolint \
             https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
           chmod +x hadolint
-          ./hadolint docker/Dockerfile.${{ matrix.image }}
+          ./hadolint docker/Dockerfile.${{ matrix.dockerfile }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -153,7 +166,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: docker/
-          file: docker/Dockerfile.${{ matrix.image }}
+          file: docker/Dockerfile.${{ matrix.dockerfile }}
           load: true
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.tags }}
@@ -162,6 +175,8 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ matrix.base_image }}
             FLAVOUR=${{ matrix.flavour }}
+            COMBINE=${{ matrix.combine }}
+            WORKER_IMAGE=${{ steps.tags.outputs.worker_image }}
             PYVER=${{ matrix.pyver }}
             TAG=${{ steps.tags.outputs.releasetag }}
             PROJECT=${{ env.PROJECT }}
@@ -256,7 +271,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: docker/
-          file: docker/Dockerfile.${{ matrix.image }}
+          file: docker/Dockerfile.${{ matrix.dockerfile }}
           push: true
           platforms: linux/amd64
           tags: ${{ steps.tags.outputs.tags }}
@@ -264,6 +279,8 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ matrix.base_image }}
             FLAVOUR=${{ matrix.flavour }}
+            COMBINE=${{ matrix.combine }}
+            WORKER_IMAGE=${{ steps.tags.outputs.worker_image }}
             PYVER=${{ matrix.pyver }}
             TAG=${{ steps.tags.outputs.releasetag }}
             PROJECT=${{ env.PROJECT }}
