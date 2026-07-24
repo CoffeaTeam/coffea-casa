@@ -40,7 +40,7 @@ fileExistenceTests:
     path: /etc/condor/condor_config
     shouldExist: true
   - name: xcache xrootd plugin built
-    path: /usr/local/lib/libXrdClXcachePlugin-5.so
+    path: /usr/local/lib/libXrdClXcachePlugin-6.so
     shouldExist: true
 
 commandTests:

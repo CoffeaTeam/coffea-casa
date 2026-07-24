@@ -1,0 +1,15 @@
+# Flavour: full (CalVer coffea, Python 3.12 base). Modern stack.
+# Applied LAST so these pins win over anything a package pulled in transitively.
+# The three CalVer flavours are intentionally kept as separate files (even though
+# identical today) so the auto-update bot can bump them independently and so they
+# can diverge without touching the Dockerfile.
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - xrootd
+  - pip
+  - pip:
+      # something keeps pulling in the wrong numpy; pin it explicitly.
+      - numpy==2.4.2
+      - numba
