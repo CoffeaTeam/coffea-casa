@@ -11,6 +11,7 @@ dependencies:
   - atlas-schema
   - ndcctools
   - pip
+  - htcondor==24.0.22
   - pip:
       - mt2
       - pixi-kernel
