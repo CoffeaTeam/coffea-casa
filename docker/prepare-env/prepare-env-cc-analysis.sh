@@ -35,20 +35,31 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     if [ "${GITHUB_ACTIONS:-}" == "true" ]; then
         echo "CI mode, no need to test dask_HostPort info..."
     else
-        # From chtc/dask-chtc: wait for the job ad to gain <service>_HostPort,
-        # which appears a few seconds after the job starts.
-        echo "Waiting for dask_HostPort and nanny_HostPort information..."
-        while true; do
-            if grep dask_HostPort "$_CONDOR_JOB_AD"; then break; fi
+        # Wait (up to 30s) for a *defined* dask_HostPort / nanny_HostPort.
+        # Newer HTCondor writes these as "undefined" on the first ad update and
+        # fills in the real forwarded port a moment later. Grepping only the
+        # attribute *name* (the old behavior) matched "= undefined" and raced
+        # ahead, so the worker was launched with tls://host:undefined and died
+        # in ~3s. Here we wait for an actual value; ad_get comes from
+        # worker-args.sh, which is sourced above. If the port never becomes
+        # defined (e.g. host-networked node), we proceed anyway and
+        # cc_build_worker_command falls back to the container port.
+        echo "Waiting for a defined dask_HostPort / nanny_HostPort (up to 30s)..."
+        for _i in $(seq 1 30); do
+            _dh=$(ad_get "$_CONDOR_JOB_AD" dask_HostPort)
+            _nh=$(ad_get "$_CONDOR_JOB_AD" nanny_HostPort)
+            if [ -n "$_dh" ] && [ "$_dh" != "undefined" ] \
+               && [ -n "$_nh" ] && [ "$_nh" != "undefined" ]; then
+                echo "Got dask_HostPort=$_dh nanny_HostPort=$_nh, proceeding..."
+                break
+            fi
             sleep 1
         done
-        echo "Got dask_HostPort, proceeding..."
-        echo
-        while true; do
-            if grep nanny_HostPort "$_CONDOR_JOB_AD"; then break; fi
-            sleep 1
-        done
-        echo "Got nanny_HostPort, proceeding..."
+        if [ -z "$_dh" ] || [ "$_dh" = "undefined" ] \
+           || [ -z "$_nh" ] || [ "$_nh" = "undefined" ]; then
+            echo "WARNING: dask_HostPort/nanny_HostPort still undefined after 30s;" \
+                 "falling back to the container port (host-networked node?)." 1>&2
+        fi
         echo
         if [ -z "$_CONDOR_JOB_IWD" ]; then
             echo "Error: \$_CONDOR_JOB_IWD (initial working directory) was not defined!"

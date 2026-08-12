@@ -60,6 +60,20 @@ write_ad() {
     [ "$output" = "8" ]
 }
 
+# --- _is_unset: empty or the literal "undefined" ---------------------------
+
+@test "_is_unset is true for empty and for the literal 'undefined'" {
+    run _is_unset ""
+    [ "$status" -eq 0 ]
+    run _is_unset "undefined"
+    [ "$status" -eq 0 ]
+}
+
+@test "_is_unset is false for a real value" {
+    run _is_unset "8786"
+    [ "$status" -eq 1 ]
+}
+
 # --- cores ------------------------------------------------------------------
 
 @test "cpus uses DaskWorkerCores when present" {
@@ -109,16 +123,29 @@ write_ad() {
 }
 
 # --- host -------------------------------------------------------------------
+# The worker advertises the startd's IP (as in the known-good cc8fa51), and
+# only falls back to the RemoteHost hostname when StartdIpAddr is unavailable.
 
-@test "host extracts the hostname from RemoteHost slot syntax" {
+@test "host prefers StartdIpAddr when present" {
+    write_ad \
+        'StartdIpAddr = "<129.93.183.34:9618?addrs=129.93.183.34-9618&noUDP>"' \
+        'RemoteHost = "slot1_3@node42.af.uchicago.edu"'
+    run cc_worker_host "$AD"
+    [ "$output" = "129.93.183.34" ]
+}
+
+@test "host falls back to the RemoteHost hostname when StartdIpAddr is absent" {
     write_ad 'RemoteHost = "slot1_3@node42.af.uchicago.edu"'
     run cc_worker_host "$AD"
     [ "$output" = "node42.af.uchicago.edu" ]
 }
 
 # --- validation -------------------------------------------------------------
+# *_HostPort is intentionally NOT required: it may be undefined, in which case
+# the build falls back to the container port. Validation covers the attributes
+# the worker genuinely cannot start without.
 
-@test "validate passes when all networking attributes are present" {
+@test "validate passes when the required attributes are present" {
     write_ad \
         'dask_HostPort = 8786' \
         'nanny_HostPort = 8788' \
@@ -130,13 +157,38 @@ write_ad() {
     [ "$status" -eq 0 ]
 }
 
+@test "validate does NOT require *_HostPort (fallback handles it)" {
+    # No dask_HostPort / nanny_HostPort at all -> still valid.
+    write_ad \
+        'nanny_ContainerPort = 8789' \
+        'dask_ContainerPort = 8787' \
+        'StartdIpAddr = "<10.0.0.7:9618>"' \
+        'DaskSchedulerAddress = "tls://1.2.3.4:8786"'
+    run cc_worker_validate "$AD"
+    [ "$status" -eq 0 ]
+}
+
 @test "validate fails and reports the missing attributes" {
     write_ad 'dask_HostPort = 8786'
     run cc_worker_validate "$AD"
     [ "$status" -eq 1 ]
-    [[ "$output" == *RemoteHost* ]]
+    [[ "$output" == *dask_ContainerPort* ]]
+    [[ "$output" == *nanny_ContainerPort* ]]
     [[ "$output" == *DaskSchedulerAddress* ]]
+    [[ "$output" == *host* ]]
+    # HostPort is not part of the required set.
     [[ "$output" != *dask_HostPort* ]]
+}
+
+@test "validate treats the literal 'undefined' as missing" {
+    write_ad \
+        'dask_ContainerPort = undefined' \
+        'nanny_ContainerPort = 8789' \
+        'StartdIpAddr = "<10.0.0.7:9618>"' \
+        'DaskSchedulerAddress = "tls://1.2.3.4:8786"'
+    run cc_worker_validate "$AD"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *dask_ContainerPort* ]]
 }
 
 # --- full command assembly --------------------------------------------------
@@ -160,12 +212,50 @@ write_ad() {
     [[ "$output" == *"--nthreads 8"* ]]
     [[ "$output" == *"--memory-limit 2147483648"* ]]
     [[ "$output" == *"--name htcondor--12345.0--"* ]]
+    # No StartdIpAddr here -> host falls back to the RemoteHost hostname.
     [[ "$output" == *"--contact-address tls://node42.af.uchicago.edu:8786"* ]]
     [[ "$output" == *"--nanny-contact-address tls://node42.af.uchicago.edu:8788"* ]]
     [[ "$output" == *"--listen-address tls://0.0.0.0:8787"* ]]
 }
 
-@test "build_worker_command applies all fallbacks for a minimal ad" {
+@test "build_worker_command prefers StartdIpAddr for the contact host" {
+    write_ad \
+        'dask_HostPort = 8786' \
+        'nanny_HostPort = 8788' \
+        'nanny_ContainerPort = 8789' \
+        'dask_ContainerPort = 8787' \
+        'StartdIpAddr = "<129.93.183.34:9618?addrs=129.93.183.34-9618>"' \
+        'RemoteHost = "slot1_3@node42.af.uchicago.edu"' \
+        'DaskSchedulerAddress = "tls://1.2.3.4:8786"'
+
+    run cc_build_worker_command "$AD"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"--contact-address tls://129.93.183.34:8786"* ]]
+    [[ "$output" == *"--nanny-contact-address tls://129.93.183.34:8788"* ]]
+}
+
+@test "build falls back to the container ports when *_HostPort is undefined" {
+    # This is the regression the fix targets: HTCondor left *_HostPort as the
+    # literal 'undefined', which must NOT end up in the contact address.
+    write_ad \
+        'dask_HostPort = undefined' \
+        'nanny_HostPort = undefined' \
+        'nanny_ContainerPort = 8001' \
+        'dask_ContainerPort = 8786' \
+        'StartdIpAddr = "<10.0.0.7:9618>"' \
+        'RemoteHost = "slot1@node1"' \
+        'DaskSchedulerAddress = "tls://1.2.3.4:8786"'
+
+    run cc_build_worker_command "$AD"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"--contact-address tls://10.0.0.7:8786"* ]]
+    [[ "$output" == *"--nanny-contact-address tls://10.0.0.7:8001"* ]]
+    [[ "$output" == *"--listen-address tls://0.0.0.0:8786"* ]]
+    # The literal "undefined" must never appear as a port.
+    [[ "$output" != *":undefined"* ]]
+}
+
+@test "build_worker_command applies name/cpu/memory fallbacks for a minimal ad" {
     write_ad \
         'dask_HostPort = 8786' \
         'nanny_HostPort = 8788' \
