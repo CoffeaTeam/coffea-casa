@@ -127,9 +127,13 @@ jupyterhub:
       Authenticator:
         # Persist OAuth tokens in jhub database
         enable_auth_state: true
-      CryptKeeper: # FIXME: Add key directly for now
-        keys:      #        Remove when we upgrade chart to 1.0+, and rotate to new key
-          - 413ff34d2dc7956fd9789c66a73f9e4ad2b3685120056386abd168326e6445a9
+      CryptKeeper:
+        # SECURITY: the real key must NOT be committed here - it encrypts
+        # OAuth auth_state (access tokens) in the Hub's database. Supply it
+        # via --set/a separate secrets values file at actual deploy time.
+        # The previous literal key committed in this repo's history
+        # (commit 4ecaecf) must be treated as compromised and rotated.
+        keys: []
       JupyterHub:
         authenticator_class: oauthenticator.coffea.CoffeaOAuthenticator
       GenericOAuthenticator:

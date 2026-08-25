@@ -1,0 +1,23 @@
+# Overlay for chart-test.yaml's kind spawn test.
+#
+# Replaces values.yaml's singleuser.profileList (a real published image) with
+# a single profile pointing at coffea-casa/cc-dask-alma9:chart-ci - built
+# fresh in the same workflow run from the current commit's docker/ sources
+# and side-loaded into the kind cluster - so the chart is tested against
+# code from this commit, not a possibly-stale registry tag.
+#
+# Apply on top of values.yaml: -f values.yaml -f ../../ci/values-chart-ci.yaml
+jupyterhub:
+  singleuser:
+    profileList:
+      - display_name: "CI test image"
+        description: "Built fresh in this workflow run from docker/Dockerfile.cc-dask-alma9"
+        default: true
+        kubespawner_override:
+          image: coffea-casa/cc-dask-alma9:chart-ci
+          imagePullPolicy: Never
+          container_security_context:
+            runAsUser: 6440
+            runAsGroup: 11265
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
