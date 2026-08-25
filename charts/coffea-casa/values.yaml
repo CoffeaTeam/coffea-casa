@@ -46,11 +46,6 @@ traefik:
   # Whether to expose the dashboard on port 9000 (enable for debugging only!)
   dashboard: false
 
-# Disable/enable ServiceX as a dependency
-servicex:
-  enabled: false
-  # host: "http://coffea-casa-servicex-app:8000"
-
 xcache:
   enabled: false
 
@@ -70,13 +65,6 @@ jupyterhub:
       test:
         admin: true
         apiToken: ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-    image:
-      name: jupyterhub/k8s-hub
-      tag: 1.2.0
-    command: ["sh", "-c"]
-    args:
-      - pip install --cache-dir /srv/jupyterhub/.cache/pip pyjwt pymacaroons && jupyterhub --config
-        /usr/local/etc/jupyterhub/jupyterhub_config.py --upgrade-db
     # attemp to debug
     # args: ["while true; do echo 'debug' && sleep 5; done;"]
     extraEnv:
@@ -133,8 +121,11 @@ jupyterhub:
       JupyterHub:
         admin_access: true
         authenticator_class: dummy
-      securityContext:
-        runAsUser: 0
+    podSecurityContext:
+      runAsNonRoot: false
+    containerSecurityContext:
+      runAsUser: 0
+      runAsGroup: 0
     networkPolicy:
       egress:
         - ports:
@@ -188,13 +179,13 @@ jupyterhub:
       #  periodSeconds: 10
       networkPolicy:
         egress: []
-    extraEnv:
-      # explicit notation (the "name" field takes precedence)
-      CHP_NAMESPACE:
-        name: CHP_NAMESPACE
-        valueFrom:
-          fieldRef:
-            fieldPath: metadata.namespace
+      extraEnv:
+        # explicit notation (the "name" field takes precedence)
+        CHP_NAMESPACE:
+          name: CHP_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
     # service:
     #  type: LoadBalancer
     #  labels: {}
@@ -209,11 +200,8 @@ jupyterhub:
   singleuser:
     networkPolicy:
       enabled: false
-    spec:
-      securityContext:
-        runAsUser: 6440
     uid: 6440
-    gid: 11265
+    fsGid: 11265
     extraLabels:
       jhub_user: '{username}'
     lifecycleHooks:

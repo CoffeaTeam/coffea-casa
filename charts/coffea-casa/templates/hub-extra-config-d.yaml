@@ -5,6 +5,11 @@ metadata:
   labels:
     {{- include "jupyterhub.labels" . | nindent 4 }}
 data:
-  {{- /* Glob files to allow them to be mounted by the hub pod */ -}}
-  {{- /* key=filename: value=content */ -}}
-  {{- (.Files.Glob "files/hub-extra/*").AsConfig | nindent 2 }}
+  {{- /* Glob text files to allow them to be mounted by the hub pod */ -}}
+  {{- /* key=filename: value=content. Binary files (e.g. logo.png.bin) must
+     be excluded here and go through binaryData below instead - a single
+     non-UTF8 match makes the whole glob's AsConfig return empty, silently
+     dropping every key, text included. */ -}}
+  {{- (.Files.Glob "files/hub-extra/*.{py,html}").AsConfig | nindent 2 }}
+binaryData:
+  {{- (.Files.Glob "files/hub-extra/*.bin").AsSecrets | nindent 2 }}

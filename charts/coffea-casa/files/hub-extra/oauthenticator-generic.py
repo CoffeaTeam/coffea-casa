@@ -148,6 +148,8 @@ class GenericOAuthenticator(OAuthenticator):
             expires_in = int(token_response.get('expires_in'))
             # Renew at 2/3 the token lifetime
             renew_at = time.time() + (2 * expires_in / 3)
+            # Or 1 hour, whichever is sooner
+            renew_at = min(renew_at, time.time() + 3600)
         except (KeyError, TypeError):
             renew_at = None
 
