@@ -6,15 +6,11 @@ appVersion: 2022.2.1
 description: Multi-user JupyterHub/Dask/Coffea deployment.
 dependencies:
   - name: jupyterhub
-    version: "0.11.1-n259.h74abbb81"
+    version: "4.4.1"
     repository: 'https://jupyterhub.github.io/helm-chart/'
     import-values:
       - child: rbac
         parent: rbac
-  - name: servicex
-    version: "1.0.16"
-    repository: 'https://ssl-hep.github.io/ssl-helm-charts/'
-    condition: servicex.enabled
 maintainers:
   - name: Oksana Shadura
     email: oksana.shadura@cern.ch

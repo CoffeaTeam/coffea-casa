@@ -244,8 +244,8 @@ def sign_servicex_token(identity, issuer, master_key):
     encoded = jwt.encode(payload, master_key, algorithm='HS256')
     return encoded
 
-def generate_condor(api, namespace, secret_name, issuer, name, kid):
-    secret = api.read_namespaced_secret(secret_name, namespace)
+async def generate_condor(api, namespace, secret_name, issuer, name, kid):
+    secret = await api.read_namespaced_secret(secret_name, namespace)
     token_value = base64.b64decode(secret.data["token"])
 
     password = simple_scramble(token_value)
@@ -254,8 +254,8 @@ def generate_condor(api, namespace, secret_name, issuer, name, kid):
     master_key = derive_master_key(password)
     return sign_token(name, issuer, kid, master_key).decode()
 
-def generate_xcache(api, namespace, secret_name, xcache_location, xcache_user_name):
-    secret = api.read_namespaced_secret(secret_name, namespace)
+async def generate_xcache(api, namespace, secret_name, xcache_location, xcache_user_name):
+    secret = await api.read_namespaced_secret(secret_name, namespace)
     token_value = base64.b64decode(secret.data["token"])
 
     if not pymacaroons:
@@ -270,8 +270,8 @@ def generate_xcache(api, namespace, secret_name, xcache_location, xcache_user_na
     m.add_first_party_caveat("before:%s" % datestring)
     return m.serialize()
 
-def generate_servicex(api, namespace, secret_name, issuer, name):
-    secret = api.read_namespaced_secret(secret_name, namespace)
+async def generate_servicex(api, namespace, secret_name, issuer, name):
+    secret = await api.read_namespaced_secret(secret_name, namespace)
     token_value = base64.b64decode(secret.data["token"])
     # let's try the same way it is done for HTCondor
     password = simple_scramble(token_value)

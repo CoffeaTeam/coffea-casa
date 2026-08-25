@@ -1,0 +1,137 @@
+name: Test Helm chart
+
+# Two tiers:
+#   lint-and-template - fast, no cluster. Renders the chart with each
+#     values-*.yaml independently (that's how they're actually deployed -
+#     never merged together) and fails on any schema violation.
+#   install            - builds the canonical (noml) cc-dask-alma9 image
+#     fresh from this commit's docker/ sources, loads it into a kind
+#     cluster, does a real `helm install` with the dev values.yaml (image
+#     swapped for the freshly-built one via ci/values-chart-ci.yaml), then
+#     drives a real user spawn through the Hub REST API using the static
+#     `test` service token already baked into values.yaml. This is the
+#     tier that catches runtime-only breakage helm template/lint can't see
+#     (a kubespawner_override key KubeSpawner renamed, a ConfigMap glob
+#     silently dropping every key because one matched file was binary, or
+#     the chart and the image simply disagreeing with each other).
+on:
+  push:
+    paths:
+      - 'charts/**'
+      - 'docker/**'
+      - '.github/workflows/chart-test.yaml'
+    branches:
+      - master
+  pull_request:
+    paths:
+      - 'charts/**'
+      - 'docker/**'
+      - '.github/workflows/chart-test.yaml'
+  workflow_dispatch:
+
+jobs:
+  lint-and-template:
+    name: Lint & template (${{ matrix.values_file }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        values_file: [values.yaml, values-prod.yaml, values-cmsaf-prod.yaml]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Fetch chart dependencies
+        working-directory: charts/coffea-casa
+        run: helm dependency update
+
+      - name: helm lint
+        working-directory: charts/coffea-casa
+        run: helm lint . -f ${{ matrix.values_file }}
+
+      - name: helm template
+        working-directory: charts/coffea-casa
+        run: helm template coffea-casa . -f ${{ matrix.values_file }} > /dev/null
+
+  install:
+    name: Install on kind and spawn a user server
+    runs-on: ubuntu-latest
+    needs: lint-and-template
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          docker-images: false
+          large-packages: true
+          swap-storage: true
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: cc-chart-test
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build the canonical singleuser image fresh from this commit's
+      # docker/ sources - the chart is tested against code from this commit,
+      # not a possibly-stale registry tag. Mirrors the canonical (noml) row
+      # of docker-build-test-publish.yaml's matrix.
+      - name: Build canonical singleuser image (load locally)
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/
+          file: docker/Dockerfile.cc-dask-alma9
+          load: true
+          platforms: linux/amd64
+          tags: coffea-casa/cc-dask-alma9:chart-ci
+          cache-from: type=gha,scope=chart-test-cc-dask-alma9
+          cache-to: type=gha,mode=max,scope=chart-test-cc-dask-alma9
+          build-args: |
+            BASE_IMAGE=coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12
+            FLAVOUR=noml
+            PYVER=3.12
+            COMBINE=0
+
+      - name: Load image into kind
+        run: kind load docker-image coffea-casa/cc-dask-alma9:chart-ci --name cc-chart-test
+
+      - name: Fetch chart dependencies
+        working-directory: charts/coffea-casa
+        run: helm dependency update
+
+      - name: helm install (dev values + CI image overlay)
+        working-directory: charts/coffea-casa
+        run: |
+          kubectl create namespace coffea-casa-ci
+          helm upgrade --install coffea-casa . \
+            -f values.yaml \
+            -f ../../ci/values-chart-ci.yaml \
+            --namespace coffea-casa-ci \
+            --wait --timeout 10m
+
+      - name: Dump cluster state on install failure
+        if: failure()
+        run: |
+          kubectl get all -n coffea-casa-ci
+          kubectl describe pod -n coffea-casa-ci -l component=hub || true
+          kubectl logs -n coffea-casa-ci -l component=hub --tail=300 || true
+
+      - name: Spawn a user server through the Hub API
+        run: ./ci/chart-spawn-test.sh coffea-casa-ci
+
+      - name: Dump cluster state on spawn failure
+        if: failure()
+        run: |
+          kubectl get all -n coffea-casa-ci
+          kubectl logs -n coffea-casa-ci -l component=hub --tail=300 || true

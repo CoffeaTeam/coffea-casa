@@ -34,11 +34,6 @@ traefik:
   # Whether to expose the dashboard on port 9000 (enable for debugging only!)
   dashboard: false
 
-# Disable/enable ServiceX as a dependency
-servicex:
-  enabled: false
-  host: "http://coffea-casa-servicex-app:8000"
-
 xcache:
   enabled: true
   host: "red-xcache1.unl.edu"
@@ -96,9 +91,6 @@ jupyterhub:
     db:
       pvc:
         storageClassName: rook-ceph-block
-    image:
-      name: jupyterhub/k8s-hub
-      tag: 1.2.0
     command: ["sh", "-c"]
     args:
         -    pip install
@@ -109,11 +101,13 @@ jupyterhub:
                --config /usr/local/etc/jupyterhub/jupyterhub_config.py
                --upgrade-db
     extraEnv:
-      OAUTH2_AUTHORIZE_URL:
-      OAUTH2_TOKEN_URL:
-      OAUTH_CLIENT_ID:
-      OAUTH_CLIENT_SECRET:
-      DASK_BASE_DOMAIN:
+      # Expected to be overridden (e.g. via --set or a separate secrets
+      # values file) at actual deploy time.
+      OAUTH2_AUTHORIZE_URL: ""
+      OAUTH2_TOKEN_URL: ""
+      OAUTH_CLIENT_ID: ""
+      OAUTH_CLIENT_SECRET: ""
+      DASK_BASE_DOMAIN: ""
 
   proxy:
     chp:
@@ -123,13 +117,13 @@ jupyterhub:
         periodSeconds: 10
       networkPolicy:
         enabled: false
-    extraEnv:
-      # explicit notation (the "name" field takes precedence)
-      CHP_NAMESPACE:
-        name: CHP_NAMESPACE
-        valueFrom:
-          fieldRef:
-            fieldPath: metadata.namespace
+      extraEnv:
+        # explicit notation (the "name" field takes precedence)
+        CHP_NAMESPACE:
+          name: CHP_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
     https:
       enabled: true
       hosts:
@@ -146,11 +140,8 @@ jupyterhub:
   singleuser:
     networkPolicy:
       enabled: false
-    spec:
-      securityContext:
-        runAsUser: 6440
     uid: 6440
-    gid: 11265
+    fsGid: 11265
     extraLabels:
       jhub_user: '{username}'
     lifecycleHooks:
@@ -171,11 +162,11 @@ jupyterhub:
         kubespawner_override:
           image: coffeateam/coffea-casa:2021.07.22
           imagePullPolicy: Always
-          securityContext:
+          container_security_context:
             runAsUser: 6440
             runAsGroup: 11265
             allowPrivilegeEscalation: False
-            RunAsNonRoot: true
+            runAsNonRoot: true
         default: true
     extraContainers:
     - name: dask-worker
