@@ -219,14 +219,14 @@ jupyterhub:
       - display_name: "Coffea Base Image"
         description: "Test build"
         kubespawner_override:
-          image: hub.opensciencegrid.org/coffea-casa/cc-ubuntu:latest
+          image: hub.opensciencegrid.org/coffea-casa/cc-dask-alma9:development
           # tag: "set-by-chartpress"
           # imagePullPolicy: Always
-          securityContext:
+          container_security_context:
             runAsUser: 6440
             runAsGroup: 11265
             allowPrivilegeEscalation: false
-            RunAsNonRoot: true
+            runAsNonRoot: true
         default: true
   # The continuous-image-puller and hook-image-puller are disabled by default.
   prePuller:

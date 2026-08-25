@@ -162,11 +162,11 @@ jupyterhub:
         kubespawner_override:
           image: coffeateam/coffea-casa:2021.07.22
           imagePullPolicy: Always
-          securityContext:
+          container_security_context:
             runAsUser: 6440
             runAsGroup: 11265
             allowPrivilegeEscalation: False
-            RunAsNonRoot: true
+            runAsNonRoot: true
         default: true
     extraContainers:
     - name: dask-worker
