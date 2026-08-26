@@ -1,0 +1,64 @@
+name: Publish Helm chart
+
+# Packages charts/coffea-casa and publishes it to this repo's own gh-pages
+# branch as a Helm chart repo, using chartpress (the same tool the
+# JupyterHub/Binder projects use to publish their own charts) - see
+# charts/chartpress.yaml, which already points repo.published at
+# https://coffeateam.github.io/coffea-casa/.
+#
+# On an actual GitHub Release, the chart version/appVersion are pinned to
+# that release's tag, matching how docker images are published on release
+# (see docker-build-test-publish.yaml) - charts, images, and the PyPI
+# package all track the same tag.
+#
+# NOTE: this requires GitHub Pages to be enabled for this repo, serving from
+# the gh-pages branch (root) - a one-time repo settings change a maintainer
+# needs to make; chartpress creates/updates the branch itself but can't
+# enable Pages.
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  publish-chart:
+    name: Package and publish charts/coffea-casa
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install chartpress
+        run: pip install "chartpress>=2.1,<3"
+
+      - name: Configure git identity for the gh-pages commit
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch chart dependencies
+        working-directory: charts/coffea-casa
+        run: helm dependency update
+
+      - name: Publish chart
+        working-directory: charts
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          if [ -n "$TAG" ]; then
+            chartpress --skip-build --publish-chart --tag "$TAG"
+          else
+            # workflow_dispatch with no release: let chartpress derive a
+            # dev version from git describe instead of a real release tag.
+            chartpress --skip-build --publish-chart
+          fi

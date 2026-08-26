@@ -5,7 +5,12 @@ charts:
     repo:
       git: coffeateam/coffea-casa
       published: https://coffeateam.github.io/coffea-casa/
-    images:
+    # No entries active below (all commented out) - chartpress requires this
+    # to be a dict, not null, or it crashes even on --list-images/
+    # --publish-chart. Docker images are built/published separately by
+    # docker-build-test-publish.yaml; this section is for chartpress's own
+    # build+tag+push mechanism, unused here.
+    images: {}
       # hub, the container where JupyterHub, KubeSpawner, and the configured
       # Authenticator are running.
       #hub:

@@ -90,6 +90,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :caption: Deploying Coffea-Casa at K8s Cluster
 
    cc_deployment.rst
+   cc_local_deployment.rst
 
 
 .. toctree::

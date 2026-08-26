@@ -12,6 +12,12 @@ helm repo add coffea-casa https://coffeateam.github.io/coffea-casa
 
 You can then run `helm search repo coffea-casa` to see the charts.
 
+## Local development
+
+Testing a chart change on a real deployment isn't practical. To deploy this
+chart on a local Kubernetes cluster (k3d or minikube) instead, see
+[docs/DEVNOTES.md](docs/DEVNOTES.md).
+
 # Prepare Configuration Fils
 
 In this step, we'll prepare a YAML configuration file with the fields required by the Coffea-casa helm chart. It will contain some secret keys, which should not be checked into version control in plaintext.

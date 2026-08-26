@@ -1,61 +1,138 @@
-# Development notes: Minikube
+# Local development: deploying the chart on k3d or minikube
 
-Minikube runs a single-node Kubernetes cluster inside a Virtual Machine (VM) on your laptop. For more information on minikube, see the [Minikube documentation](https://kubernetes.io/docs/setup/learning-environment/minikube/).
+This covers running `charts/coffea-casa` on a local Kubernetes cluster, to
+test chart changes before opening a PR. Both instructions below were
+verified end-to-end on this repo's current chart (`jupyterhub` dependency
+`4.4.1`) - not just written from memory.
 
+Pick whichever local cluster tool you prefer:
 
-This document explains on how to deploy coffea-casa using minikube as a provider.
+- **k3d** - k3s running in Docker. Fast to start, low resource use.
+- **minikube** - its own VM/driver. Heavier, closer to a "real" cluster.
 
-# Quick Start
+The deployment steps are identical either way once the cluster is up -
+only cluster creation differs.
 
-1. For installing minikube - https://kubernetes.io/docs/tasks/tools/install-minikube/
-2. Minikube Documentation - https://minikube.sigs.k8s.io/docs/overview/
+## Prerequisites
 
-# Basic Commands for Minikube
+- Docker (or another container runtime your chosen tool supports)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [Helm](https://helm.sh/docs/intro/install/) >= 3
+- Either [k3d](https://k3d.io/#installation) or
+  [minikube](https://minikube.sigs.k8s.io/docs/start/)
 
-- Start a cluster by running:
- ```minikube start```
+## 1. Create a cluster
 
-- Access the Kubernetes Dashboard running within the minikube cluster:
- ```minikube dashboard```
+### k3d
 
-- Stop your local minikube cluster:
- ```minikube stop```
-
-- Delete your local cluster:
-```minikube delete```
-
-Start minikube with at least 4 CPU’s and 10GB memory for complete coffea-casa deployment. As per the need increase the limits of minikube.
-
-# How to deploy coffea-casa
-
-Use `values.yaml` to deploy coffea-casa which is available in the charts/coffea-casa) directory. 
-
-Create namespace:
-
-``` kubectl create namespace coffea-casa ```
-
-Example helm command to test:
-
-```helm install --dry-run --debug coffea-casa coffea-casa```
-
+```sh
+k3d cluster create coffea-casa-dev --wait
 ```
-~ helm dependency update
-Getting updates for unmanaged Helm repositories...
-...Successfully got an update from the "https://jupyterhub.github.io/helm-chart/" chart repository
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "ssl-hep" chart repository
-...Successfully got an update from the "daskgateway" chart repository
-Update Complete. ⎈Happy Helming!⎈
-Saving 2 charts
-Downloading jupyterhub from repo https://jupyterhub.github.io/helm-chart/
-Downloading servicex from repo https://ssl-hep.github.io/ssl-helm-charts/
-Deleting outdated charts```
 
-Example helm command to test:
+### minikube
 
-```helm install --dry-run --debug coffea-casa coffea-casa```
+```sh
+minikube start
+```
 
-Example helm command to deploy:
-	
-```~ helm upgrade --install coffea-casa charts/coffea-casa/  --namespace coffea-casa --values charts/coffea-casa/values.yaml --values charts/coffea-casa/secrets.yaml```
+`kubectl` picks up whichever cluster you just created automatically (check
+with `kubectl config current-context`). If you have other clusters
+configured, make sure the context is `k3d-coffea-casa-dev` or `minikube`
+before continuing - `kubectl config use-context <name>` to switch.
 
+## 2. Deploy the chart
+
+From the repo root:
+
+```sh
+cd charts/coffea-casa
+helm dependency update
+kubectl create namespace coffea-casa
+helm upgrade --install coffea-casa . \
+  -f values.yaml \
+  --namespace coffea-casa \
+  --wait --timeout 10m
+```
+
+`values.yaml` is the chart's own local/dev profile: dummy authentication
+(any username/password is accepted), no TLS, a NodePort proxy, and a single
+test `singleuser` profile - it's meant for exactly this, not for a real
+deployment. (`values-prod.yaml` and `values-cmsaf-prod.yaml` are real site
+configs and need real secrets/hostnames you won't have locally.)
+
+### Apple Silicon / Docker Desktop: hub pod crashes with `Illegal instruction`
+
+If the `hub` pod goes into `CrashLoopBackOff` with exit code 132 and no
+useful log output (or logs stop right after a `pip install` step), this is
+**not a chart bug** - it's `cryptography`'s OpenSSL backend hitting a
+CPU-feature-detection bug under Docker Desktop's arm64 VM on Apple Silicon,
+specifically when generating an RSA key (JupyterHub does this during
+startup for TLS cert self-signing). It reproduces identically on both k3d
+and minikube, since it's the underlying Docker Desktop VM, not the cluster
+tool.
+
+Work around it by forcing OpenSSL to skip ARM crypto-extension detection:
+
+```sh
+helm upgrade --install coffea-casa . \
+  -f values.yaml \
+  --set-string jupyterhub.hub.extraEnv.OPENSSL_armcap=0 \
+  --namespace coffea-casa \
+  --wait --timeout 10m
+```
+
+This is a local-machine workaround only - don't add it to any committed
+values file; it isn't needed on Linux CI runners or Intel Macs.
+
+## 3. Access JupyterHub
+
+```sh
+kubectl port-forward svc/proxy-public 8080:80 -n coffea-casa
+```
+
+Then open **http://localhost:8080**. Neither k3d nor minikube's Docker
+driver reliably exposes NodePorts straight to the host on macOS, so
+port-forward is the simplest option regardless of which tool you're using.
+
+Log in with **any username and any password** - `values.yaml` configures
+JupyterHub's `DummyAuthenticator`, which accepts anything.
+
+## 4. Spawning a notebook
+
+`values.yaml`'s default profile points at a real published image
+(`hub.opensciencegrid.org/coffea-casa/cc-dask-alma9:development`). Two
+things worth knowing before you click "Start":
+
+- **That image is amd64-only.** On an Apple Silicon Mac (arm64), spawning
+  will fail with `ImagePullBackOff: no matching manifest for
+  linux/arm64/v8` - this is expected, not a chart problem. It works as-is
+  on amd64 hosts (Linux CI runners, Intel Macs).
+- To test against an image you built locally instead (e.g. while iterating
+  on `docker/Dockerfile.cc-dask-alma9`), build it, load it into your
+  cluster (`k3d image import <tag> -c coffea-casa-dev`, or
+  `minikube image load <tag>`), and point the chart at it with an overlay
+  values file overriding `jupyterhub.singleuser.profileList` -
+  `ci/values-chart-ci.yaml` is exactly this, used by
+  `.github/workflows/chart-test.yaml`'s CI spawn test, and works as a
+  local example too:
+
+  ```sh
+  helm upgrade --install coffea-casa . \
+    -f values.yaml \
+    -f ../../ci/values-chart-ci.yaml \
+    --set-string jupyterhub.hub.extraEnv.OPENSSL_armcap=0 \
+    --namespace coffea-casa \
+    --wait --timeout 10m
+  ```
+
+## 5. Cleaning up
+
+```sh
+kubectl delete namespace coffea-casa
+
+# k3d
+k3d cluster delete coffea-casa-dev
+
+# minikube
+minikube delete
+```
