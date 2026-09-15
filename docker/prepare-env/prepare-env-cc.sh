@@ -85,8 +85,17 @@ replace "$DASK_ROOT_CONFIG/labextension.yaml" \
 
 if [[ "${LABEXTENTION_FACTORY_CLASS:-}" == "LocalCluster" ]]; then
     replace "$DASK_ROOT_CONFIG/dask_tls.yaml" \
-            "require-encryption: True" \
-            "require-encryption: False"
+            "require-encryption: true" \
+            "require-encryption: false"
+    # distributed.Security builds a TLS context whenever ca-file AND cert
+    # are both non-empty, regardless of require-encryption (see
+    # Security._get_tls_context) - so a plain LocalCluster (no facility
+    # certs mounted) still crashes on the ca-file path above with
+    # "Cluster failed to start: [Errno 2] No such file or directory"
+    # unless ca-file is cleared too.
+    replace "$DASK_ROOT_CONFIG/dask_tls.yaml" \
+            'ca-file: ".*"' \
+            "ca-file: null"
 fi
 
 ########################################

@@ -67,6 +67,15 @@ jupyterhub:
         apiToken: ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
     # attemp to debug
     # args: ["while true; do echo 'debug' && sleep 5; done;"]
+    # LOCAL DEV WORKAROUND (Apple Silicon / arm64 Docker Desktop): the hub
+    # image's bundled cryptography==50.0.0 Rust bindings crash with SIGILL
+    # ("Illegal instruction") on this arm64 virtualized CPU merely by
+    # importing jupyterhub.spawner - reproduces with plain `docker run`,
+    # unrelated to k8s/seccomp. cryptography==42.0.5 imports fine. Remove
+    # once upstream cryptography or the base image fixes this.
+    command: ["sh", "-c"]
+    args:
+      - pip install --user --cache-dir /srv/jupyterhub/.cache/pip "cryptography==42.0.5" && exec jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py --debug
     extraEnv:
       DASK_BASE_DOMAIN: kubernetes.docker.internal
       CONDOR_ENABLED: 'False'
@@ -215,6 +224,17 @@ jupyterhub:
     extraEnv:
       LABEXTENTION_FACTORY_CLASS: LocalCluster
       LABEXTENTION_FACTORY_MODULE: dask.distributed
+      # LOCAL DEV WORKAROUND: prepare-env-cc.sh's LocalCluster branch only
+      # flips require-encryption and forgets to also clear ca-file, so
+      # distributed.Security still tries to load the (unmounted, real-
+      # facility-only) /etc/cmsaf-secrets/ca.pem and LocalCluster fails
+      # with "Cluster failed to start: [Errno 2] No such file or
+      # directory". Fixed at the source in prepare-env-cc.sh (needs an
+      # image rebuild to take effect); these env vars override the
+      # generated dask_tls.yaml in the meantime. Remove once running on a
+      # rebuilt image.
+      DASK_DISTRIBUTED__COMM__REQUIRE_ENCRYPTION: "False"
+      DASK_DISTRIBUTED__COMM__TLS__CA_FILE: ""
     profileList:
       - display_name: "Coffea Base Image"
         description: "Test build"
