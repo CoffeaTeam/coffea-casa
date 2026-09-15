@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Chart spawn test: against an already-installed coffea-casa chart release,
 # use the Hub REST API to spawn a user server with the chart's default
-# singleuser profile and verify it becomes ready and answers HTTP.
+# singleuser profile, verify it becomes ready and answers HTTP, and verify
+# the dask-labextension LocalCluster factory actually starts inside it.
 #
 # Unlike ci/spawn-test.sh (which installs the upstream jupyterhub chart
 # directly to test a candidate docker image), this targets our own chart's
@@ -63,6 +64,27 @@ fi
 echo "==> Probing the user server through the proxy"
 curl -fsS "${AUTH[@]}" "http://localhost:8080/user/$USER_NAME/api/status" \
   | python3 -m json.tool
+
+# Regression test for the dask-labextension LocalCluster crash: prepare-env-cc.sh
+# used to sed-replace "require-encryption: True" -> "False" in dask_tls.yaml to
+# disable TLS for LABEXTENTION_FACTORY_CLASS=LocalCluster, but the template uses
+# lowercase "true" so the replace silently never matched, and ca-file was never
+# cleared either - LocalCluster() failed with "Cluster failed to start: [Errno 2]
+# No such file or directory" trying to load the unmounted facility CA cert. This
+# only reproduces inside the actual spawned pod (real prepare-env-cc.sh run,
+# real generated dask_tls.yaml), not via helm template/lint.
+POD=$(kubectl -n "$NAMESPACE" get pod -l component=singleuser-server -o jsonpath='{.items[0].metadata.name}')
+echo "==> Verifying the dask-labextension LocalCluster factory starts (pod: $POD)"
+if ! kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- python3 -c "
+from dask.distributed import LocalCluster
+c = LocalCluster()
+print('LocalCluster started OK:', c)
+c.close()
+"; then
+  echo "!! LocalCluster failed to start inside the spawned singleuser pod"
+  kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- cat /opt/dask/dask_tls.yaml || true
+  exit 1
+fi
 
 echo "==> Stopping server"
 curl -fsS -X DELETE "${AUTH[@]}" "$HUB/users/$USER_NAME/server" || true
