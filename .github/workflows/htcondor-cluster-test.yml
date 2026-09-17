@@ -99,11 +99,19 @@ jobs:
 
       - name: Run the real CoffeaCasaCluster + HTCondor test
         run: |
+          # CoffeaCasaCluster falls back to socket.getfqdn() (the pool
+          # container's own hostname) for +DaskSchedulerAddress when POD_IP/
+          # HOST_IP aren't set - that hostname isn't resolvable from the
+          # sibling worker container Docker spins up for the job, only its
+          # IP is. Real k8s deployments always set POD_IP; give this test
+          # the equivalent.
+          POOL_IP=$(docker inspect condor-pool --format '{{.NetworkSettings.IPAddress}}')
           docker exec \
             -u submituser -w /home/submituser \
             -e HOME=/home/submituser \
             -e PYTHONPATH=/opt/pylibs \
             -e WORKER_IMAGE=${{ env.WORKER_IMAGE }} \
+            -e HOST_IP="$POOL_IP" \
             condor-pool python3 -u htcondor_cluster_test.py
 
       - name: Dump HTCondor logs on failure
