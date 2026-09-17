@@ -1,0 +1,114 @@
+name: HTCondor cluster test
+
+# Real end-to-end test of CoffeaCasaCluster against a live HTCondor pool
+# (htcondor/mini, Docker-universe enabled) and the actual cc-analysis-alma9
+# worker image - not mocks. Runs whenever a change could break the real
+# submission path: the coffea_casa package itself, or either of the images
+# HTCondor jobs actually run (scheduler/notebook and worker).
+#
+# tests/test_coffeacasa.py (run by pypi-ci.yml) covers class logic with
+# mocked HTCondor and stays fast; this job is the slower, real-condor
+# regression test for the two of them together.
+on:
+  pull_request:
+    paths:
+      - coffea_casa/**
+      - docker/Dockerfile.cc-dask-alma9
+      - docker/Dockerfile.cc-analysis-alma9
+      - docker/prepare-env/**
+      - ci/htcondor-pool-setup.sh
+      - ci/htcondor_cluster_test.py
+    branches:
+      - master
+  push:
+    paths:
+      - coffea_casa/**
+      - docker/Dockerfile.cc-dask-alma9
+      - docker/Dockerfile.cc-analysis-alma9
+      - docker/prepare-env/**
+      - ci/htcondor-pool-setup.sh
+      - ci/htcondor_cluster_test.py
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  # Tracks docker-build-test-publish.yaml's canonical (noml) row. This job
+  # only needs *a* worker image, not every flavour.
+  BASE_IMAGE: coffeateam/coffea-almalinux9-noml:2026.9.0-py3.12
+  WORKER_IMAGE: coffea-casa/cc-analysis-alma9:htcondor-ci
+
+jobs:
+  htcondor-cluster-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+          driver-opts: network=host
+
+      # Loaded into the runner's own docker daemon (runner is already
+      # linux/amd64, no QEMU needed), which is also what the HTCondor pool
+      # below talks to via the mounted socket. Shares docker-build-test-
+      # publish.yaml's GHA cache scope so this doesn't rebuild from scratch
+      # on every run.
+      - name: Build the worker image (cc-analysis-alma9)
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/
+          file: docker/Dockerfile.cc-analysis-alma9
+          load: true
+          tags: ${{ env.WORKER_IMAGE }}
+          cache-from: type=gha,scope=cc-analysis-alma9-noml
+          cache-to: type=gha,mode=max,scope=cc-analysis-alma9-noml
+          build-args: |
+            BASE_IMAGE=${{ env.BASE_IMAGE }}
+            FLAVOUR=noml
+            PYVER=3.12
+            COMBINE=0
+
+      - name: Start the HTCondor pool (htcondor/mini, Docker-universe enabled)
+        run: ./ci/htcondor-pool-setup.sh condor-pool
+
+      - name: Install coffea_casa and its deps into the pool container
+        run: |
+          docker exec condor-pool python3 -m pip install --quiet "dask[distributed]" dask_jobqueue
+          docker cp coffea_casa condor-pool:/opt/coffea_casa_pkg
+          docker cp ci/htcondor_cluster_test.py condor-pool:/home/submituser/htcondor_cluster_test.py
+          docker exec condor-pool bash -c '
+            mkdir -p /opt/pylibs
+            ln -sf /opt/coffea_casa_pkg /opt/pylibs/coffea_casa
+            chmod -R a+rX /opt/pylibs /opt/coffea_casa_pkg
+            chown submituser:submituser /home/submituser/htcondor_cluster_test.py
+          '
+
+      - name: Run the real CoffeaCasaCluster + HTCondor test
+        run: |
+          docker exec \
+            -u submituser -w /home/submituser \
+            -e HOME=/home/submituser \
+            -e PYTHONPATH=/opt/pylibs \
+            -e WORKER_IMAGE=${{ env.WORKER_IMAGE }} \
+            condor-pool python3 -u htcondor_cluster_test.py
+
+      - name: Dump HTCondor logs on failure
+        if: failure()
+        run: |
+          docker exec condor-pool condor_q -allusers || true
+          docker exec condor-pool condor_history -limit 10 -af ClusterId ExitCode HoldReason || true
+          docker exec condor-pool bash -c 'tail -n 200 /var/log/condor/StarterLog* /var/log/condor/StartLog /var/log/condor/SchedLog' || true
