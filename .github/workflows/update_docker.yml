@@ -1,5 +1,12 @@
 name: Auto Update Base Docker Images
 
+# Checks Docker Hub for newer coffeateam/coffea-*-almalinux9* base image tags
+# (published by https://github.com/CoffeaTeam/af-images) and opens a PR
+# bumping every place that pins one: the Dockerfile ARG BASE_IMAGE defaults,
+# the docker-build-test-publish.yaml build matrix (the actual source of
+# truth for CI/published images - it passes BASE_IMAGE as a build-arg that
+# overrides the Dockerfile default), and chart-test.yaml's canonical build.
+
 on:
   schedule:
     - cron: '0 6 * * *'  # Every day at 6am UTC
@@ -10,55 +17,91 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Get latest base image tag from Docker Hub
+      # One (repo, tag-pattern) pair per coffea flavour actually referenced
+      # in this repo. Add a row here if a new flavour is introduced.
+      - name: Get latest base image tags from Docker Hub
         id: latest
         run: |
-          LATEST_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/coffeateam/coffea-dask-almalinux9-noml/tags?page_size=100" |
-            jq -r '.results[].name' |
-            grep -E '^[0-9]{4}\.[0-9]+\.[0-9]+-py3\.12$' |
-            sort -V |
-            tail -n 1 )
-          echo "Found latest tag: $LATEST_TAG"
-          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
 
-      - name: Find and update all Dockerfiles
+          latest_tag() {
+            local repo="$1" pattern="$2"
+            curl -fsS "https://registry.hub.docker.com/v2/repositories/coffeateam/${repo}/tags?page_size=100" \
+              | jq -r '.results[].name' \
+              | grep -E "$pattern" \
+              | sort -V \
+              | tail -n 1
+          }
+
+          noml=$(latest_tag coffea-almalinux9-noml '^[0-9]{4}\.[0-9]+\.[0-9]+-py3\.12$')
+          full=$(latest_tag coffea-almalinux9 '^[0-9]{4}\.[0-9]+\.[0-9]+-py3\.12$')
+          dak=$(latest_tag coffea-dak-almalinux9 '^[0-9]{4}\.[0-9]+\.[0-9]+-py3\.12$')
+          zero7=$(latest_tag coffea-0.7-almalinux9 '^0\.7\.[0-9]+-py3\.11$')
+
+          echo "Latest tags: noml=$noml full=$full dak=$dak 0.7=$zero7"
+          echo "noml=$noml" >> "$GITHUB_OUTPUT"
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+          echo "dak=$dak" >> "$GITHUB_OUTPUT"
+          echo "zero7=$zero7" >> "$GITHUB_OUTPUT"
+
+      - name: Update base image references
         id: update
         run: |
-          set -e
+          set -euo pipefail
+          rm -f /tmp/updated_flag
 
-          UPDATED=false
-          LATEST_TAG=${{ steps.latest.outputs.latest_tag }}
-          IMAGE_NAME="coffeateam/coffea-dask-almalinux9-noml"
+          # Every file that pins one of these images, regardless of extension.
+          TARGET_FILES=$(find docker .github/workflows -type f \
+            \( -name 'Dockerfile*' -o -name '*.yaml' -o -name '*.yml' \))
 
-          for dockerfile in $(find . -name "Dockerfile*"); do
-            echo "Checking $dockerfile..."
-
-            # Extract current tag
-            CURRENT_TAG=$(grep -E "^FROM $IMAGE_NAME:" "$dockerfile" | sed "s|FROM $IMAGE_NAME:||")
-
-            if [ -n "$CURRENT_TAG" ] && [ "$CURRENT_TAG" != "$LATEST_TAG" ]; then
-              echo "Updating $dockerfile: $CURRENT_TAG → $LATEST_TAG"
-              sed -i "s|$IMAGE_NAME:$CURRENT_TAG|$IMAGE_NAME:$LATEST_TAG|" "$dockerfile"
-              UPDATED=true
-            else
-              echo "No update needed in $dockerfile"
+          update_image() {
+            local image="$1" new_tag="$2"
+            if [ -z "$new_tag" ]; then
+              echo "No tag resolved for $image, skipping"
+              return
             fi
-          done
+            for f in $TARGET_FILES; do
+              for cur in $(grep -ohE "${image}:[A-Za-z0-9._-]+" "$f" 2>/dev/null | sort -u); do
+                cur_tag="${cur#${image}:}"
+                if [ "$cur_tag" != "$new_tag" ]; then
+                  echo "Updating $f: ${image}:${cur_tag} -> ${image}:${new_tag}"
+                  sed -i "s|${image}:${cur_tag}|${image}:${new_tag}|g" "$f"
+                  touch /tmp/updated_flag
+                fi
+              done
+            done
+          }
 
-          echo "UPDATED=$UPDATED" >> $GITHUB_ENV
+          update_image "coffeateam/coffea-almalinux9-noml" "${{ steps.latest.outputs.noml }}"
+          update_image "coffeateam/coffea-almalinux9" "${{ steps.latest.outputs.full }}"
+          update_image "coffeateam/coffea-dak-almalinux9" "${{ steps.latest.outputs.dak }}"
+          update_image "coffeateam/coffea-0.7-almalinux9" "${{ steps.latest.outputs.zero7 }}"
+
+          if [ -f /tmp/updated_flag ]; then
+            echo "UPDATED=true" >> "$GITHUB_ENV"
+          else
+            echo "UPDATED=false" >> "$GITHUB_ENV"
+          fi
 
       - name: Create Pull Request
         if: env.UPDATED == 'true'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN  }}
-          commit-message: "chore: update base image to coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}"
-          title: "chore: update base image to coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}"
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          commit-message: "chore: update coffea base images"
+          title: "chore: update coffea base images"
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           branch: "update-coffea-base-image"
           body: |
-            A new Coffea image version has been detected.
+            Automated check of https://github.com/CoffeaTeam/af-images published
+            tags on Docker Hub found newer base image tags than the ones
+            currently pinned in Dockerfiles and CI workflows.
 
-            This PR updates all Dockerfiles that use `coffeateam/coffea-dask-almalinux9-noml:<old>` to `coffeateam/coffea-dask-almalinux9-noml:${{ steps.latest.outputs.latest_tag }}`.
+            | Flavour | Image | Latest tag |
+            |---|---|---|
+            | noml | `coffeateam/coffea-almalinux9-noml` | `${{ steps.latest.outputs.noml }}` |
+            | full | `coffeateam/coffea-almalinux9` | `${{ steps.latest.outputs.full }}` |
+            | dak  | `coffeateam/coffea-dak-almalinux9` | `${{ steps.latest.outputs.dak }}` |
+            | 0.7  | `coffeateam/coffea-0.7-almalinux9` | `${{ steps.latest.outputs.zero7 }}` |
