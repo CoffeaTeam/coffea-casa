@@ -179,6 +179,15 @@ jupyterhub:
       #SERVICEX_HOST: https://cmsaf-servicex.servicex.coffea.casa
       NAMESPACE: cmsaf-prod
       BASH_ENV: "/usr/local/etc/profile.d/conda.sh"
+      # The image's base conda env lives at /usr/local (CONDA_DIR), which is
+      # the container's writable layer and is lost on every pod restart.
+      # These make `conda create -n foo` / `mamba create -n foo` (no
+      # --prefix needed) default to the persistent $HOME instead, so
+      # user-created envs survive restarts. /usr/local stays listed second
+      # as a fallback. CONDA_ENVS_DIRS is ':'-separated, CONDA_PKGS_DIRS is
+      # ','-separated (conda's own convention, verified against the image).
+      CONDA_ENVS_DIRS: "/home/cms-jovyan/.conda/envs:/usr/local/envs"
+      CONDA_PKGS_DIRS: "/home/cms-jovyan/.conda/pkgs,/usr/local/pkgs"
       EXTERNAL_HOSTNAME: coffea.casa
       XCACHE_HOST: xcache.cmsaf-dev.flatiron.hollandhpc.org
       SERVICEX_HOST: http://cmsaf-servicex-servicex-app:8000
@@ -209,6 +218,13 @@ jupyterhub:
             name: triton-bucket
             key: BUCKET_PORT
     storage:
+      # Must match the image's actual $HOME (NB_USER=cms-jovyan) - the
+      # chart default /home/jovyan is never used by this image, so without
+      # this override the persistent PVC mounts somewhere the container
+      # never reads, and everything under $HOME (conda envs, pip --user
+      # installs, anything outside work/) is silently lost on every pod
+      # restart.
+      homeMountPath: /home/cms-jovyan/
       extraVolumes:
         - name: cvmfs
           persistentVolumeClaim:
