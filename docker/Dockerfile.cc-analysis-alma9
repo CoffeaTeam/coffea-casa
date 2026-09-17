@@ -1,9 +1,9 @@
 # Generic across coffea base flavours. See Dockerfile.cc-dask-alma9 header.
-#   --build-arg BASE_IMAGE=coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12
+#   --build-arg BASE_IMAGE=coffeateam/coffea-dak-almalinux9:2026.9.0-py3.12
 #   --build-arg FLAVOUR=dak
 #   --build-arg PYVER=3.12
 # Package sets live in env/casa-{common,analysis,flavour-<FLAVOUR>}.yaml.
-ARG BASE_IMAGE=coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12
+ARG BASE_IMAGE=coffeateam/coffea-almalinux9-noml:2026.9.0-py3.12
 FROM ${BASE_IMAGE}
 
 # Re-declared after FROM so they are usable in the build stage below.

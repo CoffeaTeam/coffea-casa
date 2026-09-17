@@ -42,20 +42,20 @@ jobs:
           # dockerfile = which Dockerfile to build; image = published repo name.
           # combine=1 overlays root + cms-combine on the same Dockerfile.
           # ---- cc-dask-alma9 across all coffea flavours -----------------
-          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: noml, combine: "0", base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: true,  spawntest: true  }
-          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: dak,  combine: "0", base_image: "coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12",  pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
-          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: full, combine: "0", base_image: "coffeateam/coffea-almalinux9:2026.7.0-py3.12",      pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
+          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: noml, combine: "0", base_image: "coffeateam/coffea-almalinux9-noml:2026.9.0-py3.12", pyver: "3.12", canonical: true,  singleuser: true,  spawntest: true  }
+          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: dak,  combine: "0", base_image: "coffeateam/coffea-dak-almalinux9:2026.9.0-py3.12",  pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
+          - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: full, combine: "0", base_image: "coffeateam/coffea-almalinux9:2026.9.0-py3.12",      pyver: "3.12", canonical: false, singleuser: true,  spawntest: false }
           - { dockerfile: cc-dask-alma9, image: cc-dask-alma9, flavour: "0.7", combine: "0", base_image: "coffeateam/coffea-0.7-almalinux9:0.7.31-py3.11",   pyver: "3.11", canonical: false, singleuser: true,  spawntest: false }
           # ---- cc-analysis-alma9 (slim) across all coffea flavours ------
-          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: noml, combine: "0", base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: false, spawntest: false }
-          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: dak,  combine: "0", base_image: "coffeateam/coffea-dak-almalinux9:2026.7.0-py3.12",  pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
-          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: full, combine: "0", base_image: "coffeateam/coffea-almalinux9:2026.7.0-py3.12",      pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: noml, combine: "0", base_image: "coffeateam/coffea-almalinux9-noml:2026.9.0-py3.12", pyver: "3.12", canonical: true,  singleuser: false, spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: dak,  combine: "0", base_image: "coffeateam/coffea-dak-almalinux9:2026.9.0-py3.12",  pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: full, combine: "0", base_image: "coffeateam/coffea-almalinux9:2026.9.0-py3.12",      pyver: "3.12", canonical: false, singleuser: false, spawntest: false }
           - { dockerfile: cc-analysis-alma9, image: cc-analysis-alma9, flavour: "0.7", combine: "0", base_image: "coffeateam/coffea-0.7-almalinux9:0.7.31-py3.11",   pyver: "3.11", canonical: false, singleuser: false, spawntest: false }
           # ---- combine: same Dockerfiles + root/cms-combine overlay -----
           # Canonical (noml) base only, to match current scope. Add flavour
           # rows here later if flavoured combine images are needed.
-          - { dockerfile: cc-dask-alma9,     image: cc-dask-combine-alma9,     flavour: noml, combine: "1", base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: true,  spawntest: false }
-          - { dockerfile: cc-analysis-alma9, image: cc-analysis-combine-alma9, flavour: noml, combine: "1", base_image: "coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12", pyver: "3.12", canonical: true,  singleuser: false, spawntest: false }
+          - { dockerfile: cc-dask-alma9,     image: cc-dask-combine-alma9,     flavour: noml, combine: "1", base_image: "coffeateam/coffea-almalinux9-noml:2026.9.0-py3.12", pyver: "3.12", canonical: true,  singleuser: true,  spawntest: false }
+          - { dockerfile: cc-analysis-alma9, image: cc-analysis-combine-alma9, flavour: noml, combine: "1", base_image: "coffeateam/coffea-almalinux9-noml:2026.9.0-py3.12", pyver: "3.12", canonical: true,  singleuser: false, spawntest: false }
     name: ${{ matrix.image }} ${{ matrix.flavour }}
     runs-on: ubuntu-latest
     timeout-minutes: 120

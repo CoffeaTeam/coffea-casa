@@ -98,7 +98,7 @@ jobs:
           cache-from: type=gha,scope=chart-test-cc-dask-alma9
           cache-to: type=gha,mode=max,scope=chart-test-cc-dask-alma9
           build-args: |
-            BASE_IMAGE=coffeateam/coffea-almalinux9-noml:2026.7.0-py3.12
+            BASE_IMAGE=coffeateam/coffea-almalinux9-noml:2026.9.0-py3.12
             FLAVOUR=noml
             PYVER=3.12
             COMBINE=0
