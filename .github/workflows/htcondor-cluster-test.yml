@@ -1,10 +1,16 @@
 name: HTCondor cluster test
 
 # Real end-to-end test of CoffeaCasaCluster against a live HTCondor pool
-# (htcondor/mini, Docker-universe enabled) and the actual cc-analysis-alma9
-# worker image - not mocks. Runs whenever a change could break the real
-# submission path: the coffea_casa package itself, or either of the images
-# HTCondor jobs actually run (scheduler/notebook and worker).
+# (a native minicondor install, Docker-universe enabled) and the actual
+# cc-analysis-alma9 worker image - not mocks. Runs whenever a change could
+# break the real submission path: the coffea_casa package itself, or
+# either of the images HTCondor jobs actually run (scheduler/notebook and
+# worker).
+#
+# HTCondor must run natively on the runner, not inside a container talking
+# to the runner's dockerd over a mounted socket (see comments in
+# ci/htcondor-pool-setup.sh for why: that Docker-outside-of-Docker setup
+# breaks docker-universe's scratch-dir bind mount).
 #
 # tests/test_coffeacasa.py (run by pypi-ci.yml) covers class logic with
 # mocked HTCondor and stays fast; this job is the slower, real-condor
@@ -63,10 +69,9 @@ jobs:
           driver-opts: network=host
 
       # Loaded into the runner's own docker daemon (runner is already
-      # linux/amd64, no QEMU needed), which is also what the HTCondor pool
-      # below talks to via the mounted socket. Shares docker-build-test-
-      # publish.yaml's GHA cache scope so this doesn't rebuild from scratch
-      # on every run.
+      # linux/amd64, no QEMU needed) - the same daemon the native HTCondor
+      # pool below will use directly. Shares docker-build-test-publish.yaml's
+      # GHA cache scope so this doesn't rebuild from scratch every run.
       - name: Build the worker image (cc-analysis-alma9)
         uses: docker/build-push-action@v6
         with:
@@ -82,41 +87,29 @@ jobs:
             PYVER=3.12
             COMBINE=0
 
-      - name: Start the HTCondor pool (htcondor/mini, Docker-universe enabled)
-        run: ./ci/htcondor-pool-setup.sh condor-pool
+      - name: Install and start the HTCondor pool (native, Docker-universe enabled)
+        run: ./ci/htcondor-pool-setup.sh
 
-      - name: Install coffea_casa and its deps into the pool container
+      - name: Install coffea_casa and its deps
         run: |
-          docker exec condor-pool python3 -m pip install --quiet "dask[distributed]" dask_jobqueue
-          docker cp coffea_casa condor-pool:/opt/coffea_casa_pkg
-          docker cp ci/htcondor_cluster_test.py condor-pool:/home/submituser/htcondor_cluster_test.py
-          docker exec condor-pool bash -c '
-            mkdir -p /opt/pylibs
-            ln -sf /opt/coffea_casa_pkg /opt/pylibs/coffea_casa
-            chmod -R a+rX /opt/pylibs /opt/coffea_casa_pkg
-            chown submituser:submituser /home/submituser/htcondor_cluster_test.py
-          '
+          python3 -m pip install --quiet "dask[distributed]" dask_jobqueue
 
       - name: Run the real CoffeaCasaCluster + HTCondor test
         run: |
-          # CoffeaCasaCluster falls back to socket.getfqdn() (the pool
-          # container's own hostname) for +DaskSchedulerAddress when POD_IP/
-          # HOST_IP aren't set - that hostname isn't resolvable from the
-          # sibling worker container Docker spins up for the job, only its
-          # IP is. Real k8s deployments always set POD_IP; give this test
-          # the equivalent.
-          POOL_IP=$(docker inspect condor-pool --format '{{.NetworkSettings.IPAddress}}')
-          docker exec \
-            -u submituser -w /home/submituser \
-            -e HOME=/home/submituser \
-            -e PYTHONPATH=/opt/pylibs \
-            -e WORKER_IMAGE=${{ env.WORKER_IMAGE }} \
-            -e HOST_IP="$POOL_IP" \
-            condor-pool python3 -u htcondor_cluster_test.py
+          # CoffeaCasaCluster falls back to socket.getfqdn() for
+          # +DaskSchedulerAddress when POD_IP/HOST_IP aren't set - the
+          # runner's own hostname isn't resolvable from inside the sibling
+          # worker container Docker spins up for the job, only the docker0
+          # bridge gateway is. Real k8s deployments always set POD_IP; give
+          # this test the equivalent.
+          HOST_IP=$(ip -4 -o addr show docker0 | awk '{print $4}' | cut -d/ -f1)
+          echo "HOST_IP=$HOST_IP"
+          PYTHONPATH="$PWD" HOME="$HOME" WORKER_IMAGE=${{ env.WORKER_IMAGE }} HOST_IP="$HOST_IP" \
+            python3 -u ci/htcondor_cluster_test.py
 
       - name: Dump HTCondor logs on failure
         if: failure()
         run: |
-          docker exec condor-pool condor_q -allusers || true
-          docker exec condor-pool condor_history -limit 10 -af ClusterId ExitCode HoldReason || true
-          docker exec condor-pool bash -c 'tail -n 200 /var/log/condor/StarterLog* /var/log/condor/StartLog /var/log/condor/SchedLog' || true
+          condor_q -allusers || true
+          condor_history -limit 10 -af ClusterId ExitCode HoldReason || true
+          sudo bash -c 'tail -n 200 /var/log/condor/StarterLog* /var/log/condor/StartLog /var/log/condor/SchedLog' || true
