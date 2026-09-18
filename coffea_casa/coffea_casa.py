@@ -333,6 +333,14 @@ class CoffeaCasaCluster(HTCondorCluster):
             {
                 "universe": "docker",
                 "docker_image": worker_image or dask.config.get(f"jobqueue.{cls.config_name}.worker-image"),
+                # Without this, HTCondor's docker universe treats Executable
+                # (dask_jobqueue always generates "/bin/sh") as a file to
+                # transfer from the submit host into the job sandbox and
+                # exec as "./sh" instead of using the image's own /bin/sh -
+                # the container fails immediately with "exec ./sh failed:
+                # No such file or directory". Verified against a real
+                # HTCondor pool (htcondor/mini).
+                "transfer_executable": False,
                 "container_service_names": "dask,nanny",
                 "dask_container_port": DEFAULT_CONTAINER_PORT,
                 "nanny_container_port": DEFAULT_NANNY_PORT,
