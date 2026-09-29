@@ -83,18 +83,10 @@ jupyterhub:
         mountPath: /usr/local/share/jupyterhub/static/images/logo.png
         subPath: logo.png.bin
       - name: hub-extra-config-d
-        # Override GenericOAuthenticator with token refresh version
-        mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/generic.py
-        subPath: oauthenticator-generic.py
-      - name: hub-extra-config-d
-        # Pull in v14.2.0 of oauthenticator/oauth2.py, unmodified
-        # Our patched oauthenticator/generic.py comes from v14.2. as well
-        # Remove once hub is running v14+
-        mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/oauth2.py
-        subPath: oauthenticator-oauth2-14.2.0.py
-      - name: hub-extra-config-d
-        # Add CoffeaOAuthenticator to save tokens to secret
-        mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/coffea.py
+        # Add CoffeaOAuthenticator to save tokens to secret.
+        # The z2jh 4.x hub image is python:3.12-slim with oauthenticator 17.x, which
+        # refreshes tokens natively, so the v14.2 generic.py/oauth2.py overrides are gone.
+        mountPath: /usr/local/lib/python3.12/site-packages/oauthenticator/coffea.py
         subPath: oauthenticator-coffea.py
     extraVolumes:
       - name: custom-templates
@@ -139,7 +131,6 @@ jupyterhub:
       GenericOAuthenticator:
         login_service: CMS SSO
         token_url: https://cms-auth.cern.ch/token
-        userdata_method: GET
         userdata_params:
           state: state
         userdata_url: https://cms-auth.cern.ch/userinfo
