@@ -95,11 +95,16 @@ jobs:
           echo "publish=$PUBLISH" >> "$GITHUB_OUTPUT"
           echo "git tag $TAG -> chart version $VERSION (publish=$PUBLISH)"
 
-      - name: Configure git identity for the gh-pages commit
+      - name: Configure git for the gh-pages push
         if: steps.plan.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # chartpress always clones/pushes gh-pages as git@github.com:<repo.git> (SSH).
+          # Actions has no SSH key, so route that through HTTPS with this job's token.
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "git@github.com:"
 
       - name: Fetch chart dependencies
         if: steps.plan.outputs.publish == 'true'
