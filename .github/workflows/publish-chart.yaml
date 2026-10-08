@@ -111,6 +111,17 @@ jobs:
         working-directory: charts/coffea-casa
         run: helm dependency update
 
+      - name: Stamp hub-extra-config-d checksum into hub pod annotations
+        if: steps.plan.outputs.publish == 'true'
+        working-directory: charts/coffea-casa
+        run: |
+          # Changing the hub pod template makes helm upgrades restart the hub
+          # whenever files/hub-extra/* (the hub-extra-config-d ConfigMap) changes.
+          SUM=$(find files/hub-extra -type f | LC_ALL=C sort | xargs sha256sum | sha256sum | cut -d' ' -f1)
+          grep -q 'checksum/hub-extra-config-d: set-by-publish-chart' values.yaml
+          sed -i "s|checksum/hub-extra-config-d: set-by-publish-chart|checksum/hub-extra-config-d: \"$SUM\"|" values.yaml
+          echo "hub-extra-config-d checksum: $SUM"
+
       - name: Publish chart
         if: steps.plan.outputs.publish == 'true'
         working-directory: charts

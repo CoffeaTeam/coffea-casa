@@ -61,6 +61,12 @@ jupyterhub:
   debug:
     enabled: true
   hub:
+    annotations:
+      # Restarts the hub when files/hub-extra/* (mounted from the
+      # hub-extra-config-d ConfigMap via subPath, so never refreshed in place)
+      # change. z2jh does not tpl hub.annotations, so publish-chart.yaml writes
+      # the real sha256 here before packaging.
+      checksum/hub-extra-config-d: set-by-publish-chart
     services:
       test:
         admin: true
