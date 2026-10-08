@@ -480,3 +480,69 @@ def test_x509_proxy_detected(mock_environment, tmp_path):
         directives = job_kwargs.get("job_extra_directives", {})
         
         assert directives.get("use_x509userproxy") is True
+
+# ===== Tests for worker logs =====
+
+def test_job_keeps_worker_output_without_event_log_or_streaming(tmp_path):
+    """Spooled jobs write stdout/stderr to log_directory, no Log/streaming"""
+    job = CoffeaCasaJob(
+        scheduler="tls://127.0.0.1:8786", name="test",
+        cores=1, memory="1GiB", disk="1GiB",
+        log_directory=str(tmp_path / "logs"),
+    )
+    header = job.job_header_dict
+    assert header["Output"].endswith(".out")
+    assert header["Error"].endswith(".err")
+    assert "Log" not in header
+    assert header["Stream_Output"] is False
+    assert header["Stream_Error"] is False
+    assert (tmp_path / "logs").is_dir()
+
+
+def test_job_respects_user_log_directives(tmp_path):
+    """Explicit Log/Stream_* job_extra_directives are not overridden"""
+    job = CoffeaCasaJob(
+        scheduler="tls://127.0.0.1:8786", name="test",
+        cores=1, memory="1GiB", disk="1GiB",
+        log_directory=str(tmp_path),
+        job_extra_directives={"Log": "/tmp/events.log", "Stream_Output": True},
+    )
+    assert job.job_header_dict["Log"] == "/tmp/events.log"
+    assert job.job_header_dict["Stream_Output"] is True
+
+
+def test_default_log_directory_and_cluster_id(mock_environment, tmp_path):
+    """Worker logs default to ~/dask-worker-logs; jobs carry a cluster id"""
+    import dask
+    with dask.config.set({"jobqueue.coffea-casa.log-directory": None}), \
+         patch("coffea_casa.coffea_casa.DEFAULT_LOG_DIR", tmp_path / "dwl"):
+        job_kwargs = CoffeaCasaCluster._modify_job_kwargs({}, force_tcp=True)
+    assert job_kwargs["log_directory"] == str(tmp_path / "dwl")
+    cluster_id = job_kwargs["job_extra_directives"]["+CoffeaCasaClusterId"]
+    assert cluster_id.startswith('"') and len(cluster_id) == 34
+
+
+def test_explicit_log_directory_wins(mock_environment, tmp_path):
+    """log_directory passed by the user is kept"""
+    job_kwargs = CoffeaCasaCluster._modify_job_kwargs(
+        {"log_directory": str(tmp_path)}, force_tcp=True)
+    assert job_kwargs["log_directory"] == str(tmp_path)
+
+
+def test_fetch_worker_logs_selects_this_cluster(tmp_path):
+    """fetch_worker_logs transfers only this cluster's completed jobs"""
+    cluster = CoffeaCasaCluster.__new__(CoffeaCasaCluster)
+    cluster._worker_log_directory = str(tmp_path)
+    cluster._coffea_casa_cluster_id = '"abc123"'
+    (tmp_path / "worker-1.0.err").write_text("boom")
+    (tmp_path / "unrelated.txt").write_text("x")
+
+    with patch("coffea_casa.coffea_casa.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        files = cluster.fetch_worker_logs()
+
+    args = mock_run.call_args[0][0]
+    assert args[:2] == ["condor_transfer_data", "-constraint"]
+    assert 'CoffeaCasaClusterId == "abc123"' in args[2]
+    assert "JobStatus == 4" in args[2]
+    assert files == [tmp_path / "worker-1.0.err"]

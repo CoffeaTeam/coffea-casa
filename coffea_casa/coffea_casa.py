@@ -2,6 +2,8 @@
 import os
 from pathlib import Path
 import socket
+import subprocess
+import uuid
 import dask
 from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
 from distributed.security import Security
@@ -20,6 +22,8 @@ CERT_FILE = SECRETS_DIR / "hostcert.pem"
 KEY_FILE = SECRETS_DIR / "hostkey.pem"
 HOME_DIR = Path.home()
 PIP_REQUIREMENTS = HOME_DIR / "requirements.txt"
+# Default directory for worker stdout/stderr (jobqueue log-directory)
+DEFAULT_LOG_DIR = HOME_DIR / "dask-worker-logs"
 
 # conda, with yml/yaml both supported
 if (HOME_DIR / "environment.yaml").is_file():
@@ -89,6 +93,21 @@ def merge_dicts(*dict_args):
 class CoffeaCasaJob(HTCondorJob):
     submit_command = "condor_submit -spool"
     config_name = "coffea-casa"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.log_directory:
+            # Jobs are spooled (condor_submit -spool): worker stdout/stderr stay
+            # in the schedd spool until condor_transfer_data brings them back
+            # (CoffeaCasaCluster.fetch_worker_logs). Spooled output can't be
+            # streamed, and the remote schedd can't write a user event log into
+            # the notebook's home, so drop those dask-jobqueue defaults.
+            user_directives = self.job_extra_directives or {}
+            if "Log" not in user_directives:
+                self.job_header_dict.pop("Log", None)
+            for key in ("Stream_Output", "Stream_Error"):
+                if key not in user_directives:
+                    self.job_header_dict[key] = False
 
 
 class CoffeaCasaCluster(HTCondorCluster):
@@ -197,6 +216,10 @@ class CoffeaCasaCluster(HTCondorCluster):
             dashboard_port=dashboard_port,
             nanny_port=nanny_port,
         )
+        # Used by fetch_worker_logs() to find this cluster's jobs and logs
+        self._worker_log_directory = job_kwargs.get("log_directory")
+        self._coffea_casa_cluster_id = job_kwargs["job_extra_directives"].get(
+            "+CoffeaCasaClusterId")
 
         # By default do not submit any HTCondor jobs at construction time;
         # users are expected to call .scale()/.adapt(). An explicit
@@ -218,6 +241,14 @@ class CoffeaCasaCluster(HTCondorCluster):
                            nanny_port=DEFAULT_NANNY_PORT):
         job_config = job_kwargs.copy()
         input_files = []
+
+        # Keep worker stdout/stderr instead of the dask-jobqueue default of
+        # /dev/null, so users can see why workers fail to start.
+        if job_config.get("log_directory") is None:
+            job_config["log_directory"] = (
+                dask.config.get(f"jobqueue.{cls.config_name}.log-directory", None)
+                or str(DEFAULT_LOG_DIR)
+            )
 
         if PIP_REQUIREMENTS.is_file():
             input_files.append(PIP_REQUIREMENTS)
@@ -345,6 +376,9 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "+CoffeaCasaWorkerType": '"dask"',
                 "+DaskSchedulerAddress": external_ip_string,
                 "+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"',
+                # Tags this cluster's jobs; workers of all users may share one
+                # schedd account, so fetch_worker_logs() selects on this.
+                "+CoffeaCasaClusterId": f'"{uuid.uuid4().hex}"',
             },
             job_kwargs.get(
                 "job_extra_directives",
@@ -353,6 +387,42 @@ class CoffeaCasaCluster(HTCondorCluster):
         )
 
         return job_config
+
+    def fetch_worker_logs(self):
+        """Copy stdout/stderr of finished workers back from HTCondor.
+
+        Workers are submitted with ``condor_submit -spool``, so their output
+        stays in the schedd spool until it is transferred back. This fetches
+        it for this cluster's completed jobs (e.g. workers that exited or
+        crashed at startup) into the cluster's ``log_directory`` as
+        ``worker-<ClusterId>.<ProcId>.out`` / ``.err``.
+
+        Workers stopped by scale-down/close are removed with ``condor_rm``,
+        which discards their spooled output, so only completed jobs are
+        covered.
+
+        Returns
+        -------
+        list of pathlib.Path
+            The worker log files in ``log_directory``, newest first.
+        """
+        log_dir = self._worker_log_directory
+        if not log_dir:
+            raise RuntimeError("This cluster was created without a log_directory")
+        if self._coffea_casa_cluster_id:
+            constraint = (f"CoffeaCasaClusterId == {self._coffea_casa_cluster_id}"
+                          " && JobStatus == 4")
+            result = subprocess.run(
+                ["condor_transfer_data", "-constraint", constraint],
+                capture_output=True, text=True,
+            )
+            # Exit status is non-zero when no job matches; only surface real errors
+            if result.returncode != 0 and "No jobs" not in result.stderr + result.stdout:
+                print(f"condor_transfer_data failed: {result.stderr.strip()}")
+        return sorted(
+            (p for p in Path(log_dir).glob("worker-*") if p.is_file()),
+            key=lambda p: p.stat().st_mtime, reverse=True,
+        )
 
 
 def security_obj():
