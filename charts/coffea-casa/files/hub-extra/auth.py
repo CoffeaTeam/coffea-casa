@@ -233,7 +233,8 @@ def sign_token(identity, issuer, kid, master_key):
                'iss': issuer
               }
     encoded = jwt.encode(payload, master_key, headers={'kid': kid}, algorithm='HS256')
-    return encoded
+    # PyJWT < 2 returns bytes, PyJWT >= 2 returns str
+    return encoded.decode() if isinstance(encoded, bytes) else encoded
 
 def sign_servicex_token(identity, issuer, master_key):
     payload = {'sub': identity,
@@ -242,7 +243,8 @@ def sign_servicex_token(identity, issuer, master_key):
                'iss': issuer
               }
     encoded = jwt.encode(payload, master_key, algorithm='HS256')
-    return encoded
+    # PyJWT < 2 returns bytes, PyJWT >= 2 returns str
+    return encoded.decode() if isinstance(encoded, bytes) else encoded
 
 async def generate_condor(api, namespace, secret_name, issuer, name, kid):
     secret = await api.read_namespaced_secret(secret_name, namespace)
@@ -252,7 +254,7 @@ async def generate_condor(api, namespace, secret_name, issuer, name, kid):
     if kid == "POOL":
         password += password
     master_key = derive_master_key(password)
-    return sign_token(name, issuer, kid, master_key).decode()
+    return sign_token(name, issuer, kid, master_key)
 
 async def generate_xcache(api, namespace, secret_name, xcache_location, xcache_user_name):
     secret = await api.read_namespaced_secret(secret_name, namespace)
@@ -276,4 +278,4 @@ async def generate_servicex(api, namespace, secret_name, issuer, name):
     # let's try the same way it is done for HTCondor
     password = simple_scramble(token_value)
     master_servicex_key = derive_servicex_master_key(password)
-    return sign_servicex_token(name, issuer, master_servicex_key).decode()
+    return sign_servicex_token(name, issuer, master_servicex_key)
