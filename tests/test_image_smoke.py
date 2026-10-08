@@ -151,6 +151,19 @@ def test_dask_config_loads():
                 yaml.safe_load(f)
 
 
+def test_worker_image_matches_flavour():
+    # prepare-env-cc.sh templates worker-image from WORKER_IMAGE and TAG; the
+    # tag must carry the flavour suffix so e.g. a -dak notebook spawns -dak
+    # workers (mismatched packages make workers die at startup).
+    expected = os.environ.get("CASA_WORKER_IMAGE")
+    if not expected:
+        pytest.skip("CASA_WORKER_IMAGE not set")
+    import yaml
+    with open("/opt/dask/jobqueue-coffea-casa.yaml") as f:
+        cfg = yaml.safe_load(f)
+    assert cfg["jobqueue"]["coffea-casa"]["worker-image"] == expected
+
+
 def test_xrootd_plugin_env():
     confdir = os.environ.get("XRD_PLUGINCONFDIR", "")
     plugin = os.environ.get("XRD_PLUGIN", "")
