@@ -2,6 +2,34 @@ apiVersion: v1
 entries:
   coffea-casa:
   - apiVersion: v2
+    appVersion: 2026.10.08.4
+    created: "2026-10-08T11:52:51.718833791Z"
+    dependencies:
+    - import-values:
+      - child: rbac
+        parent: rbac
+      name: jupyterhub
+      repository: https://jupyterhub.github.io/helm-chart/
+      version: 4.4.1
+    description: Multi-user JupyterHub/Dask/Coffea deployment.
+    digest: 14bc60573530a97dc13bf024fbed85f0e944006223e3c7d069dc99da5ec7130c
+    icon: https://iris-hep.org/assets/logos/coffea-casa.png
+    maintainers:
+    - email: oksana.shadura@cern.ch
+      name: Oksana Shadura
+    - email: clundstedt@unl.edu
+      name: Carl Lundstedt
+    - email: jthiltges@unl.edu
+      name: John Thiltges
+    - email: garhan.attebury@unl.edu
+      name: Garhan Attebury
+    - email: bbockelman@morgridge.org
+      name: Brian Bockelman
+    name: coffea-casa
+    urls:
+    - https://coffeateam.github.io/coffea-casa/coffea-casa-2026.1008.4.tgz
+    version: 2026.1008.4
+  - apiVersion: v2
     appVersion: 2026.10.08.3
     created: "2026-10-08T10:43:49.003450008Z"
     dependencies:
@@ -113,4 +141,4 @@ entries:
     urls:
     - https://coffeateam.github.io/coffea-casa/coffea-casa-2026.929.2.tgz
     version: 2026.929.2
-generated: "2026-10-08T10:43:48.997696795Z"
+generated: "2026-10-08T11:52:51.712922533Z"
