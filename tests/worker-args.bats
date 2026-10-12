@@ -214,7 +214,7 @@ write_ad() {
     [[ "$output" == *"--name htcondor--12345.0--"* ]]
     # No StartdIpAddr here -> host falls back to the RemoteHost hostname.
     [[ "$output" == *"--contact-address tls://node42.af.uchicago.edu:8786"* ]]
-    [[ "$output" == *"--nanny-contact-address tls://node42.af.uchicago.edu:8788"* ]]
+    [[ "$output" != *"--nanny-contact-address"* ]]
     [[ "$output" == *"--listen-address tls://0.0.0.0:8787"* ]]
 }
 
@@ -231,7 +231,7 @@ write_ad() {
     run cc_build_worker_command "$AD"
     [ "$status" -eq 0 ]
     [[ "$output" == *"--contact-address tls://129.93.183.34:8786"* ]]
-    [[ "$output" == *"--nanny-contact-address tls://129.93.183.34:8788"* ]]
+    [[ "$output" != *"--nanny-contact-address"* ]]
 }
 
 @test "build falls back to the container ports when *_HostPort is undefined" {
@@ -249,7 +249,7 @@ write_ad() {
     run cc_build_worker_command "$AD"
     [ "$status" -eq 0 ]
     [[ "$output" == *"--contact-address tls://10.0.0.7:8786"* ]]
-    [[ "$output" == *"--nanny-contact-address tls://10.0.0.7:8001"* ]]
+    [[ "$output" != *"--nanny-contact-address"* ]]
     [[ "$output" == *"--listen-address tls://0.0.0.0:8786"* ]]
     # The literal "undefined" must never appear as a port.
     [[ "$output" != *":undefined"* ]]
