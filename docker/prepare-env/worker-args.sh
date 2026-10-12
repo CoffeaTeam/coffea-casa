@@ -64,7 +64,7 @@ cc_build_worker_command() {
     _is_unset "$port"  && port=$containerp
     _is_unset "$nanny" && nanny=$nannyc
 
-    echo "/opt/conda/bin/python -m distributed.cli.dask_worker $sched \
+    echo "${CONDA_DIR:-/usr/local}/bin/python -m distributed.cli.dask_worker $sched \
 --name $name \
 --tls-ca-file ${PATH_CA_FILE:-} \
 --tls-cert ${FILE_CERT:-} \
