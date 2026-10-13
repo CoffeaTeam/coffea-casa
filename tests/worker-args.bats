@@ -270,3 +270,70 @@ write_ad() {
     [[ "$output" == *"--memory-limit 2048MB"* ]]
     [[ "$output" == *"--name dask-worker-"* ]]
 }
+
+# --- cc_setup_shipped_env: notebook conda env shipped with the job ----------
+
+# A fake packed env: bin/python logs its arguments, conda-unpack is a no-op.
+make_env_tarball() {
+    local src="$BATS_TEST_TMPDIR/envsrc"
+    mkdir -p "$src/bin" "$IWD"
+    printf '#!/bin/sh\necho "$@" >> "$(dirname "$0")/../python.log"\n' > "$src/bin/python"
+    printf '' > "$src/bin/conda-unpack"
+    chmod +x "$src/bin/python"
+    tar -czf "$IWD/$1" -C "$src" .
+}
+
+@test "setup_shipped_env is a no-op without the tarball attribute" {
+    write_ad 'DaskWorkerCores = 2'
+    IWD="$BATS_TEST_TMPDIR/iwd"
+    unset CC_WORKER_PYTHON
+    cc_setup_shipped_env "$AD" "$IWD" "$BATS_TEST_TMPDIR/env"
+    [ -z "${CC_WORKER_PYTHON:-}" ]
+}
+
+@test "setup_shipped_env is a no-op without a job ad" {
+    unset CC_WORKER_PYTHON
+    cc_setup_shipped_env "" "$BATS_TEST_TMPDIR/iwd" "$BATS_TEST_TMPDIR/env"
+    [ -z "${CC_WORKER_PYTHON:-}" ]
+}
+
+@test "setup_shipped_env unpacks the env and selects its python" {
+    IWD="$BATS_TEST_TMPDIR/iwd"
+    make_env_tarball cc-env-foo-abc.tar.gz
+    write_ad 'CoffeaCasaEnvTarball = "cc-env-foo-abc.tar.gz"'
+    dest="$BATS_TEST_TMPDIR/env"
+
+    cc_setup_shipped_env "$AD" "$IWD" "$dest"
+    [ "$CC_WORKER_PYTHON" = "$dest/bin/python" ]
+    # conda-unpack ran with the env's python; no wheels, so no pip
+    [ "$(cat "$dest/python.log")" = "$dest/bin/conda-unpack" ]
+}
+
+@test "setup_shipped_env installs shipped editable wheels" {
+    IWD="$BATS_TEST_TMPDIR/iwd"
+    make_env_tarball cc-env-foo-abc.tar.gz
+    mkdir -p "$IWD/cc-editable-wheels"
+    touch "$IWD/cc-editable-wheels/myana-1.0-py3-none-any.whl"
+    write_ad 'CoffeaCasaEnvTarball = "cc-env-foo-abc.tar.gz"'
+    dest="$BATS_TEST_TMPDIR/env"
+
+    cc_setup_shipped_env "$AD" "$IWD" "$dest"
+    grep -q -- "-m pip install --no-deps --no-index --force-reinstall $IWD/cc-editable-wheels/myana-1.0-py3-none-any.whl" "$dest/python.log"
+}
+
+@test "setup_shipped_env fails when the tarball was not transferred" {
+    write_ad 'CoffeaCasaEnvTarball = "cc-env-foo-abc.tar.gz"'
+    run cc_setup_shipped_env "$AD" "$BATS_TEST_TMPDIR/iwd" "$BATS_TEST_TMPDIR/env"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"was not transferred"* ]]
+}
+
+@test "build_worker_command uses the shipped env's python" {
+    write_ad \
+        'nanny_ContainerPort = 8789' \
+        'dask_ContainerPort = 8787' \
+        'RemoteHost = "slot1@node1"' \
+        'DaskSchedulerAddress = "tls://1.2.3.4:8786"'
+    CC_WORKER_PYTHON=/scratch/cc-env/bin/python run cc_build_worker_command "$AD"
+    [[ "$output" == "/scratch/cc-env/bin/python -m distributed.cli.dask_worker "* ]]
+}

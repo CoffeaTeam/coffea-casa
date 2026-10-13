@@ -38,6 +38,13 @@ def suppress_unraisable_warnings():
     )
 
 
+@pytest.fixture(autouse=True)
+def no_env_shipping():
+    """Don't pack the test runner's conda env (see tests/test_env_pack.py)"""
+    with patch("coffea_casa.coffea_casa.prepare_shipped_env", return_value=None):
+        yield
+
+
 @pytest.fixture
 def dummy_certs(tmp_path):
     """Create dummy CA and host cert files"""

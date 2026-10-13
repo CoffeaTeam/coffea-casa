@@ -19,6 +19,7 @@ dependencies:
   - nodejs
   - ipywidgets
   - jupyter-ai
+  - conda-pack
   - nbdime
   - gperftools
   - pip
