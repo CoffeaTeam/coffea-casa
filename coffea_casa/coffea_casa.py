@@ -8,7 +8,7 @@ import dask
 from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
 from distributed.security import Security
 
-from .env_pack import ENV_TARBALL_ATTR, prepare_shipped_env
+from .env_pack import ENV_TARBALL_ATTR, WHEELS_DIR_NAME, prepare_shipped_env
 
 # Port settings
 DEFAULT_SCHEDULER_PORT = 8786
@@ -32,6 +32,41 @@ if (HOME_DIR / "environment.yaml").is_file():
     CONDA_ENV = HOME_DIR / "environment.yaml"
 else:
     CONDA_ENV = HOME_DIR / "environment.yml"
+
+
+# Job attribute listing the ship_paths names; the worker entrypoint puts the
+# job directory on PYTHONPATH when it is set (see worker-args.sh)
+SHIPPED_PATHS_ATTR = "CoffeaCasaShippedPaths"
+# Job-directory names the worker entrypoint gives a meaning of their own
+RESERVED_SHIP_NAMES = {"environment.yaml", "environment.yml", "requirements.txt",
+                       "condor_token", WHEELS_DIR_NAME}
+
+
+def _resolve_ship_paths(ship_paths, other_input_files):
+    """Validate ``ship_paths`` and return them as absolute Paths.
+
+    HTCondor transfers every input into the same job directory under its base
+    name, so names must be unique and not clash with the cluster's own files.
+    """
+    if not ship_paths:
+        return []
+    if isinstance(ship_paths, (str, os.PathLike)):
+        ship_paths = [ship_paths]
+    taken = {Path(f).name for f in other_input_files} | RESERVED_SHIP_NAMES
+    resolved = []
+    for entry in ship_paths:
+        path = Path(entry).expanduser().resolve()
+        if not path.exists():
+            raise FileNotFoundError(f"ship_paths entry {entry!r} does not exist")
+        if path.name in taken:
+            raise ValueError(
+                f"ship_paths entry {entry!r}: the name {path.name!r} is already "
+                "used by another file transferred to the workers")
+        if "," in path.name:
+            raise ValueError(f"ship_paths entry {entry!r}: names can't contain ','")
+        taken.add(path.name)
+        resolved.append(path)
+    return resolved
 
 
 def bearer_token_path():
@@ -125,6 +160,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                  force_tcp=False,
                  worker_image=None,
                  ship_env="auto",
+                 ship_paths=None,
                  scheduler_options=None,
                  scheduler_port=DEFAULT_SCHEDULER_PORT,
                  dashboard_port=DEFAULT_DASHBOARD_PORT,
@@ -152,6 +188,12 @@ class CoffeaCasaCluster(HTCondorCluster):
             env changes) and transferred to the workers; editable
             (``pip install -e``) packages are shipped as wheels. False keeps
             the image's env (plus ~/environment.yaml / ~/requirements.txt).
+        ship_paths : list of str or Path, optional
+            Local files or directories (e.g. ``["foo.py", "myanalysis"]``)
+            to transfer to every worker and put on its ``PYTHONPATH``, so
+            code imported from them in the notebook (including subpackages,
+            ``from myanalysis.sub import mod``) also imports on the workers.
+            Relative paths are resolved against the current directory.
         scheduler_port : int, default 8786
             Scheduler port
         dashboard_port : int, default 8785
@@ -222,6 +264,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             force_tcp=force_tcp,
             worker_image=worker_image,
             ship_env=ship_env,
+            ship_paths=ship_paths,
             scheduler_options=scheduler_options,
             scheduler_port=scheduler_port,
             dashboard_port=dashboard_port,
@@ -247,6 +290,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                            force_tcp=False,
                            worker_image=None,
                            ship_env=False,
+                           ship_paths=None,
                            scheduler_options=None,
                            scheduler_port=DEFAULT_SCHEDULER_PORT,
                            dashboard_port=DEFAULT_DASHBOARD_PORT,
@@ -309,6 +353,10 @@ class CoffeaCasaCluster(HTCondorCluster):
         token_file = bearer_token_path()
         if token_file:
             input_files.append(token_file)
+
+        shipped_paths = _resolve_ship_paths(
+            ship_paths, input_files + (shipped_env.input_files if shipped_env else []))
+        input_files += shipped_paths
 
         files = ", ".join(str(path) for path in input_files)
         # The env is large and not secret: transfer it, but don't encrypt it
@@ -401,6 +449,9 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "+CoffeaCasaClusterId": f'"{uuid.uuid4().hex}"',
                 **({f"+{ENV_TARBALL_ATTR}": f'"{shipped_env.tarball.name}"'}
                    if shipped_env else {}),
+                **({f"+{SHIPPED_PATHS_ATTR}":
+                    '"' + ",".join(p.name for p in shipped_paths) + '"'}
+                   if shipped_paths else {}),
             },
             job_kwargs.get(
                 "job_extra_directives",

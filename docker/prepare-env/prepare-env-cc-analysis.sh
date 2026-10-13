@@ -91,6 +91,11 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
         exit 1
     fi
 
+    # Local code shipped with ship_paths: make it importable on the worker.
+    if ! cc_setup_shipped_paths "$_CONDOR_JOB_AD" "$_CONDOR_JOB_IWD"; then
+        exit 1
+    fi
+
     if [ -n "${CC_WORKER_PYTHON:-}" ]; then
         echo "Using shipped conda env: $CC_WORKER_PYTHON"
     elif [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then

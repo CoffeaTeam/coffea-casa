@@ -337,3 +337,54 @@ make_env_tarball() {
     CC_WORKER_PYTHON=/scratch/cc-env/bin/python run cc_build_worker_command "$AD"
     [[ "$output" == "/scratch/cc-env/bin/python -m distributed.cli.dask_worker "* ]]
 }
+
+# --- cc_setup_shipped_paths: local code shipped with ship_paths -------------
+
+@test "setup_shipped_paths is a no-op without the attribute" {
+    write_ad 'DaskWorkerCores = 2'
+    PYTHONPATH=/orig
+    cc_setup_shipped_paths "$AD" "$BATS_TEST_TMPDIR/iwd"
+    [ "$PYTHONPATH" = "/orig" ]
+}
+
+@test "setup_shipped_paths is a no-op without a job ad" {
+    PYTHONPATH=/orig
+    cc_setup_shipped_paths "" "$BATS_TEST_TMPDIR/iwd"
+    [ "$PYTHONPATH" = "/orig" ]
+}
+
+@test "setup_shipped_paths puts the job dir first on PYTHONPATH" {
+    iwd="$BATS_TEST_TMPDIR/iwd"
+    mkdir -p "$iwd/myanalysis/sub"
+    touch "$iwd/helpers.py"
+    write_ad 'CoffeaCasaShippedPaths = "helpers.py,myanalysis"'
+
+    unset PYTHONPATH
+    cc_setup_shipped_paths "$AD" "$iwd"
+    [ "$PYTHONPATH" = "$iwd" ]
+
+    PYTHONPATH=/orig
+    cc_setup_shipped_paths "$AD" "$iwd"
+    [ "$PYTHONPATH" = "$iwd:/orig" ]
+    # Exported, so the dask worker and nanny processes inherit it
+    [ "$(bash -c 'echo $PYTHONPATH')" = "$iwd:/orig" ]
+}
+
+@test "setup_shipped_paths handles names with spaces" {
+    iwd="$BATS_TEST_TMPDIR/iwd"
+    mkdir -p "$iwd/my analysis"
+    write_ad 'CoffeaCasaShippedPaths = "my analysis"'
+    unset PYTHONPATH
+    cc_setup_shipped_paths "$AD" "$iwd"
+    [ "$PYTHONPATH" = "$iwd" ]
+}
+
+@test "setup_shipped_paths fails and names the paths that did not arrive" {
+    iwd="$BATS_TEST_TMPDIR/iwd"
+    mkdir -p "$iwd"
+    touch "$iwd/helpers.py"
+    write_ad 'CoffeaCasaShippedPaths = "helpers.py,myanalysis,other.py"'
+    run cc_setup_shipped_paths "$AD" "$iwd"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"not transferred"*"myanalysis other.py"* ]]
+}

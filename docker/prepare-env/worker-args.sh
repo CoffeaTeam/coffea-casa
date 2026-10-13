@@ -80,6 +80,28 @@ cc_setup_shipped_env() {
     CC_WORKER_PYTHON="$dest/bin/python"
 }
 
+# If the job shipped local code (CoffeaCasaShippedPaths attribute: the
+# comma-separated names of the ship_paths files/directories, transferred into
+# the job directory $iwd), check they all arrived and put $iwd on PYTHONPATH so
+# the worker imports them. Non-zero if any are missing.
+cc_setup_shipped_paths() {
+    local ad_file=$1 iwd=$2 names name missing=""
+    local -a list
+    [ -f "$ad_file" ] || return 0
+    names=$(ad_get "$ad_file" CoffeaCasaShippedPaths)
+    _is_unset "$names" && return 0
+    IFS=, read -ra list <<< "$names"
+    for name in "${list[@]}"; do
+        [ -e "$iwd/$name" ] || missing="$missing $name"
+    done
+    if [ -n "$missing" ]; then
+        echo "Error: shipped paths not transferred to $iwd:$missing" 1>&2
+        return 1
+    fi
+    export PYTHONPATH="$iwd${PYTHONPATH:+:$PYTHONPATH}"
+    echo "Shipped paths ($names) importable from $iwd" 1>&2
+}
+
 cc_build_worker_command() {
     local ad_file=$1
     local name cpus mem host port nannyc containerp sched
