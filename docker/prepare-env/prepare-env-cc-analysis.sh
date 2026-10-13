@@ -72,16 +72,8 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
         mkdir -p $SEC_TOKEN_SYSTEM_DIRECTORY && cp $_CONDOR_JOB_IWD/condor_token $SEC_TOKEN_SYSTEM_DIRECTORY/condor_token
     fi
 
-    if [[ -f "$_CONDOR_JOB_IWD/ceph.conf" ]]; then
-        cp $_CONDOR_JOB_IWD/ceph.conf ${CEPH_DIR}
-    fi
-
     if [[ -f "$_CONDOR_JOB_IWD/access_token" ]]; then
         mkdir -p /tmp/.xcache && cp $_CONDOR_JOB_IWD/access_token /tmp/.xcache/access_token
-    fi
-
-    if [[ -f "$_CONDOR_JOB_IWD/keyring" ]]; then
-        cp $_CONDOR_JOB_IWD/keyring ${CEPH_DIR}
     fi
 
     # The notebook's conda env, if the job shipped one (see coffea_casa.env_pack).
