@@ -18,12 +18,10 @@ else
     echo "Conda not found at $CONDA_BIN/conda"
 fi
 
-########################################
-# Enable git completion (if available)
-########################################
-
-[[ -f /usr/share/bash-completion/completions/git ]] && \
-    source /usr/share/bash-completion/completions/git
+# Git (and other) bash completions come from the bash-completion RPM installed
+# in the Dockerfile: /etc/profile.d/bash_completion.sh is loaded by /etc/bashrc
+# in every interactive shell. Sourcing them here would not work, since this
+# entrypoint is not the user's shell and functions don't reach child shells.
 
 ########################################
 # ServiceX config
