@@ -21,12 +21,12 @@ fi
 
 if [ "$EXTRA_CONDA_PACKAGES" ]; then
     echo "conda: EXTRA_CONDA_PACKAGES environment variable found. Installing."
-    /opt/conda/bin/mamba install -y $EXTRA_CONDA_PACKAGES
+    ${CONDA_DIR:-/usr/local}/bin/mamba install -y $EXTRA_CONDA_PACKAGES
 fi
 
 if [ "$EXTRA_PIP_PACKAGES" ]; then
     echo "pip: EXTRA_PIP_PACKAGES environment variable found. Installing"
-    /opt/conda/bin/pip install $EXTRA_PIP_PACKAGES
+    ${CONDA_DIR:-/usr/local}/bin/pip install $EXTRA_PIP_PACKAGES
 fi
 
 # If COFFEA_CASA_SIDECAR is defined (inside hub values.yml), this container is a
@@ -86,17 +86,17 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
 
     if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
         echo "Conda: environment.yml found. Installing packages."
-        /opt/conda/bin/mamba env update -n base -f $_CONDOR_JOB_IWD/environment.yml
+        ${CONDA_DIR:-/usr/local}/bin/mamba env update -n base -f $_CONDOR_JOB_IWD/environment.yml
     elif [ -e "$_CONDOR_JOB_IWD/environment.yaml" ]; then
         echo "Conda: environment.yaml found. Installing packages."
-        /opt/conda/bin/mamba env update -n base -f $_CONDOR_JOB_IWD/environment.yaml
+        ${CONDA_DIR:-/usr/local}/bin/mamba env update -n base -f $_CONDOR_JOB_IWD/environment.yaml
     else
         echo "No environment.yml, conda will not install any package."
     fi
 
     if [ -e "$_CONDOR_JOB_IWD/requirements.txt" ]; then
         echo "Pip: requirements.txt found. Installing packages."
-        /opt/conda/bin/python -m pip install -r $_CONDOR_JOB_IWD/requirements.txt
+        ${CONDA_DIR:-/usr/local}/bin/python -m pip install -r $_CONDOR_JOB_IWD/requirements.txt
     else
         echo "No requirements.txt, pip will not install any module."
     fi

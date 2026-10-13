@@ -178,7 +178,7 @@ jobs:
             COMBINE=${{ matrix.combine }}
             WORKER_IMAGE=${{ steps.tags.outputs.worker_image }}
             PYVER=${{ matrix.pyver }}
-            TAG=${{ steps.tags.outputs.releasetag }}
+            TAG=${{ steps.tags.outputs.primarytag }}
             PROJECT=${{ env.PROJECT }}
             GITHUB_ACTIONS=true
             REGISTRY=${{ env.REGISTRY }}
@@ -208,6 +208,7 @@ jobs:
           docker run --rm -e COFFEA_CASA_IMAGE_TESTS=1 \
             -e CASA_FLAVOUR=${{ matrix.flavour }} \
             -e CASA_PYVER=${{ matrix.pyver }} \
+            -e CASA_WORKER_IMAGE=${{ steps.tags.outputs.worker_image }}:${{ steps.tags.outputs.primarytag }} \
             -v "$PWD/tests:/tests:ro" \
             "${{ env.REGISTRY }}/coffea-casa/${{ matrix.image }}:${{ steps.tags.outputs.primarytag }}" \
             bash -c "pip install --no-cache-dir --quiet --user pytest && \
@@ -298,7 +299,7 @@ jobs:
             COMBINE=${{ matrix.combine }}
             WORKER_IMAGE=${{ steps.tags.outputs.worker_image }}
             PYVER=${{ matrix.pyver }}
-            TAG=${{ steps.tags.outputs.releasetag }}
+            TAG=${{ steps.tags.outputs.primarytag }}
             PROJECT=${{ env.PROJECT }}
             GITHUB_ACTIONS=true
             REGISTRY=${{ env.REGISTRY }}

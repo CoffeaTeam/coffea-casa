@@ -94,7 +94,7 @@ docker build --platform linux/amd64 \
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| `TAG` | Image tag used to sync the worker image (Dask Jobqueue extension) | `development` |
+| `TAG` | Worker image tag (Dask Jobqueue extension), including the flavour suffix, e.g. `2026.08.12.2-dak` | `development` |
 | `PROJECT` | Project name in the registry | `coffea-casa` |
 | `REGISTRY` | Registry host | `hub.opensciencegrid.org` |
 | `WORKER_IMAGE` | Worker image the scheduler spawns (dask image only) | `${REGISTRY}/${PROJECT}/cc-analysis-alma9` |

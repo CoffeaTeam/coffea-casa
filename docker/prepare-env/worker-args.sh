@@ -49,22 +49,22 @@ cc_worker_validate() {
 
 cc_build_worker_command() {
     local ad_file=$1
-    local name cpus mem host port nanny nannyc containerp sched
+    local name cpus mem host port nannyc containerp sched
     name=$(cc_worker_name "$ad_file")
     cpus=$(cc_worker_cpus "$ad_file")
     mem=$(cc_worker_memory_limit "$ad_file")
     host=$(cc_worker_host "$ad_file")
     port=$(ad_get "$ad_file" dask_HostPort)
-    nanny=$(ad_get "$ad_file" nanny_HostPort)
     nannyc=$(ad_get "$ad_file" nanny_ContainerPort)
     containerp=$(ad_get "$ad_file" dask_ContainerPort)
     sched=$(ad_get "$ad_file" DaskSchedulerAddress)
 
     # No forwarded host port -> the container port is what's reachable.
     _is_unset "$port"  && port=$containerp
-    _is_unset "$nanny" && nanny=$nannyc
 
-    echo "/opt/conda/bin/python -m distributed.cli.dask_worker $sched \
+    # No --nanny-contact-address: upstream distributed has no such option
+    # (dask_worker exits 2), it only existed in a patched build.
+    echo "${CONDA_DIR:-/usr/local}/bin/python -m distributed.cli.dask_worker $sched \
 --name $name \
 --tls-ca-file ${PATH_CA_FILE:-} \
 --tls-cert ${FILE_CERT:-} \
@@ -77,6 +77,5 @@ cc_build_worker_command() {
 --protocol tls \
 --lifetime 7200 \
 --listen-address tls://0.0.0.0:$containerp \
---nanny-contact-address tls://$host:$nanny \
 --contact-address tls://$host:$port"
 }

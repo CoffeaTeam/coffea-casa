@@ -30,3 +30,15 @@ If your terminal is terminating without errors, please check for the aforementio
 **I have installed a package through the terminal, but I still get ModuleNotFound errors when attempting to run my processor.**
 
 Ensure that you have installed your package onto the workers as well. A guide for this can be found `here in our documentation <https://coffea-casa.readthedocs.io/en/latest/cc_packages.html>`_.
+
+**I scaled my Dask cluster, but HTCondor workers exit right away or never join the scheduler.**
+
+Each worker's stdout and stderr are kept in ``~/dask-worker-logs`` (``worker-<ClusterId>.<ProcId>.out`` / ``.err``). Workers are spooled to the HTCondor schedd, so the logs of finished workers have to be copied back first:
+
+.. code-block:: python
+
+    logs = cluster.fetch_worker_logs()  # newest first
+    print(logs)
+    print(logs[0].read_text())
+
+This covers workers that exited on their own, e.g. crashed at startup. Workers stopped by scaling down or closing the cluster are removed from HTCondor together with their logs. To keep logs elsewhere, pass ``log_directory=...`` to ``CoffeaCasaCluster``.

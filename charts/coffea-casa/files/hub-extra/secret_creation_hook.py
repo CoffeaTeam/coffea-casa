@@ -147,19 +147,17 @@ async def pre_spawn_hook(spawner):
     # Mount secrets into pod
     #spawner.volume_mounts.extend([{"name": "cmsaf-secrets", "mountPath": "/etc/cmsaf-secrets"}])
     # The spawner state is retained across spawn attempts
-    # Remove old volume config if present, preventing duplication (and failure).
-    # c.KubeSpawner.volumes can be either a list of dicts (legacy) or a dict
-    # keyed by volume name - the jupyterhub chart's generated config uses the
-    # dict form whenever any volume is configured (storage.type, extraVolumes,
-    # ...), so a plain list comprehension here silently iterates dict *keys*
-    # (strings) instead of the volume dicts and crashes every such spawn.
-    secrets_volume = {"name": "cmsaf-secrets", "secret": {"secretName": secret_name}}
+    # Remove old volume config if present, preventing duplication (and failure)
+    # z2jh >= 4 / KubeSpawner >= 7 configure volumes as a dict keyed by name
+    cmsaf_secrets_volume = {"name": "cmsaf-secrets", "secret": {"secretName": secret_name}}
     if isinstance(spawner.volumes, dict):
-        spawner.volumes.pop('cmsaf-secrets', None)
-        spawner.volumes[secrets_volume['name']] = secrets_volume
+        spawner.volumes = {k: v for k, v in spawner.volumes.items() if v.get('name', k) != 'cmsaf-secrets'}
+        # Add volume for secrets
+        spawner.volumes['cmsaf-secrets'] = cmsaf_secrets_volume
     else:
         spawner.volumes = [v for v in spawner.volumes if not v.get('name', None)=='cmsaf-secrets']
-        spawner.volumes.append(secrets_volume)
+        # Add volume for secrets
+        spawner.volumes.append(cmsaf_secrets_volume)
 
     ##########################################################################
     # Create a service to serve the Dask scheduler to the outside world
@@ -192,15 +190,12 @@ async def pre_spawn_hook(spawner):
     # Create Shared Volume Mount
     # Get CMS username (if available, else None)
     cmsuser = user_to_cmsuser(spawner.user.name)
-    # Set subPath to limit cms-store access to individual user.
-    # Same dict-vs-list caveat as spawner.volumes above.
-    volume_mounts = (
-        spawner.volume_mounts.values()
-        if isinstance(spawner.volume_mounts, dict)
-        else spawner.volume_mounts
-    )
+    # Set subPath to limit cms-store access to individual user
+    volume_mounts = spawner.volume_mounts
+    if isinstance(volume_mounts, dict):
+        volume_mounts = volume_mounts.values()
     for mnt in volume_mounts:
-        if mnt['name'] == 'cms-store-user':
+        if mnt.get('name') == 'cms-store-user':
             if cmsuser:
                 # We have a CMS user. Set the path.
                 mnt['subPath'] = cmsuser
