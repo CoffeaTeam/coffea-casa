@@ -19,6 +19,8 @@ dependencies:
   - nodejs
   - ipywidgets
   - jupyter-ai
+  - marimo>=0.25.0
+  - marimo-jupyter-extension
   - nbdime
   - gperftools
   - pip
