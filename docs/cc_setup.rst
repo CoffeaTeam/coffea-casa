@@ -103,6 +103,8 @@ or
 
     cluster = CoffeaCasaCluster(job_extra = {'docker_image': 'coffeateam/coffea-casa-analysis:latest')
 
+If your notebook kernel runs in a conda environment of your own, the cluster ships that environment to the workers by default (``ship_env``). Use ``ship_paths`` to make local modules importable on the workers. See :doc:`cc_packages` for details.
+
 
 .. note::
 
