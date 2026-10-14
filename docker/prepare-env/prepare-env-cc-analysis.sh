@@ -72,19 +72,25 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
         mkdir -p $SEC_TOKEN_SYSTEM_DIRECTORY && cp $_CONDOR_JOB_IWD/condor_token $SEC_TOKEN_SYSTEM_DIRECTORY/condor_token
     fi
 
-    if [[ -f "$_CONDOR_JOB_IWD/ceph.conf" ]]; then
-        cp $_CONDOR_JOB_IWD/ceph.conf ${CEPH_DIR}
-    fi
-
     if [[ -f "$_CONDOR_JOB_IWD/access_token" ]]; then
         mkdir -p /tmp/.xcache && cp $_CONDOR_JOB_IWD/access_token /tmp/.xcache/access_token
     fi
 
-    if [[ -f "$_CONDOR_JOB_IWD/keyring" ]]; then
-        cp $_CONDOR_JOB_IWD/keyring ${CEPH_DIR}
+    # The notebook's conda env, if the job shipped one (see coffea_casa.env_pack).
+    # Workers then run that env, so the base-env updates below are skipped.
+    if ! cc_setup_shipped_env "$_CONDOR_JOB_AD" "$_CONDOR_JOB_IWD" \
+            "${_CONDOR_SCRATCH_DIR:-$_CONDOR_JOB_IWD}/cc-env"; then
+        exit 1
     fi
 
-    if [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
+    # Local code shipped with ship_paths: make it importable on the worker.
+    if ! cc_setup_shipped_paths "$_CONDOR_JOB_AD" "$_CONDOR_JOB_IWD"; then
+        exit 1
+    fi
+
+    if [ -n "${CC_WORKER_PYTHON:-}" ]; then
+        echo "Using shipped conda env: $CC_WORKER_PYTHON"
+    elif [ -e "$_CONDOR_JOB_IWD/environment.yml" ]; then
         echo "Conda: environment.yml found. Installing packages."
         ${CONDA_DIR:-/usr/local}/bin/mamba env update -n base -f $_CONDOR_JOB_IWD/environment.yml
     elif [ -e "$_CONDOR_JOB_IWD/environment.yaml" ]; then
@@ -94,7 +100,9 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
         echo "No environment.yml, conda will not install any package."
     fi
 
-    if [ -e "$_CONDOR_JOB_IWD/requirements.txt" ]; then
+    if [ -n "${CC_WORKER_PYTHON:-}" ]; then
+        :
+    elif [ -e "$_CONDOR_JOB_IWD/requirements.txt" ]; then
         echo "Pip: requirements.txt found. Installing packages."
         ${CONDA_DIR:-/usr/local}/bin/python -m pip install -r $_CONDOR_JOB_IWD/requirements.txt
     else

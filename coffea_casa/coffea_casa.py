@@ -8,6 +8,8 @@ import dask
 from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
 from distributed.security import Security
 
+from .env_pack import ENV_TARBALL_ATTR, WHEELS_DIR_NAME, prepare_shipped_env
+
 # Port settings
 DEFAULT_SCHEDULER_PORT = 8786
 DEFAULT_DASHBOARD_PORT = 8785
@@ -30,6 +32,41 @@ if (HOME_DIR / "environment.yaml").is_file():
     CONDA_ENV = HOME_DIR / "environment.yaml"
 else:
     CONDA_ENV = HOME_DIR / "environment.yml"
+
+
+# Job attribute listing the ship_paths names; the worker entrypoint puts the
+# job directory on PYTHONPATH when it is set (see worker-args.sh)
+SHIPPED_PATHS_ATTR = "CoffeaCasaShippedPaths"
+# Job-directory names the worker entrypoint gives a meaning of their own
+RESERVED_SHIP_NAMES = {"environment.yaml", "environment.yml", "requirements.txt",
+                       "condor_token", WHEELS_DIR_NAME}
+
+
+def _resolve_ship_paths(ship_paths, other_input_files):
+    """Validate ``ship_paths`` and return them as absolute Paths.
+
+    HTCondor transfers every input into the same job directory under its base
+    name, so names must be unique and not clash with the cluster's own files.
+    """
+    if not ship_paths:
+        return []
+    if isinstance(ship_paths, (str, os.PathLike)):
+        ship_paths = [ship_paths]
+    taken = {Path(f).name for f in other_input_files} | RESERVED_SHIP_NAMES
+    resolved = []
+    for entry in ship_paths:
+        path = Path(entry).expanduser().resolve()
+        if not path.exists():
+            raise FileNotFoundError(f"ship_paths entry {entry!r} does not exist")
+        if path.name in taken:
+            raise ValueError(
+                f"ship_paths entry {entry!r}: the name {path.name!r} is already "
+                "used by another file transferred to the workers")
+        if "," in path.name:
+            raise ValueError(f"ship_paths entry {entry!r}: names can't contain ','")
+        taken.add(path.name)
+        resolved.append(path)
+    return resolved
 
 
 def bearer_token_path():
@@ -122,6 +159,8 @@ class CoffeaCasaCluster(HTCondorCluster):
                  security=None,
                  force_tcp=False,
                  worker_image=None,
+                 ship_env="auto",
+                 ship_paths=None,
                  scheduler_options=None,
                  scheduler_port=DEFAULT_SCHEDULER_PORT,
                  dashboard_port=DEFAULT_DASHBOARD_PORT,
@@ -142,6 +181,19 @@ class CoffeaCasaCluster(HTCondorCluster):
             Force TCP instead of TLS
         worker_image : str, optional
             Docker image for workers
+        ship_env : {"auto", True, False}, default "auto"
+            Run workers in the notebook kernel's conda environment. With
+            "auto", a kernel running in a conda env other than the image's
+            base env has that env packed with conda-pack (cached until the
+            env changes) and transferred to the workers; editable
+            (``pip install -e``) packages are shipped as wheels. False keeps
+            the image's env (plus ~/environment.yaml / ~/requirements.txt).
+        ship_paths : list of str or Path, optional
+            Local files or directories (e.g. ``["foo.py", "myanalysis"]``)
+            to transfer to every worker and put on its ``PYTHONPATH``, so
+            code imported from them in the notebook (including subpackages,
+            ``from myanalysis.sub import mod``) also imports on the workers.
+            Relative paths are resolved against the current directory.
         scheduler_port : int, default 8786
             Scheduler port
         dashboard_port : int, default 8785
@@ -211,6 +263,8 @@ class CoffeaCasaCluster(HTCondorCluster):
             security=security,
             force_tcp=force_tcp,
             worker_image=worker_image,
+            ship_env=ship_env,
+            ship_paths=ship_paths,
             scheduler_options=scheduler_options,
             scheduler_port=scheduler_port,
             dashboard_port=dashboard_port,
@@ -235,6 +289,8 @@ class CoffeaCasaCluster(HTCondorCluster):
                            security=None,
                            force_tcp=False,
                            worker_image=None,
+                           ship_env=False,
+                           ship_paths=None,
                            scheduler_options=None,
                            scheduler_port=DEFAULT_SCHEDULER_PORT,
                            dashboard_port=DEFAULT_DASHBOARD_PORT,
@@ -250,10 +306,14 @@ class CoffeaCasaCluster(HTCondorCluster):
                 or str(DEFAULT_LOG_DIR)
             )
 
-        if PIP_REQUIREMENTS.is_file():
-            input_files.append(PIP_REQUIREMENTS)
-        if CONDA_ENV.is_file():
-            input_files.append(CONDA_ENV)
+        # A shipped env replaces the image's env on the worker, so the
+        # environment.yaml / requirements.txt updates of the base env don't apply.
+        shipped_env = prepare_shipped_env(ship_env)
+        if shipped_env is None:
+            if PIP_REQUIREMENTS.is_file():
+                input_files.append(PIP_REQUIREMENTS)
+            if CONDA_ENV.is_file():
+                input_files.append(CONDA_ENV)
 
         # If we have a Security object (user-provided, or built from the
         # default facility certs) and are not forcing TCP, use TLS.
@@ -294,7 +354,15 @@ class CoffeaCasaCluster(HTCondorCluster):
         if token_file:
             input_files.append(token_file)
 
+        shipped_paths = _resolve_ship_paths(
+            ship_paths, input_files + (shipped_env.input_files if shipped_env else []))
+        input_files += shipped_paths
+
         files = ", ".join(str(path) for path in input_files)
+        # The env is large and not secret: transfer it, but don't encrypt it
+        transfer_files = ", ".join(
+            str(path) for path in input_files
+            + (shipped_env.input_files if shipped_env else []))
 
         # Networking settings
         try:
@@ -368,7 +436,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "dask_container_port": DEFAULT_CONTAINER_PORT,
                 "nanny_container_port": DEFAULT_NANNY_PORT,
                 "use_x509userproxy": use_proxy,
-                "transfer_input_files": files,
+                "transfer_input_files": transfer_files,
                 "encrypt_input_files": files,
                 "transfer_output_files": "",
                 "when_to_transfer_output": "ON_EXIT",
@@ -379,6 +447,11 @@ class CoffeaCasaCluster(HTCondorCluster):
                 # Tags this cluster's jobs; workers of all users may share one
                 # schedd account, so fetch_worker_logs() selects on this.
                 "+CoffeaCasaClusterId": f'"{uuid.uuid4().hex}"',
+                **({f"+{ENV_TARBALL_ATTR}": f'"{shipped_env.tarball.name}"'}
+                   if shipped_env else {}),
+                **({f"+{SHIPPED_PATHS_ATTR}":
+                    '"' + ",".join(p.name for p in shipped_paths) + '"'}
+                   if shipped_paths else {}),
             },
             job_kwargs.get(
                 "job_extra_directives",

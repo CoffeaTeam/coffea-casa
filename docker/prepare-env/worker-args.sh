@@ -47,6 +47,61 @@ cc_worker_validate() {
     return 0
 }
 
+# If the job shipped the notebook's conda env (CoffeaCasaEnvTarball attribute,
+# set by coffea_casa.env_pack), unpack it into $dest, install any shipped
+# editable-package wheels, and point CC_WORKER_PYTHON at the env's python.
+# Returns 0 with CC_WORKER_PYTHON unset when no env was shipped, non-zero if the
+# shipped env can't be set up (the worker must not start in the wrong env).
+cc_setup_shipped_env() {
+    local ad_file=$1 iwd=$2 dest=$3 tarball wheels
+    [ -f "$ad_file" ] || return 0
+    tarball=$(ad_get "$ad_file" CoffeaCasaEnvTarball)
+    _is_unset "$tarball" && return 0
+    if [ ! -f "$iwd/$tarball" ]; then
+        echo "Error: shipped env $tarball was not transferred to $iwd" 1>&2
+        return 1
+    fi
+    echo "Unpacking shipped conda env $tarball into $dest" 1>&2
+    mkdir -p "$dest" \
+        && tar -xzf "$iwd/$tarball" -C "$dest" \
+        && "$dest/bin/python" "$dest/bin/conda-unpack" || {
+        echo "Error: could not unpack shipped env $tarball" 1>&2
+        return 1
+    }
+    wheels="$iwd/cc-editable-wheels"
+    if compgen -G "$wheels/*.whl" > /dev/null; then
+        echo "Installing shipped editable-package wheels from $wheels" 1>&2
+        "$dest/bin/python" -m pip install --no-deps --no-index --force-reinstall \
+            "$wheels"/*.whl 1>&2 || {
+            echo "Error: could not install shipped wheels from $wheels" 1>&2
+            return 1
+        }
+    fi
+    CC_WORKER_PYTHON="$dest/bin/python"
+}
+
+# If the job shipped local code (CoffeaCasaShippedPaths attribute: the
+# comma-separated names of the ship_paths files/directories, transferred into
+# the job directory $iwd), check they all arrived and put $iwd on PYTHONPATH so
+# the worker imports them. Non-zero if any are missing.
+cc_setup_shipped_paths() {
+    local ad_file=$1 iwd=$2 names name missing=""
+    local -a list
+    [ -f "$ad_file" ] || return 0
+    names=$(ad_get "$ad_file" CoffeaCasaShippedPaths)
+    _is_unset "$names" && return 0
+    IFS=, read -ra list <<< "$names"
+    for name in "${list[@]}"; do
+        [ -e "$iwd/$name" ] || missing="$missing $name"
+    done
+    if [ -n "$missing" ]; then
+        echo "Error: shipped paths not transferred to $iwd:$missing" 1>&2
+        return 1
+    fi
+    export PYTHONPATH="$iwd${PYTHONPATH:+:$PYTHONPATH}"
+    echo "Shipped paths ($names) importable from $iwd" 1>&2
+}
+
 cc_build_worker_command() {
     local ad_file=$1
     local name cpus mem host port nannyc containerp sched
@@ -64,7 +119,8 @@ cc_build_worker_command() {
 
     # No --nanny-contact-address: upstream distributed has no such option
     # (dask_worker exits 2), it only existed in a patched build.
-    echo "${CONDA_DIR:-/usr/local}/bin/python -m distributed.cli.dask_worker $sched \
+    # CC_WORKER_PYTHON is set by cc_setup_shipped_env when an env was shipped.
+    echo "${CC_WORKER_PYTHON:-${CONDA_DIR:-/usr/local}/bin/python} -m distributed.cli.dask_worker $sched \
 --name $name \
 --tls-ca-file ${PATH_CA_FILE:-} \
 --tls-cert ${FILE_CERT:-} \

@@ -220,7 +220,7 @@ RUN groupadd -g 989 condor && \
     mkdir -p /var/lib/condor/spool && chown -R "${CONDOR_USER}:${CONDOR_GID}" /var/lib/condor && \
     chmod -R 755 /var/lib/condor
 
-# Fix permissions for Dask/Ceph config files
+# Fix permissions for Dask config files
 RUN chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT_CONFIG}/*.yaml
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"
