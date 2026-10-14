@@ -58,9 +58,13 @@ To set up such an environment, create it with the packages you need, plus ``ipyk
 
 .. code-block:: bash
 
-    mamba create -n myenv -c conda-forge python=3.12 ipykernel conda-pack coffea dask distributed
-    mamba run -n myenv pip install coffea-casa
-    mamba run -n myenv python -m ipykernel install --user --name myenv --display-name "Python (myenv)"
+    mamba create -p ~/.conda/envs/myenv -c conda-forge python=3.12 ipykernel conda-pack coffea dask distributed
+    mamba run -p ~/.conda/envs/myenv pip install coffea-casa
+    mamba run -p ~/.conda/envs/myenv python -m ipykernel install --user --name myenv --display-name "Python (myenv)"
+
+.. note::
+
+    Create the environment in your home directory, as above with ``-p ~/.conda/envs/myenv``. ``mamba create -n myenv`` may put it in ``/usr/local/envs``, which is part of the container image and is lost when your server restarts. The **Python (myenv)** kernel is then still listed, but fails to start. ``mamba env list`` shows where each environment lives.
 
 Then select the **Python (myenv)** kernel in your notebook and create the cluster as usual:
 
@@ -72,6 +76,10 @@ Then select the **Python (myenv)** kernel in your notebook and create the cluste
     cluster = CoffeaCasaCluster()
     cluster.scale(10)
     client = Client(cluster)
+
+    # Workers need a few minutes to start: the environment is transferred
+    # and unpacked first
+    client.wait_for_workers(1, timeout=900)
 
     # Workers report the unpacked env, not the image's /usr/local
     client.run(lambda: __import__("sys").prefix)
