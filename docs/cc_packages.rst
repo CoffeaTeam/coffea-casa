@@ -59,9 +59,8 @@ To set up such an environment, create it with the packages you need, plus ``ipyk
 .. code-block:: bash
 
     mamba create -n myenv -c conda-forge python=3.12 ipykernel conda-pack coffea dask distributed
-    conda activate myenv
-    pip install coffea-casa
-    python -m ipykernel install --user --name myenv --display-name "Python (myenv)"
+    mamba run -n myenv pip install coffea-casa
+    mamba run -n myenv python -m ipykernel install --user --name myenv --display-name "Python (myenv)"
 
 Then select the **Python (myenv)** kernel in your notebook and create the cluster as usual:
 
