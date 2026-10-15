@@ -1,5 +1,8 @@
 # Configuration file for the Sphinx documentation builder.
 
+import os
+import sys
+
 # -- Project information -----------------------------------------------------
 
 project = 'coffea-casa'
@@ -15,7 +18,19 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
+    "myst_nb",
 ]
+
+# Render the gallery notebooks with their saved outputs; they need a
+# coffea-casa cluster and data, so they can't be executed on Read the Docs.
+nb_execution_mode = "off"
+
+# Notebooks link to their own sections Jupyter-style ("#Loading-Files"), so
+# build heading anchors the same way. Given as an import path: a function
+# defined here can't be pickled into the Sphinx environment.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "_ext"))
+myst_heading_anchors = 3
+myst_heading_slug_func = "jupyter_anchors.heading_slug"
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
