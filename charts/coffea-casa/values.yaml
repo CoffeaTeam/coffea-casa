@@ -136,6 +136,14 @@ jupyterhub:
       JupyterHub:
         admin_access: true
         authenticator_class: dummy
+      KubeSpawner:
+        # Merged with fsGroup (singleuser.fsGid). With the default policy
+        # (Always) the kubelet re-applies group ownership and g+rw to every
+        # file in the home volume on each server start, so ssh rejects
+        # ~/.ssh/config and private keys after a restart (#152). Only do it
+        # when the volume root doesn't match yet, i.e. on first mount.
+        pod_security_context:
+          fsGroupChangePolicy: OnRootMismatch
     podSecurityContext:
       runAsNonRoot: false
     containerSecurityContext:
