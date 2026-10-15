@@ -211,6 +211,28 @@ This behaves exactly like the *New Launcher* option above.
 
     Regardless of the method you use to open a new file, the file will be saved to the current directory of your **File Browser.**
 
+Changing the JupyterLab Theme
+-----------------------------
+JupyterLab comes with a light, a dark and a high-contrast dark theme. Switch between them in the **Settings → Theme** menu. In the same menu, *Synchronize with System Settings* follows your operating system's light/dark preference.
+
+You can also install additional themes yourself. Most themes for JupyterLab 4 are distributed as pip packages, for example:
+
+* `jupyterlab-night <https://pypi.org/project/jupyterlab-night/>`_
+* `jupyterlab_materialdarker <https://pypi.org/project/jupyterlab_materialdarker/>`_
+* `jupyterlab-theme-solarized-dark <https://pypi.org/project/jupyterlab-theme-solarized-dark/>`_
+* `jupyterlab-horizon-theme <https://pypi.org/project/jupyterlab-horizon-theme/>`_
+
+Install one with ``--user`` from a terminal, so it goes to your home directory and is kept when your server restarts:
+
+.. code-block:: bash
+
+    pip install --user jupyterlab-night
+
+Then restart your server: **File → Hub Control Panel → Stop My Server**, then **Start My Server**. The new theme now appears in the **Settings → Theme** menu. To remove it, run ``pip uninstall jupyterlab-night`` and restart the server again.
+
+.. note::
+
+    Only themes built for JupyterLab 4 work. Themes for older JupyterLab versions, such as those from the `jupyterlab-themes <https://github.com/arbennett/jupyterlab-themes>`_ collection, don't load in JupyterLab 4. Check that the package's description mentions JupyterLab 4 before installing it.
 Your Files and Server Restarts
 ------------------------------
 Your home directory is stored on a persistent volume. Stopping and restarting your server (**File → Hub Control Panel**) starts a fresh container, but your home directory is kept: files, cloned repositories and their uncommitted changes, and anything you installed with ``pip install --user`` are still there afterwards. Anything outside your home directory, such as packages installed into the image's own environment in ``/usr/local``, is lost.
