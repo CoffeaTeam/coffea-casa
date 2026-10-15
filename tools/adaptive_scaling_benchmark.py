@@ -17,7 +17,7 @@ In a notebook (kernel in the env you want to measure):
 
 or from a terminal:
 
-    python tools/adaptive_scaling_benchmark.py --tasks 400 --mean 3 --repeats 2
+    python -u tools/adaptive_scaling_benchmark.py --tasks 400 --mean 3 --repeats 2
 
 To benchmark a real analysis, pass ``workload=fn`` where ``fn(client)`` runs it
 and blocks until the results are back (e.g. a coffea ``Runner`` call or
@@ -189,8 +189,27 @@ def run_one(name, spec, workload, cluster_factory, cluster_kwargs,
         mon.stop()
         return _summarize(name, spec, mon, wall)
     finally:
+        _drain(client, cluster)
         client.close()
         cluster.close()
+
+
+def _drain(client, cluster, timeout_s=60):
+    """Stop the workers and wait for them to leave before closing the cluster.
+
+    Closing the scheduler with workers still connected makes distributed log a
+    CancelledError traceback per worker.
+    """
+    try:
+        if cluster._adaptive is not None:
+            cluster._adaptive.stop()
+        cluster.scale(0)
+        deadline = time.monotonic() + timeout_s
+        while (client.run_on_scheduler(_scheduler_workers)
+               and time.monotonic() < deadline):
+            time.sleep(1)
+    except Exception:  # best effort; close() follows anyway
+        pass
 
 
 def run_benchmark(workload=None, configs=None, repeats=1, cluster_factory=None,
