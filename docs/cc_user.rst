@@ -242,6 +242,39 @@ If you wish to commit, push, or pull from the repository you currently have acti
 
 The buttons in the top right allow for pulling and pushing respectively. When you have edited files in a directory, they will show up under the *Changed* category, at which point you can hit the **+** to add them to a commit (at which point they will show up under *Staged*). Filling out the box at the bottom of the sidebar will file your commit, and prepare it for you to push.
 
+Versioning Notebooks
+--------------------
+Git is the way to keep a history of your notebooks: commit whenever you reach a state you may want to return to, and use branches or tags to keep different versions of an analysis apart. Notebooks are JSON files that also store their outputs, though, so plain ``git diff`` output is hard to read and repositories grow quickly. Coffea-casa includes three tools that help.
+
+**See what changed in a notebook (nbdime).** In the Git tab, click a changed notebook to see a cell-by-cell diff instead of raw JSON. To get the same in a terminal, enable nbdime for ``git diff`` and ``git merge`` once:
+
+.. code-block:: bash
+
+    nbdime config-git --enable --global
+
+This is stored in ``~/.gitconfig`` and applies to all your repositories. ``nbdiff-web old.ipynb new.ipynb`` compares two notebooks directly.
+
+**Keep outputs out of commits (nbstripout).** Run this once in each repository:
+
+.. code-block:: bash
+
+    cd ~/my-analysis
+    nbstripout --install
+
+Git then removes outputs and execution counts from notebooks as they are committed. The notebooks you have open keep their outputs; only the committed copies are smaller and their diffs show code changes only.
+
+**Version a notebook as a Python script (jupytext).** jupytext pairs a notebook with a ``.py`` file and keeps both in sync, so you can commit the script, review changes as ordinary code, and run it outside Jupyter:
+
+.. code-block:: bash
+
+    jupytext --set-formats ipynb,py:percent analysis.ipynb
+
+JupyterLab then saves ``analysis.py`` alongside ``analysis.ipynb`` every time you save the notebook, and opening either file shows the same notebook. You can also pair a notebook from the command palette (**View → Activate Command Palette**, then search for "Pair Notebook with percent Script").
+
+.. note::
+
+    JupyterLab's own **File → Save and Create Checkpoint** keeps only one checkpoint per notebook, which the next one overwrites. Use Git commits for any version you want to keep.
+
 Using XCache
 -------
 .. important::
