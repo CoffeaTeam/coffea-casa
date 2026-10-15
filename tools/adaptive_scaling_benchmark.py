@@ -49,6 +49,16 @@ DEFAULT_CONFIGS = {
 }
 
 
+def cap_workers(spec, n):
+    """Return ``spec`` with its worker count (adapt maximum or scale) capped at n."""
+    if "adapt" in spec:
+        adapt = dict(spec["adapt"])
+        adapt["maximum"] = min(adapt.get("maximum", n), n)
+        adapt["minimum"] = min(adapt.get("minimum", 0), n)
+        return {"adapt": adapt}
+    return {"scale": min(spec["scale"], n)}
+
+
 def burn(duration, seed):
     """Keep one core busy for ``duration`` seconds (stands in for one chunk)."""
     end = time.perf_counter() + duration
@@ -295,11 +305,16 @@ def main():
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--configs", nargs="+", choices=list(DEFAULT_CONFIGS),
                         help="subset of configurations to run")
+    parser.add_argument("--max-workers", type=int,
+                        help="cap adapt maximum and scale count (e.g. the "
+                             "number of HTCondor slots available)")
     parser.add_argument("--cooldown", type=float, default=30)
     parser.add_argument("--out", default="~/adaptive-bench")
     args = parser.parse_args()
 
     configs = {k: DEFAULT_CONFIGS[k] for k in (args.configs or DEFAULT_CONFIGS)}
+    if args.max_workers:
+        configs = {k: cap_workers(v, args.max_workers) for k, v in configs.items()}
     run_benchmark(
         workload=synthetic_workload(args.tasks, args.mean, phases=args.phases,
                                     gap_s=args.gap),
