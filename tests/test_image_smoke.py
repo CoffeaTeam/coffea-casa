@@ -96,6 +96,33 @@ def test_condor_cli_available():
     )
 
 
+# pyhf tensor backends each flavour must provide (#209): pytorch comes with the
+# ML base images, jax is added by casa-flavour-{full,dak}.yaml; noml has neither.
+PYHF_BACKENDS = {"full": {"jax", "pytorch"}, "dak": {"jax", "pytorch"},
+                 "0.7": {"pytorch"}, "noml": set()}
+
+
+@pytest.mark.parametrize("backend", ["numpy", "jax", "pytorch"])
+def test_pyhf_backend(backend):
+    import importlib.util
+    import warnings
+    module = {"pytorch": "torch"}.get(backend, backend)
+    if importlib.util.find_spec(module) is None:
+        if backend in PYHF_BACKENDS.get(CASA_FLAVOUR, set()):
+            pytest.fail(f"{module} missing from the {CASA_FLAVOUR} flavour")
+        pytest.skip(f"{module} not shipped in the {CASA_FLAVOUR} flavour")
+    import pyhf
+    with warnings.catch_warnings():
+        # pyhf 0.7 still uses jsonschema's deprecated RefResolver, and its
+        # pytorch backend triggers torch's slow-tensor-creation UserWarning
+        warnings.simplefilter("ignore", DeprecationWarning)
+        warnings.simplefilter("ignore", UserWarning)
+        pyhf.set_backend(backend)
+        model = pyhf.simplemodels.uncorrelated_background([5.0], [50.0], [7.0])
+        cls = pyhf.infer.hypotest(1.0, [52.0] + model.config.auxdata, model)
+    assert float(cls) == pytest.approx(0.66124, abs=1e-4)
+
+
 def test_patched_distributed_is_the_imported_one():
     # The vendored+patched distributed is CalVer-only; the 0.7 flavour keeps the
     # base's stock distributed (see the FLAVOUR guard in the Dockerfile), so
