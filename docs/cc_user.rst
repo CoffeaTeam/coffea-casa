@@ -233,6 +233,17 @@ Then restart your server: **File → Hub Control Panel → Stop My Server**, the
 .. note::
 
     Only themes built for JupyterLab 4 work. Themes for older JupyterLab versions, such as those from the `jupyterlab-themes <https://github.com/arbennett/jupyterlab-themes>`_ collection, don't load in JupyterLab 4. Check that the package's description mentions JupyterLab 4 before installing it.
+Your Files and Server Restarts
+------------------------------
+Your home directory is stored on a persistent volume. Stopping and restarting your server (**File → Hub Control Panel**) starts a fresh container, but your home directory is kept: files, cloned repositories and their uncommitted changes, and anything you installed with ``pip install --user`` are still there afterwards. Anything outside your home directory, such as packages installed into the image's own environment in ``/usr/local``, is lost.
+
+JupyterLab also remembers which tabs were open and restores them after a restart. To start with a clean layout, open your JupyterLab URL with ``?reset`` added, for example ``https://coffea.casa/user/<your-username>/lab?reset``. This only closes the tabs; it doesn't delete any files.
+
+To delete a file or folder, including a cloned repository, right-click it in the **File Browser** and choose **Delete**. Deleting is permanent: there is no trash to restore from. You can also delete a folder from a terminal:
+
+.. code-block:: bash
+
+    rm -rf ~/my-old-repo
 
 
 Using Git
