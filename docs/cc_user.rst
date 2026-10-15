@@ -211,6 +211,18 @@ This behaves exactly like the *New Launcher* option above.
 
     Regardless of the method you use to open a new file, the file will be saved to the current directory of your **File Browser.**
 
+Your Files and Server Restarts
+------------------------------
+Your home directory is stored on a persistent volume. Stopping and restarting your server (**File → Hub Control Panel**) starts a fresh container, but your home directory is kept: files, cloned repositories and their uncommitted changes, and anything you installed with ``pip install --user`` are still there afterwards. Anything outside your home directory, such as packages installed into the image's own environment in ``/usr/local``, is lost.
+
+JupyterLab also remembers which tabs were open and restores them after a restart. To start with a clean layout, open your JupyterLab URL with ``?reset`` added, for example ``https://coffea.casa/user/<your-username>/lab?reset``. This only closes the tabs; it doesn't delete any files.
+
+To delete a file or folder, including a cloned repository, right-click it in the **File Browser** and choose **Delete**. Deleting is permanent: there is no trash to restore from. You can also delete a folder from a terminal:
+
+.. code-block:: bash
+
+    rm -rf ~/my-old-repo
+
 
 Using Git
 ---------
