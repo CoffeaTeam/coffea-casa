@@ -12,6 +12,7 @@ dependencies:
   - jupyterlab_widgets
   - jupyterlab-git
   - jupytext
+  - pre-commit
   - jupyter_client
   - jupyter-server-proxy
   - jupyter-vscode-proxy
