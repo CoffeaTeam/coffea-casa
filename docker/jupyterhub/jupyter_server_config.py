@@ -19,6 +19,9 @@ c.InlineBackend.figure_formats = {"png", "jpeg", "svg", "pdf"}
 
 # https://github.com/jupyter/notebook/issues/3130
 c.FileContentsManager.delete_to_trash = False
+# Without the trash, non-empty directories (e.g. cloned repos) can't be deleted
+# from the file browser unless this is set; JupyterLab still asks to confirm.
+c.FileContentsManager.always_delete_dir = True
 
 # Generate a self-signed certificate
 OPENSSL_CONFIG = """\

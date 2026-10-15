@@ -151,6 +151,16 @@ def test_dask_config_loads():
                 yaml.safe_load(f)
 
 
+def test_file_browser_can_delete_non_empty_dirs():
+    # delete_to_trash is off, so without always_delete_dir the file browser
+    # can't delete non-empty directories such as cloned repos (issue #71).
+    from traitlets.config.loader import PyFileConfigLoader
+    cfg = PyFileConfigLoader("jupyter_server_config.py",
+                             path="/etc/jupyter").load_config()
+    assert cfg.FileContentsManager.delete_to_trash is False
+    assert cfg.FileContentsManager.always_delete_dir is True
+
+
 def test_worker_image_matches_flavour():
     # prepare-env-cc.sh templates worker-image from WORKER_IMAGE and TAG; the
     # tag must carry the flavour suffix so e.g. a -dak notebook spawns -dak
