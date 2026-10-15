@@ -271,6 +271,25 @@ Git then removes outputs and execution counts from notebooks as they are committ
 
 JupyterLab then saves ``analysis.py`` alongside ``analysis.ipynb`` every time you save the notebook, and opening either file shows the same notebook. You can also pair a notebook from the command palette (**View → Activate Command Palette**, then search for "Pair Notebook with percent Script").
 
+To make sure a notebook and its paired script are always committed together, add jupytext's `pre-commit <https://pre-commit.com/>`_ hook to the repository. Create ``.pre-commit-config.yaml`` in the repository's top directory:
+
+.. code-block:: yaml
+
+    repos:
+      - repo: https://github.com/mwouts/jupytext
+        rev: v1.19.6
+        hooks:
+          - id: jupytext
+            args: [--sync]
+
+and enable it once:
+
+.. code-block:: bash
+
+    pre-commit install
+
+From then on, ``git commit`` syncs paired files and stops if only one of them is staged, for example with ``the git index is outdated`` and the ``git add`` command to run. Run it and commit again. The first commit after ``pre-commit install`` takes a moment longer, because pre-commit downloads the hook from GitHub.
+
 .. note::
 
     JupyterLab's own **File → Save and Create Checkpoint** keeps only one checkpoint per notebook, which the next one overwrites. Use Git commits for any version you want to keep.
