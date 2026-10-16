@@ -96,6 +96,12 @@ def test_condor_cli_available():
     )
 
 
+def test_git_notebook_tools_available():
+    # Used by users' git hooks, e.g. jupytext syncing paired notebooks (#354)
+    for tool in ("pre-commit", "jupytext", "nbstripout", "nbdime"):
+        assert shutil.which(tool), f"{tool} missing from PATH"
+
+
 def test_patched_distributed_is_the_imported_one():
     # The vendored+patched distributed is CalVer-only; the 0.7 flavour keeps the
     # base's stock distributed (see the FLAVOUR guard in the Dockerfile), so
