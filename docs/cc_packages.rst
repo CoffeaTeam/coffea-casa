@@ -53,6 +53,7 @@ When you create a cluster from a kernel running in a non-base conda environment:
 1. The environment is packed with `conda-pack <https://conda.github.io/conda-pack/>`_ into ``~/.cache/coffea-casa/envs/``. Packing a large environment can take a few minutes. The tarball is reused for later clusters until you install, remove or upgrade a package in the environment.
 2. Packages installed in editable mode (``pip install -e``) can't be packed by conda-pack. Instead, a wheel is built for each of them every time a cluster is created, so your latest source changes reach the workers.
 3. The tarball and the wheels are transferred with every worker job. Each worker unpacks the environment into its scratch directory, installs the wheels, and starts ``dask-worker`` with the environment's Python.
+4. Each worker also makes the environment available at the path it has in your notebook (for example ``~/.conda/envs/myenv``), so file paths into the environment that your code resolved in the notebook, such as a package's data files, work on the workers too.
 
 To set up such an environment, create it with the packages you need, plus ``ipykernel``, ``conda-pack`` and ``coffea-casa``, and register it as a Jupyter kernel:
 

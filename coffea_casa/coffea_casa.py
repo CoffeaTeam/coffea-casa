@@ -5,10 +5,11 @@ import socket
 import subprocess
 import uuid
 import dask
-from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob
+from dask_jobqueue.htcondor import HTCondorCluster, HTCondorJob, quote_environment
 from distributed.security import Security
 
 from .env_pack import ENV_TARBALL_ATTR, WHEELS_DIR_NAME, prepare_shipped_env
+from .ship_env_preload import PREFIX_ENV_VAR
 
 # Port settings
 DEFAULT_SCHEDULER_PORT = 8786
@@ -449,6 +450,14 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "+CoffeaCasaClusterId": f'"{uuid.uuid4().hex}"',
                 **({f"+{ENV_TARBALL_ATTR}": f'"{shipped_env.tarball.name}"'}
                    if shipped_env else {}),
+                # Workers link the env's notebook path to where it's unpacked,
+                # so paths into it resolved in the notebook work there too.
+                # The outer double quotes select HTCondor's space-separated
+                # environment syntax; quote_environment() doesn't add them.
+                **({"environment": '"' + quote_environment({
+                    PREFIX_ENV_VAR: str(shipped_env.prefix),
+                    "DASK_DISTRIBUTED__WORKER__PRELOAD": "coffea_casa.ship_env_preload",
+                }) + '"'} if shipped_env and shipped_env.prefix else {}),
                 **({f"+{SHIPPED_PATHS_ATTR}":
                     '"' + ",".join(p.name for p in shipped_paths) + '"'}
                    if shipped_paths else {}),
