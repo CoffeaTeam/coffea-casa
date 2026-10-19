@@ -141,3 +141,52 @@ def test_no_shipped_env_keeps_environment_yaml(tmp_path, monkeypatch):
     directives = directives_for(None)
     assert str(env_yaml) in directives["transfer_input_files"]
     assert "+CoffeaCasaEnvTarball" not in directives
+
+
+# ===== original env path on the workers =====
+
+def test_shipped_env_sets_worker_preload_and_original_prefix(tmp_path):
+    shipped = ShippedEnv(tmp_path / "cc-env-foo-abc.tar.gz", prefix="/home/u/.conda/envs/foo")
+    env = directives_for(shipped)["environment"]
+    assert "COFFEA_CASA_ENV_PREFIX=/home/u/.conda/envs/foo" in env
+    assert "DASK_DISTRIBUTED__WORKER__PRELOAD=coffea_casa.ship_env_preload" in env
+
+
+def test_no_shipped_env_sets_no_environment():
+    assert "environment" not in directives_for(None)
+
+
+def test_prepare_shipped_env_records_the_notebook_prefix(tmp_path, monkeypatch):
+    monkeypatch.setattr(env_pack, "should_ship_env", lambda mode: True)
+    monkeypatch.setattr(env_pack, "pack_env", lambda cache_dir: tmp_path / "t.tar.gz")
+    monkeypatch.setattr(env_pack, "find_editable_packages", lambda: {})
+    assert env_pack.prepare_shipped_env("auto").prefix == Path(sys.prefix)
+
+
+def test_preload_links_original_prefix(tmp_path):
+    from coffea_casa.ship_env_preload import link_original_prefix
+    actual = make_env(tmp_path / "scratch" / "cc-env")
+    original = tmp_path / "home" / ".conda" / "envs" / "foo"
+    assert link_original_prefix(original, actual) == "linked"
+    assert original.is_symlink() and original.resolve() == actual.resolve()
+    assert link_original_prefix(original, actual) == "same"
+
+
+def test_preload_leaves_an_existing_path_alone(tmp_path):
+    from coffea_casa.ship_env_preload import link_original_prefix
+    actual = make_env(tmp_path / "cc-env")
+    original = make_env(tmp_path / "other-env")
+    assert link_original_prefix(original, actual) == "exists"
+    assert not original.is_symlink()
+
+
+def test_preload_does_not_raise_when_it_cannot_link(tmp_path):
+    from coffea_casa.ship_env_preload import link_original_prefix
+    actual = make_env(tmp_path / "cc-env")
+    readonly = tmp_path / "ro"
+    readonly.mkdir()
+    readonly.chmod(0o500)
+    try:
+        assert link_original_prefix(readonly / "envs" / "foo", actual) == "failed"
+    finally:
+        readonly.chmod(0o700)
