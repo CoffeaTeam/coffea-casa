@@ -148,9 +148,17 @@ def test_labextension_manual_scale_stops_adaptive():
     factory = {"module": "dask.distributed", "class": "LocalCluster", "args": [],
                "kwargs": {"n_workers": 0, "processes": False,
                           "dashboard_address": None}}
-    # No "initial" clusters: the image's would start a CoffeaCasaCluster
+    # The image's dask_tls.yaml requires TLS with the facility certificates,
+    # which don't exist outside a deployment; run this throwaway local
+    # cluster without TLS. No "initial" clusters: the image's would start a
+    # CoffeaCasaCluster.
+    no_tls = {"distributed.comm.require-encryption": False,
+              "distributed.comm.tls.ca-file": None}
+    for role in ("scheduler", "worker", "client"):
+        no_tls[f"distributed.comm.tls.{role}.cert"] = None
+        no_tls[f"distributed.comm.tls.{role}.key"] = None
     with dask.config.set({"labextension.factory": factory,
-                          "labextension.initial": []}):
+                          "labextension.initial": [], **no_tls}):
         assert asyncio.run(scale_after_adapt()) == "stopped"
 
 
