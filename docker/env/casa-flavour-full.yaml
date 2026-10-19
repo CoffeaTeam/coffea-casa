@@ -13,3 +13,5 @@ dependencies:
       # something keeps pulling in the wrong numpy; pin it explicitly.
       - numpy==2.4.2
       - numba
+      # pyhf tensor backend (pytorch comes with this flavour's base image)
+      - jax

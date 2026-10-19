@@ -60,19 +60,20 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
    :hidden:
    :caption: Gallery of Coffea-casa Examples
 
-   Coffea-Casa Template <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/coffea-casa-template.ipynb>
-   Coffea-Casa Analysis Tutorial <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/analysis_tutorial.ipynb>
-   ADL Benchmark 1 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example1.ipynb>
-   ADL Benchmark 2 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example2.ipynb>
-   ADL Benchmark 3 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example3.ipynb>
-   ADL Benchmark 4 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example4.ipynb>
-   ADL Benchmark 5 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example5.ipynb>
-   ADL Benchmark 6 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example6.ipynb>
-   ADL Benchmark 7 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example7.ipynb>
-   ADL Benchmark 8 <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/example8.ipynb>
-   Single Top-Higgs Production (tHq) Analysis <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/analysis-casa.ipynb>
-   Single Top-Higgs Production (tHq) Analysis Tutorial <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/analysis_tutorial.ipynb>
-   Coffea + Dask + ServiceX Example <https://github.com/CoffeaTeam/coffea-casa/blob/master/docs/gallery/ttbar_HT.ipynb>
+   Coffea-Casa Template <gallery/coffea-casa-template>
+   Single Top-Higgs Production (tHq) Analysis Tutorial <gallery/analysis_tutorial>
+   Single Top-Higgs Production (tHq) Analysis <gallery/analysis-casa>
+   ADL Benchmark 1 <gallery/example1>
+   ADL Benchmark 2 <gallery/example2>
+   ADL Benchmark 3 <gallery/example3>
+   ADL Benchmark 4 <gallery/example4>
+   ADL Benchmark 5 <gallery/example5>
+   ADL Benchmark 6 <gallery/example6>
+   ADL Benchmark 7 <gallery/example7>
+   ADL Benchmark 8 <gallery/example8>
+   Z-Peak Example <gallery/zpeak_example>
+   Columnar Analysis with Coffea (AGC Tools 2022) <gallery/coffea_analysis>
+   Coffea + Dask + ServiceX Example <gallery/ttbar_HT>
 
 
 .. toctree::
