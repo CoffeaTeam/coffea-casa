@@ -12,7 +12,11 @@ Run this once in a terminal. Creating the environment takes a few minutes:
 .. code-block:: bash
 
     mamba create -y -p ~/.conda/envs/pocketcoffea -c conda-forge python=3.11 conda-pack xrootd "setuptools<71" "pyarrow<26"
-    ~/.conda/envs/pocketcoffea/bin/python -m pip install pocket-coffea coffea-casa
+    ~/.conda/envs/pocketcoffea/bin/python -m pip install "git+https://github.com/PocketCoffea/PocketCoffea@main" coffea-casa
+
+.. note::
+
+    The ``dask@casa`` executor described here is in PocketCoffea's ``main`` branch and will be part of its next release (after 0.9.13). Until then, install PocketCoffea from GitHub as above; afterwards, ``pip install pocket-coffea coffea-casa`` is enough.
 
 The version limits avoid known problems:
 
