@@ -451,11 +451,13 @@ class CoffeaCasaCluster(HTCondorCluster):
                 **({f"+{ENV_TARBALL_ATTR}": f'"{shipped_env.tarball.name}"'}
                    if shipped_env else {}),
                 # Workers link the env's notebook path to where it's unpacked,
-                # so paths into it resolved in the notebook work there too
-                **({"environment": quote_environment({
+                # so paths into it resolved in the notebook work there too.
+                # The outer double quotes select HTCondor's space-separated
+                # environment syntax; quote_environment() doesn't add them.
+                **({"environment": '"' + quote_environment({
                     PREFIX_ENV_VAR: str(shipped_env.prefix),
                     "DASK_DISTRIBUTED__WORKER__PRELOAD": "coffea_casa.ship_env_preload",
-                })} if shipped_env and shipped_env.prefix else {}),
+                }) + '"'} if shipped_env and shipped_env.prefix else {}),
                 **({f"+{SHIPPED_PATHS_ATTR}":
                     '"' + ",".join(p.name for p in shipped_paths) + '"'}
                    if shipped_paths else {}),

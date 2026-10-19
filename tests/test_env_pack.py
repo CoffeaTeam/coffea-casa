@@ -148,8 +148,10 @@ def test_no_shipped_env_keeps_environment_yaml(tmp_path, monkeypatch):
 def test_shipped_env_sets_worker_preload_and_original_prefix(tmp_path):
     shipped = ShippedEnv(tmp_path / "cc-env-foo-abc.tar.gz", prefix="/home/u/.conda/envs/foo")
     env = directives_for(shipped)["environment"]
-    assert "COFFEA_CASA_ENV_PREFIX=/home/u/.conda/envs/foo" in env
-    assert "DASK_DISTRIBUTED__WORKER__PRELOAD=coffea_casa.ship_env_preload" in env
+    # One double-quoted, space-separated list (HTCondor's "new" syntax);
+    # without the outer quotes condor reads it all as a single variable
+    assert env == ('"COFFEA_CASA_ENV_PREFIX=/home/u/.conda/envs/foo '
+                   'DASK_DISTRIBUTED__WORKER__PRELOAD=coffea_casa.ship_env_preload"')
 
 
 def test_no_shipped_env_sets_no_environment():
