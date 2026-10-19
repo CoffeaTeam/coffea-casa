@@ -1,7 +1,7 @@
 Running PocketCoffea
 ====================
 
-`PocketCoffea <https://pocketcoffea.readthedocs.io>`_ is a CMS analysis framework built on coffea 0.7. It runs on coffea-casa with its ``dask@casa`` executor, which starts a :class:`CoffeaCasaCluster` with HTCondor workers for each run.
+`PocketCoffea <https://pocketcoffea.readthedocs.io>`_ is an analysis framework built on coffea 0.7. It runs on coffea-casa with its ``dask@casa`` executor, which starts a :class:`CoffeaCasaCluster` with HTCondor workers for each run.
 
 PocketCoffea needs coffea 0.7 and awkward 1, while the coffea-casa images ship current coffea. You therefore install PocketCoffea in a conda environment of your own, and coffea-casa ships that environment to the workers (see :doc:`cc_packages`). This works from any coffea-casa image flavour.
 
@@ -11,42 +11,25 @@ Run this once in a terminal. Creating the environment takes a few minutes:
 
 .. code-block:: bash
 
-    mamba create -y -p ~/.conda/envs/pocketcoffea -c conda-forge python=3.11 conda-pack "xrootd=6.1.0" "setuptools<71" "pyarrow<26"
+    mamba create -y -p ~/.conda/envs/pocketcoffea -c conda-forge python=3.11 conda-pack xrootd "setuptools<71" "pyarrow<26"
     ~/.conda/envs/pocketcoffea/bin/python -m pip install pocket-coffea coffea-casa
 
 The version limits avoid known problems:
 
 * ``setuptools<71``: PocketCoffea requires it. Installing it with conda, rather than letting pip replace conda's version later, keeps the environment packable for the workers.
 * ``pyarrow<26``: pyarrow 26 requires NumPy 2, but coffea 0.7 needs NumPy 1.
-* ``xrootd=6.1.0``: with XRootD 6.2.0, reading files from some sites with a grid proxy fails (``secgsi ... refuse to sign`` followed by ``Access denied``).
 
 You don't need to activate the environment: running its ``pocket-coffea`` by full path, as below, is enough for coffea-casa to ship it to the workers.
 
-2. Choose how to read the data
-------------------------------
-**With coffea-casa tokens (CMS instance).** No grid certificate is needed. Read files through XCache by using the ``xcache`` redirector in your dataset definitions, for example:
+2. Point your datasets at files the facility can read
+-----------------------------------------------------
+Workers read the files listed in your dataset definitions directly, so use paths that work at your facility. On instances with XCache, replace the redirector in the file paths with ``xcache``, for example:
 
 .. code-block:: bash
 
-    sed -i 's#root://xrootd-cms.infn.it/#root://xcache/#' datasets/my_datasets.json
+    sed -i 's#root://cmsxrootd.fnal.gov/#root://xcache/#' datasets/my_datasets.json
 
-See :doc:`cc_user` for more on XCache.
-
-**With a grid proxy.** This is needed to read through other redirectors, and on instances without CMS tokens. coffea-casa images don't include the VOMS tools, so create the proxy elsewhere, for example on lxplus:
-
-.. code-block:: bash
-
-    voms-proxy-init -voms cms -rfc --valid 168:0
-    cat $(voms-proxy-info -path)
-
-Copy the printed proxy, from the first ``-----BEGIN`` line to the last ``-----END`` line. Then save it on coffea-casa: run ``cat > ~/x509up_cms`` in a terminal, paste, press Enter and then Ctrl+D. Make the file readable only by you, and tell PocketCoffea where it is:
-
-.. code-block:: bash
-
-    chmod 600 ~/x509up_cms
-    echo "voms-proxy: $HOME/x509up_cms" > my_run_options.yaml
-
-The executor exports the proxy as ``X509_USER_PROXY`` before starting the cluster, and HTCondor then sends it to every worker. Without a proxy, the executor prints ``No usable VOMS proxy`` and continues with tokens. The proxy is your grid credential: delete it when you no longer need it.
+See :doc:`cc_user` for how data access works at each coffea-casa instance.
 
 3. Run the analysis
 -------------------
@@ -56,11 +39,11 @@ From your analysis directory:
 
     ~/.conda/envs/pocketcoffea/bin/pocket-coffea run --cfg config.py -o output --executor dask@casa --scaleout 10
 
-Add ``--custom-run-options my_run_options.yaml`` if you created one in the previous step, and ``--limit-files 1 --limit-chunks 2`` for a quick test.
+For a quick test, add ``--limit-files 1 --limit-chunks 2``.
 
 The first run packs the environment, which takes a few minutes and prints ``Packed ...``. Workers then download and unpack it before they start, so the progress bar may stay at 0% for a few minutes. Later runs reuse the packed environment until you change it.
 
-The ``dask@casa`` executor understands these run options, either in a run options file or, where available, as command-line flags:
+The ``dask@casa`` executor understands these run options, set in a file passed with ``--custom-run-options`` or, where available, as command-line flags:
 
 ``scaleout`` (``--scaleout``, default 10)
     Number of workers. With ``adaptive: true``, the maximum number of workers.
@@ -74,8 +57,14 @@ The ``dask@casa`` executor understands these run options, either in a run option
 ``scheduler-address`` (default none)
     Use an already running Dask cluster instead of starting one. You can also set ``DASK_SCHEDULER_ADDRESS``. That cluster's workers must have PocketCoffea, for example a :class:`CoffeaCasaCluster` created from a notebook running in your PocketCoffea environment. Clusters started from the Dask sidebar use the image's environment and won't work.
 
-``voms-proxy`` / ``ignore-grid-certificate``
-    Path to a grid proxy, or ``true`` to never look for one.
+For example, to run adaptively on up to 50 workers with more memory each:
+
+.. code-block:: yaml
+
+    # my_run_options.yaml
+    scaleout: 50
+    adaptive: true
+    mem-per-worker: "8GB"
 
 .. note::
 
@@ -83,7 +72,7 @@ The ``dask@casa`` executor understands these run options, either in a run option
 
 Building datasets
 -----------------
-PocketCoffea's dataset tools (``pocket-coffea build-datasets``) query DAS and Rucio with a grid proxy only. Build your dataset definition files where you have a proxy and the CMS tools, for example on lxplus, and copy the resulting JSON files to coffea-casa.
+PocketCoffea's dataset tools (``pocket-coffea build-datasets``) query CMS data-management services that aren't available from coffea-casa. Build your dataset definition files where you normally do, for example on lxplus, and copy the resulting JSON files to coffea-casa.
 
 Troubleshooting
 ---------------
@@ -102,8 +91,5 @@ After workers have finished, ``condor_transfer_data <ClusterId>`` copies their l
 ``pyarrow requires NumPy 2.0 or newer``
     Install ``pyarrow<26`` in the environment.
 
-``Access denied`` when opening files
-    The site the redirector chose didn't accept your credentials. Check that the proxy is valid and that the environment uses ``xrootd=6.1.0``, or use another redirector such as ``root://cmsxrootd.fnal.gov/``.
-
-``excessive access rights`` in a worker log
-    The proxy file is readable by others. Run ``chmod 600`` on it.
+``Access denied`` or ``file not found`` when opening files
+    The workers can't read that path. Check that your dataset definitions use the facility's data access (step 2).
