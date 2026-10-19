@@ -185,6 +185,10 @@ EXPOSE 8888
 # Copy local files as late as possible to avoid cache busting
 COPY jupyterhub/start-notebook.py jupyterhub/start-notebook.sh jupyterhub/start-singleuser.py jupyterhub/start-singleuser.sh /usr/local/bin/
 COPY jupyterhub/jupyter_server_config.py /etc/jupyter/
+# Server extension counting running terminal commands and busy kernels as
+# activity, so the hub's idle culler doesn't stop servers doing work (#422)
+COPY jupyterhub/coffea_casa_activity.py ${CONDA_DIR}/lib/python${PYVER}/site-packages/
+COPY jupyterhub/coffea_casa_activity.json /etc/jupyter/jupyter_server_config.d/
 
 # Fix permissions on /etc/jupyter as root
 USER root

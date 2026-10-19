@@ -110,6 +110,41 @@ def test_patched_distributed_is_the_imported_one():
     )
 
 
+def test_activity_extension_enabled():
+    # Keeps busy servers from being culled as idle (#422)
+    import re
+    out = subprocess.run(["jupyter", "server", "extension", "list"],
+                         capture_output=True, text=True, timeout=120)
+    listing = re.sub(r"\x1b\[[0-9;]*m", "", out.stdout + out.stderr)  # colours
+    assert re.search(r"coffea_casa_activity\s+enabled", listing), listing
+    assert re.search(r"coffea_casa_activity\s+OK", listing), listing
+
+
+def test_activity_extension_detects_running_terminal_command():
+    import types
+    import coffea_casa_activity
+
+    def manager(*cmds):
+        procs = [subprocess.Popen(cmd) for cmd in cmds]
+        terms = {str(i): types.SimpleNamespace(ptyproc=types.SimpleNamespace(pid=p.pid))
+                 for i, p in enumerate(procs)}
+        return types.SimpleNamespace(terminals=terms), procs
+
+    # A shell running a command has a child process; a bare process doesn't
+    busy, busy_procs = manager(["bash", "-c", "sleep 60; true"])
+    idle, idle_procs = manager(["sleep", "60"])
+    try:
+        import time
+        time.sleep(1)
+        assert coffea_casa_activity.terminal_busy(busy)
+        assert not coffea_casa_activity.terminal_busy(idle)
+        assert not coffea_casa_activity.terminal_busy(None)
+    finally:
+        for p in busy_procs + idle_procs:
+            p.kill()
+            p.wait()
+
+
 def test_jupyterhub_singleuser_on_path():
     assert shutil.which("jupyterhub-singleuser"), (
         "jupyterhub-singleuser missing from PATH — KubeSpawner cannot start "
