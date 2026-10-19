@@ -96,6 +96,10 @@ def test_condor_cli_available():
     )
 
 
+def test_git_notebook_tools_available():
+    # Used by users' git hooks, e.g. jupytext syncing paired notebooks (#354)
+    for tool in ("pre-commit", "jupytext", "nbstripout", "nbdime"):
+        assert shutil.which(tool), f"{tool} missing from PATH"
 # pyhf tensor backends each flavour must provide (#209): pytorch comes with the
 # ML base images, jax is added by casa-flavour-{full,dak}.yaml; noml has neither.
 PYHF_BACKENDS = {"full": {"jax", "pytorch"}, "dak": {"jax", "pytorch"},
