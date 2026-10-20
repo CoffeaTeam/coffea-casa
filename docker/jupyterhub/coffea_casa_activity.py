@@ -12,7 +12,8 @@ activity under a setting ending in ``_last_activity``, which jupyter_server
 includes in the activity it reports to the hub. Servers with nothing running
 are still culled as before.
 
-Enabled by /etc/jupyter/jupyter_server_config.d/coffea_casa_activity.json.
+Enabled by coffea_casa_activity.json in the env's etc/jupyter/jupyter_server_config.d/
+(where `jupyter server extension enable --sys-prefix` would put it).
 """
 import datetime
 import os

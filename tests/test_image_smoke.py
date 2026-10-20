@@ -113,7 +113,7 @@ def test_patched_distributed_is_the_imported_one():
 def test_activity_extension_enabled():
     # Keeps busy servers from being culled as idle (#422)
     import re
-    out = subprocess.run(["jupyter", "server", "extension", "list"],
+    out = subprocess.run([sys.executable, "-m", "jupyter_server", "extension", "list"],
                          capture_output=True, text=True, timeout=120)
     listing = re.sub(r"\x1b\[[0-9;]*m", "", out.stdout + out.stderr)  # colours
     assert re.search(r"coffea_casa_activity\s+enabled", listing), listing

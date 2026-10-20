@@ -188,7 +188,7 @@ COPY jupyterhub/jupyter_server_config.py /etc/jupyter/
 # Server extension counting running terminal commands and busy kernels as
 # activity, so the hub's idle culler doesn't stop servers doing work (#422)
 COPY jupyterhub/coffea_casa_activity.py ${CONDA_DIR}/lib/python${PYVER}/site-packages/
-COPY jupyterhub/coffea_casa_activity.json /etc/jupyter/jupyter_server_config.d/
+COPY jupyterhub/coffea_casa_activity.json ${CONDA_DIR}/etc/jupyter/jupyter_server_config.d/
 
 # Fix permissions on /etc/jupyter as root
 USER root
