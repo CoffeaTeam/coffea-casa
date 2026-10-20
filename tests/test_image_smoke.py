@@ -141,6 +141,58 @@ def test_patched_distributed_is_the_imported_one():
     )
 
 
+def test_labextension_manual_scale_stops_adaptive():
+    # Switching "Adaptive" off in the dask-labextension Scale dialog must stop
+    # adaptive scaling, or it keeps resizing the cluster (patch 0006, issue #151).
+    if IS_07:
+        pytest.skip("patches intentionally skipped for the 0.7 flavour")
+    import asyncio
+    import warnings
+    from inspect import isawaitable
+
+    import dask
+    with warnings.catch_warnings():
+        # The module creates a default manager outside an event loop on import
+        warnings.simplefilter("ignore", DeprecationWarning)
+        from dask_labextension.manager import DaskClusterManager
+
+    async def call(result):
+        return await result if isawaitable(result) else result
+
+    async def scale_after_adapt():
+        mgr = DaskClusterManager()
+        model = await call(mgr.start_cluster())
+        cluster = mgr._clusters[model["id"]]
+        try:
+            await call(mgr.adapt_cluster(model["id"], 1, 4))
+            adaptive = cluster._adaptive
+            for _ in range(50):  # it starts on a later event-loop tick
+                if adaptive.state == "running":
+                    break
+                await asyncio.sleep(0.1)
+            assert adaptive.state == "running"
+            await call(mgr.scale_cluster(model["id"], 2))
+            return adaptive.state
+        finally:
+            await call(mgr.close())
+
+    factory = {"module": "dask.distributed", "class": "LocalCluster", "args": [],
+               "kwargs": {"n_workers": 0, "processes": False,
+                          "dashboard_address": None}}
+    # The image's dask_tls.yaml requires TLS with the facility certificates,
+    # which don't exist outside a deployment; run this throwaway local
+    # cluster without TLS. No "initial" clusters: the image's would start a
+    # CoffeaCasaCluster.
+    no_tls = {"distributed.comm.require-encryption": False,
+              "distributed.comm.tls.ca-file": None}
+    for role in ("scheduler", "worker", "client"):
+        no_tls[f"distributed.comm.tls.{role}.cert"] = None
+        no_tls[f"distributed.comm.tls.{role}.key"] = None
+    with dask.config.set({"labextension.factory": factory,
+                          "labextension.initial": [], **no_tls}):
+        assert asyncio.run(scale_after_adapt()) == "stopped"
+
+
 def test_jupyterhub_singleuser_on_path():
     assert shutil.which("jupyterhub-singleuser"), (
         "jupyterhub-singleuser missing from PATH — KubeSpawner cannot start "

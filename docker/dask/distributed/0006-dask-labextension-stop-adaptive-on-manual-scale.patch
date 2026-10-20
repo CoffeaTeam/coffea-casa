@@ -1,0 +1,23 @@
+Stop adaptive scaling when a cluster is scaled manually
+
+Switching "Adaptive" off in the dask-labextension Scale dialog calls
+scale_cluster(), which drops the cluster's Adaptive from its bookkeeping
+but never stops it. Its periodic callback keeps running and resizes the
+cluster over the manually requested number of workers
+(CoffeaTeam/coffea-casa#151). Applies to dask-labextension 5.3 - 7.0.
+
+--- a/dask_labextension/manager.py
++++ b/dask_labextension/manager.py
+@@ -182,7 +182,11 @@
+         if model.get("adapt") is None and model["workers"] == n:
+             return model
+ 
+-        # Otherwise, rescale the model.
++        # Otherwise, rescale the model. Stop adaptive scaling first: dropping
++        # it from self._adaptives alone leaves its periodic callback running,
++        # and it would keep resizing the cluster over the requested size.
++        if adaptive is not None:
++            adaptive.stop()
+         t = cluster.scale(n)
+         if isawaitable(t):
+             await t
