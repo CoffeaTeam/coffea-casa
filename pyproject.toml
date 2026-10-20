@@ -45,6 +45,7 @@ dev = [
 docs = [
   "sphinx",
   "sphinx-rtd-theme",
+  "myst-nb",
 ]
 
 [tool.hatch]

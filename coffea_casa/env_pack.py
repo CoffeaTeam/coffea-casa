@@ -35,9 +35,11 @@ WHEELS_MAX_AGE = 7 * 24 * 3600
 class ShippedEnv:
     """Files to transfer so workers run the notebook's environment."""
 
-    def __init__(self, tarball, wheels_dir=None):
+    def __init__(self, tarball, wheels_dir=None, prefix=None):
         self.tarball = Path(tarball)
         self.wheels_dir = Path(wheels_dir) if wheels_dir else None
+        # Where the env lives in the notebook; the workers link it there
+        self.prefix = Path(prefix) if prefix else None
 
     @property
     def input_files(self):
@@ -223,4 +225,5 @@ def prepare_shipped_env(mode="auto", cache_dir=DEFAULT_CACHE_DIR):
     tarball = pack_env(cache_dir=cache_dir)
     editables = find_editable_packages()
     wheels_dir = build_editable_wheels(editables, cache_dir) if editables else None
-    return ShippedEnv(tarball, wheels_dir)
+    # Unresolved, as paths into the env (module __file__s) are built from it
+    return ShippedEnv(tarball, wheels_dir, prefix=sys.prefix)
