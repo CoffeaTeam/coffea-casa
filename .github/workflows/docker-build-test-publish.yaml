@@ -15,11 +15,25 @@ on:
   pull_request:
     paths:
       - docker/**
+      # what the image jobs run, so changes to it are tested too
+      - ci/spawn-test.sh
+      - ci/values-ci.yaml
+      - ci/structure-tests.yaml
+      - tests/test_image_smoke.py
+      - tests/test_analysis_smoke.py
+      - .github/workflows/docker-build-test-publish.yaml
     branches:
       - master
   push:
     paths:
       - docker/**
+      # what the image jobs run, so changes to it are tested too
+      - ci/spawn-test.sh
+      - ci/values-ci.yaml
+      - ci/structure-tests.yaml
+      - tests/test_image_smoke.py
+      - tests/test_analysis_smoke.py
+      - .github/workflows/docker-build-test-publish.yaml
     branches:
       - master
   release:
