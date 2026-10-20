@@ -10,13 +10,20 @@ IMAGE_NAME="${IMAGE%:*}"
 IMAGE_TAG="${IMAGE##*:}"
 NAMESPACE="jhub-ci"
 USER_NAME="ci-user"
-API_TOKEN="$(openssl rand -hex 32)"
+# 62 characters: JupyterHub >= 5.5.3 rejects tokens of 64 characters or more
+# (jupyterhub/jupyterhub#5566), which `openssl rand -hex 32` produces.
+API_TOKEN="$(openssl rand -hex 31)"
+# Test against the z2jh version our chart deploys (charts/coffea-casa/Chart.yaml),
+# not whatever upstream released last.
+Z2JH_VERSION="$(awk '/- name: jupyterhub/{f=1} f && /version:/{print $2; exit}' \
+  "$(dirname "$0")/../charts/coffea-casa/Chart.yaml" | tr -d "\"' ")"
 
 helm repo add jupyterhub https://hub.jupyter.org/helm-chart/ >/dev/null
 helm repo update >/dev/null
 
-echo "==> Installing zero-to-jupyterhub with image ${IMAGE}"
+echo "==> Installing zero-to-jupyterhub ${Z2JH_VERSION} with image ${IMAGE}"
 helm upgrade --install jhub-ci jupyterhub/jupyterhub \
+  --version "${Z2JH_VERSION:?could not read the z2jh version from Chart.yaml}" \
   --namespace "$NAMESPACE" --create-namespace \
   -f ci/values-ci.yaml \
   --set singleuser.image.name="$IMAGE_NAME" \
