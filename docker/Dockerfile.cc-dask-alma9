@@ -269,14 +269,17 @@ RUN fix-permissions "${CONDA_DIR}"
 
 # Distributed: install our vendored, patched distributed on top of the base's.
 # This is the ONLY genuinely flavour-specific step: the vendored copy and the
-# two patches track the CalVer dask/distributed generation, so they are skipped
+# patches track the CalVer dask/distributed generation, so they are skipped
 # on the legacy coffea 0.7 flavour (older distributed the patches don't fit).
+# 0006 patches dask-labextension (one directory up, in site-packages) so that
+# switching a cluster from adaptive to a fixed size stops adaptive scaling.
 COPY dask/distributed /tmp/distributed-src
 RUN if [ "${FLAVOUR}" != "0.7" ]; then \
       cp -a /tmp/distributed-src/. "${CONDA_DIR}/lib/python${PYVER}/site-packages/distributed/" && \
       cd "${CONDA_DIR}/lib/python${PYVER}/site-packages/distributed" && \
       patch -p2 < 0001-Patch-from-bbockelman-adaptive-scaling.patch && \
-      patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch ; \
+      patch -p2 < 0002-Allow-scheduler-to-preserve-worker-hostnames.patch && \
+      patch -p1 -d .. < 0006-dask-labextension-stop-adaptive-on-manual-scale.patch ; \
     else \
       echo "FLAVOUR=0.7: skipping vendored distributed patch (CalVer-only)" ; \
     fi && rm -rf /tmp/distributed-src
