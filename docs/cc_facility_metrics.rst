@@ -19,11 +19,11 @@ The metric set
      - Registered users
      - JupyterHub
    * - How many people use it?
-     - Active users over 24 hours, 7 days and 30 days
-     - JupyterHub
+     - Users who had a server running in the last 24 hours, 7 days and 30 days
+     - kube-state-metrics (or JupyterHub >= 3.1)
    * - Do people come back?
-     - Ratio of 7-day to 30-day active users
-     - JupyterHub
+     - Ratio of 7-day to 30-day users
+     - kube-state-metrics (or JupyterHub >= 3.1)
    * - Is it growing?
      - New users per week
      - JupyterHub
@@ -91,33 +91,48 @@ Queries
 
 The queries assume the default ``jupyterhub_`` metric prefix. Add a ``namespace="..."`` matcher to each selector if one Prometheus scrapes several deployments.
 
+Restrict ``jupyterhub_*`` series to the hub's scrape job (``job="hub"``, after the hub Service). The Dask scheduler runs inside each user's Jupyter server, and the ``/metrics`` endpoint on its dashboard port also serves zero-valued ``jupyterhub_*`` series. Without the filter, those zeros end up in sums and averages.
+
 JupyterHub
 ^^^^^^^^^^
 
 .. code-block:: text
 
     # Registered users
-    jupyterhub_total_users
+    jupyterhub_total_users{job="hub"}
 
-    # Active users (period is 24h, 7d or 30d)
-    jupyterhub_active_users{period="7d"}
-
-    # Returning users: share of the last 30 days' users who were also active this week
-    jupyterhub_active_users{period="7d"} / ignoring(period) jupyterhub_active_users{period="30d"}
+    # Active users (period is 24h, 7d or 30d); needs JupyterHub 3.1 or newer
+    jupyterhub_active_users{job="hub", period="7d"}
 
     # New users per week (approximate: deleted users reduce it)
-    delta(jupyterhub_total_users[7d])
+    delta(jupyterhub_total_users{job="hub"}[7d])
 
     # Peak concurrent user servers per day
-    max_over_time(jupyterhub_running_servers[1d])
+    max_over_time(jupyterhub_running_servers{job="hub"}[1d])
 
     # Share of spawns that succeeded over the last day
-      sum(increase(jupyterhub_server_spawn_duration_seconds_count{status="success"}[1d]))
-    / sum(increase(jupyterhub_server_spawn_duration_seconds_count[1d]))
+      sum(increase(jupyterhub_server_spawn_duration_seconds_count{job="hub", status="success"}[1d]))
+    / sum(increase(jupyterhub_server_spawn_duration_seconds_count{job="hub"}[1d]))
 
     # 90th percentile time to a running server
     histogram_quantile(0.9,
-      sum by (le) (rate(jupyterhub_server_spawn_duration_seconds_bucket{status="success"}[1d])))
+      sum by (le) (rate(jupyterhub_server_spawn_duration_seconds_bucket{job="hub", status="success"}[1d])))
+
+Active users from user pods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``jupyterhub_active_users`` only exists from JupyterHub 3.1 on. The same question can be answered for any hub version by counting the distinct user pods (named ``jupyter-<user>``) that kube-state-metrics has seen. This counts users who started a server, which is close to, but not the same as, JupyterHub's activity-based count:
+
+.. code-block:: text
+
+    # Users who had a server running in the last 7 days
+    count(count by (pod) (max_over_time(kube_pod_info{pod=~"jupyter-.+"}[7d])))
+
+    # Returning users: share of the last 30 days' users who also had a server this week
+      count(count by (pod) (max_over_time(kube_pod_info{pod=~"jupyter-.+"}[7d])))
+    / count(count by (pod) (max_over_time(kube_pod_info{pod=~"jupyter-.+"}[30d])))
+
+The look-back can't be longer than your Prometheus retention.
 
 Image flavours
 ^^^^^^^^^^^^^^
@@ -166,7 +181,7 @@ The ``service`` label on the scraped series then names the user. Useful queries:
 Grafana dashboard
 -----------------
 
-The chart ships a "Coffea-casa usage" Grafana dashboard with panels for all the queries above, plus spawns by result and servers per image over time. It has a data source selector, and a namespace selector for when one Prometheus scrapes several deployments. To install it, enable the ConfigMap that Grafana's dashboard sidecar picks up (the sidecar is on by default in kube-prometheus-stack):
+The chart ships a "Coffea-casa usage" Grafana dashboard with panels for all the queries above, plus spawns by result and servers per image over time. It has a data source selector, and a namespace selector for when one Prometheus scrapes several deployments. The user counts come from user pods (see above), so they work with any JupyterHub version; the "Active users" panel shows JupyterHub's own counts and stays empty before JupyterHub 3.1. Hub panels use the scrape job ``hub``; if yours differs, change the hidden ``hub_job`` dashboard variable. To install it, enable the ConfigMap that Grafana's dashboard sidecar picks up (the sidecar is on by default in kube-prometheus-stack):
 
 .. code-block:: yaml
 

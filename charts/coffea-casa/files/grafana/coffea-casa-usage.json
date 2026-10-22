@@ -16,6 +16,13 @@
   "templating": {
     "list": [
       {
+        "name": "hub_job",
+        "type": "constant",
+        "query": "hub",
+        "hide": 2,
+        "description": "Prometheus job label of the hub (the hub Service's name)."
+      },
+      {
         "name": "datasource",
         "label": "Data source",
         "type": "datasource",
@@ -32,10 +39,10 @@
           "uid": "${datasource}"
         },
         "query": {
-          "query": "label_values(jupyterhub_total_users, namespace)",
+          "query": "label_values(jupyterhub_total_users{job=\"$hub_job\"}, namespace)",
           "refId": "ns"
         },
-        "definition": "label_values(jupyterhub_total_users, namespace)",
+        "definition": "label_values(jupyterhub_total_users{job=\"$hub_job\"}, namespace)",
         "refresh": 2,
         "current": {},
         "hide": 0
@@ -77,7 +84,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(jupyterhub_total_users{namespace=\"$namespace\"})",
+          "expr": "max(jupyterhub_total_users{namespace=\"$namespace\", job=\"$hub_job\"})",
           "legendFormat": "",
           "refId": "A"
         }
@@ -98,8 +105,8 @@
     },
     {
       "type": "stat",
-      "title": "Active users (24h)",
-      "description": "Users with activity in the last 24 hours.",
+      "title": "Users with a server (24h)",
+      "description": "Users who had a server running in the last 24 hours (from kube-state-metrics).",
       "id": 3,
       "datasource": {
         "type": "prometheus",
@@ -117,7 +124,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(jupyterhub_active_users{namespace=\"$namespace\", period=\"24h\"})",
+          "expr": "count(count by (pod) (max_over_time(kube_pod_info{namespace=\"$namespace\", pod=~\"jupyter-.+\"}[24h])))",
           "legendFormat": "",
           "refId": "A"
         }
@@ -138,8 +145,8 @@
     },
     {
       "type": "stat",
-      "title": "Active users (7d)",
-      "description": "Users with activity in the last 7 days.",
+      "title": "Users with a server (7d)",
+      "description": "Users who had a server running in the last 7 days (from kube-state-metrics).",
       "id": 4,
       "datasource": {
         "type": "prometheus",
@@ -157,7 +164,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(jupyterhub_active_users{namespace=\"$namespace\", period=\"7d\"})",
+          "expr": "count(count by (pod) (max_over_time(kube_pod_info{namespace=\"$namespace\", pod=~\"jupyter-.+\"}[7d])))",
           "legendFormat": "",
           "refId": "A"
         }
@@ -178,8 +185,8 @@
     },
     {
       "type": "stat",
-      "title": "Active users (30d)",
-      "description": "Users with activity in the last 30 days.",
+      "title": "Users with a server (30d)",
+      "description": "Users who had a server running in the last 30 days (from kube-state-metrics).",
       "id": 5,
       "datasource": {
         "type": "prometheus",
@@ -197,7 +204,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(jupyterhub_active_users{namespace=\"$namespace\", period=\"30d\"})",
+          "expr": "count(count by (pod) (max_over_time(kube_pod_info{namespace=\"$namespace\", pod=~\"jupyter-.+\"}[30d])))",
           "legendFormat": "",
           "refId": "A"
         }
@@ -219,7 +226,7 @@
     {
       "type": "stat",
       "title": "Returning users",
-      "description": "Share of the last 30 days' users who were also active in the last 7 days.",
+      "description": "Share of the last 30 days' users who also had a server in the last 7 days.",
       "id": 6,
       "datasource": {
         "type": "prometheus",
@@ -237,7 +244,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(jupyterhub_active_users{namespace=\"$namespace\", period=\"7d\"}) / max(jupyterhub_active_users{namespace=\"$namespace\", period=\"30d\"})",
+          "expr": "count(count by (pod) (max_over_time(kube_pod_info{namespace=\"$namespace\", pod=~\"jupyter-.+\"}[7d]))) / count(count by (pod) (max_over_time(kube_pod_info{namespace=\"$namespace\", pod=~\"jupyter-.+\"}[30d])))",
           "legendFormat": "",
           "refId": "A"
         }
@@ -279,7 +286,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(delta(jupyterhub_total_users{namespace=\"$namespace\"}[7d]))",
+          "expr": "max(delta(jupyterhub_total_users{namespace=\"$namespace\", job=\"$hub_job\"}[7d]))",
           "legendFormat": "",
           "refId": "A"
         }
@@ -300,8 +307,8 @@
     },
     {
       "type": "timeseries",
-      "title": "Active users",
-      "description": "Active users by look-back period.",
+      "title": "Daily users",
+      "description": "Users who had a server running on each day (from kube-state-metrics).",
       "id": 8,
       "datasource": {
         "type": "prometheus",
@@ -309,7 +316,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 5
       },
@@ -319,7 +326,48 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max by (period) (jupyterhub_active_users{namespace=\"$namespace\"})",
+          "expr": "count(count by (pod) (max_over_time(kube_pod_info{namespace=\"$namespace\", pod=~\"jupyter-.+\"}[1d])))",
+          "legendFormat": "users",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "interval": "1d"
+    },
+    {
+      "type": "timeseries",
+      "title": "Active users (JupyterHub >= 3.1)",
+      "description": "JupyterHub's own active-user counts by look-back period. Empty on older hubs.",
+      "id": 9,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max by (period) (jupyterhub_active_users{namespace=\"$namespace\", job=\"$hub_job\"})",
           "legendFormat": "{{period}}",
           "refId": "A"
         }
@@ -342,15 +390,15 @@
       "type": "timeseries",
       "title": "Registered users",
       "description": "Users known to JupyterHub.",
-      "id": 9,
+      "id": 10,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 5
       },
       "targets": [
@@ -359,7 +407,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(jupyterhub_total_users{namespace=\"$namespace\"})",
+          "expr": "max(jupyterhub_total_users{namespace=\"$namespace\", job=\"$hub_job\"})",
           "legendFormat": "registered",
           "refId": "A"
         }
@@ -381,7 +429,7 @@
     {
       "type": "row",
       "title": "User servers",
-      "id": 10,
+      "id": 11,
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -395,7 +443,7 @@
       "type": "timeseries",
       "title": "Running user servers",
       "description": "Concurrent user servers (notebook pods).",
-      "id": 11,
+      "id": 12,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -412,7 +460,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(jupyterhub_running_servers{namespace=\"$namespace\"})",
+          "expr": "max(jupyterhub_running_servers{namespace=\"$namespace\", job=\"$hub_job\"})",
           "legendFormat": "running",
           "refId": "A"
         }
@@ -435,7 +483,7 @@
       "type": "timeseries",
       "title": "Spawn time",
       "description": "Time from spawn request to a running server, successful spawns only.",
-      "id": 12,
+      "id": 13,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -452,7 +500,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.5, sum by (le) (rate(jupyterhub_server_spawn_duration_seconds_bucket{namespace=\"$namespace\", status=\"success\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(jupyterhub_server_spawn_duration_seconds_bucket{namespace=\"$namespace\", job=\"$hub_job\", status=\"success\"}[$__rate_interval])))",
           "legendFormat": "p50",
           "refId": "A"
         },
@@ -461,7 +509,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "histogram_quantile(0.9, sum by (le) (rate(jupyterhub_server_spawn_duration_seconds_bucket{namespace=\"$namespace\", status=\"success\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.9, sum by (le) (rate(jupyterhub_server_spawn_duration_seconds_bucket{namespace=\"$namespace\", job=\"$hub_job\", status=\"success\"}[$__rate_interval])))",
           "legendFormat": "p90",
           "refId": "B"
         }
@@ -486,7 +534,7 @@
       "type": "timeseries",
       "title": "Spawns by result",
       "description": "Spawn attempts per hour, by result (success, failure, throttled, ...).",
-      "id": 13,
+      "id": 14,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -503,7 +551,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (status) (increase(jupyterhub_server_spawn_duration_seconds_count{namespace=\"$namespace\"}[1h]))",
+          "expr": "sum by (status) (increase(jupyterhub_server_spawn_duration_seconds_count{namespace=\"$namespace\", job=\"$hub_job\"}[1h]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }
@@ -525,7 +573,7 @@
     {
       "type": "row",
       "title": "Image flavours",
-      "id": 14,
+      "id": 15,
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -539,7 +587,7 @@
       "type": "bargauge",
       "title": "Running servers per image",
       "description": "User servers currently running, by container image.",
-      "id": 15,
+      "id": 16,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -581,7 +629,7 @@
       "type": "timeseries",
       "title": "Servers per image over time",
       "description": "User servers by container image.",
-      "id": 16,
+      "id": 17,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -620,7 +668,7 @@
     {
       "type": "row",
       "title": "Dask",
-      "id": 17,
+      "id": 18,
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -634,7 +682,7 @@
       "type": "timeseries",
       "title": "Dask adoption",
       "description": "Users whose Dask scheduler has workers, and the total number of workers.",
-      "id": 18,
+      "id": 19,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -683,7 +731,7 @@
       "type": "bargauge",
       "title": "Compute time by task prefix",
       "description": "Top 20 Dask task prefixes by compute time over the dashboard's time range.",
-      "id": 19,
+      "id": 20,
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
