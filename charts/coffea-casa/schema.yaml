@@ -73,6 +73,51 @@ properties:
               name: {{ include "jupyterhub.user-scheduler.fullname" . }}
               key: user-scheduler
       ```
+  monitoring:
+    type: object
+    additionalProperties: false
+    description: |
+      Usage metrics for the facility. See the "Facility usage metrics" page
+      of the coffea-casa documentation.
+    properties:
+      serviceMonitor:
+        type: object
+        additionalProperties: false
+        description: |
+          A Prometheus Operator `ServiceMonitor` that scrapes the hub's
+          `/hub/metrics` endpoint. Requires the `monitoring.coreos.com` CRDs.
+        properties:
+          enabled:
+            type: boolean
+            description: |
+              Render the `ServiceMonitor`.
+          namespace:
+            type: string
+            description: |
+              Namespace for the `ServiceMonitor`. Empty means the release
+              namespace.
+          labels:
+            type: object
+            description: |
+              Extra labels, typically what the operator's
+              `serviceMonitorSelector` matches (e.g. `release: prometheus`).
+          interval:
+            type: string
+            description: |
+              Scrape interval.
+          bearerTokenSecret:
+            type: object
+            additionalProperties: false
+            description: |
+              Secret holding a hub API token with the `read:metrics` scope.
+              Leave `name` empty when `jupyterhub.hub.authenticatePrometheus`
+              is `false`. The Secret must be in the `ServiceMonitor`'s
+              namespace.
+            properties:
+              name:
+                type: string
+              key:
+                type: string
   jupyterhub:
     nameOverride:
       type: [string, "null"]

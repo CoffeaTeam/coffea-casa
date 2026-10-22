@@ -55,6 +55,23 @@ htcondor:
 oidc_auth:
   enabled: false
 
+# Usage metrics, see docs/cc_facility_metrics.rst
+monitoring:
+  serviceMonitor:
+    # Needs the Prometheus Operator CRDs (e.g. kube-prometheus-stack)
+    enabled: false
+    # Namespace for the ServiceMonitor; empty means the release namespace
+    namespace: ""
+    # Extra labels, e.g. `release: prometheus` to match the operator's
+    # serviceMonitorSelector
+    labels: {}
+    interval: 30s
+    # Secret with a hub API token that has the read:metrics scope. Leave
+    # `name` empty if jupyterhub.hub.authenticatePrometheus is false.
+    bearerTokenSecret:
+      name: ""
+      key: api_token
+
 #####################
 # Jupyterhub settings
 jupyterhub:
