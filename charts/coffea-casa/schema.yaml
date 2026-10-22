@@ -118,6 +118,31 @@ properties:
                 type: string
               key:
                 type: string
+      grafanaDashboard:
+        type: object
+        additionalProperties: false
+        description: |
+          A ConfigMap holding the "Coffea-casa usage" Grafana dashboard, for
+          Grafana's dashboard sidecar to load.
+        properties:
+          enabled:
+            type: boolean
+            description: |
+              Render the ConfigMap.
+          namespace:
+            type: string
+            description: |
+              Namespace for the ConfigMap. Empty means the release namespace.
+              It must be a namespace the Grafana dashboard sidecar watches.
+          labels:
+            type: object
+            description: |
+              Labels the sidecar looks for. kube-prometheus-stack's default is
+              `grafana_dashboard: "1"`.
+          annotations:
+            type: object
+            description: |
+              Annotations, e.g. the sidecar's folder annotation.
   jupyterhub:
     nameOverride:
       type: [string, "null"]

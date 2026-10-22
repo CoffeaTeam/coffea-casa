@@ -71,6 +71,17 @@ monitoring:
     bearerTokenSecret:
       name: ""
       key: api_token
+  # ConfigMap with a Grafana dashboard (files/grafana/coffea-casa-usage.json)
+  grafanaDashboard:
+    enabled: false
+    # Namespace for the ConfigMap; empty means the release namespace. Must be
+    # one the Grafana dashboard sidecar watches.
+    namespace: ""
+    # The label the sidecar looks for (kube-prometheus-stack default)
+    labels:
+      grafana_dashboard: "1"
+    # e.g. a folder annotation, if the sidecar's folderAnnotation is set
+    annotations: {}
 
 #####################
 # Jupyterhub settings

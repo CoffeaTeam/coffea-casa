@@ -163,6 +163,25 @@ The ``service`` label on the scraped series then names the user. Useful queries:
     # Compute time per task prefix over the last week, i.e. what people run
     topk(20, sum by (task_prefix_name) (increase(dask_scheduler_tasks_compute_seconds_total[7d])))
 
+Grafana dashboard
+-----------------
+
+The chart ships a "Coffea-casa usage" Grafana dashboard with panels for all the queries above, plus spawns by result and servers per image over time. It has a data source selector, and a namespace selector for when one Prometheus scrapes several deployments. To install it, enable the ConfigMap that Grafana's dashboard sidecar picks up (the sidecar is on by default in kube-prometheus-stack):
+
+.. code-block:: yaml
+
+    monitoring:
+      grafanaDashboard:
+        enabled: true
+        # Only needed if the sidecar watches a single namespace
+        namespace: monitoring
+
+The ConfigMap carries the ``grafana_dashboard: "1"`` label by default; change ``monitoring.grafanaDashboard.labels`` if your sidecar looks for another one.
+
+Without the sidecar, or for a Grafana outside the cluster, import ``charts/coffea-casa/files/grafana/coffea-casa-usage.json`` from the coffea-casa repository through *Dashboards → New → Import*.
+
+The image-flavour panels need kube-state-metrics, and the Dask panels need the Dask ``ServiceMonitor`` described above. Without them those panels stay empty.
+
 Active time per user
 --------------------
 

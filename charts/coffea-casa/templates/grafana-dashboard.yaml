@@ -1,0 +1,28 @@
+{{- /*
+  Grafana dashboard for the facility usage metrics. Grafana's dashboard
+  sidecar (on by default in kube-prometheus-stack) loads ConfigMaps that
+  carry its label, by default grafana_dashboard: "1".
+*/}}
+{{- with .Values.monitoring.grafanaDashboard }}
+{{- if .enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "coffea-casa.fullname" $ }}-grafana-dashboard
+  namespace: {{ .namespace | default $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "coffea-casa.name" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name | quote }}
+    helm.sh/chart: {{ include "coffea-casa.chart" $ }}
+    {{- with .labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  coffea-casa-usage.json: |-
+    {{- $.Files.Get "files/grafana/coffea-casa-usage.json" | nindent 4 }}
+{{- end }}
+{{- end }}
