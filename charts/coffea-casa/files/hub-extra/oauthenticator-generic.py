@@ -231,6 +231,11 @@ class GenericOAuthenticator(OAuthenticator):
     async def refresh_user(self, user, handler=None):
         # Retrieve user authentication info and check if refresh is needed
         auth_state = await user.get_auth_state()
+
+        # If no auth_state (e.g. admin-created service user), nothing to refresh
+        if not auth_state:
+            return True
+
         renew_at = auth_state.get('renew_at', None)
         refresh_token = auth_state.get('refresh_token', None)
 
