@@ -67,10 +67,6 @@ jupyterhub:
       # change. z2jh does not tpl hub.annotations, so publish-chart.yaml writes
       # the real sha256 here before packaging.
       checksum/hub-extra-config-d: set-by-publish-chart
-    services:
-      test:
-        admin: true
-        apiToken: ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
     # attemp to debug
     # args: ["while true; do echo 'debug' && sleep 5; done;"]
     # LOCAL DEV WORKAROUND (Apple Silicon / arm64 Docker Desktop): the hub

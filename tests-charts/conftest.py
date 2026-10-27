@@ -9,7 +9,6 @@ import uuid
 
 import pytest
 import requests
-import yaml
 
 
 def pytest_configure(config):
@@ -25,23 +24,23 @@ def pytest_configure(config):
     )
 
 
+def _hub_api_token():
+    # The admin service token the hub was deployed with; never commit one.
+    token = os.environ.get("HUB_API_TOKEN")
+    if not token:
+        pytest.skip("HUB_API_TOKEN is not set")
+    return token
+
+
 @pytest.fixture(scope="module")
 def admin_api_token():
-    base_dir = os.path.dirname(os.path.dirname(__file__))
-    with open(os.path.join(base_dir, "charts", "coffea-casa", "values.yaml")) as f:
-        y = yaml.safe_load(f)
-    token = y["jupyterhub"]["hub"]["services"]["test"]["apiToken"]
-    return token
+    return _hub_api_token()
 
 
 @pytest.fixture(scope="module")
 def scoped_api_token():
     """This token is granted a limited scope"""
-    base_dir = os.path.dirname(os.path.dirname(__file__))
-    with open(os.path.join(base_dir, "charts", "coffea-casa", "values.yaml")) as f:
-        y = yaml.safe_load(f)
-    token = y["jupyterhub"]["hub"]["services"]["test"]["apiToken"]
-    return token
+    return _hub_api_token()
 
 
 @pytest.fixture(scope="module")

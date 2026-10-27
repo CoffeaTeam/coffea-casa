@@ -8,8 +8,8 @@ name: Test Helm chart
 #     fresh from this commit's docker/ sources, loads it into a kind
 #     cluster, does a real `helm install` with the dev values.yaml (image
 #     swapped for the freshly-built one via ci/values-chart-ci.yaml), then
-#     drives a real user spawn through the Hub REST API using the static
-#     `test` service token already baked into values.yaml. This is the
+#     drives a real user spawn through the Hub REST API using a `ci` admin
+#     service whose token is generated per run (never committed). This is the
 #     tier that catches runtime-only breakage helm template/lint can't see
 #     (a kubespawner_override key KubeSpawner renamed, a ConfigMap glob
 #     silently dropping every key because one matched file was binary, or
@@ -113,10 +113,16 @@ jobs:
       - name: helm install (dev values + CI image overlay)
         working-directory: charts/coffea-casa
         run: |
+          # 62 characters: JupyterHub >= 5.5.3 rejects tokens of 64 characters
+          # or more (jupyterhub/jupyterhub#5566).
+          HUB_API_TOKEN="$(openssl rand -hex 31)"
+          echo "::add-mask::$HUB_API_TOKEN"
+          echo "HUB_API_TOKEN=$HUB_API_TOKEN" >> "$GITHUB_ENV"
           kubectl create namespace coffea-casa-ci
           helm upgrade --install coffea-casa . \
             -f values.yaml \
             -f ../../ci/values-chart-ci.yaml \
+            --set jupyterhub.hub.services.ci.apiToken="$HUB_API_TOKEN" \
             --namespace coffea-casa-ci \
             --wait --timeout 10m
 
