@@ -6,8 +6,16 @@
 # and side-loaded into the kind cluster - so the chart is tested against
 # code from this commit, not a possibly-stale registry tag.
 #
+# Also declares the `ci` admin service the spawn test authenticates with; its
+# token is generated per run and injected with
+# --set jupyterhub.hub.services.ci.apiToken=... (never commit one).
+#
 # Apply on top of values.yaml: -f values.yaml -f ../../ci/values-chart-ci.yaml
 jupyterhub:
+  hub:
+    services:
+      ci:
+        admin: true
   singleuser:
     profileList:
       - display_name: "CI test image"

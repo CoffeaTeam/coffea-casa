@@ -124,8 +124,12 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     # Build and exec the worker. Parsing/command construction lives in
     # worker-args.sh; see cc_build_worker_command for the dask/taskvine split.
     if [ ! -z "$_CONDOR_JOB_AD" ]; then
-        echo "Print ClassAd:" 1>&2
-        cat "$_CONDOR_JOB_AD" 1>&2
+        # The ClassAd can carry the job's Environment attribute; only dump it
+        # to the worker log when explicitly debugging.
+        if [[ "${DEBUG:-}" == "1" ]]; then
+            echo "Print ClassAd:" 1>&2
+            cat "$_CONDOR_JOB_AD" 1>&2
+        fi
 
         if ! MISSING=$(cc_worker_validate "$_CONDOR_JOB_AD"); then
             echo "Error: cannot start worker -- ${MISSING}" 1>&2

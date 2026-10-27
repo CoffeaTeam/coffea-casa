@@ -7,15 +7,16 @@
 # Unlike ci/spawn-test.sh (which installs the upstream jupyterhub chart
 # directly to test a candidate docker image), this targets our own chart's
 # release/wiring - profileList, hub-extra-config-d mounts, kubespawner
-# overrides, etc. Authenticates with the static `hub.services.test.apiToken`
-# already committed in values.yaml, so no --set/secret plumbing is needed.
+# overrides, etc. Authenticates as the `ci` admin service declared in
+# ci/values-chart-ci.yaml, whose token must be passed in HUB_API_TOKEN (the
+# same value given to helm via --set jupyterhub.hub.services.ci.apiToken=...).
 #
-# Usage: ./ci/chart-spawn-test.sh <namespace>
+# Usage: HUB_API_TOKEN=... ./ci/chart-spawn-test.sh <namespace>
 set -euo pipefail
 
 NAMESPACE="${1:?usage: chart-spawn-test.sh <namespace>}"
 USER_NAME="ci-user"
-API_TOKEN="ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+API_TOKEN="${HUB_API_TOKEN:?HUB_API_TOKEN must be set to the ci service token}"
 
 echo "==> Port-forwarding the proxy"
 kubectl -n "$NAMESPACE" port-forward service/proxy-public 8080:80 >/dev/null 2>&1 &
