@@ -160,8 +160,10 @@ def test_refresh_disabled_uses_upstream(oauth, monkeypatch):
     assert model["auth_state"]["access_token"] == "valid"
 
 
-def test_refresh_user_pushes_access_token_to_secret(oauth, monkeypatch):
-    patched = {}
+@pytest.fixture
+def fake_k8s(oauth, monkeypatch):
+    """Fake kubernetes_asyncio secret API; returns the {name: string_data} patches"""
+    state = {"patched": {}, "read_status": None}
 
     class FakeSecret:
         string_data = None
@@ -171,10 +173,14 @@ def test_refresh_user_pushes_access_token_to_secret(oauth, monkeypatch):
             pass
 
         async def read_namespaced_secret(self, name, namespace):
+            if state["read_status"]:
+                raise coffea_oauth.client.exceptions.ApiException(
+                    status=state["read_status"]
+                )
             return FakeSecret()
 
         async def patch_namespaced_secret(self, name, namespace, secret):
-            patched[name] = secret.string_data
+            state["patched"][name] = secret.string_data
 
     class FakeApiClient:
         async def __aenter__(self):
@@ -190,11 +196,28 @@ def test_refresh_user_pushes_access_token_to_secret(oauth, monkeypatch):
     monkeypatch.setattr(coffea_oauth.config, "load_incluster_config", lambda: None)
     monkeypatch.setattr(coffea_oauth.client, "ApiClient", FakeApiClient)
     monkeypatch.setattr(coffea_oauth.client, "CoreV1Api", FakeCoreV1Api)
+    return state
 
-    run(oauth.refresh_user(FakeUser({})))
-    assert patched == {
+
+def test_refresh_user_pushes_access_token_to_secret(oauth, fake_k8s):
+    model = run(oauth.refresh_user(FakeUser({})))
+    assert model["auth_state"]["access_token"] == "new-access"
+    assert fake_k8s["patched"] == {
         "jupyter-user-40example-2eorg": {"access_token": "new-access"}
     }
+
+
+def test_refresh_user_before_first_spawn(oauth, fake_k8s):
+    # refresh_pre_spawn runs before secret_creation_hook has created the secret
+    fake_k8s["read_status"] = 404
+    model = run(oauth.refresh_user(FakeUser({})))
+    assert model["auth_state"]["access_token"] == "new-access"
+    assert fake_k8s["patched"] == {}
+
+
+def test_refresh_user_unreadable_secret_requires_login(oauth, fake_k8s):
+    fake_k8s["read_status"] = 403
+    assert run(oauth.refresh_user(FakeUser({}))) is False
 
 
 # ---------------------------------------------------------------------------

@@ -127,6 +127,10 @@ class CoffeaOAuthenticator(GenericOAuthenticator):
             try:
                 secret = await api.read_namespaced_secret(secret_name, k8s_namespace)
             except client.exceptions.ApiException as e:
+                if e.status == 404:
+                    # Not spawned yet (e.g. refresh_pre_spawn on first spawn):
+                    # secret_creation_hook creates the secret with this token
+                    return user_info
                 # If secret cannot be read, force a re-auth to sort out the state
                 self.log.error(
                     'Failed to retrieve secret for %s because %s',
