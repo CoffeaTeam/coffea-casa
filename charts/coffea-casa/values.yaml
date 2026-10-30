@@ -99,20 +99,19 @@ jupyterhub:
       ## Custom login logo
       #  mountPath: /usr/local/share/jupyterhub/static/images/logo.png
       #  subPath: logo.png.bin
-    # - name: hub-extra-config-d
-    #  # Override GenericOAuthenticator with token refresh version
-    #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/generic.py
-    #  subPath: oauthenticator-generic.py
-    # - name: hub-extra-config-d
-    #  # Pull in v14.2.0 of oauthenticator/oauth2.py, unmodified
-    #  # Our patched oauthenticator/generic.py comes from v14.2. as well
-    #  # Remove once hub is running v14+
-    #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/oauth2.py
-    #  subPath: oauthenticator-oauth2-14.2.0.py
-    # - name: hub-extra-config-d
-    #  # Add CoffeaOAuthenticator to save tokens to secret
-    #  mountPath: /usr/local/lib/python3.8/dist-packages/oauthenticator/coffea.py
-    #  subPath: oauthenticator-coffea.py
+      # OAuth (see "Authentication" in docs/cc_deployment.rst). The z2jh 4.x
+      # hub image is python:3.12 with oauthenticator 17.x.
+      # - name: hub-extra-config-d
+      ## CoffeaOAuthenticator: refreshes tokens with the refresh_token and
+      ## pushes the access_token into the user's secret
+      #  mountPath: /usr/local/lib/python3.12/site-packages/oauthenticator/coffea.py
+      #  subPath: oauthenticator-coffea.py
+      # - name: hub-extra-config-d
+      ## CoffeaMultiAuthenticator: several login routes (e.g. CILogon + CMS
+      ## IAM) with refresh passed to the route the user logged in with.
+      ## Also needs jupyterhub-multiauthenticator==0.4.0 pip-installed in hub.args.
+      #  mountPath: /usr/local/lib/python3.12/site-packages/coffea_multiauthenticator.py
+      #  subPath: multiauthenticator-coffea.py
     extraVolumes:
       - name: pool-password
         secret:
