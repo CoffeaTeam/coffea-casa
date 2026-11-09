@@ -1,0 +1,45 @@
+{{- /*
+  Prometheus Operator ServiceMonitor for the JupyterHub /hub/metrics endpoint.
+  The z2jh hub Service already carries prometheus.io/* annotations, but
+  kube-prometheus-stack ignores those; it only scrapes what a ServiceMonitor
+  selects. Requires the monitoring.coreos.com CRDs, hence disabled by default.
+*/}}
+{{- with .Values.monitoring.serviceMonitor }}
+{{- if .enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "coffea-casa.fullname" $ }}-hub
+  namespace: {{ .namespace | default $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "coffea-casa.name" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name | quote }}
+    helm.sh/chart: {{ include "coffea-casa.chart" $ }}
+    {{- with .labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: jupyterhub
+      component: hub
+      release: {{ $.Release.Name | quote }}
+  namespaceSelector:
+    matchNames:
+      - {{ $.Release.Namespace }}
+  endpoints:
+    - port: hub
+      path: {{ $.Values.jupyterhub.hub.baseUrl | default "/" | trimSuffix "/" }}/hub/metrics
+      interval: {{ .interval }}
+      {{- with .bearerTokenSecret }}
+      {{- if .name }}
+      # Needed unless jupyterhub.hub.authenticatePrometheus is false. The
+      # token needs the read:metrics scope; the Secret must live in the
+      # ServiceMonitor's namespace.
+      bearerTokenSecret:
+        name: {{ .name }}
+        key: {{ .key }}
+      {{- end }}
+      {{- end }}
+{{- end }}
+{{- end }}

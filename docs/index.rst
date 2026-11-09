@@ -84,6 +84,7 @@ The facility is built on top of a Kubernetes cluster and integrates with dedicat
 
   cc_setup.rst
   cc_configuration.rst
+  cc_facility_metrics.rst
 
 
 .. toctree::
