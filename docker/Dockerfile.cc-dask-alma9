@@ -203,6 +203,8 @@ RUN mkdir -p ${DASK_ROOT_CONFIG}  && chown -R "${NB_USER}:${NB_GID}" ${DASK_ROOT
 USER ${NB_UID}
 # Dask, Labextention and coffea-casa setup
 COPY dask/dask.yaml  dask/dask_tls.yaml dask/labextension.yaml ${DASK_ROOT_CONFIG}/
+# Point the TLS config at CERT_DIR (done at build time, not container start).
+RUN sed -i "s|/etc/cmsaf-secrets|${CERT_DIR}|g" ${DASK_ROOT_CONFIG}/dask_tls.yaml
 
 USER root
 # Add HTCondor configuration files that not needed to be edited
@@ -248,6 +250,13 @@ ENV VOMS_USERCONF="/etc/vomses"
 
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
+# Bake in the worker image built from the same commit and flavour, so a
+# notebook image always spawns matching workers. Fails the build if the
+# placeholder is missing. Deployments can still override it via the Helm
+# chart's daskConfig (jobqueue.coffea-casa.worker-image).
+RUN sed -i "s|hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu:development|${WORKER_IMAGE}:${TAG}|" \
+      ${DASK_ROOT_CONFIG}/jobqueue-coffea-casa.yaml && \
+    grep -qF "worker-image: \"${WORKER_IMAGE}:${TAG}\"" ${DASK_ROOT_CONFIG}/jobqueue-coffea-casa.yaml
 
 ## ------- dask-labextention -------------------------------
 #USER ${NB_USER}

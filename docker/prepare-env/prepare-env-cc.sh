@@ -46,29 +46,12 @@ ln -sf $DASK_ROOT_CONFIG/labextension.yaml "$JUPYTER_CONFIG/dask_labextension.ya
 ls -la "$JUPYTER_CONFIG/dask_labextension.yaml"
 
 ########################################
-# Dask configuration templating
+# Dask configuration
 ########################################
 
-replace() {
-    local file="$1"
-    local search="$2"
-    local replace="$3"
-    [[ -f "$file" ]] && \
-        sed -i "s|${search}|${replace}|g" "$file"
-}
-
-replace "$DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml" \
-        "hub.opensciencegrid.org/coffea-casa/cc-analysis-ubuntu" \
-        "${WORKER_IMAGE:-}"
-
-replace "$DASK_ROOT_CONFIG/jobqueue-coffea-casa.yaml" \
-        "development" \
-        "${TAG:-}"
-
-replace "$DASK_ROOT_CONFIG/dask_tls.yaml" \
-        "/etc/cmsaf-secrets" \
-        "${CERT_DIR:-}"
-
+# worker-image (WORKER_IMAGE:TAG) and the TLS cert paths (CERT_DIR) are baked
+# into /opt/dask at image build time (Dockerfile.cc-dask-alma9).
+#
 # Notebook-pod Dask settings (labextension factory, TLS on/off, ...) come
 # from the Helm chart: .Values.daskConfig is mounted at /usr/local/etc/dask
 # and overrides these image defaults. Don't sed them here.
