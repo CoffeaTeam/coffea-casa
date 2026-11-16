@@ -77,13 +77,17 @@ replace "$DASK_ROOT_CONFIG/dask_tls.yaml" \
 # HTCondor scheduler config
 ########################################
 
+# Image-level defaults from the build-time env vars. The Helm chart can
+# override any key via .Values.htcondor.config, mounted as
+# /opt/condor/config.d/zz-coffea-casa-chart (read after this file).
+
 {
     echo "CONDOR_HOST = ${CONDOR_HOST:-}"
     echo "COLLECTOR_NAME = ${COLLECTOR_NAME:-}"
     echo "UID_DOMAIN = ${UID_DOMAIN:-}"
     echo "SCHEDD_HOST = ${SCHEDD_HOST:-}"
     echo "DELEGATE_JOB_GSI_CREDENTIALS = FALSE"
-} >> "$SCHEdd_CONF"
+} > "$SCHEdd_CONF"
 
 
 ########################################

@@ -10,8 +10,14 @@
 # token is generated per run and injected with
 # --set jupyterhub.hub.services.ci.apiToken=... (never commit one).
 #
+# Also sets a marker HTCondor knob so the spawn test can check the chart's
+# htcondor.config reaches the pod's HTCondor configuration.
+#
 # Apply on top of the dev values:
 #   -f values.yaml -f values-dev.yaml -f ../../ci/values-chart-ci.yaml
+htcondor:
+  config:
+    COFFEA_CASA_CHART_CI: "True"
 jupyterhub:
   hub:
     services:

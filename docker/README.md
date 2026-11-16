@@ -110,6 +110,11 @@ docker build --platform linux/amd64 \
 | `BEARER_TOKEN_FILE` | Bearer token file location (see charts) | `/etc/cmsaf-secrets-chown/access_token` |
 | `DASK_ROOT_CONFIG` | Dask config directory | `/opt/dask` |
 
+These are image-level defaults. On Kubernetes the Helm chart can override the
+notebook pod's Dask settings (`daskConfig`) and HTCondor settings
+(`htcondor.config`, e.g. `CONDOR_HOST`, `SCHEDD_HOST`) without rebuilding the
+image; see `charts/coffea-casa/values.yaml`.
+
 ### Custom cluster example
 
 ***Keep `TAG` consistent between the scheduler and worker images.***

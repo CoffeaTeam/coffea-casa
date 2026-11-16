@@ -1,0 +1,20 @@
+{{- /*
+  HTCondor client configuration for the singleuser (notebook) pod, rendered
+  from .Values.htcondor.config as `KEY = value` lines. values.yaml mounts it
+  as /opt/condor/config.d/zz-coffea-casa-chart (the image's LOCAL_CONFIG_DIR).
+  Files there are read in lexical order, so it overrides the `schedd` file
+  that prepare-env-cc.sh generates from the image's CONDOR_HOST,
+  COLLECTOR_NAME, UID_DOMAIN and SCHEDD_HOST env vars.
+*/ -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: coffea-casa-htcondor-config
+  labels:
+    {{- include "jupyterhub.labels" . | nindent 4 }}
+data:
+  zz-coffea-casa-chart: |
+    # Rendered from .Values.htcondor.config by the coffea-casa Helm chart.
+    {{- range $key, $value := (.Values.htcondor.config | default dict) }}
+    {{ $key }} = {{ $value }}
+    {{- end }}

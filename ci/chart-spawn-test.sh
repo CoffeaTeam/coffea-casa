@@ -85,6 +85,16 @@ print('labextension.factory.class =', cls)
   exit 1
 fi
 
+echo "==> Verifying the chart htcondor.config is mounted and applied (pod: $POD)"
+CONDOR_MARKER=$(kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- condor_config_val COFFEA_CASA_CHART_CI 2>&1 || true)
+if [ "$CONDOR_MARKER" != "True" ]; then
+  echo "!! chart htcondor.config (ci/values-chart-ci.yaml) not applied: got '$CONDOR_MARKER'"
+  kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- condor_config_val -config || true
+  kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- cat /opt/condor/config.d/zz-coffea-casa-chart || true
+  exit 1
+fi
+echo "COFFEA_CASA_CHART_CI = $CONDOR_MARKER"
+
 echo "==> Verifying the dask-labextension LocalCluster factory starts (pod: $POD)"
 if ! kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- python3 -c "
 from dask.distributed import LocalCluster
