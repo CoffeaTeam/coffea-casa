@@ -28,19 +28,26 @@ condor_secret_name = "condor-token"
 #condor_user = 'submituser@submit.condorsub.cmsaf-dev.svc.cluster.local'
 condor_user = '%s@%s' % (nb_user, uid_domain)
 #issuer = socket.gethostbyname('condor.cmsaf-dev.svc.cluster.local')
-issuer = 'unl.edu' # Matching HTCondor TRUST_DOMAIN
-kid = 'POOL'
+# Site settings, overridable via `jupyterhub.custom.*`; the defaults are the
+# UNL values these used to be hard-coded to.
+# Issuer of the HTCondor token; must match the pool's TRUST_DOMAIN.
+issuer = get_config('custom.condorTrustDomain', 'unl.edu')
+# Signing key id of the HTCondor token ('POOL' = the pool password secret).
+kid = get_config('custom.condorTokenKid', 'POOL')
 
 xcache_secret_name = 'xcache-token'
-xcache_location_name = "T2_US_Nebraska"
+# Macaroon location of the XCache token.
+xcache_location_name = get_config('custom.xcacheLocation', 'T2_US_Nebraska')
 xcache_user_name = nb_user
 
 servicex_secret_name = 'servicex-token'
 servicex_user = '%s@%s' % (nb_user, uid_domain)
-servicex_issuer = 'cmsaf-jh.unl.edu'
+servicex_issuer = get_config('custom.servicexIssuer', 'cmsaf-jh.unl.edu')
 servicex_user_name = nb_user
 
-external_dns = False
+# Annotate the traefik service with each user's Dask hostnames for
+# external-dns.
+external_dns = bool(get_config('custom.externalDns', False))
 dask_base_domain = os.environ.get('DASK_BASE_DOMAIN', 'coffea.example.edu')
 condor_settings = strtobool(os.environ.get('CONDOR_ENABLED', 'True'))
 servicex_settings = strtobool(os.environ.get('SERVICEX_ENABLED', 'True'))
@@ -78,20 +85,26 @@ def username_to_secretname(username):
     euser = escape_username(username)
     return 'jupyter-%s' % euser
 
+# JupyterHub user -> CMS store/user (HyperNews) username, for the per-user
+# cms-store-user subPath. Set `jupyterhub.custom.cmsUserMap` to replace this
+# fallback mapping.
+DEFAULT_CMS_USER_MAP = {
+    'jthiltges@unl.edu': 'jthiltge',
+    'andrew.steven.wightman@cern.ch': 'awightma',
+    'john.thiltges@cern.ch': 'jthiltge',
+    'sam.albin@unl.edu': 'salbin',
+    'samuel.albin@cern.ch': 'salbin',
+    'oksana.shadura@cern.ch': 'oshadura',
+    'clundstedt@unl.edu': 'clundst',
+    'btovar@nd.edu': 'btovarlo',
+}
+cms_user_map = get_config('custom.cmsUserMap', None)
+if cms_user_map is None:
+    cms_user_map = DEFAULT_CMS_USER_MAP
+
 def user_to_cmsuser(user):
     '''Map jhub user to CMS store/user (HyperNews) username'''
-    # FIXME: Use a static mapping for now
-    usermap = {
-        'jthiltges@unl.edu': 'jthiltge',
-        'andrew.steven.wightman@cern.ch': 'awightma',
-        'john.thiltges@cern.ch': 'jthiltge',
-        'sam.albin@unl.edu': 'salbin',
-        'samuel.albin@cern.ch': 'salbin',
-        'oksana.shadura@cern.ch': 'oshadura',
-        'clundstedt@unl.edu': 'clundst',
-        'btovar@nd.edu': 'btovarlo',
-    }
-    return usermap.get(user, None)
+    return cms_user_map.get(user, None)
 
 async def pre_spawn_hook(spawner):
 

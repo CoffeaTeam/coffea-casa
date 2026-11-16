@@ -147,6 +147,13 @@ things worth knowing before you click "Start":
   ``UID_DOMAIN``. Also update any ``/home/cms-jovyan`` paths in your own
   values file (e.g. ``singleuser.storage.homeMountPath``).
 
+* **Other site settings of the hub hook.** The token issuers
+  (``condorTrustDomain``, ``servicexIssuer``), the HTCondor token key id
+  (``condorTokenKid``), the XCache token location (``xcacheLocation``),
+  ``externalDns`` and the JupyterHub-to-CMS user map (``cmsUserMap``) are
+  also ``jupyterhub.custom`` keys; unset, they keep the UNL defaults. See the
+  comments in ``values.yaml``.
+
 5. Cleaning up
 ---------------
 
