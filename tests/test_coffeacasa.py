@@ -553,3 +553,42 @@ def test_fetch_worker_logs_selects_this_cluster(tmp_path):
     assert 'CoffeaCasaClusterId == "abc123"' in args[2]
     assert "JobStatus == 4" in args[2]
     assert files == [tmp_path / "worker-1.0.err"]
+
+
+# ===== job-extra-directives from the dask config =====
+
+def _directives_with_token(tmp_path, config=None):
+    """job_extra_directives with a bearer token present, under `config`"""
+    import dask
+    token = tmp_path / "access_token"
+    token.write_text("t")
+    with dask.config.set(config or {}), \
+         patch("coffea_casa.coffea_casa.prepare_shipped_env", return_value=None), \
+         patch("coffea_casa.coffea_casa.bearer_token_path", return_value=str(token)):
+        job_kwargs = CoffeaCasaCluster._modify_job_kwargs({}, force_tcp=True)
+    return token, job_kwargs["job_extra_directives"]
+
+
+def test_default_config_keeps_secret_files_encrypted(mock_environment, tmp_path):
+    """The packaged jobqueue config must not blank encrypt_input_files.
+
+    Its job-extra-directives are merged over the computed defaults, so an
+    `encrypt_input_files: ""` there silently dropped the encryption request
+    for tokens and certificates.
+    """
+    import dask
+    assert "encrypt_input_files" not in dask.config.get(
+        "jobqueue.coffea-casa.job-extra-directives")
+    token, directives = _directives_with_token(tmp_path)
+    assert str(token) in directives["encrypt_input_files"]
+    assert str(token) in directives["transfer_input_files"]
+
+
+def test_accounting_group_overridable_via_config(mock_environment, tmp_path):
+    """Sites set their own accounting group via dask config (e.g. the chart)"""
+    _, directives = _directives_with_token(tmp_path)
+    assert directives["+AccountingGroup"] == '"cms.other.coffea.$ENV(HOSTNAME)"'
+    _, directives = _directives_with_token(tmp_path, {
+        "jobqueue.coffea-casa.job-extra-directives.+AccountingGroup": '"group_atlas.af"',
+    })
+    assert directives["+AccountingGroup"] == '"group_atlas.af"'

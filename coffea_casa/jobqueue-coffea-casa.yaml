@@ -39,8 +39,9 @@ jobqueue:
       # Set accounting group for usage tracking
       "+AccountingGroup": '"cms.other.coffea.$ENV(HOSTNAME)"'
       
-      # Request encrypted file transfer
-      encrypt_input_files: ""
+      # Don't set encrypt_input_files / transfer_input_files here:
+      # CoffeaCasaCluster computes them (certs, tokens, env files) and these
+      # directives are merged over its defaults.
       
       # File transfer settings
       should_transfer_files: "YES"
