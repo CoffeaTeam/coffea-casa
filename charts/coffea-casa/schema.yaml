@@ -82,6 +82,20 @@ properties:
       ConfigMap and mounted at `/usr/local/etc/dask`, so it overrides the
       image defaults in `/opt/dask` but not `~/.config/dask` or `DASK_*`
       environment variables. HTCondor workers do not see it.
+  htcondor:
+    type: object
+    additionalProperties: true
+    properties:
+      config:
+        type: object
+        additionalProperties: true
+        description: |
+          HTCondor client configuration for the singleuser (notebook) pod, as
+          `KEY: value` pairs. Rendered into the `coffea-casa-htcondor-config`
+          ConfigMap and mounted as `/opt/condor/config.d/zz-coffea-casa-chart`,
+          so it overrides the pool settings the image generates from its
+          `CONDOR_HOST`, `COLLECTOR_NAME`, `UID_DOMAIN` and `SCHEDD_HOST`
+          environment variables.
   jupyterhub:
     nameOverride:
       type: [string, "null"]

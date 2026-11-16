@@ -64,6 +64,16 @@ daskConfig: {}
 
 htcondor:
   enabled: false
+  # HTCondor client config for the singleuser (notebook) pod, as KEY: value
+  # pairs rendered into /opt/condor/config.d/zz-coffea-casa-chart
+  # (templates/htcondor-config.yaml). It is read after the `schedd` file that
+  # prepare-env-cc.sh writes from the image's CONDOR_HOST, COLLECTOR_NAME,
+  # UID_DOMAIN and SCHEDD_HOST env vars, so keys here override them, e.g.
+  #   config:
+  #     CONDOR_HOST: red-condor.unl.edu
+  #     SCHEDD_HOST: t3.unl.edu
+  # Keep it empty here: values.yaml is also the base of production renders.
+  config: {}
 
 oidc_auth:
   enabled: false
@@ -240,17 +250,28 @@ jupyterhub:
           # && cp -f /etc/cmsaf-secrets/condor_token "$HOME/.condor/tokens.d/condor_token"']
     storage:
       type: none
-      # Dask config from .Values.daskConfig (templates/dask-config.yaml).
-      # A values file that sets its own storage.extraVolumes(Mounts) replaces
-      # these lists and must repeat both entries to keep the chart Dask config.
+      # Dask config from .Values.daskConfig (templates/dask-config.yaml) and
+      # HTCondor config from .Values.htcondor.config
+      # (templates/htcondor-config.yaml). A values file that sets its own
+      # storage.extraVolumes(Mounts) replaces these lists and must repeat
+      # these entries to keep the chart-provided config.
       extraVolumes:
         - name: coffea-casa-dask-config
           configMap:
             name: coffea-casa-dask-config
             optional: true
+        - name: coffea-casa-htcondor-config
+          configMap:
+            name: coffea-casa-htcondor-config
+            optional: true
       extraVolumeMounts:
         - name: coffea-casa-dask-config
           mountPath: /usr/local/etc/dask
+          readOnly: true
+        # subPath: /opt/condor/config.d must stay writable for prepare-env-cc.sh
+        - name: coffea-casa-htcondor-config
+          mountPath: /opt/condor/config.d/zz-coffea-casa-chart
+          subPath: zz-coffea-casa-chart
           readOnly: true
     defaultUrl: "/lab"
     profileList:
