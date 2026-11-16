@@ -12,8 +12,13 @@ metadataTest:
       value: cms-jovyan
     - key: DASK_ROOT_CONFIG
       value: /opt/dask
+    - key: VOMS_USERCONF
+      value: /etc/vomses
 
 fileExistenceTests:
+  - name: vomses file present (VOMS_USERCONF target)
+    path: /etc/vomses
+    shouldExist: true
   - name: start-singleuser.sh present and executable
     path: /usr/local/bin/start-singleuser.sh
     shouldExist: true

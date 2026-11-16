@@ -156,6 +156,12 @@ RUN cd /tmp && \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-6.so"
 
+# conda-forge voms bakes a NUL-padded sysconfdir into voms-proxy-init, so the
+# default system vomses path resolves to the /usr/local/etc directory and
+# voms-proxy-init segfaults parsing unrelated files there. Point it at a
+# real vomses file instead.
+ENV VOMS_USERCONF="/etc/vomses"
+
 # TODO: RETEST IF WE STILL NEED THIS 
 ENV LD_LIBRARY_PATH="${CONDA_DIR}/lib/:$LD_LIBRARY_PATH"
 ENV PATH="${CONDA_DIR}/bin/:$PATH"

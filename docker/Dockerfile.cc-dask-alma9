@@ -246,6 +246,12 @@ RUN cd /tmp && \
 ENV XRD_PLUGINCONFDIR="${CONDA_DIR}/etc/xrootd/client.plugins.d/"
 ENV XRD_PLUGIN="${CONDA_DIR}/lib/libXrdClXcachePlugin-6.so"
 
+# conda-forge voms bakes a NUL-padded sysconfdir into voms-proxy-init, so the
+# default system vomses path resolves to the /usr/local/etc directory and
+# voms-proxy-init segfaults parsing unrelated files there. Point it at a
+# real vomses file instead.
+ENV VOMS_USERCONF="/etc/vomses"
+
 # Coffea_casa - > jobqueue-coffea-casa.yaml
 COPY dask/jobqueue-coffea-casa.yaml ${DASK_ROOT_CONFIG}/
 
