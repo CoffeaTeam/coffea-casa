@@ -102,9 +102,6 @@ docker build --platform linux/amd64 \
 | `NB_UID` | User UID | `6440` |
 | `NB_GID` | User GID | `11265` |
 | `XCACHE_HOST` | XCache host for the custom XRootD plugin | `xcache.cmsaf-dev.flatiron.hollandhpc.org` |
-| `LABEXTENTION_CLUSTER` | Default cluster name (coffea_casa Dask Labextension) | `UNL HTCondor Cluster` |
-| `LABEXTENTION_FACTORY_CLASS` | Dask Labextension factory class | `CoffeaCasaCluster` |
-| `LABEXTENTION_FACTORY_MODULE` | Dask Labextension factory module | `coffea_casa` |
 | `CONDOR_HOST` | HTCondor collector host | `red-condor.unl.edu` |
 | `COLLECTOR_NAME` | HTCondor collector name | `Nebraska T2` |
 | `UID_DOMAIN` | HTCondor UID domain | `unl.edu` |

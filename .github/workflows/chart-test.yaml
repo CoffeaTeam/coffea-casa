@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        values_file: [values.yaml, values-prod.yaml, values-cmsaf-prod.yaml]
+        values_file: [values.yaml, values-dev.yaml, values-prod.yaml, values-cmsaf-prod.yaml]
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -121,6 +121,7 @@ jobs:
           kubectl create namespace coffea-casa-ci
           helm upgrade --install coffea-casa . \
             -f values.yaml \
+            -f values-dev.yaml \
             -f ../../ci/values-chart-ci.yaml \
             --set jupyterhub.hub.services.ci.apiToken="$HUB_API_TOKEN" \
             --namespace coffea-casa-ci \

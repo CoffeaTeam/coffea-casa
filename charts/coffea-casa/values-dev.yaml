@@ -1,0 +1,25 @@
+# Local development / CI overlay. Apply on top of the chart defaults:
+#   helm upgrade --install coffea-casa . -f values.yaml -f values-dev.yaml
+#
+# Holds dev-only settings that must NOT reach production. Helm always layers
+# the chart's own values.yaml under any -f file, so anything placed there also
+# ends up in values-prod.yaml / values-cmsaf-prod.yaml renders.
+
+# Dask config for the notebook pod (see daskConfig in values.yaml). No facility
+# certificates or HTCondor pool exist locally, so use a plain LocalCluster
+# without TLS.
+daskConfig:
+  labextension:
+    factory:
+      module: dask.distributed
+      class: LocalCluster
+    # Don't auto-start a cluster when the notebook server starts.
+    initial: []
+  distributed:
+    comm:
+      require-encryption: false
+      tls:
+        # distributed.Security builds a TLS context whenever ca-file and a
+        # cert are both set, regardless of require-encryption, so the image's
+        # /etc/cmsaf-secrets/ca.pem (not mounted locally) must be cleared too.
+        ca-file: ""

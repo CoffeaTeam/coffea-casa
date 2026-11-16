@@ -61,10 +61,11 @@ From the repository root:
    kubectl create namespace coffea-casa
    helm upgrade --install coffea-casa . \
      -f values.yaml \
+     -f values-dev.yaml \
      --namespace coffea-casa \
      --wait --timeout 10m
 
-``values.yaml`` is the chart's own local/dev profile: dummy authentication
+``values.yaml`` plus ``values-dev.yaml`` is the chart's local/dev profile: dummy authentication
 (any username/password is accepted), no TLS, a NodePort proxy, and a single
 test ``singleuser`` profile - it's meant for exactly this, not for a real
 deployment. ``values-prod.yaml`` and ``values-cmsaf-prod.yaml`` are real
@@ -88,6 +89,7 @@ site configs and need real secrets/hostnames you won't have locally.
 
       helm upgrade --install coffea-casa . \
         -f values.yaml \
+        -f values-dev.yaml \
         --set-string jupyterhub.hub.extraEnv.OPENSSL_armcap=0 \
         --namespace coffea-casa \
         --wait --timeout 10m
@@ -133,6 +135,7 @@ things worth knowing before you click "Start":
 
      helm upgrade --install coffea-casa . \
        -f values.yaml \
+       -f values-dev.yaml \
        -f ../../ci/values-chart-ci.yaml \
        --set-string jupyterhub.hub.extraEnv.OPENSSL_armcap=0 \
        --namespace coffea-casa \

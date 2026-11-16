@@ -1,0 +1,16 @@
+{{- /*
+  Dask configuration for the singleuser (notebook / Dask scheduler) pod,
+  rendered from .Values.daskConfig. values.yaml mounts it at
+  /usr/local/etc/dask (sys.prefix/etc/dask), which dask reads after the image
+  defaults in $DASK_ROOT_CONFIG (/opt/dask) and before ~/.config/dask and
+  DASK_* env vars. HTCondor workers do not see it.
+*/ -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: coffea-casa-dask-config
+  labels:
+    {{- include "jupyterhub.labels" . | nindent 4 }}
+data:
+  coffea-casa.yaml: |
+    {{- toYaml (.Values.daskConfig | default dict) | nindent 4 }}
