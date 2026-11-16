@@ -226,6 +226,17 @@ jupyterhub:
     nbUser: cms-jovyan
     # HTCondor UID_DOMAIN; HTCondor/ServiceX identities are <nbUser>@<uidDomain>.
     uidDomain: unl.edu
+    # Other site settings read by secret_creation_hook.py. Commented out =
+    # the hook's built-in (UNL) default, shown here.
+    # condorTrustDomain: unl.edu        # HTCondor token issuer (TRUST_DOMAIN)
+    # condorTokenKid: POOL              # HTCondor token signing key id
+    # xcacheLocation: T2_US_Nebraska    # XCache token (macaroon) location
+    # servicexIssuer: cmsaf-jh.unl.edu  # ServiceX token issuer
+    # externalDns: false                # add Dask hostnames for external-dns
+    # JupyterHub user -> CMS store/user name for the cms-store-user mount.
+    # Setting it replaces the hook's built-in map entirely.
+    # cmsUserMap:
+    #   someone@example.edu: someone
   singleuser:
     networkPolicy:
       enabled: false
