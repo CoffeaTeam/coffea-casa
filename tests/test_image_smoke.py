@@ -245,8 +245,8 @@ def test_file_browser_can_delete_non_empty_dirs():
 
 
 def test_worker_image_matches_flavour():
-    # prepare-env-cc.sh templates worker-image from WORKER_IMAGE and TAG; the
-    # tag must carry the flavour suffix so e.g. a -dak notebook spawns -dak
+    # Dockerfile.cc-dask-alma9 bakes worker-image from WORKER_IMAGE and TAG at
+    # build time; the tag must carry the flavour suffix so e.g. a -dak notebook spawns -dak
     # workers (mismatched packages make workers die at startup).
     expected = os.environ.get("CASA_WORKER_IMAGE")
     if not expected:
