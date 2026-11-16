@@ -332,6 +332,8 @@ Now, we will be able to access our data.
 
 In addition to handling authentication, XCache will cache files so that they are able to be pulled more quickly in subsequent runs of the analysis. It should be expected, then, that the first analysis run with a new coffea-casa file will run slower than ones which follow afterwards.
 
+The ``xcache`` hostname is resolved to the facility's XCache server through the ``XCACHE_HOST`` (and optional ``XCACHE_PORT``) environment variable. ``CoffeaCasaCluster`` passes the notebook's values of these variables to its HTCondor workers, so workers read through the same XCache as your notebook. Facility administrators set them in the Helm chart (``jupyterhub.singleuser.extraEnv``).
+
 ServiceX
 --------
 .. important::

@@ -145,7 +145,9 @@ def test_no_shipped_env_keeps_environment_yaml(tmp_path, monkeypatch):
 
 # ===== original env path on the workers =====
 
-def test_shipped_env_sets_worker_preload_and_original_prefix(tmp_path):
+def test_shipped_env_sets_worker_preload_and_original_prefix(tmp_path, monkeypatch):
+    for name in ("XCACHE_HOST", "XCACHE_PORT"):
+        monkeypatch.delenv(name, raising=False)
     shipped = ShippedEnv(tmp_path / "cc-env-foo-abc.tar.gz", prefix="/home/u/.conda/envs/foo")
     env = directives_for(shipped)["environment"]
     # One double-quoted, space-separated list (HTCondor's "new" syntax);
@@ -154,8 +156,45 @@ def test_shipped_env_sets_worker_preload_and_original_prefix(tmp_path):
                    'DASK_DISTRIBUTED__WORKER__PRELOAD=coffea_casa.ship_env_preload"')
 
 
-def test_no_shipped_env_sets_no_environment():
+def test_no_shipped_env_sets_no_environment(monkeypatch):
+    for name in ("XCACHE_HOST", "XCACHE_PORT"):
+        monkeypatch.delenv(name, raising=False)
     assert "environment" not in directives_for(None)
+
+
+# ===== site settings passed to the workers =====
+
+def test_xcache_host_is_passed_to_workers(monkeypatch):
+    monkeypatch.setenv("XCACHE_HOST", "xcache.example.org")
+    monkeypatch.setenv("XCACHE_PORT", "1094")
+    env = directives_for(None)["environment"]
+    assert env == '"XCACHE_HOST=xcache.example.org XCACHE_PORT=1094"'
+
+
+def test_empty_xcache_host_is_not_passed(monkeypatch):
+    # e.g. values-prod.yaml sets XCACHE_HOST to an empty value
+    monkeypatch.setenv("XCACHE_HOST", "")
+    monkeypatch.delenv("XCACHE_PORT", raising=False)
+    assert "environment" not in directives_for(None)
+
+
+def test_xcache_host_combined_with_shipped_env(tmp_path, monkeypatch):
+    monkeypatch.setenv("XCACHE_HOST", "xcache.example.org")
+    monkeypatch.delenv("XCACHE_PORT", raising=False)
+    shipped = ShippedEnv(tmp_path / "cc-env-foo-abc.tar.gz", prefix="/home/u/.conda/envs/foo")
+    env = directives_for(shipped)["environment"]
+    assert env == ('"XCACHE_HOST=xcache.example.org '
+                   'COFFEA_CASA_ENV_PREFIX=/home/u/.conda/envs/foo '
+                   'DASK_DISTRIBUTED__WORKER__PRELOAD=coffea_casa.ship_env_preload"')
+
+
+def test_user_environment_directive_overrides(monkeypatch):
+    # job_extra_directives from the user/config win over the defaults
+    monkeypatch.setenv("XCACHE_HOST", "xcache.example.org")
+    with patch("coffea_casa.coffea_casa.prepare_shipped_env", return_value=None):
+        job_kwargs = CoffeaCasaCluster._modify_job_kwargs(
+            {"job_extra_directives": {"environment": '"FOO=bar"'}}, force_tcp=True)
+    assert job_kwargs["job_extra_directives"]["environment"] == '"FOO=bar"'
 
 
 def test_prepare_shipped_env_records_the_notebook_prefix(tmp_path, monkeypatch):
