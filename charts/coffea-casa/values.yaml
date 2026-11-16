@@ -207,6 +207,12 @@ jupyterhub:
     #  disableHttpPort: false
     #  extraPorts: []
     #  loadBalancerIP:
+  custom:
+    # Unix user in the singleuser image (its NB_USER build arg). Used by
+    # files/hub-extra/secret_creation_hook.py for token identities.
+    nbUser: cms-jovyan
+    # HTCondor UID_DOMAIN; HTCondor/ServiceX identities are <nbUser>@<uidDomain>.
+    uidDomain: unl.edu
   singleuser:
     networkPolicy:
       enabled: false
@@ -217,8 +223,8 @@ jupyterhub:
     lifecycleHooks:
       postStart:
         exec:
-          command: ['bash', '-c', 'mkdir -p /home/cms-jovyan/.condor/tokens.d/ ']
-          # && cp -f /etc/cmsaf-secrets/condor_token /home/cms-jovyan/.condor/tokens.d/condor_token ']
+          command: ['bash', '-c', 'mkdir -p "$HOME/.condor/tokens.d/"']
+          # && cp -f /etc/cmsaf-secrets/condor_token "$HOME/.condor/tokens.d/condor_token"']
     storage:
       type: none
     defaultUrl: "/lab"

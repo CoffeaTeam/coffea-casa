@@ -15,24 +15,30 @@ def strtobool(value):
         return False
     raise ValueError(f"invalid truth value {value!r}")
 
+# Unix user inside the singleuser image (NB_USER build arg) and the domain
+# used to build HTCondor/ServiceX identities (must match HTCondor UID_DOMAIN).
+# Set via `jupyterhub.custom.nbUser` / `jupyterhub.custom.uidDomain`.
+nb_user = get_config('custom.nbUser', 'cms-jovyan')
+uid_domain = get_config('custom.uidDomain', 'unl.edu')
+
 # Various secret management configurations
 c.KubeSpawner.namespace = os.environ.get('POD_NAMESPACE', 'default')
 K8S_NAMESPACE = os.environ.get('POD_NAMESPACE', 'default')
 condor_secret_name = "condor-token"
 #condor_user = 'submituser@submit.condorsub.cmsaf-dev.svc.cluster.local'
-condor_user = 'cms-jovyan@unl.edu'
+condor_user = '%s@%s' % (nb_user, uid_domain)
 #issuer = socket.gethostbyname('condor.cmsaf-dev.svc.cluster.local')
 issuer = 'unl.edu' # Matching HTCondor TRUST_DOMAIN
 kid = 'POOL'
 
 xcache_secret_name = 'xcache-token'
 xcache_location_name = "T2_US_Nebraska"
-xcache_user_name = "cms-jovyan"
+xcache_user_name = nb_user
 
 servicex_secret_name = 'servicex-token'
-servicex_user = 'cms-jovyan@unl.edu'
+servicex_user = '%s@%s' % (nb_user, uid_domain)
 servicex_issuer = 'cmsaf-jh.unl.edu'
-servicex_user_name = "cms-jovyan"
+servicex_user_name = nb_user
 
 external_dns = False
 dask_base_domain = os.environ.get('DASK_BASE_DOMAIN', 'coffea.example.edu')
