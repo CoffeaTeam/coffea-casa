@@ -66,15 +66,25 @@ echo "==> Probing the user server through the proxy"
 curl -fsS "${AUTH[@]}" "http://localhost:8080/user/$USER_NAME/api/status" \
   | python3 -m json.tool
 
-# Regression test for the dask-labextension LocalCluster crash: prepare-env-cc.sh
-# used to sed-replace "require-encryption: True" -> "False" in dask_tls.yaml to
-# disable TLS for LABEXTENTION_FACTORY_CLASS=LocalCluster, but the template uses
-# lowercase "true" so the replace silently never matched, and ca-file was never
-# cleared either - LocalCluster() failed with "Cluster failed to start: [Errno 2]
-# No such file or directory" trying to load the unmounted facility CA cert. This
-# only reproduces inside the actual spawned pod (real prepare-env-cc.sh run,
-# real generated dask_tls.yaml), not via helm template/lint.
+# Regression test for the dask-labextension LocalCluster crash: without facility
+# certs mounted, the image's dask_tls.yaml (ca-file /etc/cmsaf-secrets/ca.pem)
+# makes LocalCluster() fail with "Cluster failed to start: [Errno 2] No such
+# file or directory". values-dev.yaml clears it via the chart's daskConfig,
+# mounted at /usr/local/etc/dask. This only reproduces inside the actual
+# spawned pod, not via helm template/lint.
 POD=$(kubectl -n "$NAMESPACE" get pod -l component=singleuser-server -o jsonpath='{.items[0].metadata.name}')
+echo "==> Verifying the chart daskConfig is mounted and applied (pod: $POD)"
+if ! kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- python3 -c "
+import dask.config
+cls = dask.config.get('labextension.factory.class')
+assert cls == 'LocalCluster', cls
+print('labextension.factory.class =', cls)
+"; then
+  echo "!! chart daskConfig (values-dev.yaml) not applied in the singleuser pod"
+  kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- cat /usr/local/etc/dask/coffea-casa.yaml || true
+  exit 1
+fi
+
 echo "==> Verifying the dask-labextension LocalCluster factory starts (pod: $POD)"
 if ! kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- python3 -c "
 from dask.distributed import LocalCluster
@@ -84,6 +94,7 @@ c.close()
 "; then
   echo "!! LocalCluster failed to start inside the spawned singleuser pod"
   kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- cat /opt/dask/dask_tls.yaml || true
+  kubectl -n "$NAMESPACE" exec "$POD" -c notebook -- cat /usr/local/etc/dask/coffea-casa.yaml || true
   exit 1
 fi
 

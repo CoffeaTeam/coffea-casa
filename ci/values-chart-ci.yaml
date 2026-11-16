@@ -10,7 +10,8 @@
 # token is generated per run and injected with
 # --set jupyterhub.hub.services.ci.apiToken=... (never commit one).
 #
-# Apply on top of values.yaml: -f values.yaml -f ../../ci/values-chart-ci.yaml
+# Apply on top of the dev values:
+#   -f values.yaml -f values-dev.yaml -f ../../ci/values-chart-ci.yaml
 jupyterhub:
   hub:
     services:

@@ -12,7 +12,9 @@ version pinned in `Chart.yaml`). Most configuration lives under the
 `templates/` and extra hub config in `files/hub-extra/`.
 
 - `version` in `Chart.yaml` is a placeholder set by chartpress – don't edit it.
-- `values.yaml` – dev/CI defaults.
+- `values.yaml` – chart defaults. Helm layers it under every values file,
+  including production, so keep dev-only settings out of it.
+- `values-dev.yaml` – local dev / CI overlay (LocalCluster, Dask TLS off).
 - `values-prod.yaml`, `values-cmsaf-prod.yaml` – **production**; only change
   when explicitly asked.
 - Values files are deployed **one at a time**, never merged together. A change
@@ -24,7 +26,7 @@ Run from `charts/coffea-casa/` (same as `chart-test.yaml`):
 
 ```sh
 helm dependency update
-for f in values.yaml values-prod.yaml values-cmsaf-prod.yaml; do
+for f in values.yaml values-dev.yaml values-prod.yaml values-cmsaf-prod.yaml; do
   helm lint . -f "$f" && helm template coffea-casa . -f "$f" > /dev/null
 done
 ```
@@ -39,7 +41,7 @@ docker build -f docker/Dockerfile.cc-dask-alma9 \
   -t coffea-casa/cc-dask-alma9:chart-ci docker/          # from repo root
 kind load docker-image coffea-casa/cc-dask-alma9:chart-ci --name cc-chart-test
 kubectl create namespace coffea-casa-ci
-helm upgrade --install coffea-casa . -f values.yaml -f ../../ci/values-chart-ci.yaml \
+helm upgrade --install coffea-casa . -f values.yaml -f values-dev.yaml -f ../../ci/values-chart-ci.yaml \
   -n coffea-casa-ci --wait --timeout 10m
 ../../ci/chart-spawn-test.sh coffea-casa-ci             # spawns a real user server
 ```
