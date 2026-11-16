@@ -138,6 +138,15 @@ things worth knowing before you click "Start":
        --namespace coffea-casa \
        --wait --timeout 10m
 
+* **Images built with a different user.** If you build the image with
+  ``--build-arg NB_USER=<name>`` (default ``cms-jovyan``), set
+  ``jupyterhub.custom.nbUser`` to the same name. The hub uses it to issue
+  the HTCondor, XCache and ServiceX tokens, and HTCondor/ServiceX
+  identities are ``<nbUser>@<uidDomain>``, so also set
+  ``jupyterhub.custom.uidDomain`` (default ``unl.edu``) to your HTCondor
+  ``UID_DOMAIN``. Also update any ``/home/cms-jovyan`` paths in your own
+  values file (e.g. ``singleuser.storage.homeMountPath``).
+
 5. Cleaning up
 ---------------
 
