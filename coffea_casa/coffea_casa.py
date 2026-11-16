@@ -38,6 +38,11 @@ else:
 # Job attribute listing the ship_paths names; the worker entrypoint puts the
 # job directory on PYTHONPATH when it is set (see worker-args.sh)
 SHIPPED_PATHS_ATTR = "CoffeaCasaShippedPaths"
+# Site settings passed from the notebook's environment to the HTCondor
+# workers. The worker image only has build-time defaults for these, while the
+# notebook pod gets the deployment's values from the Helm chart.
+# (BEARER_TOKEN_FILE is not passed: the worker's token path differs.)
+WORKER_ENV_PASSTHROUGH = ("XCACHE_HOST", "XCACHE_PORT")
 # Job-directory names the worker entrypoint gives a meaning of their own
 RESERVED_SHIP_NAMES = {"environment.yaml", "environment.yml", "requirements.txt",
                        "condor_token", WHEELS_DIR_NAME}
@@ -428,6 +433,14 @@ class CoffeaCasaCluster(HTCondorCluster):
         proxy = x509_user_proxy_path()
         use_proxy = proxy is not None
 
+        # Environment for the worker container: the site settings above plus,
+        # with a shipped env, its original path so paths into it resolved in
+        # the notebook work on the workers too.
+        worker_env = worker_passthrough_env()
+        if shipped_env and shipped_env.prefix:
+            worker_env[PREFIX_ENV_VAR] = str(shipped_env.prefix)
+            worker_env["DASK_DISTRIBUTED__WORKER__PRELOAD"] = "coffea_casa.ship_env_preload"
+
         # Job extra settings (HTCondor ClassAd)
         job_config["job_extra_directives"] = merge_dicts(
             {
@@ -450,14 +463,10 @@ class CoffeaCasaCluster(HTCondorCluster):
                 "+CoffeaCasaClusterId": f'"{uuid.uuid4().hex}"',
                 **({f"+{ENV_TARBALL_ATTR}": f'"{shipped_env.tarball.name}"'}
                    if shipped_env else {}),
-                # Workers link the env's notebook path to where it's unpacked,
-                # so paths into it resolved in the notebook work there too.
                 # The outer double quotes select HTCondor's space-separated
                 # environment syntax; quote_environment() doesn't add them.
-                **({"environment": '"' + quote_environment({
-                    PREFIX_ENV_VAR: str(shipped_env.prefix),
-                    "DASK_DISTRIBUTED__WORKER__PRELOAD": "coffea_casa.ship_env_preload",
-                }) + '"'} if shipped_env and shipped_env.prefix else {}),
+                **({"environment": '"' + quote_environment(worker_env) + '"'}
+                   if worker_env else {}),
                 **({f"+{SHIPPED_PATHS_ATTR}":
                     '"' + ",".join(p.name for p in shipped_paths) + '"'}
                    if shipped_paths else {}),
@@ -505,6 +514,12 @@ class CoffeaCasaCluster(HTCondorCluster):
             (p for p in Path(log_dir).glob("worker-*") if p.is_file()),
             key=lambda p: p.stat().st_mtime, reverse=True,
         )
+
+
+def worker_passthrough_env():
+    """Return the WORKER_ENV_PASSTHROUGH variables set (non-empty) here"""
+    return {name: os.environ[name] for name in WORKER_ENV_PASSTHROUGH
+            if os.environ.get(name)}
 
 
 def security_obj():
