@@ -34,6 +34,16 @@ condor_user = '%s@%s' % (nb_user, uid_domain)
 issuer = get_config('custom.condorTrustDomain', 'unl.edu')
 # Signing key id of the HTCondor token ('POOL' = the pool password secret).
 kid = get_config('custom.condorTokenKid', 'POOL')
+# WIP (#224): give each JupyterHub user their own HTCondor identity,
+# <escaped user>@<condorUserDomain>, instead of the shared condor_user. Unset
+# = shared identity (current behaviour). Needs USER_IS_THE_NEW_OWNER = true on
+# the schedd, and the domain must differ from UID_DOMAIN so HTCondor doesn't
+# try to map the identity to a local Unix account: jobs then run with Owner
+# "nobody" and only their User can condor_rm/condor_hold them.
+condor_user_domain = get_config('custom.condorUserDomain', None)
+if condor_user_domain is not None and condor_user_domain == uid_domain:
+    raise ValueError(
+        'custom.condorUserDomain must differ from custom.uidDomain (%s)' % uid_domain)
 
 xcache_secret_name = 'xcache-token'
 # Macaroon location of the XCache token.
@@ -80,6 +90,12 @@ def escape_username(input_name):
         else:
             result += '-%0x' % ord(character)
     return result
+
+def condor_identity(username):
+    '''HTCondor identity (token subject) for a JupyterHub user'''
+    if condor_user_domain is None:
+        return condor_user
+    return '%s@%s' % (escape_username(username), condor_user_domain)
 
 def username_to_secretname(username):
     euser = escape_username(username)
@@ -139,7 +155,9 @@ async def pre_spawn_hook(spawner):
 
     # Optional fields
     if condor_settings is True:
-        secret.string_data['condor_token'] = await generate_condor(api, K8S_NAMESPACE, condor_secret_name, issuer, condor_user, kid)
+        secret.string_data['condor_token'] = await generate_condor(
+            api, K8S_NAMESPACE, condor_secret_name, issuer,
+            condor_identity(spawner.user.name), kid)
     if servicex_settings is True:
         secret.string_data['.servicex'] = await generate_servicex(api, K8S_NAMESPACE, servicex_secret_name, servicex_issuer, servicex_user)
 

@@ -243,6 +243,10 @@ jupyterhub:
     # xcacheLocation: T2_US_Nebraska    # XCache token (macaroon) location
     # servicexIssuer: cmsaf-jh.unl.edu  # ServiceX token issuer
     # externalDns: false                # add Dask hostnames for external-dns
+    # WIP (#224): per-user HTCondor identity <escaped user>@<condorUserDomain>
+    # instead of <nbUser>@<uidDomain> for everyone. Must differ from
+    # uidDomain; the schedd needs USER_IS_THE_NEW_OWNER = true.
+    # condorUserDomain: users.coffea.casa
     # JupyterHub user -> CMS store/user name for the cms-store-user mount.
     # Setting it replaces the hook's built-in map entirely.
     # cmsUserMap:
