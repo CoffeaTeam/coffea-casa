@@ -133,6 +133,24 @@ def merge_dicts(*dict_args):
     return result
 
 
+def _keep_files_encrypted(directives, files):
+    """Make sure `encrypt_input_files` still lists every file in `files`.
+
+    job_extra_directives from dask config (the image, the chart, a user's
+    ~/.config/dask) or from the caller are merged over the computed ones, so an
+    override such as `encrypt_input_files: ""` would ship tokens and
+    certificates to the workers unencrypted. Keep any extra files the override
+    adds, but never drop ours.
+    """
+    configured = [f.strip() for f in str(directives.get("encrypt_input_files") or "").split(",")
+                  if f.strip()]
+    wanted = [str(f) for f in files]
+    merged = wanted + [f for f in configured if f not in wanted]
+    if merged:
+        directives["encrypt_input_files"] = ", ".join(merged)
+    return directives
+
+
 class CoffeaCasaJob(HTCondorJob):
     submit_command = "condor_submit -spool"
     config_name = "coffea-casa"
@@ -476,6 +494,7 @@ class CoffeaCasaCluster(HTCondorCluster):
                 dask.config.get(f"jobqueue.{cls.config_name}.job_extra_directives", {}),
             ),
         )
+        _keep_files_encrypted(job_config["job_extra_directives"], input_files)
 
         return job_config
 

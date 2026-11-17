@@ -592,3 +592,33 @@ def test_accounting_group_overridable_via_config(mock_environment, tmp_path):
         "jobqueue.coffea-casa.job-extra-directives.+AccountingGroup": '"group_atlas.af"',
     })
     assert directives["+AccountingGroup"] == '"group_atlas.af"'
+
+
+def test_config_cannot_blank_encrypt_input_files(mock_environment, tmp_path):
+    """A stale config (e.g. an old ~/.config/dask copy) must not turn encryption off"""
+    token, directives = _directives_with_token(tmp_path, {
+        "jobqueue.coffea-casa.job-extra-directives.encrypt_input_files": "",
+    })
+    assert str(token) in directives["encrypt_input_files"]
+
+
+def test_config_encrypt_input_files_adds_to_ours(mock_environment, tmp_path):
+    """A configured encrypt_input_files keeps its own files on top of ours"""
+    token, directives = _directives_with_token(tmp_path, {
+        "jobqueue.coffea-casa.job-extra-directives.encrypt_input_files": "/etc/site/extra.pem",
+    })
+    encrypted = [f.strip() for f in directives["encrypt_input_files"].split(",")]
+    assert str(token) in encrypted
+    assert "/etc/site/extra.pem" in encrypted
+    assert len(encrypted) == len(set(encrypted))
+
+
+def test_job_kwargs_cannot_blank_encrypt_input_files(mock_environment, tmp_path):
+    """job_extra_directives passed by the caller can't drop encryption either"""
+    token = tmp_path / "access_token"
+    token.write_text("t")
+    with patch("coffea_casa.coffea_casa.prepare_shipped_env", return_value=None), \
+         patch("coffea_casa.coffea_casa.bearer_token_path", return_value=str(token)):
+        job_kwargs = CoffeaCasaCluster._modify_job_kwargs(
+            {"job_extra_directives": {"encrypt_input_files": ""}}, force_tcp=True)
+    assert str(token) in job_kwargs["job_extra_directives"]["encrypt_input_files"]
