@@ -218,6 +218,39 @@ write_ad() {
     [[ "$output" == *"--listen-address tls://0.0.0.0:8787"* ]]
 }
 
+@test "build_worker_command passes the TLS files for a tls:// scheduler" {
+    write_ad \
+        'nanny_ContainerPort = 8789' \
+        'dask_ContainerPort = 8787' \
+        'StartdIpAddr = "<10.0.0.7:9618>"' \
+        'DaskSchedulerAddress = "tls://1.2.3.4:8786"'
+
+    PATH_CA_FILE=/tmp/ca.pem FILE_CERT=/tmp/host.pem FILE_KEY=/tmp/key.pem \
+        run cc_build_worker_command "$AD"
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"--tls-ca-file /tmp/ca.pem --tls-cert /tmp/host.pem --tls-key /tmp/key.pem "* ]]
+    [[ "$output" == *"--protocol tls "* ]]
+}
+
+@test "build_worker_command speaks tcp to a tcp:// scheduler (force_tcp)" {
+    # CoffeaCasaCluster(force_tcp=True) ships no certificates: empty --tls-*
+    # values would swallow the next flag and dask_worker would exit 2.
+    write_ad \
+        'nanny_ContainerPort = 8789' \
+        'dask_ContainerPort = 8787' \
+        'StartdIpAddr = "<10.0.0.7:9618>"' \
+        'DaskSchedulerAddress = "tcp://1.2.3.4:8786"'
+
+    run cc_build_worker_command "$AD"
+
+    [ "$status" -eq 0 ]
+    [[ "$output" != *"--tls-"* ]]
+    [[ "$output" == *"--protocol tcp "* ]]
+    [[ "$output" == *"--listen-address tcp://0.0.0.0:8787"* ]]
+    [[ "$output" == *"--contact-address tcp://10.0.0.7:8787"* ]]
+}
+
 @test "build_worker_command prefers StartdIpAddr for the contact host" {
     write_ad \
         'dask_HostPort = 8786' \

@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""
+Real end-to-end test of CoffeaCasaCluster against a live HTCondor pool.
+
+Run inside a container that has network access to an htcondor/mini pool
+(collector+negotiator+schedd+startd in one) with Docker-universe enabled,
+and with the coffea-casa Python package + its deps installed. Exercises the
+real submission path: condor_submit, matchmaking, `docker create`/`docker
+start` of the actual cc-analysis-alma9 worker image, that image's own
+ENTRYPOINT (prepare-env.sh -> worker-args.sh building the dask-worker
+command line from the job's real HTCondor ClassAd), and a real dask
+computation over the wire - not a mock.
+
+Env vars:
+  WORKER_IMAGE  - docker image tag for the dask worker (required)
+"""
+import os
+import sys
+import time
+
+import coffea_casa.config  # noqa: E402,F401 - registers jobqueue.coffea-casa defaults
+
+from coffea_casa import CoffeaCasaCluster
+from distributed import Client
+
+
+def main():
+    worker_image = os.environ["WORKER_IMAGE"]
+
+    cluster = CoffeaCasaCluster(
+        cores=1,
+        memory="512MiB",
+        disk="512MiB",
+        force_tcp=True,
+        worker_image=worker_image,
+        # Don't set GITHUB_ACTIONS=true in the worker: prepare-env-cc-analysis.sh
+        # then skips waiting for HTCondor's forwarded dask_HostPort and the
+        # worker advertises its container port (8786) on the host, which is
+        # the scheduler's own port, so results can't be gathered. Like
+        # production, let it wait for the real mapped port.
+    )
+
+    print("=== job script CoffeaCasaCluster submits ===", flush=True)
+    print(cluster.job_script(), flush=True)
+
+    cluster.scale(1)
+    client = Client(cluster)
+
+    for i in range(40):
+        n_workers = len(client.scheduler_info().get("workers", {}))
+        print(f"attempt {i}: workers={n_workers}", flush=True)
+        if n_workers >= 1:
+            break
+        time.sleep(3)
+    else:
+        print("FAILED: no HTCondor-submitted worker connected within timeout", flush=True)
+        # Workers that exited at startup leave their output in the schedd
+        # spool; bring it back and show it.
+        for path in cluster.fetch_worker_logs():
+            print(f"=== {path} ===\n{path.read_text(errors='replace')}", flush=True)
+        sys.exit(1)
+
+    result = client.submit(lambda x: x + 1, 41).result(timeout=60)
+    assert result == 42, f"expected 42, got {result}"
+    print("SUCCESS: real HTCondor docker-universe worker computed a task", flush=True)
+
+
+if __name__ == "__main__":
+    main()
