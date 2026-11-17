@@ -117,21 +117,27 @@ cc_build_worker_command() {
     # No forwarded host port -> the container port is what's reachable.
     _is_unset "$port"  && port=$containerp
 
+    # Speak the scheduler's protocol: CoffeaCasaCluster(force_tcp=True) sends
+    # a tcp:// address and no certificates, and an empty --tls-ca-file value
+    # would swallow the next flag (dask_worker then exits 2 on bad usage).
+    local proto=tls tls_args=""
+    case "$sched" in
+        tcp://*) proto=tcp ;;
+        *) tls_args="--tls-ca-file ${PATH_CA_FILE:-} --tls-cert ${FILE_CERT:-} --tls-key ${FILE_KEY:-} " ;;
+    esac
+
     # No --nanny-contact-address: upstream distributed has no such option
     # (dask_worker exits 2), it only existed in a patched build.
     # CC_WORKER_PYTHON is set by cc_setup_shipped_env when an env was shipped.
     echo "${CC_WORKER_PYTHON:-${CONDA_DIR:-/usr/local}/bin/python} -m distributed.cli.dask_worker $sched \
 --name $name \
---tls-ca-file ${PATH_CA_FILE:-} \
---tls-cert ${FILE_CERT:-} \
---tls-key ${FILE_KEY:-} \
---nthreads $cpus \
+${tls_args}--nthreads $cpus \
 --memory-limit $mem \
 --nanny \
 --nanny-port $nannyc \
 --death-timeout 60 \
---protocol tls \
+--protocol $proto \
 --lifetime 7200 \
---listen-address tls://0.0.0.0:$containerp \
---contact-address tls://$host:$port"
+--listen-address $proto://0.0.0.0:$containerp \
+--contact-address $proto://$host:$port"
 }

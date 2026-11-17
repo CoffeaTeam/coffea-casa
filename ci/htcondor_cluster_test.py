@@ -56,6 +56,10 @@ def main():
         time.sleep(3)
     else:
         print("FAILED: no HTCondor-submitted worker connected within timeout", flush=True)
+        # Workers that exited at startup leave their output in the schedd
+        # spool; bring it back and show it.
+        for path in cluster.fetch_worker_logs():
+            print(f"=== {path} ===\n{path.read_text(errors='replace')}", flush=True)
         sys.exit(1)
 
     result = client.submit(lambda x: x + 1, 41).result(timeout=60)
