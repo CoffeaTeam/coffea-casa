@@ -33,13 +33,11 @@ def main():
         disk="512MiB",
         force_tcp=True,
         worker_image=worker_image,
-        # prepare-env-cc-analysis.sh polls the job ClassAd for up to 30s
-        # waiting for HTCondor to resolve dask_HostPort/nanny_HostPort (the
-        # container's mapped host ports), and explicitly skips that wait
-        # when GITHUB_ACTIONS=true - the script's own escape hatch for
-        # exactly this kind of ephemeral/CI pool. Propagate it into the
-        # worker container so this test isn't paying that wait every run.
-        job_extra_directives={"environment": "GITHUB_ACTIONS=true"},
+        # Don't set GITHUB_ACTIONS=true in the worker: prepare-env-cc-analysis.sh
+        # then skips waiting for HTCondor's forwarded dask_HostPort and the
+        # worker advertises its container port (8786) on the host, which is
+        # the scheduler's own port, so results can't be gathered. Like
+        # production, let it wait for the real mapped port.
     )
 
     print("=== job script CoffeaCasaCluster submits ===", flush=True)
