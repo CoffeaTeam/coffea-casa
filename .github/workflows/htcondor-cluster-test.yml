@@ -90,9 +90,31 @@ jobs:
       - name: Install and start the HTCondor pool (native, Docker-universe enabled)
         run: ./ci/htcondor-pool-setup.sh
 
+      # The client (scheduler) must match the worker image, as the notebook
+      # image does in a real deployment: tasks travel as pickled bytecode, and
+      # a newer runner Python/dask than the worker's kills the worker
+      # (KilledWorker). Use the worker's Python version and pin the packages
+      # that cross the wire to the versions inside the image.
+      - name: Set up Python (matches the worker image)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install coffea_casa and its deps
         run: |
-          python3 -m pip install --quiet "dask[distributed]" dask_jobqueue
+          PINS=$(docker run --rm -i --entrypoint python ${{ env.WORKER_IMAGE }} - <<'PY'
+          from importlib.metadata import PackageNotFoundError, version
+          pins = []
+          for p in ("dask", "distributed", "cloudpickle", "msgpack", "tornado"):
+              try:
+                  pins.append(f"{p}=={version(p)}")
+              except PackageNotFoundError:
+                  pins.append(p)
+          print(" ".join(pins))
+          PY
+          )
+          echo "Pinning to the worker image: $PINS"
+          python3 -m pip install --quiet $PINS dask_jobqueue
 
       - name: Run the real CoffeaCasaCluster + HTCondor test
         run: |
