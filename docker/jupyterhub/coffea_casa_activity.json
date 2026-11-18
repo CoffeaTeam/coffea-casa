@@ -1,0 +1,7 @@
+{
+  "ServerApp": {
+    "jpserver_extensions": {
+      "coffea_casa_activity": true
+    }
+  }
+}
