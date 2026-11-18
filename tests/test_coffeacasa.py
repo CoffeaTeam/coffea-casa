@@ -597,3 +597,26 @@ def test_accounting_group_overridable_via_config(mock_environment, tmp_path):
         "jobqueue.coffea-casa.job-extra-directives.+AccountingGroup": '"group_atlas.af"',
     })
     assert directives["+AccountingGroup"] == '"group_atlas.af"'
+
+
+def test_jobs_are_tagged_with_jupyterhub_user(mock_environment, tmp_path, monkeypatch):
+    """#150: HTCondor jobs say which JupyterHub user they belong to"""
+    monkeypatch.setenv("JUPYTERHUB_USER", "jane.doe@cern.ch")
+    _, directives = _directives_with_token(tmp_path)
+    assert directives["+CoffeaCasaUser"] == '"jane.doe@cern.ch"'
+    assert directives["batch_name"] == "coffea-casa-jane.doe@cern.ch"
+
+
+def test_job_user_tag_is_sanitized(mock_environment, tmp_path, monkeypatch):
+    """Quotes, $ and spaces can't leak into the submit file"""
+    monkeypatch.setenv("JUPYTERHUB_USER", 'a"b $(x) c')
+    _, directives = _directives_with_token(tmp_path)
+    assert directives["+CoffeaCasaUser"] == '"a_b___x__c"'
+    assert directives["batch_name"] == "coffea-casa-a_b___x__c"
+
+
+def test_no_job_user_tag_outside_jupyterhub(mock_environment, tmp_path, monkeypatch):
+    monkeypatch.delenv("JUPYTERHUB_USER", raising=False)
+    _, directives = _directives_with_token(tmp_path)
+    assert "+CoffeaCasaUser" not in directives
+    assert "batch_name" not in directives

@@ -167,6 +167,8 @@ As soon as you start your computations, you will notice that available resources
    :width: 65%
    :align: center
 
+Each Dask worker runs as an HTCondor job. All users submit under the same HTCondor owner, so ``CoffeaCasaCluster`` labels every job with your JupyterHub user name: ``condor_q`` shows it as the batch name ``coffea-casa-<user>``, and ``condor_q -constraint 'CoffeaCasaUser == "<user>"'`` lists only your jobs.
+
 Cluster Hardware Specifications
 ````````````````````````````````
 
