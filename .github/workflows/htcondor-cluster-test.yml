@@ -41,7 +41,7 @@ on:
 env:
   # Tracks docker-build-test-publish.yaml's canonical (noml) row. This job
   # only needs *a* worker image, not every flavour.
-  BASE_IMAGE: coffeateam/coffea-almalinux9-noml:2026.9.0-py3.12
+  BASE_IMAGE: coffeateam/coffea-almalinux9-noml:2026.11.0-py3.12
   WORKER_IMAGE: coffea-casa/cc-analysis-alma9:htcondor-ci
 
 jobs:
