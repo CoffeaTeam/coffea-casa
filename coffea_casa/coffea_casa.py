@@ -151,6 +151,21 @@ def _keep_files_encrypted(directives, files):
     return directives
 
 
+def _job_user_directives():
+    """HTCondor directives naming the JupyterHub user, if we know who it is"""
+    user = os.environ.get("JUPYTERHUB_USER")
+    if not user:
+        return {}
+    # These end up in the submit file, where quotes, "$" (macro expansion) and
+    # whitespace would break or alter the job; JupyterHub names here are
+    # e-mail addresses, so keep their characters and replace anything else.
+    safe = "".join(c if c.isalnum() or c in "._@+-" else "_" for c in user)
+    return {
+        "+CoffeaCasaUser": f'"{safe}"',
+        "batch_name": f"coffea-casa-{safe}",
+    }
+
+
 class CoffeaCasaJob(HTCondorJob):
     submit_command = "condor_submit -spool"
     config_name = "coffea-casa"
@@ -487,6 +502,12 @@ class CoffeaCasaCluster(HTCondorCluster):
                 # Tags this cluster's jobs; workers of all users may share one
                 # schedd account, so fetch_worker_logs() selects on this.
                 "+CoffeaCasaClusterId": f'"{uuid.uuid4().hex}"',
+                # Which JupyterHub user owns this worker (#150): every user
+                # submits as the same HTCondor Owner (NB_USER), so condor_q
+                # can't tell them apart otherwise. batch_name shows up in
+                # condor_q's default (batch) view; select with
+                # `condor_q -constraint 'CoffeaCasaUser == "<user>"'`.
+                **_job_user_directives(),
                 **({f"+{ENV_TARBALL_ATTR}": f'"{shipped_env.tarball.name}"'}
                    if shipped_env else {}),
                 # The outer double quotes select HTCondor's space-separated
