@@ -311,6 +311,15 @@ RUN rm -rf /tmp/* \
 COPY prepare-env/prepare-env-cc.sh /usr/local/bin/prepare-env.sh
 RUN chmod ugo+x /usr/local/bin/prepare-env.sh
 
+# dasgoclient (#96): conda-forge's binary goes behind a wrapper that prefers a
+# user's X.509 proxy over the XCache BEARER_TOKEN_FILE and trusts the IGTF CAs
+# (cmsweb.cern.ch is signed by the CERN Grid CA).
+COPY prepare-env/dasgoclient.sh /tmp/dasgoclient.sh
+RUN mkdir -p /usr/local/libexec && \
+    mv "${CONDA_DIR}/bin/dasgoclient" /usr/local/libexec/dasgoclient && \
+    install -m 0755 /tmp/dasgoclient.sh "${CONDA_DIR}/bin/dasgoclient" && \
+    rm /tmp/dasgoclient.sh
+
 # Periscope
 COPY prepare-env/sitecustomize.py ${CONDA_DIR}/lib/python${PYVER}/site-packages/sitecustomize.py
 

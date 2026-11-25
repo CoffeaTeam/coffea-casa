@@ -347,6 +347,20 @@ In addition to handling authentication, XCache will cache files so that they are
 
 The ``xcache`` hostname is resolved to the facility's XCache server through the ``XCACHE_HOST`` (and optional ``XCACHE_PORT``) environment variable. ``CoffeaCasaCluster`` passes the notebook's values of these variables to its HTCondor workers, so workers read through the same XCache as your notebook. Facility administrators set them in the Helm chart (``jupyterhub.singleuser.extraEnv``).
 
+Finding Datasets with DAS
+-------------------------
+.. important::
+   This section applies only to the CMS Coffea-Casa instance.
+
+The notebook image includes ``dasgoclient``, the command-line client for the CMS Data Aggregation System (DAS). Run it from a terminal, or from a notebook with ``!``:
+
+.. code-block:: bash
+
+    voms-proxy-init -voms cms -rfc
+    dasgoclient -query="file dataset=/DoubleMuon/Run2018A-02Apr2020-v1/NANOAOD"
+
+DAS needs a VOMS proxy (``X509_USER_PROXY``, or the default ``/tmp/x509up_u<uid>`` that ``voms-proxy-init`` writes). The facility's XCache token is not accepted by DAS, so ``dasgoclient`` ignores ``BEARER_TOKEN_FILE``; if you have a CMS token that DAS accepts, pass it with ``-token <file>``. The returned ``/store/...`` paths can be read through XCache as described above.
+
 ServiceX
 --------
 .. important::
