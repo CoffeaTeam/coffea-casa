@@ -246,6 +246,19 @@ To delete a file or folder, including a cloned repository, right-click it in the
     rm -rf ~/my-old-repo
 
 
+Long-Running Work and Idle Servers
+----------------------------------
+To free resources for other users, servers that show no activity for a while are stopped automatically (after one hour by default; each facility can set its own limit). Stopping a server ends everything running in it, but files in your home directory are kept.
+
+Work that is still running counts as activity, even after you close the browser tab:
+
+* a notebook cell that is executing, including one that prints nothing for hours;
+* a command running in a JupyterLab terminal, including one started in the background with ``nohup command &``, as long as the terminal itself isn't shut down (closing its tab is fine).
+
+Commands running inside **tmux** or **screen**, or started with ``setsid`` or ``disown``, are not detected, because they run outside the terminal's shell. Start long commands directly in the terminal, or with ``nohup``, instead.
+
+For analyses that run for many hours, consider splitting the work, for example processing one dataset or group of datasets per run. Shorter runs are easier to restart if something goes wrong, and very large Dask graphs take a long time to submit.
+
 Using Git
 ---------
 
