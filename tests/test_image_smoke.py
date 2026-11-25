@@ -96,6 +96,21 @@ def test_condor_cli_available():
     )
 
 
+def test_dasgoclient_wrapped():
+    """#96: dasgoclient is the wrapper, and the real binary runs"""
+    path = shutil.which("dasgoclient")
+    assert path, "dasgoclient missing from PATH"
+    with open(path, "rb") as f:
+        assert f.read(2) == b"#!", f"{path} is not the coffea-casa wrapper"
+    # dasgoclient exits early without a token or proxy, even for -version;
+    # the wrapper hides BEARER_TOKEN_FILE (the XCache token), not BEARER_TOKEN
+    env = dict(os.environ, BEARER_TOKEN="dummy")
+    out = subprocess.run([path, "-version"], capture_output=True, text=True, env=env)
+    assert out.returncode == 0, out.stderr
+    # cmsweb.cern.ch is signed by the CERN Grid CA, which the wrapper adds
+    assert any(n.startswith("CERN-GridCA") for n in os.listdir("/etc/grid-security/certificates"))
+
+
 def test_git_notebook_tools_available():
     # Used by users' git hooks, e.g. jupytext syncing paired notebooks (#354)
     for tool in ("pre-commit", "jupytext", "nbstripout", "nbdime"):

@@ -25,6 +25,8 @@ dependencies:
   - marimo-jupyter-extension
   - nbdime
   - gperftools
+  # CMS DAS client (#96); wrapped by prepare-env/dasgoclient.sh
+  - dasgoclient
   - pip
   - pip:
       - jq
