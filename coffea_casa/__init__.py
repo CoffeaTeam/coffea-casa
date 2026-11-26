@@ -18,6 +18,7 @@ from .coffea_casa import (
 )
 from .plugin import DistributedEnvironmentPlugin
 from .remote_debug import start_remote_debugger
+from .taskvine import CoffeaCasaVineWorkers, vine_manager
 try:
     from ._version import version as __version__
 except ImportError:  # package not built with hatch-vcs (e.g. raw checkout)
@@ -31,4 +32,6 @@ __all__ = [
     'security_obj',
     "DistributedEnvironmentPlugin",
     "start_remote_debugger",
+    "CoffeaCasaVineWorkers",
+    "vine_manager",
 ]

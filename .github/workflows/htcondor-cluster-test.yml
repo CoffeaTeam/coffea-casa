@@ -1,6 +1,7 @@
 name: HTCondor cluster test
 
-# Real end-to-end test of CoffeaCasaCluster against a live HTCondor pool
+# Real end-to-end test of CoffeaCasaCluster (and coffea_casa.taskvine's
+# TaskVine workers) against a live HTCondor pool
 # (a native minicondor install, Docker-universe enabled) and the actual
 # cc-analysis-alma9 worker image - not mocks. Runs whenever a change could
 # break the real submission path: the coffea_casa package itself, or
@@ -24,6 +25,7 @@ on:
       - docker/prepare-env/**
       - ci/htcondor-pool-setup.sh
       - ci/htcondor_cluster_test.py
+      - ci/htcondor_vine_test.py
     branches:
       - master
   push:
@@ -34,6 +36,7 @@ on:
       - docker/prepare-env/**
       - ci/htcondor-pool-setup.sh
       - ci/htcondor_cluster_test.py
+      - ci/htcondor_vine_test.py
     branches:
       - master
   workflow_dispatch:
@@ -128,6 +131,38 @@ jobs:
           echo "HOST_IP=$HOST_IP"
           PYTHONPATH="$PWD" HOME="$HOME" WORKER_IMAGE=${{ env.WORKER_IMAGE }} HOST_IP="$HOST_IP" \
             python3 -u ci/htcondor_cluster_test.py
+
+      # TaskVine (#167): the manager runs here with the same ndcctools as the
+      # worker image's vine_worker (manager and worker must match). ndcctools
+      # is conda-forge only, hence micromamba.
+      - name: Find the worker image's ndcctools version
+        id: ndcctools
+        run: |
+          VER=$(docker run --rm --entrypoint vine_worker ${{ env.WORKER_IMAGE }} --version 2>&1 \
+                | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+          echo "ndcctools $VER"
+          test -n "$VER"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+
+      - name: Set up the TaskVine manager environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: vine
+          create-args: >-
+            python=3.12
+            ndcctools=${{ steps.ndcctools.outputs.version }}
+            dask-jobqueue
+          condarc: |
+            channels:
+              - conda-forge
+
+      - name: Run the real CoffeaCasaVineWorkers + HTCondor test
+        shell: bash -el {0}
+        run: |
+          # Same reasoning as the Dask test above for HOST_IP.
+          HOST_IP=$(ip -4 -o addr show docker0 | awk '{print $4}' | cut -d/ -f1)
+          PYTHONPATH="$PWD" HOME="$HOME" WORKER_IMAGE=${{ env.WORKER_IMAGE }} HOST_IP="$HOST_IP" \
+            micromamba run -n vine python -u ci/htcondor_vine_test.py
 
       - name: Dump HTCondor logs on failure
         if: failure()
