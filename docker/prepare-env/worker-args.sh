@@ -1,5 +1,7 @@
 #!/bin/bash
-# Pure helpers for deriving dask-worker arguments from an HTCondor job ClassAd.
+# Pure helpers for deriving worker arguments from an HTCondor job ClassAd.
+# +CoffeaCasaWorkerType selects the worker: "dask" (default, dask-worker for
+# CoffeaCasaCluster) or "taskvine" (vine_worker for coffea_casa.taskvine).
 # Drop-in replacement. Changes vs upstream:
 #   * host is taken from StartdIpAddr (as in the known-good cc8fa51), not RemoteHost
 #   * *_HostPort is NOT required; if empty/"undefined" we fall back to the
@@ -36,10 +38,25 @@ cc_worker_host() {
     echo "$ip"
 }
 
+cc_worker_type() { local t; t=$(ad_get "$1" CoffeaCasaWorkerType); echo "${t:-dask}"; }
+
+# Container services the job asked HTCondor to forward (container_service_names),
+# space-separated. Their <name>_HostPort attributes appear once the job starts.
+cc_container_services() {
+    local s; s=$(ad_get "$1" ContainerServiceNames)
+    [ -z "$s" ] && s="dask,nanny"
+    echo "$s" | tr ',' ' '
+}
+
 # Only the attributes the worker truly cannot start without. HostPort is optional.
 cc_worker_validate() {
-    local ad_file=$1 missing="" v val
-    for v in dask_ContainerPort nanny_ContainerPort DaskSchedulerAddress; do
+    local ad_file=$1 missing="" v val required
+    case "$(cc_worker_type "$ad_file")" in
+        dask) required="dask_ContainerPort nanny_ContainerPort DaskSchedulerAddress" ;;
+        taskvine) required="vine_ContainerPort VineManagerAddress" ;;
+        *) echo "unknown CoffeaCasaWorkerType: $(cc_worker_type "$ad_file")"; return 1 ;;
+    esac
+    for v in $required; do
         val=$(ad_get "$ad_file" "$v"); _is_unset "$val" && missing="$missing $v"
     done
     val=$(cc_worker_host "$ad_file"); _is_unset "$val" && missing="$missing host"
@@ -140,4 +157,40 @@ ${tls_args}--nthreads $cpus \
 --lifetime 7200 \
 --listen-address $proto://0.0.0.0:$containerp \
 --contact-address $proto://$host:$port"
+}
+
+# Resources HTCondor gave the slot (Provisioned), else what the job requested.
+_cc_provisioned() {
+    local v; v=$(ad_get "$1" "${2}Provisioned")
+    _is_unset "$v" && v=$(ad_get "$1" "Request${2}")
+    echo "$v"
+}
+
+# vine_worker for a TaskVine manager running in the user's notebook
+# (coffea_casa.taskvine). The manager always uses TLS; vine_worker sends the
+# manager's hostname as SNI, which is what the per-user Traefik route matches.
+# Other workers fetch files from this one through the forwarded "vine" port.
+cc_build_vine_worker_command() {
+    local ad_file=$1 workspace=$2
+    local manager host port containerp cores memory disk timeout
+    manager=$(ad_get "$ad_file" VineManagerAddress)
+    host=$(cc_worker_host "$ad_file")
+    port=$(ad_get "$ad_file" vine_HostPort)
+    containerp=$(ad_get "$ad_file" vine_ContainerPort)
+    _is_unset "$port" && port=$containerp
+    cores=$(_cc_provisioned "$ad_file" Cpus)
+    memory=$(_cc_provisioned "$ad_file" Memory)
+    disk=$(_cc_provisioned "$ad_file" Disk)
+    timeout=$(ad_get "$ad_file" VineWorkerTimeout)
+
+    # vine_worker takes MB; HTCondor's disk is in KiB
+    echo "vine_worker --ssl \
+--contact-hostport $host:$port \
+--transfer-port $containerp \
+--cores ${cores:-1} \
+--memory ${memory:-2048} \
+--disk $(( ${disk:-2097152} / 1024 )) \
+--timeout ${timeout:-900} \
+--workspace $workspace \
+${manager%:*} ${manager##*:}"
 }

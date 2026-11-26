@@ -404,11 +404,7 @@ class CoffeaCasaCluster(HTCondorCluster):
             + (shipped_env.input_files if shipped_env else []))
 
         # Networking settings
-        try:
-            external_ip = os.environ.get("POD_IP") or os.environ.get("HOST_IP") or socket.getfqdn()
-        except Exception:
-            print("Warning: Could not determine external IP")
-            external_ip = "127.0.0.1"
+        external_ip = external_host()
 
         scheduler_protocol = job_config["protocol"]
         address_list = [external_ip, str(scheduler_port)]
@@ -548,20 +544,43 @@ class CoffeaCasaCluster(HTCondorCluster):
         log_dir = self._worker_log_directory
         if not log_dir:
             raise RuntimeError("This cluster was created without a log_directory")
-        if self._coffea_casa_cluster_id:
-            constraint = (f"CoffeaCasaClusterId == {self._coffea_casa_cluster_id}"
-                          " && JobStatus == 4")
-            result = subprocess.run(
-                ["condor_transfer_data", "-constraint", constraint],
-                capture_output=True, text=True,
-            )
-            # Exit status is non-zero when no job matches; only surface real errors
-            if result.returncode != 0 and "No jobs" not in result.stderr + result.stdout:
-                print(f"condor_transfer_data failed: {result.stderr.strip()}")
-        return sorted(
-            (p for p in Path(log_dir).glob("worker-*") if p.is_file()),
-            key=lambda p: p.stat().st_mtime, reverse=True,
+        return [p for p in fetch_spooled_logs(self._coffea_casa_cluster_id, log_dir)
+                if p.name.startswith("worker-")]
+
+
+def external_host():
+    """Return the host HTCondor workers use to reach this notebook.
+
+    POD_IP if set, else HOST_IP (the per-user hostname the hub routes to this
+    pod through Traefik), else this machine's FQDN.
+    """
+    try:
+        return os.environ.get("POD_IP") or os.environ.get("HOST_IP") or socket.getfqdn()
+    except Exception:
+        print("Warning: Could not determine external IP")
+        return "127.0.0.1"
+
+
+def fetch_spooled_logs(cluster_id, log_dir):
+    """Bring back spooled stdout/stderr of the finished jobs tagged `cluster_id`.
+
+    Jobs submitted with ``condor_submit -spool`` keep their output in the
+    schedd spool until ``condor_transfer_data``. Returns the ``*worker-*``
+    files in `log_dir`, newest first.
+    """
+    if cluster_id:
+        constraint = f"CoffeaCasaClusterId == {cluster_id} && JobStatus == 4"
+        result = subprocess.run(
+            ["condor_transfer_data", "-constraint", constraint],
+            capture_output=True, text=True,
         )
+        # Exit status is non-zero when no job matches; only surface real errors
+        if result.returncode != 0 and "No jobs" not in result.stderr + result.stdout:
+            print(f"condor_transfer_data failed: {result.stderr.strip()}")
+    return sorted(
+        (p for p in Path(log_dir).glob("*worker-*") if p.is_file()),
+        key=lambda p: p.stat().st_mtime, reverse=True,
+    )
 
 
 def worker_passthrough_env():

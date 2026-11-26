@@ -35,29 +35,29 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     if [ "${GITHUB_ACTIONS:-}" == "true" ]; then
         echo "CI mode, no need to test dask_HostPort info..."
     else
-        # Wait (up to 30s) for a *defined* dask_HostPort / nanny_HostPort.
-        # Newer HTCondor writes these as "undefined" on the first ad update and
-        # fills in the real forwarded port a moment later. Grepping only the
-        # attribute *name* (the old behavior) matched "= undefined" and raced
-        # ahead, so the worker was launched with tls://host:undefined and died
-        # in ~3s. Here we wait for an actual value; ad_get comes from
-        # worker-args.sh, which is sourced above. If the port never becomes
-        # defined (e.g. host-networked node), we proceed anyway and
-        # cc_build_worker_command falls back to the container port.
-        echo "Waiting for a defined dask_HostPort / nanny_HostPort (up to 30s)..."
+        # Wait (up to 30s) for a *defined* <service>_HostPort for every
+        # forwarded container service (dask/nanny for dask workers, vine for
+        # TaskVine workers). Newer HTCondor writes these as "undefined" on the
+        # first ad update and fills in the real forwarded port a moment later.
+        # Grepping only the attribute *name* (the old behavior) matched
+        # "= undefined" and raced ahead, so the worker was launched with
+        # tls://host:undefined and died in ~3s. Here we wait for an actual
+        # value; ad_get comes from worker-args.sh, which is sourced above. If
+        # the port never becomes defined (e.g. host-networked node), we proceed
+        # anyway and the command builders fall back to the container port.
+        _services=$(cc_container_services "$_CONDOR_JOB_AD")
+        echo "Waiting for a defined HostPort for: $_services (up to 30s)..."
         for _i in $(seq 1 30); do
-            _dh=$(ad_get "$_CONDOR_JOB_AD" dask_HostPort)
-            _nh=$(ad_get "$_CONDOR_JOB_AD" nanny_HostPort)
-            if [ -n "$_dh" ] && [ "$_dh" != "undefined" ] \
-               && [ -n "$_nh" ] && [ "$_nh" != "undefined" ]; then
-                echo "Got dask_HostPort=$_dh nanny_HostPort=$_nh, proceeding..."
-                break
-            fi
+            _pending=""
+            for _svc in $_services; do
+                _is_unset "$(ad_get "$_CONDOR_JOB_AD" "${_svc}_HostPort")" \
+                    && _pending="$_pending ${_svc}_HostPort"
+            done
+            [ -z "$_pending" ] && { echo "Got all HostPorts, proceeding..."; break; }
             sleep 1
         done
-        if [ -z "$_dh" ] || [ "$_dh" = "undefined" ] \
-           || [ -z "$_nh" ] || [ "$_nh" = "undefined" ]; then
-            echo "WARNING: dask_HostPort/nanny_HostPort still undefined after 30s;" \
+        if [ -n "$_pending" ]; then
+            echo "WARNING:$_pending still undefined after 30s;" \
                  "falling back to the container port (host-networked node?)." 1>&2
         fi
         echo
@@ -122,7 +122,7 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
     fi
 
     # Build and exec the worker. Parsing/command construction lives in
-    # worker-args.sh; see cc_build_worker_command for the dask/taskvine split.
+    # worker-args.sh (cc_build_worker_command / cc_build_vine_worker_command).
     if [ ! -z "$_CONDOR_JOB_AD" ]; then
         # The ClassAd can carry the job's Environment attribute; only dump it
         # to the worker log when explicitly debugging.
@@ -136,7 +136,12 @@ if [[ ! -v COFFEA_CASA_SIDECAR ]]; then
             exit 1
         fi
 
-        HTCONDOR_COMMAND=$(cc_build_worker_command "$_CONDOR_JOB_AD" "$@")
+        if [ "$(cc_worker_type "$_CONDOR_JOB_AD")" = taskvine ]; then
+            HTCONDOR_COMMAND=$(cc_build_vine_worker_command "$_CONDOR_JOB_AD" \
+                "${_CONDOR_SCRATCH_DIR:-$_CONDOR_JOB_IWD}/vine-workspace")
+        else
+            HTCONDOR_COMMAND=$(cc_build_worker_command "$_CONDOR_JOB_AD" "$@")
+        fi
         echo "$HTCONDOR_COMMAND" 1>&2
         exec $HTCONDOR_COMMAND
     fi
