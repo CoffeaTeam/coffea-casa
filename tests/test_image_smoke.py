@@ -311,3 +311,13 @@ def test_kernel_actually_executes():
         [sys.executable, "-c", code], capture_output=True, text=True, timeout=300
     )
     assert "KERNEL_OK" in out.stdout, out.stderr
+
+
+@pytest.mark.skipif(IS_07, reason="TaskVine/vine-reduce need coffea >= 2025.10 (#167)")
+def test_taskvine_stack():
+    """#167: workers run vine_worker, tasks may use vine_reduce"""
+    assert shutil.which("vine_worker"), "vine_worker missing (ndcctools)"
+    out = subprocess.run(["vine_worker", "--version"], capture_output=True, text=True)
+    assert out.returncode == 0, out.stderr
+    importlib.import_module("ndcctools.taskvine")
+    importlib.import_module("vine_reduce")

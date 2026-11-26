@@ -36,7 +36,7 @@ Package sets live in [`env/`](env) and are applied in order (later wins):
 | `casa-common.yaml` | always | packages shared by both roles (cabinetry, pyhf, ndcctools, servicex, coffea-casa itself, …) |
 | `casa-dask.yaml` | `Dockerfile.cc-dask-alma9` | Jupyter/Lab/code-server stack |
 | `casa-analysis.yaml` | `Dockerfile.cc-analysis-alma9` | slim worker extras (supervisor, aiostream) |
-| `casa-flavour-<FLAVOUR>.yaml` | always | version-sensitive pins (numpy, xrootd, numba) — differs per flavour |
+| `casa-flavour-<FLAVOUR>.yaml` | always | version-sensitive pins (numpy, xrootd, numba) and packages that need a recent coffea (vine-reduce; not in 0.7) — differs per flavour |
 | `casa-combine.yaml` | `COMBINE=1` | `root` + `cms-combine` |
 
 To change a package or a pin, edit the relevant env file — not the Dockerfile.

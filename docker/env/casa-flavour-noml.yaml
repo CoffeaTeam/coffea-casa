@@ -13,3 +13,6 @@ dependencies:
       # something keeps pulling in the wrong numpy; pin it explicitly.
       - numpy==2.4.2
       - numba
+      # TaskVine analysis orchestration (coffea_casa.taskvine, #167); needs
+      # coffea >= 2025.10, so not in the 0.7 flavour.
+      - vine-reduce>=2026.11.1

@@ -421,3 +421,97 @@ make_env_tarball() {
     [ "$status" -ne 0 ]
     [[ "$output" == *"not transferred"*"myanalysis other.py"* ]]
 }
+
+# --- TaskVine workers (+CoffeaCasaWorkerType = "taskvine", #167) -------------
+
+write_vine_ad() {
+    write_ad \
+        'CoffeaCasaWorkerType = "taskvine"' \
+        'ContainerServiceNames = "vine"' \
+        'vine_ContainerPort = 9123' \
+        'StartdIpAddr = "<10.0.0.7:9618>"' \
+        'VineManagerAddress = "jane-40cern-2ech.dask.coffea.casa:8786"' \
+        "$@"
+}
+
+@test "worker type defaults to dask" {
+    write_ad 'DaskWorkerCores = 1'
+    run cc_worker_type "$AD"
+    [ "$output" = "dask" ]
+}
+
+@test "worker type reads CoffeaCasaWorkerType" {
+    write_vine_ad
+    run cc_worker_type "$AD"
+    [ "$output" = "taskvine" ]
+}
+
+@test "container services default to dask and nanny" {
+    write_ad 'DaskWorkerCores = 1'
+    run cc_container_services "$AD"
+    [ "$output" = "dask nanny" ]
+}
+
+@test "container services follow ContainerServiceNames" {
+    write_vine_ad
+    run cc_container_services "$AD"
+    [ "$output" = "vine" ]
+}
+
+@test "validate accepts a taskvine ad without the dask attributes" {
+    write_vine_ad
+    run cc_worker_validate "$AD"
+    [ "$status" -eq 0 ]
+}
+
+@test "validate reports what a taskvine ad is missing" {
+    write_ad 'CoffeaCasaWorkerType = "taskvine"'
+    run cc_worker_validate "$AD"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *vine_ContainerPort* ]]
+    [[ "$output" == *VineManagerAddress* ]]
+    [[ "$output" == *host* ]]
+    [[ "$output" != *DaskSchedulerAddress* ]]
+}
+
+@test "validate rejects an unknown worker type" {
+    write_ad 'CoffeaCasaWorkerType = "spark"'
+    run cc_worker_validate "$AD"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *spark* ]]
+}
+
+@test "vine command connects to the manager over TLS with the forwarded port" {
+    write_vine_ad \
+        'vine_HostPort = 31234' \
+        'CpusProvisioned = 4' \
+        'MemoryProvisioned = 8000' \
+        'DiskProvisioned = 16384000' \
+        'VineWorkerTimeout = 300'
+    run cc_build_vine_worker_command "$AD" /scratch/vine-workspace
+    [ "$status" -eq 0 ]
+    [[ "$output" == "vine_worker --ssl "* ]]
+    [[ "$output" == *"--contact-hostport 10.0.0.7:31234 "* ]]
+    [[ "$output" == *"--transfer-port 9123 "* ]]
+    [[ "$output" == *"--cores 4 "* ]]
+    [[ "$output" == *"--memory 8000 "* ]]
+    [[ "$output" == *"--disk 16000 "* ]]
+    [[ "$output" == *"--timeout 300 "* ]]
+    [[ "$output" == *"--workspace /scratch/vine-workspace "* ]]
+    [[ "$output" == *" jane-40cern-2ech.dask.coffea.casa 8786" ]]
+}
+
+@test "vine command falls back to requested resources and the container port" {
+    write_vine_ad \
+        'vine_HostPort = undefined' \
+        'RequestCpus = 2' \
+        'RequestMemory = 4096' \
+        'RequestDisk = 8192000'
+    run cc_build_vine_worker_command "$AD" /tmp/ws
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"--contact-hostport 10.0.0.7:9123 "* ]]
+    [[ "$output" == *"--cores 2 "* ]]
+    [[ "$output" == *"--memory 4096 "* ]]
+    [[ "$output" == *"--disk 8000 "* ]]
+    [[ "$output" == *"--timeout 900 "* ]]
+}
